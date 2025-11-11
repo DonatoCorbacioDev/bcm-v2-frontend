@@ -37,7 +37,10 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-// Login page component
+/**
+ * Login page component
+ * Handles user authentication via JWT
+ */
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -51,19 +54,22 @@ export default function LoginPage() {
     },
   });
 
-  // Handle form submission
+  /**
+   * Handle form submission
+   * Authenticates user and redirects to dashboard on success
+   */
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
 
     try {
-      // Call API POST /auth/login
+      // Call backend API for authentication
       const response = await api.post<LoginResponse>('/auth/login', values);
 
-      // Save JWT token in localStorage
+      // Save JWT token (both localStorage and cookie)
       setToken(response.data.token);
 
       // Show success notification
-      toast.success('Login successful!');
+      toast.success('Login successful! Redirecting to dashboard...');
 
       // Redirect to dashboard
       router.push('/dashboard');
@@ -102,7 +108,12 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your username" disabled={isLoading} {...field} />
+                    <Input
+                      placeholder="Enter your username"
+                      disabled={isLoading}
+                      autoComplete="username"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,6 +132,7 @@ export default function LoginPage() {
                       type="password"
                       placeholder="Enter your password"
                       disabled={isLoading}
+                      autoComplete="current-password"
                       {...field}
                     />
                   </FormControl>

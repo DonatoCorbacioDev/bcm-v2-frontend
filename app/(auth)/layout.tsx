@@ -1,3 +1,8 @@
+/**
+ * Authentication layout
+ * Wraps login, register, and password reset pages
+ * Centers the content and provides consistent styling
+ */
 export default function AuthLayout({
   children,
 }: Readonly<{

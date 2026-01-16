@@ -13,6 +13,12 @@ import {
 
 export default function ContractsPage() {
   const [showForm, setShowForm] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleSuccess = () => {
+    // Trigger table refresh
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="space-y-6">
@@ -26,15 +32,18 @@ export default function ContractsPage() {
         <Button onClick={() => setShowForm(true)}>+ New Contract</Button>
       </div>
 
-      <ContractTable />
+      <ContractTable key={refreshKey} />
 
-      {/* Dialog per mostrare il form */}
+      {/* Dialog for the form */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Contract</DialogTitle>
           </DialogHeader>
-          <ContractForm onClose={() => setShowForm(false)} />
+          <ContractForm
+            onClose={() => setShowForm(false)}
+            onSuccess={handleSuccess}
+          />
         </DialogContent>
       </Dialog>
     </div>

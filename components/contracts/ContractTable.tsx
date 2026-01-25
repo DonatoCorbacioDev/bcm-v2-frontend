@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import api from "@/lib/api";
-import { Contract } from "@/types";
+import type { Contract } from "@/types";
+import { useContracts } from "@/hooks/useContracts";
 import {
   Table,
   TableBody,
@@ -14,39 +13,33 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 export default function ContractTable() {
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: contracts, isLoading, isError } = useContracts();
 
-  useEffect(() => {
-    fetchContracts();
-  }, []);
-
-  const fetchContracts = async () => {
-    try {
-      const response = await api.get("/contracts");
-      setContracts(response.data);
-    } catch (error) {
-      console.error("Error fetching contracts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive"> = {
+  const getStatusBadge = (status: Contract["status"]) => {
+    const variants: Record<
+      Contract["status"],
+      "default" | "secondary" | "destructive"
+    > = {
       ACTIVE: "default",
       EXPIRED: "secondary",
       CANCELLED: "destructive",
-      DRAFT: "secondary",
     };
     return variants[status] || "secondary";
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-center py-8">Loading contracts...</div>;
   }
 
-  if (contracts.length === 0) {
+  if (isError) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        Failed to load contracts
+      </div>
+    );
+  }
+
+  if (!contracts || contracts.length === 0) {
     return (
       <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <p className="text-gray-500">No contracts found</p>
@@ -73,6 +66,7 @@ export default function ContractTable() {
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
+
         <TableBody>
           {contracts.map((contract) => (
             <TableRow key={contract.id}>

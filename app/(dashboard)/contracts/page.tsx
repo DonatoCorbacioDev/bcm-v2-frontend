@@ -13,11 +13,8 @@ import {
 
 export default function ContractsPage() {
   const [showForm, setShowForm] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleSuccess = () => {
-    // Trigger table refresh
-    setRefreshKey((prev) => prev + 1);
   };
 
   return (
@@ -32,7 +29,7 @@ export default function ContractsPage() {
         <Button onClick={() => setShowForm(true)}>+ New Contract</Button>
       </div>
 
-      <ContractTable key={refreshKey} />
+      <ContractTable />
 
       {/* Dialog for the form */}
       <Dialog open={showForm} onOpenChange={setShowForm}>

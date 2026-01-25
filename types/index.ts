@@ -44,7 +44,7 @@ export interface Contract {
   managerId: number;
   startDate: string;
   endDate: string;
-  status: "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT";
+  status: "ACTIVE" | "EXPIRED" | "CANCELLED";
   createdAt: string;
 }
 

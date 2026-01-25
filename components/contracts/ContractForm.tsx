@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import api from "@/lib/api";
+
 import type { Contract, BusinessArea, Manager } from "@/types";
+import { useUpsertContract } from "@/hooks/useUpsertContract";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,17 +21,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Zod validation schema
+// Zod validation schema (allineato al backend)
 const contractSchema = z.object({
-  customerName: z
-    .string()
-    .min(2, "Customer name must be at least 2 characters"),
+  customerName: z.string().min(2, "Customer name must be at least 2 characters"),
   contractNumber: z.string().min(1, "Contract number is required"),
   wbsCode: z.string().min(1, "WBS code is required"),
   projectName: z.string().min(2, "Project name must be at least 2 characters"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
-  status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED", "DRAFT"]),
+  status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED"]),
   areaId: z.number().min(1, "Business area is required"),
   managerId: z.number().min(1, "Manager is required"),
 });
@@ -48,14 +49,14 @@ export default function ContractForm({
 }: ContractFormProps) {
   const [businessAreas, setBusinessAreas] = useState<BusinessArea[]>([]);
   const [managers, setManagers] = useState<Manager[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const upsertMutation = useUpsertContract();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setValue,
-    watch,
+    control,
   } = useForm<ContractFormData>({
     resolver: zodResolver(contractSchema),
     defaultValues: contract
@@ -71,11 +72,11 @@ export default function ContractForm({
           managerId: contract.managerId,
         }
       : {
-          status: "DRAFT",
+          status: "ACTIVE",
         },
   });
 
-  // Fetch business areas and managers
+  // Fetch business areas and managers (step successivo: React Query)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -90,21 +91,27 @@ export default function ContractForm({
         console.error(error);
       }
     };
+
     fetchData();
   }, []);
 
   const onSubmit = async (data: ContractFormData) => {
-    setIsSubmitting(true);
     try {
       if (contract?.id) {
-        // Update existing contract
-        await api.put(`/contracts/${contract.id}`, data);
+        await upsertMutation.mutateAsync({
+          mode: "update",
+          id: contract.id,
+          payload: data,
+        });
         toast.success("Contract updated successfully!");
       } else {
-        // Create new contract
-        await api.post("/contracts", data);
+        await upsertMutation.mutateAsync({
+          mode: "create",
+          payload: data,
+        });
         toast.success("Contract created successfully!");
       }
+
       onSuccess?.();
       onClose();
     } catch (error) {
@@ -112,20 +119,13 @@ export default function ContractForm({
         contract?.id ? "Failed to update contract" : "Failed to create contract"
       );
       console.error(error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  const selectedAreaId = watch("areaId");
-  const selectedManagerId = watch("managerId");
-  const selectedStatus = watch("status");
-
-  // Helper function for submit button text (fix SonarLint warning)
-  const getSubmitButtonText = () => {
-    if (isSubmitting) return "Saving...";
+  const submitLabel = useMemo(() => {
+    if (upsertMutation.isPending) return "Saving...";
     return contract?.id ? "Update Contract" : "Create Contract";
-  };
+  }, [upsertMutation.isPending, contract?.id]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -166,11 +166,7 @@ export default function ContractForm({
         <Label htmlFor="wbsCode">
           WBS Code <span className="text-red-500">*</span>
         </Label>
-        <Input
-          id="wbsCode"
-          {...register("wbsCode")}
-          placeholder="e.g., WBS-001"
-        />
+        <Input id="wbsCode" {...register("wbsCode")} placeholder="e.g., WBS-001" />
         {errors.wbsCode && (
           <p className="text-sm text-red-500">{errors.wbsCode.message}</p>
         )}
@@ -202,6 +198,7 @@ export default function ContractForm({
             <p className="text-sm text-red-500">{errors.startDate.message}</p>
           )}
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="endDate">
             End Date <span className="text-red-500">*</span>
@@ -213,93 +210,105 @@ export default function ContractForm({
         </div>
       </div>
 
-      {/* Status */}
-      <div className="space-y-2">
-        <Label htmlFor="status">
-          Status <span className="text-red-500">*</span>
-        </Label>
-        <Select
-          value={selectedStatus}
-          onValueChange={(value) =>
-            setValue("status", value as ContractFormData["status"])
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="DRAFT">Draft</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="EXPIRED">Expired</SelectItem>
-            <SelectItem value="CANCELLED">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.status && (
-          <p className="text-sm text-red-500">{errors.status.message}</p>
+      {/* Status (Controller) */}
+      <Controller
+        control={control}
+        name="status"
+        render={({ field }) => (
+          <div className="space-y-2">
+            <Label htmlFor="status">
+              Status <span className="text-red-500">*</span>
+            </Label>
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="EXPIRED">Expired</SelectItem>
+                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.status && (
+              <p className="text-sm text-red-500">{errors.status.message}</p>
+            )}
+          </div>
         )}
-      </div>
+      />
 
-      {/* Business Area */}
-      <div className="space-y-2">
-        <Label htmlFor="areaId">
-          Business Area <span className="text-red-500">*</span>
-        </Label>
-        <Select
-          value={selectedAreaId?.toString()}
-          onValueChange={(value) =>
-            setValue("areaId", Number.parseInt(value, 10))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select business area" />
-          </SelectTrigger>
-          <SelectContent>
-            {businessAreas.map((area) => (
-              <SelectItem key={area.id} value={area.id.toString()}>
-                {area.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.areaId && (
-          <p className="text-sm text-red-500">{errors.areaId.message}</p>
-        )}
-      </div>
+      {/* Business Area (Controller) */}
+      <Controller
+        control={control}
+        name="areaId"
+        render={({ field }) => (
+          <div className="space-y-2">
+            <Label htmlFor="areaId">
+              Business Area <span className="text-red-500">*</span>
+            </Label>
 
-      {/* Manager */}
-      <div className="space-y-2">
-        <Label htmlFor="managerId">
-          Manager <span className="text-red-500">*</span>
-        </Label>
-        <Select
-          value={selectedManagerId?.toString()}
-          onValueChange={(value) =>
-            setValue("managerId", Number.parseInt(value, 10))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select manager" />
-          </SelectTrigger>
-          <SelectContent>
-            {managers.map((manager) => (
-              <SelectItem key={manager.id} value={manager.id.toString()}>
-                {manager.firstName} {manager.lastName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.managerId && (
-          <p className="text-sm text-red-500">{errors.managerId.message}</p>
+            <Select
+              value={field.value ? String(field.value) : ""}
+              onValueChange={(value) => field.onChange(Number(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select business area" />
+              </SelectTrigger>
+              <SelectContent>
+                {businessAreas.map((area) => (
+                  <SelectItem key={area.id} value={String(area.id)}>
+                    {area.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {errors.areaId && (
+              <p className="text-sm text-red-500">{errors.areaId.message}</p>
+            )}
+          </div>
         )}
-      </div>
+      />
+
+      {/* Manager (Controller) */}
+      <Controller
+        control={control}
+        name="managerId"
+        render={({ field }) => (
+          <div className="space-y-2">
+            <Label htmlFor="managerId">
+              Manager <span className="text-red-500">*</span>
+            </Label>
+
+            <Select
+              value={field.value ? String(field.value) : ""}
+              onValueChange={(value) => field.onChange(Number(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select manager" />
+              </SelectTrigger>
+              <SelectContent>
+                {managers.map((m) => (
+                  <SelectItem key={m.id} value={String(m.id)}>
+                    {m.firstName} {m.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {errors.managerId && (
+              <p className="text-sm text-red-500">{errors.managerId.message}</p>
+            )}
+          </div>
+        )}
+      />
 
       {/* Buttons */}
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {getSubmitButtonText()}
+        <Button type="submit" disabled={upsertMutation.isPending}>
+          {submitLabel}
         </Button>
       </div>
     </form>

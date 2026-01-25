@@ -32,7 +32,7 @@ export default function Header() {
             <p className="font-medium text-gray-900 dark:text-white">
               {user?.username || "User"}
             </p>
-            <p className="text-xs text-gray-500">{user?.role || "ADMIN"}</p>
+            <p className="text-xs text-gray-500">{user?.roleId || "ADMIN"}</p>
           </div>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             Logout

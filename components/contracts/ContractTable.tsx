@@ -1,7 +1,7 @@
 "use client";
 
-import type { Contract } from "@/types";
 import { useContracts } from "@/hooks/useContracts";
+import type { Contract } from "@/types";
 import {
   Table,
   TableBody,
@@ -13,18 +13,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 export default function ContractTable() {
-  const { data: contracts, isLoading, isError } = useContracts();
+  const { data, isLoading, isError } = useContracts();
+  const contracts = data ?? [];
 
   const getStatusBadge = (status: Contract["status"]) => {
-    const variants: Record<
-      Contract["status"],
-      "default" | "secondary" | "destructive"
-    > = {
+    const variants: Record<Contract["status"], "default" | "secondary" | "destructive"> = {
       ACTIVE: "default",
       EXPIRED: "secondary",
       CANCELLED: "destructive",
     };
-    return variants[status] || "secondary";
+    return variants[status] ?? "secondary";
   };
 
   if (isLoading) {
@@ -33,13 +31,14 @@ export default function ContractTable() {
 
   if (isError) {
     return (
-      <div className="text-center py-8 text-red-500">
-        Failed to load contracts
+      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <p className="text-red-500">Failed to load contracts</p>
+        <p className="text-sm text-gray-400 mt-2">Check API / network / auth token</p>
       </div>
     );
   }
 
-  if (!contracts || contracts.length === 0) {
+  if (contracts.length === 0) {
     return (
       <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <p className="text-gray-500">No contracts found</p>
@@ -66,24 +65,19 @@ export default function ContractTable() {
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
-
         <TableBody>
-          {contracts.map((contract) => (
-            <TableRow key={contract.id}>
-              <TableCell className="font-medium">
-                {contract.contractNumber}
-              </TableCell>
-              <TableCell>{contract.customerName}</TableCell>
-              <TableCell>{contract.projectName}</TableCell>
-              <TableCell>{contract.wbsCode}</TableCell>
-              <TableCell>{contract.managerId}</TableCell>
+          {contracts.map((c) => (
+            <TableRow key={c.id}>
+              <TableCell className="font-medium">{c.contractNumber}</TableCell>
+              <TableCell>{c.customerName}</TableCell>
+              <TableCell>{c.projectName}</TableCell>
+              <TableCell>{c.wbsCode}</TableCell>
+              <TableCell>{c.managerId}</TableCell>
               <TableCell>
-                <Badge variant={getStatusBadge(contract.status)}>
-                  {contract.status}
-                </Badge>
+                <Badge variant={getStatusBadge(c.status)}>{c.status}</Badge>
               </TableCell>
-              <TableCell>{contract.startDate}</TableCell>
-              <TableCell>{contract.endDate || "N/A"}</TableCell>
+              <TableCell>{c.startDate}</TableCell>
+              <TableCell>{c.endDate || "N/A"}</TableCell>
               <TableCell>
                 <button className="text-blue-600 hover:underline text-sm">
                   View

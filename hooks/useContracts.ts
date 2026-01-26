@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { contractsService } from "@/services/contracts.service";
+import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
+import type { Contract } from "@/types";
 
-export const contractsQueryKeys = {
-  all: ["contracts"] as const,
-}
-
-export const useContracts = () => {
-  return useQuery({
-    queryKey: contractsQueryKeys.all,
-    queryFn: contractsService.list,
+export function useContracts() {
+  return useQuery<Contract[]>({
+    queryKey: contractsQueryKeys.list(),
+    queryFn: async () => {
+      const res = await contractsService.list(); 
+      return res;
+    },
   });
-};
+}

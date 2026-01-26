@@ -14,9 +14,6 @@ import {
 export default function ContractsPage() {
   const [showForm, setShowForm] = useState(false);
 
-  const handleSuccess = () => {
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -31,7 +28,6 @@ export default function ContractsPage() {
 
       <ContractTable />
 
-      {/* Dialog for the form */}
       <Dialog open={showForm} onOpenChange={setShowForm}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -39,7 +35,7 @@ export default function ContractsPage() {
           </DialogHeader>
           <ContractForm
             onClose={() => setShowForm(false)}
-            onSuccess={handleSuccess}
+            onSuccess={() => {}}
           />
         </DialogContent>
       </Dialog>

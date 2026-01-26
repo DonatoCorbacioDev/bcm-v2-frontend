@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import api from "@/lib/api";
 
-import type { Contract, BusinessArea, Manager } from "@/types";
+import type { Contract } from "@/types";
 import { useUpsertContract } from "@/hooks/useUpsertContract";
+import { useBusinessAreas } from "@/hooks/useBusinessAreas";
+import { useManagers } from "@/hooks/useManagers";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,10 +48,18 @@ export default function ContractForm({
   onSuccess,
   contract,
 }: ContractFormProps) {
-  const [businessAreas, setBusinessAreas] = useState<BusinessArea[]>([]);
-  const [managers, setManagers] = useState<Manager[]>([]);
-
   const upsertMutation = useUpsertContract();
+
+  // ✅ Reference data via React Query
+  const businessAreasQuery = useBusinessAreas();
+  const managersQuery = useManagers();
+
+  const businessAreas = businessAreasQuery.data ?? [];
+  const managers = managersQuery.data ?? [];
+
+  const isReferenceLoading =
+    businessAreasQuery.isLoading || managersQuery.isLoading;
+  const isReferenceError = businessAreasQuery.isError || managersQuery.isError;
 
   const {
     register,
@@ -75,25 +84,6 @@ export default function ContractForm({
           status: "ACTIVE",
         },
   });
-
-  // Fetch business areas and managers (step successivo: React Query)
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [areasRes, managersRes] = await Promise.all([
-          api.get<BusinessArea[]>("/business-areas"),
-          api.get<Manager[]>("/managers"),
-        ]);
-        setBusinessAreas(areasRes.data);
-        setManagers(managersRes.data);
-      } catch (error) {
-        toast.error("Failed to load form data");
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const onSubmit = async (data: ContractFormData) => {
     try {
@@ -126,6 +116,22 @@ export default function ContractForm({
     if (upsertMutation.isPending) return "Saving...";
     return contract?.id ? "Update Contract" : "Create Contract";
   }, [upsertMutation.isPending, contract?.id]);
+
+  if (isReferenceLoading) {
+    return (
+      <div className="py-8 text-center text-sm text-gray-500">
+        Loading form data...
+      </div>
+    );
+  }
+
+  if (isReferenceError) {
+    return (
+      <div className="py-8 text-center text-sm text-red-500">
+        Failed to load business areas/managers.
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -166,7 +172,11 @@ export default function ContractForm({
         <Label htmlFor="wbsCode">
           WBS Code <span className="text-red-500">*</span>
         </Label>
-        <Input id="wbsCode" {...register("wbsCode")} placeholder="e.g., WBS-001" />
+        <Input
+          id="wbsCode"
+          {...register("wbsCode")}
+          placeholder="e.g., WBS-001"
+        />
         {errors.wbsCode && (
           <p className="text-sm text-red-500">{errors.wbsCode.message}</p>
         )}

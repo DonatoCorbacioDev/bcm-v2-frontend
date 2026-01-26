@@ -1,7 +1,19 @@
 import api from "@/lib/api";
 import type { Contract } from "@/types";
 
-export type ContractUpsertPayload = Omit<Contract, "id" | "createdAt">;
+export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED";
+
+export type ContractUpsertPayload = {
+  customerName: string;
+  contractNumber: string;
+  wbsCode: string;
+  projectName: string;
+  startDate: string; 
+  endDate: string;   
+  status: ContractStatus;
+  areaId: number;
+  managerId: number;
+};
 
 export const contractsService = {
   list: async (): Promise<Contract[]> => {

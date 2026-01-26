@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
 
 import type { Contract } from "@/types";
@@ -22,20 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Zod validation schema (allineato al backend)
-const contractSchema = z.object({
-  customerName: z.string().min(2, "Customer name must be at least 2 characters"),
-  contractNumber: z.string().min(1, "Contract number is required"),
-  wbsCode: z.string().min(1, "WBS code is required"),
-  projectName: z.string().min(2, "Project name must be at least 2 characters"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED"]),
-  areaId: z.number().min(1, "Business area is required"),
-  managerId: z.number().min(1, "Manager is required"),
-});
-
-type ContractFormData = z.infer<typeof contractSchema>;
+import { contractSchema, type ContractFormData } from "@/lib/validations/contract.schema";
 
 interface ContractFormProps {
   readonly onClose: () => void;
@@ -50,7 +36,7 @@ export default function ContractForm({
 }: ContractFormProps) {
   const upsertMutation = useUpsertContract();
 
-  // ✅ Reference data via React Query
+  // Reference data via React Query
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
 

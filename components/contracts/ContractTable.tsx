@@ -1,7 +1,13 @@
 "use client";
 
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
 import { useContracts } from "@/hooks/useContracts";
+import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import type { Contract } from "@/types";
+
 import {
   Table,
   TableBody,
@@ -11,13 +17,68 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-export default function ContractTable() {
+interface ContractTableProps {
+  onEditClick: (contract: Contract) => void;
+}
+
+export default function ContractTable({ onEditClick }: ContractTableProps) {
   const { data, isLoading, isError } = useContracts();
   const contracts = data ?? [];
+  const queryClient = useQueryClient();
+
+  // Delete confirmation dialog state
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    contract: Contract | null;
+  }>({ open: false, contract: null });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contracts/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${document.cookie.split("auth_token=")[1]?.split(";")[0]}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to delete contract");
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
+      toast.success("Contract deleted successfully!");
+      setDeleteDialog({ open: false, contract: null });
+    },
+    onError: () => {
+      toast.error("Failed to delete contract");
+    },
+  });
+
+  const handleDeleteClick = (contract: Contract) => {
+    setDeleteDialog({ open: true, contract });
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteDialog.contract?.id) {
+      deleteMutation.mutate(deleteDialog.contract.id);
+    }
+  };
 
   const getStatusBadge = (status: Contract["status"]) => {
-    const variants: Record<Contract["status"], "default" | "secondary" | "destructive"> = {
+    const variants: Record<
+      Contract["status"],
+      "default" | "secondary" | "destructive"
+    > = {
       ACTIVE: "default",
       EXPIRED: "secondary",
       CANCELLED: "destructive",
@@ -33,7 +94,9 @@ export default function ContractTable() {
     return (
       <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
         <p className="text-red-500">Failed to load contracts</p>
-        <p className="text-sm text-gray-400 mt-2">Check API / network / auth token</p>
+        <p className="text-sm text-gray-400 mt-2">
+          Check API / network / auth token
+        </p>
       </div>
     );
   }
@@ -50,43 +113,99 @@ export default function ContractTable() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Contract Number</TableHead>
-            <TableHead>Customer Name</TableHead>
-            <TableHead>Project</TableHead>
-            <TableHead>WBS Code</TableHead>
-            <TableHead>Manager ID</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {contracts.map((c) => (
-            <TableRow key={c.id}>
-              <TableCell className="font-medium">{c.contractNumber}</TableCell>
-              <TableCell>{c.customerName}</TableCell>
-              <TableCell>{c.projectName}</TableCell>
-              <TableCell>{c.wbsCode}</TableCell>
-              <TableCell>{c.managerId}</TableCell>
-              <TableCell>
-                <Badge variant={getStatusBadge(c.status)}>{c.status}</Badge>
-              </TableCell>
-              <TableCell>{c.startDate}</TableCell>
-              <TableCell>{c.endDate || "N/A"}</TableCell>
-              <TableCell>
-                <button className="text-blue-600 hover:underline text-sm">
-                  View
-                </button>
-              </TableCell>
+    <>
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Contract Number</TableHead>
+              <TableHead>Customer Name</TableHead>
+              <TableHead>Project</TableHead>
+              <TableHead>WBS Code</TableHead>
+              <TableHead>Manager ID</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Start Date</TableHead>
+              <TableHead>End Date</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {contracts.map((c) => (
+              <TableRow key={c.id}>
+                <TableCell className="font-medium">
+                  {c.contractNumber}
+                </TableCell>
+                <TableCell>{c.customerName}</TableCell>
+                <TableCell>{c.projectName}</TableCell>
+                <TableCell>{c.wbsCode}</TableCell>
+                <TableCell>{c.managerId}</TableCell>
+                <TableCell>
+                  <Badge variant={getStatusBadge(c.status)}>{c.status}</Badge>
+                </TableCell>
+                <TableCell>{c.startDate}</TableCell>
+                <TableCell>{c.endDate || "N/A"}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEditClick(c)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteClick(c)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialog.open}
+        onOpenChange={(open) =>
+          !deleteMutation.isPending &&
+          setDeleteDialog({ open, contract: null })
+        }
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Contract</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete contract{" "}
+              <span className="font-semibold">
+                {deleteDialog.contract?.contractNumber}
+              </span>? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialog({ open: false, contract: null })}
+              disabled={deleteMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

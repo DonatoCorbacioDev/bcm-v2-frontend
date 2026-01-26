@@ -10,9 +10,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { Contract } from "@/types";
 
 export default function ContractsPage() {
-  const [showForm, setShowForm] = useState(false);
+  const [formDialog, setFormDialog] = useState<{
+    open: boolean;
+    contract: Contract | null;
+  }>({ open: false, contract: null });
+
+  const handleCreateClick = () => {
+    setFormDialog({ open: true, contract: null });
+  };
+
+  const handleEditClick = (contract: Contract) => {
+    setFormDialog({ open: true, contract });
+  };
+
+  const handleCloseForm = () => {
+    setFormDialog({ open: false, contract: null });
+  };
 
   return (
     <div className="space-y-6">
@@ -23,19 +39,22 @@ export default function ContractsPage() {
           </h2>
           <p className="text-gray-500 mt-2">Manage all business contracts</p>
         </div>
-        <Button onClick={() => setShowForm(true)}>+ New Contract</Button>
+        <Button onClick={handleCreateClick}>+ New Contract</Button>
       </div>
 
-      <ContractTable />
+      <ContractTable onEditClick={handleEditClick} />
 
-      <Dialog open={showForm} onOpenChange={setShowForm}>
+      <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Contract</DialogTitle>
+            <DialogTitle>
+              {formDialog.contract ? "Edit Contract" : "Create New Contract"}
+            </DialogTitle>
           </DialogHeader>
           <ContractForm
-            onClose={() => setShowForm(false)}
-            onSuccess={() => {}}
+            contract={formDialog.contract}
+            onClose={handleCloseForm}
+            onSuccess={() => { }}
           />
         </DialogContent>
       </Dialog>

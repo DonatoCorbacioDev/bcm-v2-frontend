@@ -1,90 +1,88 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+import KPICard from "@/components/dashboard/KPICard";
 
 export default function DashboardPage() {
+  const { data: stats, isLoading, isError } = useDashboardStats();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Dashboard
+          </h2>
+          <p className="text-gray-500 mt-2">Overview of your contracts</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Dashboard
+          </h2>
+          <p className="text-gray-500 mt-2">Overview of your contracts</p>
+        </div>
+        <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+          <p className="text-red-600 dark:text-red-400">
+            Failed to load dashboard statistics
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            Please check your API connection
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
           Dashboard
         </h2>
-        <p className="text-gray-500 mt-2">
-          Welcome to Business Contracts Manager
-        </p>
+        <p className="text-gray-500 mt-2">Overview of your contracts</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Total Contracts
-            </CardTitle>
-            <span className="text-2xl">📄</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-gray-500 mt-1">
-              Active contracts in system
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Financial Values
-            </CardTitle>
-            <span className="text-2xl">💰</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-gray-500 mt-1">
-              Tracked financial entries
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Business Areas
-            </CardTitle>
-            <span className="text-2xl">🏢</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-gray-500 mt-1">Active business areas</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Managers
-            </CardTitle>
-            <span className="text-2xl">👥</span>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1</div>
-            <p className="text-xs text-gray-500 mt-1">Registered managers</p>
-          </CardContent>
-        </Card>
+        <KPICard
+          title="Total Contracts"
+          value={stats?.total ?? 0}
+          icon="📊"
+          variant="default"
+        />
+        <KPICard
+          title="Active Contracts"
+          value={stats?.active ?? 0}
+          icon="✅"
+          variant="success"
+        />
+        <KPICard
+          title="Expiring Soon"
+          value={stats?.expiring ?? 0}
+          icon="⏰"
+          variant="warning"
+        />
+        <KPICard
+          title="Expired Contracts"
+          value={stats?.expired ?? 0}
+          icon="❌"
+          variant="danger"
+        />
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="flex gap-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            + New Contract
-          </button>
-          <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-            + Add Financial Value
-          </button>
-        </CardContent>
-      </Card>
     </div>
   );
 }

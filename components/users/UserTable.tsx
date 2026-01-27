@@ -26,6 +26,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+
 interface UserTableProps {
   readonly onEditClick: (user: User) => void;
 }
@@ -104,7 +106,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading users...</div>;
+    return <TableSkeleton rows={5} columns={7} />;
   }
 
   if (isError) {
@@ -199,8 +201,8 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${user.verified
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
                         }`}
                     >
                       {user.verified ? "Yes" : "No"}

@@ -26,6 +26,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+
 interface FinancialValueTableProps {
   readonly onEditClick: (financialValue: FinancialValue) => void;
 }
@@ -111,7 +113,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading financial values...</div>;
+    return <TableSkeleton rows={5} columns={6} />;
   }
 
   if (isError) {

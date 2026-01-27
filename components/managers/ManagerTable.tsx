@@ -28,6 +28,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+
 interface ManagerTableProps {
   onEditClick: (manager: Manager) => void;
 }
@@ -96,7 +98,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading managers...</div>;
+    return <TableSkeleton rows={5} columns={5} />;
   }
 
   if (isError) {

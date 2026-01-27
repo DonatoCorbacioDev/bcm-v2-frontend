@@ -27,6 +27,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+
 interface BusinessAreaTableProps {
   readonly onEditClick: (businessArea: BusinessArea) => void;
 }
@@ -91,7 +93,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading business areas...</div>;
+    return <TableSkeleton rows={5} columns={4} />;
   }
 
   if (isError) {

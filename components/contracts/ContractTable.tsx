@@ -28,6 +28,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import { TableSkeleton } from "@/components/ui/table-skeleton";
+
 interface ContractTableProps {
   onEditClick: (contract: Contract) => void;
 }
@@ -129,7 +131,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   };
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading contracts...</div>;
+    return <TableSkeleton rows={5} columns={9} />;
   }
 
   if (isError) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -31,10 +32,39 @@ interface ManagerTableProps {
   onEditClick: (manager: Manager) => void;
 }
 
+// Search logic for managers
+function useManagerFilters(managers: Manager[]) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredManagers = useMemo(() => {
+    return managers.filter((manager) => {
+      if (searchQuery === "") return true;
+
+      const query = searchQuery.toLowerCase();
+      return (
+        manager.firstName.toLowerCase().includes(query) ||
+        manager.lastName.toLowerCase().includes(query) ||
+        manager.email.toLowerCase().includes(query) ||
+        manager.phoneNumber.includes(query) ||
+        manager.department.toLowerCase().includes(query)
+      );
+    });
+  }, [managers, searchQuery]);
+
+  return {
+    searchQuery,
+    setSearchQuery,
+    filteredManagers,
+  };
+}
+
 export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   const { data, isLoading, isError } = useManagers();
   const managers = data ?? [];
   const queryClient = useQueryClient();
+
+  // Search state
+  const { searchQuery, setSearchQuery, filteredManagers } = useManagerFilters(managers);
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -91,51 +121,87 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Department</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {managers.map((m) => (
-              <TableRow key={m.id}>
-                <TableCell className="font-medium">
-                  {m.firstName} {m.lastName}
-                </TableCell>
-                <TableCell>{m.email}</TableCell>
-                <TableCell>{m.phoneNumber}</TableCell>
-                <TableCell>{m.department}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditClick(m)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick(m)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      {/* Search Bar */}
+      <div className="mb-4 flex gap-4 items-center">
+        <div className="flex-1">
+          <Input
+            placeholder="Search managers (name, email, phone, department)..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
+        </div>
+
+        {searchQuery && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSearchQuery("")}
+          >
+            Clear Search
+          </Button>
+        )}
+
+        <div className="text-sm text-gray-600">
+          {filteredManagers.length} / {managers.length} managers
+        </div>
       </div>
+
+      {/* Empty state after search */}
+      {filteredManagers.length === 0 && (
+        <div className="text-center py-8 text-gray-500">
+          No managers match your search
+        </div>
+      )}
+
+      {/* Table */}
+      {filteredManagers.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredManagers.map((m) => (
+                <TableRow key={m.id}>
+                  <TableCell className="font-medium">
+                    {m.firstName} {m.lastName}
+                  </TableCell>
+                  <TableCell>{m.email}</TableCell>
+                  <TableCell>{m.phoneNumber}</TableCell>
+                  <TableCell>{m.department}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditClick(m)}
+                        className="text-blue-600 hover:text-blue-700"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(m)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog

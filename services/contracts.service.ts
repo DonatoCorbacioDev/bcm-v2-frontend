@@ -15,6 +15,21 @@ export type ContractUpsertPayload = {
   managerId: number;
 };
 
+// Pagination types
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface ContractSearchParams {
+  page?: number;
+  size?: number;
+  query?: string;
+  status?: string;
+}
 
 export const contractsService = {
   list: async (): Promise<Contract[]> => {
@@ -39,5 +54,20 @@ export const contractsService = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/contracts/${id}`);
+  },
+
+  // Paginated search
+  searchPaged: async (params: ContractSearchParams): Promise<PageResponse<Contract>> => {
+    const { page = 0, size = 10, query, status } = params;
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+    });
+
+    if (query) queryParams.append("q", query);
+    if (status && status !== "ALL") queryParams.append("status", status);
+
+    const res = await api.get<PageResponse<Contract>>(`/contracts/search?${queryParams.toString()}`);
+    return res.data;
   },
 };

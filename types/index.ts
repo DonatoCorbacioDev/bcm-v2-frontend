@@ -46,6 +46,8 @@ export interface Contract {
   endDate: string;
   status: "ACTIVE" | "EXPIRED" | "CANCELLED";
   createdAt: string;
+  manager?: Manager;
+  area?: BusinessArea;
 }
 
 export interface FinancialValue {

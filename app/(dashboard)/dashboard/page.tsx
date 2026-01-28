@@ -2,6 +2,7 @@
 
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import KPICard from "@/components/dashboard/KPICard";
+import ContractStatsChart from "@/components/dashboard/ContractStatsChart";
 
 export default function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
@@ -57,6 +58,7 @@ export default function DashboardPage() {
         <p className="text-gray-500 mt-2">Overview of your contracts</p>
       </div>
 
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
           title="Total Contracts"
@@ -81,6 +83,16 @@ export default function DashboardPage() {
           value={stats?.expired ?? 0}
           icon="❌"
           variant="danger"
+        />
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ContractStatsChart
+          total={stats?.total ?? 0}
+          active={stats?.active ?? 0}
+          expiring={stats?.expiring ?? 0}
+          expired={stats?.expired ?? 0}
         />
       </div>
     </div>

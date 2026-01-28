@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { useContracts } from "@/hooks/useContracts";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
@@ -70,6 +71,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   const { data, isLoading, isError } = useContracts();
   const contracts = data ?? [];
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Search and filter state
   const {
@@ -245,6 +247,14 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   <TableCell>{c.endDate || "N/A"}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/contracts/${c.id}`)}
+                        className="text-green-600 hover:text-green-700"
+                      >
+                        View
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"

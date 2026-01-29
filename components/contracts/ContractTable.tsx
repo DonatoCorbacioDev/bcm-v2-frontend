@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-import { useContractsPaged } from "@/hooks/useContractsPaged"; // CHANGED: new hook
+import { useContractsPaged } from "@/hooks/useContractsPaged";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import type { Contract } from "@/types";
 
@@ -113,12 +113,12 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   // Handle filter changes (reset to page 0)
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
-    setPage(0); // Reset to first page on search
+    setPage(0);
   };
 
   const handleStatusChange = (value: string) => {
     setStatusFilter(value);
-    setPage(0); // Reset to first page on filter
+    setPage(0);
   };
 
   const handleClearFilters = () => {
@@ -158,10 +158,10 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   return (
     <>
       {/* Search and Filters */}
-      <div className="mb-4 flex gap-4 items-center flex-wrap">
-        <div className="flex-1 min-w-[300px]">
+      <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
+        <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Search contracts (name, number, project, WBS)..."
+            placeholder="Search contracts..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="max-w-md"
@@ -169,11 +169,11 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-sm text-gray-600">Status:</span>
+          <span className="text-sm text-gray-600 hidden sm:inline">Status:</span>
           <select
             value={statusFilter}
             onChange={(e) => handleStatusChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 md:px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">All</option>
             <option value="ACTIVE">Active</option>
@@ -186,55 +186,58 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               variant="outline"
               size="sm"
               onClick={handleClearFilters}
+              className="hidden sm:inline-flex"
             >
-              Clear Filters
+              Clear
             </Button>
           )}
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-gray-600">
           {totalElements} contract{totalElements === 1 ? "" : "s"}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      {/* Table with Responsive Columns */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Contract Number</TableHead>
-              <TableHead>Customer Name</TableHead>
-              <TableHead>Project</TableHead>
-              <TableHead>WBS Code</TableHead>
-              <TableHead>Manager ID</TableHead>
+              <TableHead>Number</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead className="hidden md:table-cell">Project</TableHead>
+              <TableHead className="hidden lg:table-cell">WBS Code</TableHead>
+              <TableHead className="hidden lg:table-cell">Manager ID</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
+              <TableHead className="hidden md:table-cell">Start Date</TableHead>
+              <TableHead className="hidden lg:table-cell">End Date</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {contracts.map((c) => (
               <TableRow key={c.id}>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium text-sm">
                   {c.contractNumber}
                 </TableCell>
-                <TableCell>{c.customerName}</TableCell>
-                <TableCell>{c.projectName}</TableCell>
-                <TableCell>{c.wbsCode}</TableCell>
-                <TableCell>{c.managerId}</TableCell>
+                <TableCell className="text-sm">{c.customerName}</TableCell>
+                <TableCell className="hidden md:table-cell text-sm">{c.projectName}</TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode}</TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">{c.managerId}</TableCell>
                 <TableCell>
-                  <Badge variant={getStatusBadge(c.status)}>{c.status}</Badge>
+                  <Badge variant={getStatusBadge(c.status)} className="text-xs">
+                    {c.status}
+                  </Badge>
                 </TableCell>
-                <TableCell>{c.startDate}</TableCell>
-                <TableCell>{c.endDate || "N/A"}</TableCell>
+                <TableCell className="hidden md:table-cell text-sm">{c.startDate}</TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">{c.endDate || "N/A"}</TableCell>
                 <TableCell>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => router.push(`/contracts/${c.id}`)}
-                      className="text-green-600 hover:text-green-700"
+                      className="text-green-600 hover:text-green-700 text-xs px-2"
                     >
                       View
                     </Button>
@@ -242,7 +245,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => onEditClick(c)}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="text-blue-600 hover:text-blue-700 text-xs px-2 hidden sm:inline-flex"
                     >
                       Edit
                     </Button>
@@ -250,7 +253,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteClick(c)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:text-red-700 text-xs px-2 hidden sm:inline-flex"
                     >
                       Delete
                     </Button>
@@ -263,16 +266,16 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-6 py-4 border-t border-gray-200 dark:border-gray-700 gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Rows per page:</span>
+              <span className="text-xs md:text-sm text-gray-600">Rows:</span>
               <select
                 value={pageSize}
                 onChange={(e) => {
                   setPageSize(Number(e.target.value));
-                  setPage(0); // Reset to first page on size change
+                  setPage(0);
                 }}
-                className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 border border-gray-300 rounded text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -281,8 +284,8 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              <span className="text-xs md:text-sm text-gray-600">
                 Page {page + 1} of {totalPages}
               </span>
               <div className="flex gap-1">
@@ -291,6 +294,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   size="sm"
                   onClick={() => setPage(0)}
                   disabled={page === 0}
+                  className="text-xs px-2"
                 >
                   First
                 </Button>
@@ -299,14 +303,16 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   size="sm"
                   onClick={() => setPage(page - 1)}
                   disabled={page === 0}
+                  className="text-xs px-2"
                 >
-                  Previous
+                  Prev
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setPage(page + 1)}
                   disabled={page >= totalPages - 1}
+                  className="text-xs px-2"
                 >
                   Next
                 </Button>
@@ -315,6 +321,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   size="sm"
                   onClick={() => setPage(totalPages - 1)}
                   disabled={page >= totalPages - 1}
+                  className="text-xs px-2"
                 >
                   Last
                 </Button>

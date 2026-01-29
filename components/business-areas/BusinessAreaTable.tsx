@@ -115,10 +115,10 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   return (
     <>
       {/* Search Bar */}
-      <div className="mb-4 flex gap-4 items-center">
-        <div className="flex-1">
+      <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
+        <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Search business areas (name, description)..."
+            placeholder="Search areas..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -130,12 +130,13 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
             variant="outline"
             size="sm"
             onClick={() => setSearchQuery("")}
+            className="hidden sm:inline-flex"
           >
-            Clear Search
+            Clear
           </Button>
         )}
 
-        <div className="text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-gray-600">
           {filteredBusinessAreas.length} / {businessAreas.length} areas
         </div>
       </div>
@@ -147,41 +148,43 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
         </div>
       )}
 
-      {/* Table */}
+      {/* Table with Responsive Columns */}
       {filteredBusinessAreas.length > 0 && (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
+                <TableHead className="hidden lg:table-cell">ID</TableHead>
                 <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="hidden md:table-cell">Description</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredBusinessAreas.map((area) => (
                 <TableRow key={area.id}>
-                  <TableCell className="font-medium">{area.id}</TableCell>
-                  <TableCell>{area.name}</TableCell>
-                  <TableCell className="max-w-md truncate">{area.description}</TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditClick(area)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick(area)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      Delete
-                    </Button>
+                  <TableCell className="hidden lg:table-cell font-medium text-sm">{area.id}</TableCell>
+                  <TableCell className="text-sm font-medium">{area.name}</TableCell>
+                  <TableCell className="hidden md:table-cell max-w-md truncate text-sm">{area.description}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditClick(area)}
+                        className="text-blue-600 hover:text-blue-700 text-xs px-2"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(area)}
+                        className="text-red-600 hover:text-red-700 text-xs px-2"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -191,12 +194,16 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, businessArea: null })}>
+      <Dialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => !deleteMutation.isPending && setDeleteDialog({ open, businessArea: null })}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Business Area</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <span className="font-semibold">{deleteDialog.businessArea?.name}</span>? This action cannot be undone.
+              Are you sure you want to delete{" "}
+              <span className="font-semibold">{deleteDialog.businessArea?.name}</span>? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

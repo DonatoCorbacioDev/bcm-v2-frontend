@@ -135,10 +135,10 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
   return (
     <>
       {/* Search and Filters */}
-      <div className="mb-4 flex gap-4 items-center flex-wrap">
-        <div className="flex-1 min-w-[300px]">
+      <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
+        <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Search by year or amount..."
+            placeholder="Search year/amount..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -146,11 +146,11 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-sm text-gray-600">Month:</span>
+          <span className="text-sm text-gray-600 hidden sm:inline">Month:</span>
           <select
             value={monthFilter}
             onChange={(e) => setMonthFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 md:px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">All</option>
             <option value="1">January</option>
@@ -175,13 +175,14 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                 setSearchQuery("");
                 setMonthFilter("ALL");
               }}
+              className="hidden sm:inline-flex"
             >
-              Clear Filters
+              Clear
             </Button>
           )}
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-gray-600">
           {filteredFinancialValues.length} / {financialValues.length} values
         </div>
       </div>
@@ -193,47 +194,49 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
         </div>
       )}
 
-      {/* Table */}
+      {/* Table with Responsive Columns */}
       {filteredFinancialValues.length > 0 && (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Period</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead>Contract ID</TableHead>
-                <TableHead>Type ID</TableHead>
-                <TableHead>Area ID</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="hidden md:table-cell">Contract ID</TableHead>
+                <TableHead className="hidden lg:table-cell">Type ID</TableHead>
+                <TableHead className="hidden lg:table-cell">Area ID</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredFinancialValues.map((fv) => (
                 <TableRow key={fv.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-sm">
                     {getMonthName(fv.month)}/{fv.year}
                   </TableCell>
-                  <TableCell>€{fv.financialAmount.toLocaleString()}</TableCell>
-                  <TableCell>{fv.contractId}</TableCell>
-                  <TableCell>{fv.financialTypeId}</TableCell>
-                  <TableCell>{fv.businessAreaId}</TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditClick(fv)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick(fv)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      Delete
-                    </Button>
+                  <TableCell className="font-semibold text-sm">€{fv.financialAmount.toLocaleString()}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{fv.contractId}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{fv.financialTypeId}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{fv.businessAreaId}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditClick(fv)}
+                        className="text-blue-600 hover:text-blue-700 text-xs px-2"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(fv)}
+                        className="text-red-600 hover:text-red-700 text-xs px-2"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -243,7 +246,10 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, financialValue: null })}>
+      <Dialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => !deleteMutation.isPending && setDeleteDialog({ open, financialValue: null })}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Financial Value</DialogTitle>

@@ -128,10 +128,10 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   return (
     <>
       {/* Search and Filters */}
-      <div className="mb-4 flex gap-4 items-center flex-wrap">
-        <div className="flex-1 min-w-[300px]">
+      <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
+        <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Search users (username)..."
+            placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -139,11 +139,11 @@ export default function UserTable({ onEditClick }: UserTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-sm text-gray-600">Status:</span>
+          <span className="text-sm text-gray-600 hidden sm:inline">Status:</span>
           <select
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 md:px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="ALL">All</option>
             <option value="VERIFIED">Verified</option>
@@ -158,13 +158,14 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                 setSearchQuery("");
                 setVerifiedFilter("ALL");
               }}
+              className="hidden sm:inline-flex"
             >
-              Clear Filters
+              Clear
             </Button>
           )}
         </div>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-gray-600">
           {filteredUsers.length} / {users.length} users
         </div>
       </div>
@@ -176,58 +177,60 @@ export default function UserTable({ onEditClick }: UserTableProps) {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table with Responsive Columns */}
       {filteredUsers.length > 0 && (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
+                <TableHead className="hidden lg:table-cell">ID</TableHead>
                 <TableHead>Username</TableHead>
-                <TableHead>Manager ID</TableHead>
-                <TableHead>Role ID</TableHead>
+                <TableHead className="hidden md:table-cell">Manager ID</TableHead>
+                <TableHead className="hidden md:table-cell">Role ID</TableHead>
                 <TableHead>Verified</TableHead>
-                <TableHead>Created At</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="hidden lg:table-cell">Created At</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.id}</TableCell>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.managerId}</TableCell>
-                  <TableCell>{user.roleId}</TableCell>
+                  <TableCell className="hidden lg:table-cell font-medium text-sm">{user.id}</TableCell>
+                  <TableCell className="text-sm">{user.username}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{user.managerId}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{user.roleId}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${user.verified
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
                         }`}
                     >
                       {user.verified ? "Yes" : "No"}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditClick(user)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick(user)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      Delete
-                    </Button>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditClick(user)}
+                        className="text-blue-600 hover:text-blue-700 text-xs px-2"
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(user)}
+                        className="text-red-600 hover:text-red-700 text-xs px-2"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -237,12 +240,16 @@ export default function UserTable({ onEditClick }: UserTableProps) {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false, user: null })}>
+      <Dialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => !deleteMutation.isPending && setDeleteDialog({ open, user: null })}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete user <span className="font-semibold">{deleteDialog.user?.username}</span>? This action cannot be undone.
+              Are you sure you want to delete user{" "}
+              <span className="font-semibold">{deleteDialog.user?.username}</span>? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

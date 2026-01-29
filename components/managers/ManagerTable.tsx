@@ -31,7 +31,7 @@ import {
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 interface ManagerTableProps {
-  onEditClick: (manager: Manager) => void;
+  readonly onEditClick: (manager: Manager) => void;
 }
 
 // Search logic for managers
@@ -124,10 +124,10 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   return (
     <>
       {/* Search Bar */}
-      <div className="mb-4 flex gap-4 items-center">
-        <div className="flex-1">
+      <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
+        <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Search managers (name, email, phone, department)..."
+            placeholder="Search managers..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -139,12 +139,13 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
             variant="outline"
             size="sm"
             onClick={() => setSearchQuery("")}
+            className="hidden sm:inline-flex"
           >
-            Clear Search
+            Clear
           </Button>
         )}
 
-        <div className="text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-gray-600">
           {filteredManagers.length} / {managers.length} managers
         </div>
       </div>
@@ -156,35 +157,35 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
         </div>
       )}
 
-      {/* Table */}
+      {/* Table with Responsive Columns */}
       {filteredManagers.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Department</TableHead>
+                <TableHead className="hidden md:table-cell">Phone</TableHead>
+                <TableHead className="hidden md:table-cell">Department</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredManagers.map((m) => (
                 <TableRow key={m.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium text-sm">
                     {m.firstName} {m.lastName}
                   </TableCell>
-                  <TableCell>{m.email}</TableCell>
-                  <TableCell>{m.phoneNumber}</TableCell>
-                  <TableCell>{m.department}</TableCell>
+                  <TableCell className="text-sm max-w-[120px] truncate">{m.email}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{m.phoneNumber}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{m.department}</TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(m)}
-                        className="text-blue-600 hover:text-blue-700"
+                        className="text-blue-600 hover:text-blue-700 text-xs px-1 sm:px-2"
                       >
                         Edit
                       </Button>
@@ -192,7 +193,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteClick(m)}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 text-xs px-1 sm:px-2"
                       >
                         Delete
                       </Button>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useContract } from "@/hooks/useContract";
 import { useAuthStore } from "@/store/authStore";
@@ -18,6 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import ContractForm from "@/components/contracts/ContractForm";
+import api from "@/lib/api";
+import type { FinancialValue } from "@/types";
 
 // Helper function for status badge colors
 function getStatusBadgeClass(status: string): string {
@@ -40,14 +43,22 @@ export default function ContractDetailPage() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'ADMIN';
 
-  // Log user data
-  console.log("🔍 Debug Contract Detail Page:");
-  console.log("User from store:", user);
-  console.log("Is Admin?", isAdmin);
-  console.log("User role:", user?.role);
-
-  const { data: contract, isLoading, isError } = useContract(contractId);
+  const { data: contract, isLoading, isError, refetch } = useContract(contractId);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+  // Fetch financial values for this contract
+  const {
+    data: financialValues,
+    isLoading: isLoadingFinancials
+  } = useQuery<FinancialValue[]>({
+    queryKey: ["financial-values", "by-contract", contractId],
+    queryFn: async () => {
+      const response = await api.get(`/financial-values/by-contract/${contractId}`);
+      return response.data;
+    },
+    enabled: !!contractId,
+  });
 
   // Delete mutation
   const deleteMutation = useMutation({
@@ -73,6 +84,90 @@ export default function ContractDetailPage() {
     if (contractId) {
       deleteMutation.mutate(contractId);
     }
+  };
+
+  const handleEditClick = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    setEditDialogOpen(false);
+    refetch();
+  };
+
+  // Helper function to render Financial Values section content
+  const renderFinancialValues = () => {
+    if (isLoadingFinancials) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        </div>
+      );
+    }
+
+    if (!financialValues || financialValues.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No financial values found for this contract.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-50 dark:bg-gray-900">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Type
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Business Area
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Amount
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Month/Year
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            {financialValues.map((fv: FinancialValue) => (
+              <tr key={fv.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  {fv.typeName || 'N/A'}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                  {fv.areaName || 'N/A'}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
+                  €{fv.financialAmount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  {fv.month}/{fv.year}
+                </td>
+              </tr>
+            ))}
+
+            {/* Total Row */}
+            <tr className="bg-gray-100 dark:bg-gray-900 font-bold">
+              <td colSpan={2} className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                Total
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                €{financialValues.reduce((sum: number, fv: FinancialValue) =>
+                  sum + (fv.financialAmount || 0), 0
+                ).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -124,7 +219,11 @@ export default function ContractDetailPage() {
         <div className="flex gap-2">
           {/* Show Edit button only for ADMIN */}
           {isAdmin && (
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEditClick}
+            >
               <Pencil className="h-4 w-4 mr-2" />
               Edit
             </Button>
@@ -213,15 +312,36 @@ export default function ContractDetailPage() {
         </div>
       </div>
 
-      {/* Financial Values Section (Placeholder) */}
+      {/* Financial Values Section */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Financial Values
         </h3>
-        <p className="text-sm text-gray-500">
-          Financial values associated with this contract will be displayed here.
-        </p>
+
+        {renderFinancialValues()}
       </div>
+
+      {/* Edit Dialog */}
+      {isAdmin && (
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Contract</DialogTitle>
+              <DialogDescription>
+                Update the contract information below
+              </DialogDescription>
+            </DialogHeader>
+
+            {contract && (
+              <ContractForm
+                contract={contract}
+                onClose={() => setEditDialogOpen(false)}
+                onSuccess={handleEditSuccess}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete Confirmation Dialog */}
       {isAdmin && (

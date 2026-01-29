@@ -3,9 +3,8 @@ export interface User {
   id: number;
   username: string;
   managerId: number;
-  roleId: number;
+  role: string;
   verified: boolean;
-  createdAt: string;
 }
 
 export interface Manager {

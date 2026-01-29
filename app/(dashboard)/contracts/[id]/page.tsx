@@ -1,9 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useContract } from "@/hooks/useContract";
+import { useAuthStore } from "@/store/authStore";
+import { contractsService } from "@/services/contracts.service";
+import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { Loader2, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Helper function for status badge colors
 function getStatusBadgeClass(status: string): string {
@@ -19,9 +33,47 @@ function getStatusBadgeClass(status: string): string {
 export default function ContractDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const contractId = Number(params.id);
 
+  // Get current user to check permissions
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
+
+  // Log user data
+  console.log("🔍 Debug Contract Detail Page:");
+  console.log("User from store:", user);
+  console.log("Is Admin?", isAdmin);
+  console.log("User role:", user?.role);
+
   const { data: contract, isLoading, isError } = useContract(contractId);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await contractsService.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: contractsQueryKeys.all });
+      toast.success("Contract deleted successfully!");
+      router.push("/contracts");
+    },
+    onError: () => {
+      toast.error("Failed to delete contract");
+      setDeleteDialogOpen(false);
+    },
+  });
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (contractId) {
+      deleteMutation.mutate(contractId);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -54,7 +106,7 @@ export default function ContractDetailPage() {
   return (
     <div className="space-y-6">
       {/* Header with Actions */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <Button
             variant="ghost"
@@ -70,14 +122,25 @@ export default function ContractDetailPage() {
           <p className="text-gray-500 mt-1">{contract.customerName}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Pencil className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
-          <Button variant="destructive" size="sm">
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
+          {/* Show Edit button only for ADMIN */}
+          {isAdmin && (
+            <Button variant="outline" size="sm">
+              <Pencil className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+          )}
+          {/* Show Delete button only for ADMIN */}
+          {isAdmin && (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteClick}
+              disabled={deleteMutation.isPending}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          )}
         </div>
       </div>
 
@@ -159,6 +222,41 @@ export default function ContractDetailPage() {
           Financial values associated with this contract will be displayed here.
         </p>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {isAdmin && (
+        <Dialog
+          open={deleteDialogOpen}
+          onOpenChange={(open) => !deleteMutation.isPending && setDeleteDialogOpen(open)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Contract</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete contract{" "}
+                <span className="font-semibold">{contract.contractNumber}</span>{" "}
+                ({contract.customerName})? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteDialogOpen(false)}
+                disabled={deleteMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

@@ -101,11 +101,11 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   const getStatusBadge = (status: Contract["status"]) => {
     const variants: Record<
       Contract["status"],
-      "default" | "secondary" | "destructive"
+      "success" | "secondary" | "destructive"
     > = {
-      ACTIVE: "default",
-      EXPIRED: "secondary",
-      CANCELLED: "destructive",
+      ACTIVE: "success",
+      EXPIRED: "destructive",
+      CANCELLED: "secondary",
     };
     return variants[status] ?? "secondary";
   };

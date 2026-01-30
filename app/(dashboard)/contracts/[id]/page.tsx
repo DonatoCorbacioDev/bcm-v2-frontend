@@ -10,6 +10,7 @@ import { contractsService } from "@/services/contracts.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { Loader2, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -20,18 +21,8 @@ import {
 } from "@/components/ui/dialog";
 import ContractForm from "@/components/contracts/ContractForm";
 import api from "@/lib/api";
+import { getContractStatusVariant } from "@/lib/utils";
 import type { FinancialValue, ContractHistory } from "@/types";
-
-// Helper function for status badge colors
-function getStatusBadgeClass(status: string): string {
-  if (status === "ACTIVE") {
-    return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-  }
-  if (status === "EXPIRED") {
-    return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-  }
-  return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
-}
 
 export default function ContractDetailPage() {
   const params = useParams();
@@ -227,9 +218,16 @@ export default function ContractDetailPage() {
             {/* Content */}
             <div className="flex-1">
               <div className="flex items-start justify-between gap-4 mb-1">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                  Status Changed: <span className="text-orange-600 dark:text-orange-400">{history.previousStatus}</span> → <span className="text-green-600 dark:text-green-400">{history.newStatus}</span>
-                </p>
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white flex-wrap">
+                  <span>Status Changed:</span>
+                  <Badge variant={getContractStatusVariant(history.previousStatus)}>
+                    {history.previousStatus}
+                  </Badge>
+                  <span>→</span>
+                  <Badge variant={getContractStatusVariant(history.newStatus)}>
+                    {history.newStatus}
+                  </Badge>
+                </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                   {new Date(history.modificationDate).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -367,13 +365,9 @@ export default function ContractDetailPage() {
           </div>
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
-            <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
-                contract.status
-              )}`}
-            >
+            <Badge variant={getContractStatusVariant(contract.status)}>
               {contract.status}
-            </span>
+            </Badge>
           </div>
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Manager</p>

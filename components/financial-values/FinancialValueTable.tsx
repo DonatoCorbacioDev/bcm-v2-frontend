@@ -202,9 +202,9 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
               <TableRow>
                 <TableHead>Period</TableHead>
                 <TableHead>Amount</TableHead>
-                <TableHead className="hidden md:table-cell">Contract ID</TableHead>
-                <TableHead className="hidden lg:table-cell">Type ID</TableHead>
-                <TableHead className="hidden lg:table-cell">Area ID</TableHead>
+                <TableHead className="hidden md:table-cell">Customer</TableHead>
+                <TableHead className="hidden lg:table-cell">Type</TableHead>
+                <TableHead className="hidden lg:table-cell">Business Area</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -215,9 +215,9 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                     {getMonthName(fv.month)}/{fv.year}
                   </TableCell>
                   <TableCell className="font-semibold text-sm">€{fv.financialAmount.toLocaleString()}</TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{fv.contractId}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm">{fv.financialTypeId}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm">{fv.businessAreaId}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{fv.customerName || 'N/A'}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{fv.typeName || 'N/A'}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{fv.areaName || 'N/A'}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button

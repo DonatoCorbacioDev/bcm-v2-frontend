@@ -59,6 +59,7 @@ export interface FinancialValue {
   contractId: number;
   typeName?: string;
   areaName?: string;
+  customerName?: string;
 }
 
 export interface ContractHistory {

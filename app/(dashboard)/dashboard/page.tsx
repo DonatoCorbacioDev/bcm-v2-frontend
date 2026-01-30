@@ -2,6 +2,7 @@
 
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import KPICard from "@/components/dashboard/KPICard";
+import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
 import ContractStatsChart from "@/components/dashboard/ContractStatsChart";
 
 export default function DashboardPage() {
@@ -16,13 +17,22 @@ export default function DashboardPage() {
           </h2>
           <p className="text-gray-500 mt-2">Overview of your contracts</p>
         </div>
+
+        {/* KPI Cards Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-32 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"
-            />
+            <KPICardSkeleton key={i} />
           ))}
+        </div>
+
+        {/* Chart Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+            <div className="flex items-center justify-center h-64">
+              <div className="w-48 h-48 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
+            </div>
+          </div>
         </div>
       </div>
     );

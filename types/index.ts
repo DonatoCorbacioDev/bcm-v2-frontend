@@ -65,7 +65,7 @@ export interface ContractHistory {
   id: number;
   contractId: number;
   modifiedById: number;
-  modifiedAt: string;
+  modificationDate: string;
   previousStatus: string;
   newStatus: string;
 }

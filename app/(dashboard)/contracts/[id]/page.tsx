@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import ContractForm from "@/components/contracts/ContractForm";
 import api from "@/lib/api";
-import type { FinancialValue } from "@/types";
+import type { FinancialValue, ContractHistory } from "@/types";
 
 // Helper function for status badge colors
 function getStatusBadgeClass(status: string): string {
@@ -43,7 +43,7 @@ export default function ContractDetailPage() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'ADMIN';
 
-  const { data: contract, isLoading, isError, refetch } = useContract(contractId);
+  const { data: contract, isLoading, isError } = useContract(contractId);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -55,6 +55,19 @@ export default function ContractDetailPage() {
     queryKey: ["financial-values", "by-contract", contractId],
     queryFn: async () => {
       const response = await api.get(`/financial-values/by-contract/${contractId}`);
+      return response.data;
+    },
+    enabled: !!contractId,
+  });
+
+  // Fetch contract history
+  const {
+    data: contractHistory,
+    isLoading: isLoadingHistory
+  } = useQuery<ContractHistory[]>({
+    queryKey: ["contract-history", "by-contract", contractId],
+    queryFn: async () => {
+      const response = await api.get(`/contract-history/contract/${contractId}`);
       return response.data;
     },
     enabled: !!contractId,
@@ -92,7 +105,13 @@ export default function ContractDetailPage() {
 
   const handleEditSuccess = () => {
     setEditDialogOpen(false);
-    refetch();
+
+    queryClient.invalidateQueries({
+      queryKey: ["contracts", contractId]
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["contract-history", "by-contract", contractId]
+    });
   };
 
   // Helper function to render Financial Values section content
@@ -166,6 +185,67 @@ export default function ContractDetailPage() {
             </tr>
           </tbody>
         </table>
+      </div>
+    );
+  };
+
+  // Helper function to render Contract History section
+  const renderContractHistory = () => {
+    if (isLoadingHistory) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        </div>
+      );
+    }
+
+    if (!contractHistory || contractHistory.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No history records found for this contract.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {contractHistory.map((history, index) => (
+          <div
+            key={history.id}
+            className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0"
+          >
+            {/* Timeline dot */}
+            <div className="flex flex-col items-center">
+              <div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5"></div>
+              {index < contractHistory.length - 1 && (
+                <div className="w-0.5 flex-1 bg-gray-300 dark:bg-gray-600 mt-2"></div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="flex-1">
+              <div className="flex items-start justify-between gap-4 mb-1">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Status Changed: <span className="text-orange-600 dark:text-orange-400">{history.previousStatus}</span> → <span className="text-green-600 dark:text-green-400">{history.newStatus}</span>
+                </p>
+                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  {new Date(history.modificationDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Modified by User ID: {history.modifiedById}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
     );
   };
@@ -319,6 +399,15 @@ export default function ContractDetailPage() {
         </h3>
 
         {renderFinancialValues()}
+      </div>
+
+      {/* Contract History Section */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Change History
+        </h3>
+
+        {renderContractHistory()}
       </div>
 
       {/* Edit Dialog */}

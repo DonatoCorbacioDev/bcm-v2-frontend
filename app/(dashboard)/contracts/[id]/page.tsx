@@ -117,9 +117,13 @@ export default function ContractDetailPage() {
 
     if (!financialValues || financialValues.length === 0) {
       return (
-        <div className="text-center py-8">
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">💰</div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            No Financial Values Yet
+          </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            No financial values found for this contract.
+            Financial data will appear here once added to this contract.
           </p>
         </div>
       );
@@ -192,9 +196,13 @@ export default function ContractDetailPage() {
 
     if (!contractHistory || contractHistory.length === 0) {
       return (
-        <div className="text-center py-8">
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">📜</div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            No Change History
+          </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            No history records found for this contract.
+            Status changes and modifications will be tracked here.
           </p>
         </div>
       );

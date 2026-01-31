@@ -47,6 +47,7 @@ export interface Contract {
   createdAt: string;
   manager?: Manager;
   area?: BusinessArea;
+  daysUntilExpiry?: number;
 }
 
 export interface FinancialValue {

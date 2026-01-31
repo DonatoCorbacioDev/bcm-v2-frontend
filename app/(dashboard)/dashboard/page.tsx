@@ -1,12 +1,24 @@
 "use client";
 
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { useExpiringContracts } from "@/hooks/useExpiringContracts";
+import Link from "next/link";
 import KPICard from "@/components/dashboard/KPICard";
 import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
 import ContractStatsChart from "@/components/dashboard/ContractStatsChart";
 
 export default function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
+  const { data: expiringContracts = [], isLoading: isLoadingExpiring } = useExpiringContracts(30);
+
+  // Helper function to format days remaining
+  const formatDaysLeft = (days: number | null | undefined): string => {
+    if (days === null || days === undefined) {
+      return 'Expiring soon';
+    }
+    const dayWord = days === 1 ? 'day' : 'days';
+    return `${days} ${dayWord} left`;
+  };
 
   if (isLoading) {
     return (
@@ -67,6 +79,54 @@ export default function DashboardPage() {
         </h2>
         <p className="text-gray-500 mt-2">Overview of your contracts</p>
       </div>
+
+      {/* Expiring Contracts Alert */}
+      {!isLoadingExpiring && expiringContracts.length > 0 && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg p-6">
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">⚠️</div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                {expiringContracts.length} Contract{expiringContracts.length > 1 ? 's' : ''} Expiring Soon
+              </h3>
+              <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
+                The following contracts will expire within the next 30 days. Take action to renew or close them.
+              </p>
+              <div className="space-y-2">
+                {expiringContracts.slice(0, 5).map((contract) => (
+                  <Link
+                    key={contract.id}
+                    href={`/contracts/${contract.id}`}
+                    className="block p-3 bg-white dark:bg-gray-800 rounded border border-yellow-300 dark:border-yellow-700 hover:border-yellow-500 dark:hover:border-yellow-500 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">
+                          {contract.contractNumber} - {contract.customerName}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Expires: {new Date(contract.endDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                        {formatDaysLeft(contract.daysUntilExpiry)}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+                {expiringContracts.length > 5 && (
+                  <Link
+                    href="/contracts?status=ACTIVE"
+                    className="block text-center p-2 text-sm text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-100 font-medium"
+                  >
+                    + View {expiringContracts.length - 5} more expiring contracts
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

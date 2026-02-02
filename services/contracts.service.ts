@@ -70,4 +70,19 @@ export const contractsService = {
     const res = await api.get<PageResponse<Contract>>(`/contracts/search?${queryParams.toString()}`);
     return res.data;
   },
+
+  // Export methods
+  exportExcel: async (): Promise<Blob> => {
+    const res = await api.get("/contracts/export/excel", {
+      responseType: "blob",
+    });
+    return res.data;
+  },
+
+  exportPdf: async (): Promise<Blob> => {
+    const res = await api.get("/contracts/export/pdf", {
+      responseType: "blob",
+    });
+    return res.data;
+  },
 };

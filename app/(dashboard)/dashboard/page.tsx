@@ -6,6 +6,9 @@ import Link from "next/link";
 import KPICard from "@/components/dashboard/KPICard";
 import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
 import ContractStatsChart from "@/components/dashboard/ContractStatsChart";
+import { ContractsByAreaChart } from "@/components/dashboard/ContractsByAreaChart";
+import { ContractsTimelineChart } from "@/components/dashboard/ContractsTimelineChart";
+import { TopManagersChart } from "@/components/dashboard/TopManagersChart";
 
 export default function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
@@ -37,14 +40,16 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Chart Skeleton */}
+        {/* Charts Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="h-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
-            <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
-            <div className="flex items-center justify-center h-64">
-              <div className="w-48 h-48 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
+              <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+              <div className="flex items-center justify-center h-64">
+                <div className="w-48 h-48 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     );
@@ -158,12 +163,22 @@ export default function DashboardPage() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Contract Status Distribution (Pie Chart) */}
         <ContractStatsChart
           total={stats?.total ?? 0}
           active={stats?.active ?? 0}
           expiring={stats?.expiring ?? 0}
           expired={stats?.expired ?? 0}
         />
+
+        {/* Contracts by Business Area (Bar Chart) */}
+        <ContractsByAreaChart />
+
+        {/* Contracts Timeline (Line Chart) */}
+        <ContractsTimelineChart />
+
+        {/* Top Managers (Horizontal Bar Chart) */}
+        <TopManagersChart />
       </div>
     </div>
   );

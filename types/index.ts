@@ -89,3 +89,20 @@ export interface ApiResponse<T> {
   message?: string;
   status: number;
 }
+
+// Dashboard Statistics
+export interface ContractsByArea {
+  areaName: string;
+  count: number;
+}
+
+export interface ContractsTimeline {
+  month: string;
+  count: number;
+}
+
+export interface TopManager {
+  managerId: number;
+  managerName: string;
+  contractsCount: number;
+}

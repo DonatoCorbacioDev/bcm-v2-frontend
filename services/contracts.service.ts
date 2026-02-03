@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { Contract } from "@/types";
+import type { Contract, ContractsByArea, ContractsTimeline, TopManager } from "@/types";
 
 export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED";
 
@@ -84,5 +84,21 @@ export const contractsService = {
       responseType: "blob",
     });
     return res.data;
+  },
+
+  // Dashboard Statistics
+  async getContractsByArea(): Promise<ContractsByArea[]> {
+    const response = await api.get<ContractsByArea[]>('/contracts/stats/by-area');
+    return response.data;
+  },
+
+  async getContractsTimeline(): Promise<ContractsTimeline[]> {
+    const response = await api.get<ContractsTimeline[]>('/contracts/stats/timeline');
+    return response.data;
+  },
+
+  async getTopManagers(): Promise<TopManager[]> {
+    const response = await api.get<TopManager[]>('/contracts/stats/top-managers');
+    return response.data;
   },
 };

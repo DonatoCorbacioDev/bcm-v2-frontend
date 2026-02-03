@@ -537,7 +537,7 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com bcm-front
 
 **Donato Corbacio**
 
-- 🎓 Master's Degree in Computer Science and Software Production Technologies (Dec 2024)
+- 🎓 Bachelor's Degree in Computer Science and Software Production Technologies (Dec 2024)
 - 💼 Junior Full-Stack Developer seeking opportunities
 - 📚 Currently studying: Python IFTS & AI Automation Business
 - 🌍 Based in Puglia, Italy

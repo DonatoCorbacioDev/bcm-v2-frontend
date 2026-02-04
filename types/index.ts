@@ -43,6 +43,7 @@ export interface Contract {
   projectName: string;
   areaId: number;
   managerId: number;
+  managerName: string;
   startDate: string;
   endDate: string;
   status: "ACTIVE" | "EXPIRED" | "CANCELLED";

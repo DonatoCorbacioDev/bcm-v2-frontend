@@ -207,7 +207,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               <TableHead>Customer</TableHead>
               <TableHead className="hidden md:table-cell">Project</TableHead>
               <TableHead className="hidden lg:table-cell">WBS Code</TableHead>
-              <TableHead className="hidden lg:table-cell">Manager ID</TableHead>
+              <TableHead className="hidden lg:table-cell">Manager</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="hidden md:table-cell">Start Date</TableHead>
               <TableHead className="hidden lg:table-cell">End Date</TableHead>
@@ -223,7 +223,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                 <TableCell className="text-sm">{c.customerName}</TableCell>
                 <TableCell className="hidden md:table-cell text-sm">{c.projectName}</TableCell>
                 <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode}</TableCell>
-                <TableCell className="hidden lg:table-cell text-sm">{c.managerId}</TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">{c.managerName}</TableCell>
                 <TableCell>
                   <Badge variant={getStatusBadge(c.status)} className="text-xs">
                     {c.status}

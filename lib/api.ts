@@ -9,12 +9,15 @@ if (!API_URL) {
   );
 }
 
+// Allow HTTP for localhost/127.0.0.1, require HTTPS for external domains
 if (
   process.env.NODE_ENV === "production" &&
-  API_URL.startsWith("http://")
+  API_URL.startsWith("http://") &&
+  !API_URL.includes("localhost") &&
+  !API_URL.includes("127.0.0.1")
 ) {
   throw new Error(
-    "Production API must use HTTPS. Check NEXT_PUBLIC_API_URL in your .env file."
+    "Production API must use HTTPS for external domains. Check NEXT_PUBLIC_API_URL in your .env file."
   );
 }
 

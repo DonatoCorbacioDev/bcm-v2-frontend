@@ -12,6 +12,7 @@ interface UserProfile {
   id: number;
   username: string;
   managerId: number;
+  role: string;
   roleId: number;
   verified: boolean;
   createdAt: string;

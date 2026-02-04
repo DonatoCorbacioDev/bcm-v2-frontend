@@ -4,7 +4,9 @@ export interface User {
   username: string;
   managerId: number;
   role: string;
+  roleId: number;
   verified: boolean;
+  createdAt: string;
 }
 
 export interface Manager {

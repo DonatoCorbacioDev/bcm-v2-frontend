@@ -219,14 +219,14 @@ graph LR
     I -->|Control| G
     I -->|Auth Check| H
     
-    style A fill:#90EE90,stroke:#333
-    style B fill:#90EE90,stroke:#333
-    style C fill:#90EE90,stroke:#333
-    style D fill:#90EE90,stroke:#333
-    style E fill:#87CEEB,stroke:#333
-    style F fill:#87CEEB,stroke:#333
-    style G fill:#87CEEB,stroke:#333
-    style H fill:#FFB6C1,stroke:#333
+    style A fill:#a5d6a7,stroke:#2e7d32,stroke-width:3px,color:#000
+    style B fill:#a5d6a7,stroke:#2e7d32,stroke-width:3px,color:#000
+    style C fill:#a5d6a7,stroke:#2e7d32,stroke-width:3px,color:#000
+    style D fill:#a5d6a7,stroke:#2e7d32,stroke-width:3px,color:#000
+    style E fill:#90caf9,stroke:#1565c0,stroke-width:3px,color:#000
+    style F fill:#90caf9,stroke:#1565c0,stroke-width:3px,color:#000
+    style G fill:#90caf9,stroke:#1565c0,stroke-width:3px,color:#000
+    style H fill:#ffcc80,stroke:#ef6c00,stroke-width:3px,color:#000
 ```
 
 **State Management Rules:**

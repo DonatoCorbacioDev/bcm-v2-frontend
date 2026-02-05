@@ -60,6 +60,48 @@ BCM v2.0 Frontend is the client application for the Business Contracts Manager s
 
 ## 🏗️ Architecture
 
+### System Overview
+
+```mermaid
+graph TB
+    subgraph "User Layer"
+        A[Browser<br/>Chrome, Firefox, Safari]
+    end
+    
+    subgraph "Next.js Application"
+        B[App Router<br/>Pages & Layouts]
+        C[React Components<br/>UI Layer]
+        D[Custom Hooks<br/>useContracts, useAuth]
+        E[TanStack Query<br/>Cache & State]
+        F[Services<br/>API Client Layer]
+        G[Axios Instance<br/>HTTP Client]
+        H[Auth Store<br/>Zustand]
+    end
+    
+    subgraph "External Services"
+        I[Backend API<br/>Spring Boot REST]
+    end
+    
+    A -->|User Actions| B
+    B -->|Renders| C
+    C -->|Data Fetching| D
+    D -->|Query/Mutation| E
+    E -->|API Call| F
+    F -->|HTTP Request| G
+    G -->|Authenticated| I
+    I -->|JSON Response| G
+    G -->|Success/Error| F
+    F -->|Update Cache| E
+    E -->|Re-render| C
+    H -.->|Global State| D
+    G -.->|JWT Token| H
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
+    style E fill:#bfb,stroke:#333,stroke-width:2px
+    style I fill:#fbb,stroke:#333,stroke-width:2px
+```
+
 ### Clean Architecture Pattern
 
 ```
@@ -102,6 +144,96 @@ BCM v2.0 Frontend is the client application for the Business Contracts Manager s
 │  - Error handling                               │
 └─────────────────────────────────────────────────┘
 ```
+
+**Key Principles:**
+- **Component Isolation:** Components don't call APIs directly
+- **Single Source of Truth:** TanStack Query manages server state
+- **Type Safety:** TypeScript + Zod for runtime validation
+- **Optimistic Updates:** UI updates before server confirmation
+- **Error Boundaries:** Graceful error handling at each layer
+
+### Data Flow Example
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as ContractTable
+    participant Hook as useContracts
+    participant Query as TanStack Query
+    participant Service as contractsService
+    participant API as Axios API
+    participant Backend
+    
+    User->>Component: Clicks "Load Contracts"
+    Component->>Hook: Call useContracts()
+    Hook->>Query: useQuery(['contracts'])
+    
+    alt Cache Hit
+        Query-->>Hook: Return cached data
+        Hook-->>Component: {data, isLoading: false}
+        Component-->>User: Display contracts instantly
+    else Cache Miss
+        Query->>Service: contractsService.list()
+        Service->>API: GET /api/v1/contracts
+        API->>API: Add JWT header
+        API->>Backend: HTTP Request
+        Backend-->>API: JSON Response
+        API-->>Service: Contract[] data
+        Service-->>Query: Parsed data
+        Query->>Query: Update cache
+        Query-->>Hook: {data, isLoading: false}
+        Hook-->>Component: Contracts data
+        Component-->>User: Display contracts
+    end
+    
+    Note over User,Backend: Subsequent requests use cache<br/>until staleTime expires (2-5 min)
+```
+
+### State Management Strategy
+
+```mermaid
+graph LR
+    subgraph "Server State (TanStack Query)"
+        A[Contracts Data]
+        B[Managers Data]
+        C[Users Data]
+        D[Dashboard Stats]
+    end
+    
+    subgraph "Client State (React Hooks)"
+        E[Form State<br/>React Hook Form]
+        F[UI State<br/>useState]
+        G[Modal State<br/>Dialog Open/Close]
+    end
+    
+    subgraph "Global State (Zustand)"
+        H[Auth State<br/>User, Token, Role]
+    end
+    
+    I[Components] -->|Fetch| A
+    I -->|Fetch| B
+    I -->|Fetch| C
+    I -->|Fetch| D
+    I -->|Control| E
+    I -->|Control| F
+    I -->|Control| G
+    I -->|Auth Check| H
+    
+    style A fill:#90EE90,stroke:#333
+    style B fill:#90EE90,stroke:#333
+    style C fill:#90EE90,stroke:#333
+    style D fill:#90EE90,stroke:#333
+    style E fill:#87CEEB,stroke:#333
+    style F fill:#87CEEB,stroke:#333
+    style G fill:#87CEEB,stroke:#333
+    style H fill:#FFB6C1,stroke:#333
+```
+
+**State Management Rules:**
+1. **Server Data** → TanStack Query (contracts, managers, etc.)
+2. **Form Data** → React Hook Form (controlled inputs)
+3. **UI State** → Local useState (modals, dropdowns)
+4. **Global Auth** → Zustand (user session)
 
 ### Technology Stack
 

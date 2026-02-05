@@ -64,22 +64,22 @@ BCM v2.0 Frontend is the client application for the Business Contracts Manager s
 
 ```mermaid
 graph TB
-    subgraph "User Layer"
-        A[Browser<br/>Chrome, Firefox, Safari]
+    subgraph UserLayer["User Layer"]
+        A["Browser<br>(Chrome, Firefox, Safari)"]
     end
     
-    subgraph "Next.js Application"
-        B[App Router<br/>Pages & Layouts]
-        C[React Components<br/>UI Layer]
-        D[Custom Hooks<br/>useContracts, useAuth]
-        E[TanStack Query<br/>Cache & State]
-        F[Services<br/>API Client Layer]
-        G[Axios Instance<br/>HTTP Client]
-        H[Auth Store<br/>Zustand]
+    subgraph NextApp["Next.js Application"]
+        B["App Router<br>(Pages & Layouts)"]
+        C["React Components<br>(UI Layer)"]
+        D["Custom Hooks<br>(useContracts, useAuth)"]
+        E["TanStack Query<br>(Cache & State)"]
+        F["Services<br>(API Client Layer)"]
+        G["Axios Instance<br>(HTTP Client)"]
+        H["Auth Store<br>(Zustand)"]
     end
     
-    subgraph "External Services"
-        I[Backend API<br/>Spring Boot REST]
+    subgraph External["External Services"]
+        I["Backend API<br>(Spring Boot REST)"]
     end
     
     A -->|User Actions| B
@@ -670,7 +670,7 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com bcm-front
 **Donato Corbacio**
 
 - 🎓 Bachelor's Degree in Computer Science and Software Production Technologies (Dec 2024)
-- 💼 Junior Full-Stack Developer seeking opportunities
+- 💼 Full-Stack Developer seeking opportunities
 - 📚 Currently studying: Python IFTS & AI Automation Business
 - 🌍 Based in Puglia, Italy
 - 💡 Passionate about clean code, modern architecture, and continuous learning

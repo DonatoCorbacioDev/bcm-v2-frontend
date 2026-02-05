@@ -96,10 +96,10 @@ graph TB
     H -.->|Global State| D
     G -.->|JWT Token| H
     
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style C fill:#bbf,stroke:#333,stroke-width:2px
-    style E fill:#bfb,stroke:#333,stroke-width:2px
-    style I fill:#fbb,stroke:#333,stroke-width:2px
+    style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style C fill:#bbdefb,stroke:#1976d2,stroke-width:2px
+    style E fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style I fill:#ffccbc,stroke:#d84315,stroke-width:2px
 ```
 
 ### Clean Architecture Pattern

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import UserTable from "@/components/users/UserTable";
 import UserForm from "@/components/users/UserForm";
+import InviteUserForm from "@/components/users/InviteUserForm";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,8 @@ export default function UsersPage() {
     open: boolean;
     user: User | null;
   }>({ open: false, user: null });
+
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const handleCreateClick = () => {
     setFormDialog({ open: true, user: null });
@@ -37,7 +40,12 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold">Users</h1>
           <p className="text-gray-600 mt-1">Manage system users</p>
         </div>
-        <Button onClick={handleCreateClick}>+ New User</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setInviteOpen(true)}>
+            Invite User
+          </Button>
+          <Button onClick={handleCreateClick}>+ New User</Button>
+        </div>
       </div>
 
       <UserTable onEditClick={handleEditClick} />
@@ -55,6 +63,16 @@ export default function UsersPage() {
             onClose={handleCloseForm}
             onSuccess={() => { }}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite User Dialog */}
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite User</DialogTitle>
+          </DialogHeader>
+          <InviteUserForm onClose={() => setInviteOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>

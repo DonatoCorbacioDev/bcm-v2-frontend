@@ -67,7 +67,7 @@ export function ContractsByAreaChart() {
           <BarChart data={dataWithColors}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="areaName" />
-            <YAxis />
+            <YAxis allowDecimals={false} />
             <Tooltip />
             <Bar dataKey="count" name="Contracts" />
           </BarChart>

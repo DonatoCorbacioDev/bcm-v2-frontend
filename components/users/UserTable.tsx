@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useUsers, usersQueryKeys } from "@/hooks/useUsers";
+import { useManagers } from "@/hooks/useManagers";
 import { usersService } from "@/services/users.service";
 import type { User } from "@/types";
 
@@ -65,6 +66,11 @@ function useUserFilters(users: User[]) {
 
 export default function UserTable({ onEditClick }: UserTableProps) {
   const { data: users = [], isLoading, isError } = useUsers();
+  const { data: managers = [] } = useManagers();
+  const managerMap = useMemo(
+    () => new Map(managers.map((m) => [m.id, `${m.firstName} ${m.lastName}`])),
+    [managers]
+  );
   const queryClient = useQueryClient();
 
   // Search and filter state
@@ -185,8 +191,8 @@ export default function UserTable({ onEditClick }: UserTableProps) {
               <TableRow>
                 <TableHead className="hidden lg:table-cell">ID</TableHead>
                 <TableHead>Username</TableHead>
-                <TableHead className="hidden md:table-cell">Manager ID</TableHead>
-                <TableHead className="hidden md:table-cell">Role ID</TableHead>
+                <TableHead className="hidden md:table-cell">Manager</TableHead>
+                <TableHead className="hidden md:table-cell">Role</TableHead>
                 <TableHead>Verified</TableHead>
                 <TableHead className="hidden lg:table-cell">Created At</TableHead>
                 <TableHead>Actions</TableHead>
@@ -197,8 +203,8 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                 <TableRow key={user.id}>
                   <TableCell className="hidden lg:table-cell font-medium text-sm">{user.id}</TableCell>
                   <TableCell className="text-sm">{user.username}</TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{user.managerId}</TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{user.roleId}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{managerMap.get(user.managerId) ?? "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{user.role}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${user.verified

@@ -3,10 +3,16 @@ import type { User } from "@/types";
 
 export type UserUpsertPayload = {
   username: string;
-  password?: string; // Optional for updates (only if changing password)
+  password?: string;
   managerId: number;
   roleId: number;
   verified: boolean;
+};
+
+export type InviteUserPayload = {
+  username: string;
+  role: string;
+  managerId: number;
 };
 
 export const usersService = {
@@ -27,5 +33,9 @@ export const usersService = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/users/${id}`);
+  },
+
+  invite: async (payload: InviteUserPayload): Promise<void> => {
+    await api.post("/users/invite", payload);
   },
 };

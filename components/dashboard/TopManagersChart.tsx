@@ -59,7 +59,7 @@ export function TopManagersChart() {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
+            <XAxis type="number" allowDecimals={false} />
             <YAxis dataKey="managerName" type="category" width={150} />
             <Tooltip />
             <Legend />

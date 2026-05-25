@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
-      await api.put(`/users/${profile?.id ?? user?.id}`, { password });
+      await api.patch(`/users/${profile?.id ?? user?.id}`, { password });
       toast.success("Password updated successfully!");
       setPassword("");
       setConfirm("");

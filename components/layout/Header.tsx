@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Menu } from "lucide-react";
 
 interface HeaderProps {
@@ -42,12 +43,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden sm:block text-sm text-right">
+          <Link href="/profile" className="hidden sm:block text-sm text-right hover:opacity-75 transition-opacity">
             <p className="font-medium text-gray-900 dark:text-white">
               {user?.username || "User"}
             </p>
             <p className="text-xs text-gray-500">{user?.role || "ADMIN"}</p>
-          </div>
+          </Link>
           <Button variant="outline" size="sm" onClick={handleLogout}>
             Logout
           </Button>

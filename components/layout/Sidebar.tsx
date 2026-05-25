@@ -22,6 +22,11 @@ const navItems = [
     icon: "💰",
   },
   {
+    label: "Financial Types",
+    href: "/financial-types",
+    icon: "🏷️",
+  },
+  {
     label: "Business Areas",
     href: "/business-areas",
     icon: "🏢",

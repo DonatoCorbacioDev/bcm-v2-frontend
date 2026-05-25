@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,11 +17,15 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isLoading, error } = useAuth();
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
   });
+
+  const resetSuccess = searchParams.get("reset") === "success";
+  const inviteSuccess = searchParams.get("invite") === "success";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +46,16 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {resetSuccess && (
+          <div className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
+            Password reset successfully. You can now log in.
+          </div>
+        )}
+        {inviteSuccess && (
+          <div className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
+            Account activated successfully. You can now log in.
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username">Email</Label>
@@ -74,6 +89,11 @@ export default function LoginPage() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Sign In"}
           </Button>
+          <div className="text-center">
+            <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+              Forgot password?
+            </Link>
+          </div>
         </form>
       </CardContent>
     </Card>

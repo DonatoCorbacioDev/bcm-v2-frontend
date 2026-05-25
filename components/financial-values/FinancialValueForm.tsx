@@ -8,6 +8,7 @@ import { financialValueSchema, type FinancialValueFormData } from "@/lib/validat
 import { useUpsertFinancialValue } from "@/hooks/useUpsertFinancialValue";
 import { useContracts } from "@/hooks/useContracts";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
+import { useFinancialTypes } from "@/hooks/useFinancialTypes";
 import type { FinancialValue } from "@/types";
 
 import { Button } from "@/components/ui/button";
@@ -35,16 +36,11 @@ export default function FinancialValueForm({
   const upsertMutation = useUpsertFinancialValue();
   const contractsQuery = useContracts();
   const businessAreasQuery = useBusinessAreas();
+  const financialTypesQuery = useFinancialTypes();
 
   const contracts = contractsQuery.data ?? [];
   const businessAreas = businessAreasQuery.data ?? [];
-
-  // Hardcoded financial types (should match backend)
-  const financialTypes = [
-    { id: 1, name: "Revenue" },
-    { id: 2, name: "Cost" },
-    { id: 3, name: "Profit" },
-  ];
+  const financialTypes = financialTypesQuery.data ?? [];
 
   const submitLabel = financialValue?.id ? "Update" : "Create";
 
@@ -99,8 +95,8 @@ export default function FinancialValueForm({
     }
   };
 
-  const isReferenceLoading = contractsQuery.isLoading || businessAreasQuery.isLoading;
-  const isReferenceError = contractsQuery.isError || businessAreasQuery.isError;
+  const isReferenceLoading = contractsQuery.isLoading || businessAreasQuery.isLoading || financialTypesQuery.isLoading;
+  const isReferenceError = contractsQuery.isError || businessAreasQuery.isError || financialTypesQuery.isError;
 
   if (isReferenceLoading) {
     return (

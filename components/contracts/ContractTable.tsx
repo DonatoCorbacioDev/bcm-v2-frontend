@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 import { useContractsPaged } from "@/hooks/useContractsPaged";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
+import { contractsService } from "@/services/contracts.service";
 import type { Contract } from "@/types";
 
 import {
@@ -68,16 +69,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/contracts/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${document.cookie.split("auth_token=")[1]?.split(";")[0]}`,
-        },
-      });
-      if (!response.ok) throw new Error("Failed to delete contract");
-      return response;
-    },
+    mutationFn: (id: number) => contractsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
       toast.success("Contract deleted successfully!");

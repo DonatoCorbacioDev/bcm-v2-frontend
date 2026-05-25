@@ -12,7 +12,7 @@ import { TopManagersChart } from "@/components/dashboard/TopManagersChart";
 
 export default function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
-  const { data: expiringContracts = [], isLoading: isLoadingExpiring } = useExpiringContracts(30);
+  const { data: expiringContracts = [], isLoading: isLoadingExpiring, isError: isErrorExpiring } = useExpiringContracts(30);
 
   // Helper function to format days remaining
   const formatDaysLeft = (days: number | null | undefined): string => {
@@ -86,7 +86,15 @@ export default function DashboardPage() {
       </div>
 
       {/* Expiring Contracts Alert */}
-      {!isLoadingExpiring && expiringContracts.length > 0 && (
+      {isErrorExpiring && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-sm text-red-600 dark:text-red-400">
+            Failed to load expiring contracts
+          </p>
+        </div>
+      )}
+
+      {!isLoadingExpiring && !isErrorExpiring && expiringContracts.length > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg p-6">
           <div className="flex items-start gap-4">
             <div className="text-4xl">⚠️</div>

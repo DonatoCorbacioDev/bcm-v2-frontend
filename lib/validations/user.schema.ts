@@ -24,7 +24,7 @@ export const userCreateSchema = z.object({
     .int()
     .positive("Please select a valid role"),
 
-  verified: z.boolean(), // Removed .default(false)
+  verified: z.boolean().default(false),
 });
 
 // Schema for updating a user (password optional)

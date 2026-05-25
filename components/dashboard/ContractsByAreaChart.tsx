@@ -7,7 +7,7 @@ import { useContractsByArea } from '@/hooks/useContractsByArea';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 export function ContractsByAreaChart() {
-  const { data, isLoading } = useContractsByArea();
+  const { data, isLoading, isError } = useContractsByArea();
 
   if (isLoading) {
     return (
@@ -18,6 +18,20 @@ export function ContractsByAreaChart() {
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Contracts by Business Area</CardTitle>
+          <CardDescription>Contract distribution by business area</CardDescription>
+        </CardHeader>
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <p className="text-destructive text-sm">Failed to load chart data</p>
         </CardContent>
       </Card>
     );

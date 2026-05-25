@@ -5,7 +5,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useContractsTimeline } from '@/hooks/useContractsTimeline';
 
 export function ContractsTimelineChart() {
-  const { data, isLoading } = useContractsTimeline();
+  const { data, isLoading, isError } = useContractsTimeline();
 
   if (isLoading) {
     return (
@@ -16,6 +16,20 @@ export function ContractsTimelineChart() {
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Contracts Timeline</CardTitle>
+          <CardDescription>Contracts created in the last 12 months</CardDescription>
+        </CardHeader>
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <p className="text-destructive text-sm">Failed to load chart data</p>
         </CardContent>
       </Card>
     );

@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useTopManagers } from '@/hooks/useTopManagers';
 
 export function TopManagersChart() {
-  const { data, isLoading } = useTopManagers();
+  const { data, isLoading, isError } = useTopManagers();
 
   if (isLoading) {
     return (
@@ -16,6 +16,20 @@ export function TopManagersChart() {
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Loading...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Top Managers</CardTitle>
+          <CardDescription>Managers with most contracts</CardDescription>
+        </CardHeader>
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <p className="text-destructive text-sm">Failed to load chart data</p>
         </CardContent>
       </Card>
     );

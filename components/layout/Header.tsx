@@ -9,9 +9,10 @@ import { Menu } from "lucide-react";
 
 interface HeaderProps {
   readonly onMenuClick: () => void;
+  readonly isMenuOpen?: boolean;
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick, isMenuOpen = false }: HeaderProps) {
   const user = useAuthStore((state) => state.user);
   const { logout } = useAuth();
   const router = useRouter();
@@ -29,14 +30,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <button
             onClick={onMenuClick}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            aria-label="Toggle menu"
+            aria-label="Toggle navigation menu"
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-sidebar"
           >
             <Menu className="h-6 w-6 text-gray-600 dark:text-gray-300" />
           </button>
 
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          <span className="text-xl font-bold text-gray-900 dark:text-white">
             BCM
-          </h1>
+          </span>
           <span className="hidden sm:inline text-sm text-gray-500">
             Business Contracts Manager
           </span>

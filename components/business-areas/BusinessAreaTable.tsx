@@ -118,6 +118,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
+            aria-label="Search business areas"
             placeholder="Search areas..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -136,7 +137,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
           </Button>
         )}
 
-        <div className="text-xs md:text-sm text-gray-600">
+        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-gray-600">
           {filteredBusinessAreas.length} / {businessAreas.length} areas
         </div>
       </div>

@@ -55,13 +55,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     <>
       {/* Desktop Sidebar - Always visible */}
       <aside className="hidden md:block w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed left-0 top-16 bottom-0 overflow-y-auto z-10">
-        <nav className="p-4 space-y-2">
+        <nav aria-label="Main navigation" className="p-4 space-y-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
                   isActive
@@ -69,7 +70,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
                 )}
               >
-                <span className="text-xl">{item.icon}</span>
+                <span aria-hidden="true" className="text-xl">{item.icon}</span>
                 <span className="font-medium">{item.label}</span>
               </Link>
             );
@@ -79,6 +80,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
       {/* Mobile Sidebar - Sliding from left */}
       <aside
+        id="mobile-sidebar"
+        aria-label="Mobile navigation"
         className={cn(
           "md:hidden fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-30 transition-transform duration-300",
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -95,7 +98,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav aria-label="Main navigation" className="p-4 space-y-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -103,6 +106,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
                   isActive
@@ -110,7 +114,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     : "text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
                 )}
               >
-                <span className="text-xl">{item.icon}</span>
+                <span aria-hidden="true" className="text-xl">{item.icon}</span>
                 <span className="font-medium">{item.label}</span>
               </Link>
             );

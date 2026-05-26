@@ -47,12 +47,12 @@ export default function LoginPage() {
       </CardHeader>
       <CardContent>
         {resetSuccess && (
-          <div className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
+          <div role="status" aria-live="polite" className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
             Password reset successfully. You can now log in.
           </div>
         )}
         {inviteSuccess && (
-          <div className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
+          <div role="status" aria-live="polite" className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
             Account activated successfully. You can now log in.
           </div>
         )}
@@ -84,7 +84,7 @@ export default function LoginPage() {
             />
           </div>
           {error && (
-            <div className="text-sm text-red-500 text-center">{error}</div>
+            <div role="alert" className="text-sm text-red-500 text-center">{error}</div>
           )}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Sign In"}

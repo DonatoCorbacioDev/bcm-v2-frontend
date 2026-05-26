@@ -33,8 +33,17 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Skip navigation — visually hidden until focused (WCAG 2.4.1) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-blue-700 focus:rounded focus:shadow-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       <Header
         onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        isMenuOpen={isMobileMenuOpen}
       />
       <div className="flex">
         <Sidebar
@@ -42,7 +51,7 @@ export default function DashboardLayout({
           onClose={() => setIsMobileMenuOpen(false)}
         />
         {/* Responsive margin */}
-        <main className="flex-1 p-4 md:p-8 md:ml-64 pt-20">
+        <main id="main-content" className="flex-1 p-4 md:p-8 md:ml-64 pt-20">
           {children}
         </main>
       </div>

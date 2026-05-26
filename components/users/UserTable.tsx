@@ -137,6 +137,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
+            aria-label="Search users"
             placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -145,8 +146,10 @@ export default function UserTable({ onEditClick }: UserTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-sm text-gray-600 hidden sm:inline">Status:</span>
+          <label htmlFor="verified-filter" className="text-sm text-gray-600 hidden sm:inline">Status:</label>
           <select
+            id="verified-filter"
+            aria-label="Filter by verification status"
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.target.value)}
             className="px-2 md:px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -171,7 +174,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
           )}
         </div>
 
-        <div className="text-xs md:text-sm text-gray-600">
+        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-gray-600">
           {filteredUsers.length} / {users.length} users
         </div>
       </div>

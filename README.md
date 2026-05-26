@@ -2,10 +2,12 @@
 
 > Modern React/Next.js dashboard for contract lifecycle management with real-time analytics and comprehensive CRUD operations
 
+[![CI](https://github.com/DonatoCorbacioDev/bcm-v2-frontend/actions/workflows/ci.yml/badge.svg)](https://github.com/DonatoCorbacioDev/bcm-v2-frontend/actions/workflows/ci.yml)
 [![Next.js](https://img.shields.io/badge/Next.js-16.1.1-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwind-css)](https://tailwindcss.com/)
+[![Tests](https://img.shields.io/badge/Tests-107%20passing-brightgreen)](./\_\_tests\_\_)
 [![License](https://img.shields.io/badge/License-Custom-blue)](./LICENSE)
 
 ## 🎯 Overview
@@ -555,15 +557,37 @@ function useContractFilters(contracts: Contract[]) {
 ## 🧪 Testing
 
 ```bash
-# Run ESLint
-npm run lint
+# Run all tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage report
+npm run test:coverage
 
 # Type check
 npx tsc --noEmit
 
-# (Future) Unit tests
-npm test
+# Lint
+npm run lint
 ```
+
+**107 tests** across 9 test suites:
+
+| Suite | Tests | Description |
+|---|---|---|
+| `validations/contract.schema` | 15 | Contract Zod schema — boundaries, cross-field |
+| `validations/user.schema` | 7 | User Zod schema |
+| `validations/businessArea.schema` | 9 | BusinessArea schema |
+| `validations/financialType.schema` | 8 | FinancialType schema |
+| `validations/manager.schema` | 18 | Manager schema — email, phone regex |
+| `validations/financialValue.schema` | 18 | FinancialValue schema — month/year ranges |
+| `integration/login` | 4 | LoginPage rendering, error handling, API payload |
+| `integration/UserTable` | 11 | States, search filter, delete dialog, edit callback |
+| `integration/ContractTable` | 17 | States, pagination, filters, actions, navigation |
+
+`lib/validations` has **100% coverage** across all 6 schemas.
 
 ---
 

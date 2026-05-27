@@ -1,8 +1,8 @@
 interface KPICardProps {
-  title: string;
-  value: number;
-  icon?: React.ReactNode;
-  variant?: "default" | "success" | "warning" | "danger";
+  readonly title: string;
+  readonly value: number;
+  readonly icon?: React.ReactNode;
+  readonly variant?: "default" | "success" | "warning" | "danger";
 }
 
 export default function KPICard({

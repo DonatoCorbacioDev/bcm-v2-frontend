@@ -261,7 +261,7 @@ describe('ContractTable', () => {
 
     const select = screen.getByDisplayValue('All');
     expect(select).toBeInTheDocument();
-    expect(within(select.closest('div') ?? document.body).queryByRole('option', { name: /active/i }));
+    expect(within(select.closest('div') ?? document.body).queryByRole('option', { name: /active/i })).toBeInTheDocument();
   });
 
   it('shows the Clear button when status filter is active', async () => {

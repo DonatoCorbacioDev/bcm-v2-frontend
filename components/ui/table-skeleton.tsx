@@ -10,9 +10,9 @@ export function TableSkeleton({ rows = 5, columns = 6 }: TableSkeletonProps) {
         {/* Table Header */}
         <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-6 py-4">
           <div className="flex gap-4">
-            {Array.from({ length: columns }).map((_, i) => (
+            {Array.from({ length: columns }, (_, i) => `header-col-${i}`).map((colKey) => (
               <div
-                key={i}
+                key={colKey}
                 className="h-4 bg-gray-200 dark:bg-gray-700 rounded flex-1"
               />
             ))}
@@ -20,15 +20,15 @@ export function TableSkeleton({ rows = 5, columns = 6 }: TableSkeletonProps) {
         </div>
 
         {/* Table Body */}
-        {Array.from({ length: rows }).map((_, rowIndex) => (
+        {Array.from({ length: rows }, (_, i) => `skeleton-row-${i}`).map((rowKey) => (
           <div
-            key={rowIndex}
+            key={rowKey}
             className="border-b border-gray-200 dark:border-gray-700 px-6 py-4 last:border-0"
           >
             <div className="flex gap-4 items-center">
-              {Array.from({ length: columns }).map((_, colIndex) => (
+              {Array.from({ length: columns }, (_, i) => `${rowKey}-col-${i}`).map((colKey, colIndex) => (
                 <div
-                  key={colIndex}
+                  key={colKey}
                   className={`h-4 bg-gray-200 dark:bg-gray-700 rounded flex-1 ${colIndex === 0 ? "w-20" : ""
                     }`}
                 />

@@ -235,6 +235,14 @@ describe('useExpiringContracts', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
   });
+
+  it('uses default days=30 when called without arguments', async () => {
+    const data = [{ id: 2, customerName: 'Beta' }];
+    (api.get as jest.Mock).mockResolvedValue({ data });
+    const { result } = renderHook(() => useExpiringContracts(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(api.get).toHaveBeenCalledWith('/contracts/expiring?days=30');
+  });
 });
 
 // ─── Mutation hooks ───────────────────────────────────────────────────────────
@@ -385,5 +393,48 @@ describe('useAuth', () => {
     const { result } = renderHook(() => useAuth());
     act(() => { result.current.logout(); });
     expect(mockClearAuth).toHaveBeenCalled();
+  });
+
+  it('login succeeds and calls setAuth', async () => {
+    const mockSetAuth = jest.fn();
+    (useAuthStore as jest.Mock).mockReturnValue({
+      setAuth: mockSetAuth, clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123' } });
+    (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
+    const { result } = renderHook(() => useAuth());
+    let success: boolean | undefined;
+    await act(async () => { success = await result.current.login({ username: 'alice', password: 'pw' }); });
+    expect(success).toBe(true);
+    expect(mockSetAuth).toHaveBeenCalled();
+  });
+
+  it('login fails and sets error message from response', async () => {
+    (useAuthStore as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue({
+      response: { data: { message: 'Invalid credentials' } },
+    });
+    const { result } = renderHook(() => useAuth());
+    let success: boolean | undefined;
+    await act(async () => { success = await result.current.login({ username: 'alice', password: 'wrong' }); });
+    expect(success).toBe(false);
+    expect(result.current.error).toBe('Invalid credentials');
+  });
+
+  it('login fails with fallback message when response has no message', async () => {
+    (useAuthStore as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue({ response: { data: {} } });
+    const { result } = renderHook(() => useAuth());
+    let success: boolean | undefined;
+    await act(async () => { success = await result.current.login({ username: 'alice', password: 'wrong' }); });
+    expect(success).toBe(false);
+    expect(result.current.error).toBe('Login failed. Please try again.');
   });
 });

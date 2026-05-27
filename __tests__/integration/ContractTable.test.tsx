@@ -50,8 +50,10 @@ jest.mock('@/lib/api', () => ({
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useContractsPaged } from '@/hooks/useContractsPaged';
+import { contractsService } from '@/services/contracts.service';
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
@@ -326,6 +328,99 @@ describe('ContractTable', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /last/i })).toBeDisabled();
+    });
+  });
+
+  it('confirms delete and shows success toast', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Contract deleted successfully!');
+    });
+  });
+
+  it('shows error toast when delete fails', async () => {
+    (contractsService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Failed to delete contract');
+    });
+  });
+
+  it('changes rows per page and resets to first page', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([activeContract, expiredContract], 3),
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.selectOptions(screen.getByLabelText(/rows per page/i), '25');
+
+    expect(screen.getByDisplayValue('25')).toBeInTheDocument();
+  });
+
+  it('navigates to first page when First is clicked', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: { ...makePageResponse([activeContract], 3), totalElements: 30 },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    // Go to page 2 first
+    await userEvent.click(screen.getByRole('button', { name: /next/i }));
+    // Then click First
+    await userEvent.click(screen.getByRole('button', { name: /first/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /first/i })).toBeDisabled();
+    });
+  });
+
+  it('navigates to previous page when Prev is clicked', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: { ...makePageResponse([activeContract], 3), totalElements: 30 },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /next/i }));
+    await userEvent.click(screen.getByRole('button', { name: /prev/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /prev/i })).toBeDisabled();
+    });
+  });
+
+  it('navigates to last page when Last is clicked', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: { ...makePageResponse([activeContract], 3), totalElements: 30 },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /last/i }));
+
+    await waitFor(() => {
       expect(screen.getByRole('button', { name: /last/i })).toBeDisabled();
     });
   });

@@ -40,7 +40,9 @@ jest.mock('@/lib/api', () => ({
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
+import { toast } from 'sonner';
 import { useManagers } from '@/hooks/useManagers';
+import { managersService } from '@/services/managers.service';
 import ManagerTable from '@/components/managers/ManagerTable';
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
@@ -195,5 +197,41 @@ describe('ManagerTable', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+  });
+
+  it('confirms delete and shows success toast', async () => {
+    render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Manager deleted successfully!');
+    });
+  });
+
+  it('shows error toast when delete fails', async () => {
+    (managersService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+    render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Failed to delete manager');
+    });
+  });
+
+  it('clears the search field when Clear is clicked', async () => {
+    render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.type(screen.getByRole('textbox', { name: /search managers/i }), 'Alice');
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+
+    expect(screen.getByRole('textbox', { name: /search managers/i })).toHaveValue('');
   });
 });

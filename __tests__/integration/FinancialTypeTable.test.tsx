@@ -40,7 +40,9 @@ jest.mock('@/lib/api', () => ({
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
+import { toast } from 'sonner';
 import { useFinancialTypes } from '@/hooks/useFinancialTypes';
+import { financialTypesService } from '@/services/financialTypes.service';
 import FinancialTypeTable from '@/components/financial-types/FinancialTypeTable';
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
@@ -165,5 +167,35 @@ describe('FinancialTypeTable', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+  });
+
+  it('confirms delete and shows success toast', async () => {
+    render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Financial type deleted successfully!');
+    });
+  });
+
+  it('shows error toast when delete fails', async () => {
+    (financialTypesService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+    render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Failed to delete financial type');
+    });
+  });
+
+  it('clears the search field when Clear is clicked', async () => {
+    render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    await userEvent.type(screen.getByPlaceholderText(/search financial types/i), 'Revenue');
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(screen.getByPlaceholderText(/search financial types/i)).toHaveValue('');
   });
 });

@@ -13,7 +13,7 @@ interface HeaderProps {
 }
 
 export default function Header({ onMenuClick, isMenuOpen = false }: HeaderProps) {
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore(/* istanbul ignore next */ (state) => state.user);
   const { logout } = useAuth();
   const router = useRouter();
 

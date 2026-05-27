@@ -77,6 +77,20 @@ describe('LoginPage', () => {
     });
   });
 
+  it('shows fallback error message on network error with no response body', async () => {
+    mockPost.mockRejectedValueOnce({ code: 'ECONNABORTED' });
+
+    render(<LoginPage />);
+
+    await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password');
+    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/login failed/i)).toBeInTheDocument();
+    });
+  });
+
   it('sends POST /auth/login with the typed credentials', async () => {
     mockPost.mockResolvedValueOnce({ data: { token: 'fake-jwt-token' } });
     mockGet.mockResolvedValueOnce({

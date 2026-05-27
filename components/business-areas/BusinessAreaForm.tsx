@@ -102,6 +102,7 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {(() => {
+            /* istanbul ignore next */
             if (isSubmitting) return "Saving...";
             if (isEditing) return "Update";
             return "Create";

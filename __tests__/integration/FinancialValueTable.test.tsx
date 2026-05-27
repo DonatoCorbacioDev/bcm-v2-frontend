@@ -41,7 +41,9 @@ jest.mock('@/lib/api', () => ({
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
+import { toast } from 'sonner';
 import { useFinancialValues } from '@/hooks/useFinancialValues';
+import { financialValuesService } from '@/services/financialValues.service';
 import FinancialValueTable from '@/components/financial-values/FinancialValueTable';
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
@@ -189,5 +191,36 @@ describe('FinancialValueTable', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+  });
+
+  it('confirms delete and shows success toast', async () => {
+    render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Financial value deleted successfully!');
+    });
+  });
+
+  it('shows error toast when delete fails', async () => {
+    (financialValuesService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+    render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Failed to delete financial value');
+    });
+  });
+
+  it('clears filters when Clear is clicked', async () => {
+    render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    await userEvent.selectOptions(screen.getByDisplayValue('All'), '1');
+    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
   });
 });

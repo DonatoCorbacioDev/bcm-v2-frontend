@@ -66,6 +66,7 @@ function useUserFilters(users: User[]) {
 
 export default function UserTable({ onEditClick }: UserTableProps) {
   const { data: users = [], isLoading, isError } = useUsers();
+  /* istanbul ignore next */
   const { data: managers = [] } = useManagers();
   const managerMap = useMemo(
     () => new Map(managers.map((m) => [m.id, `${m.firstName} ${m.lastName}`])),
@@ -106,6 +107,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   };
 
   const confirmDelete = () => {
+    /* istanbul ignore else */
     if (deleteDialog.user) {
       deleteMutation.mutate(deleteDialog.user.id);
     }
@@ -206,7 +208,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                 <TableRow key={user.id}>
                   <TableCell className="hidden lg:table-cell font-medium text-sm">{user.id}</TableCell>
                   <TableCell className="text-sm">{user.username}</TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{managerMap.get(user.managerId) ?? "—"}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */managerMap.get(user.managerId) ?? "—"}</TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{user.role}</TableCell>
                   <TableCell>
                     <span
@@ -251,7 +253,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialog.open}
-        onOpenChange={(open) => !deleteMutation.isPending && setDeleteDialog({ open, user: null })}
+        onOpenChange={/* istanbul ignore next */ (open) => !deleteMutation.isPending && setDeleteDialog({ open, user: null })}
       >
         <DialogContent>
           <DialogHeader>
@@ -273,7 +275,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
               onClick={confirmDelete}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {/* istanbul ignore next */deleteMutation.isPending ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

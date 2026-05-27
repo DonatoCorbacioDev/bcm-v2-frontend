@@ -47,8 +47,10 @@ jest.mock('@/lib/api', () => ({
   },
 }));
 
+import { toast } from 'sonner';
 import { useUsers } from '@/hooks/useUsers';
 import { useManagers } from '@/hooks/useManagers';
+import { usersService } from '@/services/users.service';
 
 const mockUsers: User[] = [
   {
@@ -206,5 +208,61 @@ describe('UserTable', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+  });
+
+  it('shows empty state when no users exist', () => {
+    (useUsers as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    });
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/no users found/i)).toBeInTheDocument();
+  });
+
+  it('confirms delete and shows success toast', async () => {
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('User deleted successfully!');
+    });
+  });
+
+  it('shows error toast when delete fails', async () => {
+    (usersService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Failed to delete user');
+    });
+  });
+
+  it('shows Clear button when verified filter is set and clears on click', async () => {
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.selectOptions(screen.getByLabelText(/filter by verification status/i), 'VERIFIED');
+    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
+  });
+
+  it('filters to only unverified users when UNVERIFIED filter is selected', async () => {
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.selectOptions(screen.getByLabelText(/filter by verification status/i), 'UNVERIFIED');
+
+    expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument();
+    expect(screen.getByText('bob@example.com')).toBeInTheDocument();
   });
 });

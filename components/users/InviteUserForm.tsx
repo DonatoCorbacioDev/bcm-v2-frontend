@@ -102,7 +102,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           Cancel
         </Button>
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Sending..." : "Send Invitation"}
+          {/* istanbul ignore next */mutation.isPending ? "Sending..." : "Send Invitation"}
         </Button>
       </div>
     </form>

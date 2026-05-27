@@ -40,7 +40,9 @@ jest.mock('@/lib/api', () => ({
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
+import { toast } from 'sonner';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
+import { businessAreasService } from '@/services/businessAreas.service';
 import BusinessAreaTable from '@/components/business-areas/BusinessAreaTable';
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
@@ -186,5 +188,41 @@ describe('BusinessAreaTable', () => {
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+  });
+
+  it('confirms delete and shows success toast', async () => {
+    render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('Business area deleted successfully!');
+    });
+  });
+
+  it('shows error toast when delete fails', async () => {
+    (businessAreasService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+    render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Failed to delete business area');
+    });
+  });
+
+  it('clears the search field when Clear is clicked', async () => {
+    render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.type(screen.getByRole('textbox', { name: /search business areas/i }), 'Eng');
+    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+
+    expect(screen.getByRole('textbox', { name: /search business areas/i })).toHaveValue('');
   });
 });

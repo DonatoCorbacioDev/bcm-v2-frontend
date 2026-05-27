@@ -172,6 +172,16 @@ describe('BusinessAreaForm', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('shows error toast when mutation throws in create mode', async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
+    (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<BusinessAreaForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.type(screen.getByPlaceholderText(/it department/i), 'Sales');
+    await userEvent.type(screen.getByPlaceholderText(/describe the business area/i), 'Sales department handles revenue');
+    await userEvent.click(screen.getByRole('button', { name: /create/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to create business area'));
+  });
+
   it('calls create (no id) when submitting new business area', async () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
@@ -257,6 +267,14 @@ describe('FinancialTypeForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onClose).toHaveBeenCalled();
   });
+
+  it('shows validation errors when submitting empty form', async () => {
+    render(<FinancialTypeForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /create/i }));
+    await waitFor(() => {
+      expect(screen.getAllByText(/at least|required/i).length).toBeGreaterThan(0);
+    });
+  });
 });
 
 // ─── ManagerForm ──────────────────────────────────────────────────────────────
@@ -332,6 +350,23 @@ describe('ManagerForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onClose).toHaveBeenCalled();
   });
+
+  it('shows validation errors when submitting empty form', async () => {
+    render(<ManagerForm onClose={onClose} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /create manager/i }));
+    await waitFor(() => {
+      expect(screen.getAllByText(/at least|required|invalid/i).length).toBeGreaterThan(0);
+    });
+  });
+
+  it('calls mutateAsync without onSuccess prop', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertManager as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<ManagerForm onClose={onClose} manager={validManager} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /update manager/i }));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(onClose).toHaveBeenCalled();
+  });
 });
 
 // ─── InviteUserForm ───────────────────────────────────────────────────────────
@@ -396,6 +431,13 @@ describe('InviteUserForm', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /send invitation/i }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to send invitation.'));
+  });
+
+  it('renders with empty arrays when managers and roles data is undefined', () => {
+    (useManagers as jest.Mock).mockReturnValue({ data: undefined });
+    (useRoles as jest.Mock).mockReturnValue({ data: undefined });
+    render(<InviteUserForm onClose={onClose} />, { wrapper: createWrapper() });
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
 });
 
@@ -537,6 +579,14 @@ describe('ContractForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onClose).toHaveBeenCalled();
   });
+
+  it('shows validation errors for areaId and managerId when submitting empty form', async () => {
+    render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /create contract/i }));
+    await waitFor(() => {
+      expect(screen.getAllByText(/required|at least|invalid/i).length).toBeGreaterThan(0);
+    });
+  });
 });
 
 // ─── FinancialValueForm ───────────────────────────────────────────────────────
@@ -613,5 +663,13 @@ describe('FinancialValueForm', () => {
     render(<FinancialValueForm onClose={onClose} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('shows validation errors for controller selects when submitting empty form', async () => {
+    render(<FinancialValueForm onClose={onClose} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /^create$/i }));
+    await waitFor(() => {
+      expect(screen.getAllByText(/required|at least|invalid/i).length).toBeGreaterThan(0);
+    });
   });
 });

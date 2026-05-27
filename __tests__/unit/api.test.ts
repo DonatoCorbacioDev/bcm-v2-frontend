@@ -123,4 +123,11 @@ describe('lib/api', () => {
     await expect(resErrorFn!(error)).rejects.toBe(error);
     expect(mockCookiesRemove).not.toHaveBeenCalled();
   });
+
+  it('response error handler does not remove cookie when response is absent', async () => {
+    loadModule('http://localhost:8080');
+    const error = { response: undefined, message: 'Network Error' };
+    await expect(resErrorFn!(error)).rejects.toBe(error);
+    expect(mockCookiesRemove).not.toHaveBeenCalled();
+  });
 });

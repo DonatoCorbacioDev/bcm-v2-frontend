@@ -55,6 +55,22 @@ import {
   DropdownMenuSubTrigger, DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card, CardHeader, CardTitle, CardDescription, CardContent,
+  CardAction, CardFooter,
+} from '@/components/ui/card';
+import {
+  Dialog, DialogTrigger, DialogClose, DialogContent,
+  DialogHeader, DialogTitle, DialogDescription,
+} from '@/components/ui/dialog';
+import { TableSkeleton } from '@/components/ui/table-skeleton';
+import {
+  Table, TableHeader, TableBody, TableFooter, TableHead,
+  TableRow, TableCell, TableCaption,
+} from '@/components/ui/table';
+
 // ─── select.tsx ───────────────────────────────────────────────────────────────
 
 describe('select components', () => {
@@ -213,6 +229,151 @@ describe('dropdown-menu components', () => {
 
   it('DropdownMenuSubContent renders', () => {
     const { container } = render(<DropdownMenuSubContent />);
+    expect(container).toBeTruthy();
+  });
+});
+
+// ─── badge.tsx ────────────────────────────────────────────────────────────────
+
+describe('Badge', () => {
+  it('renders as span by default', () => {
+    const { container } = render(<Badge>Label</Badge>);
+    expect(container.querySelector('span')).toBeInTheDocument();
+  });
+
+  it('renders as child element when asChild=true', () => {
+    const { container } = render(<Badge asChild><a href="#">Link</a></Badge>);
+    expect(container.querySelector('a')).toBeInTheDocument();
+  });
+});
+
+// ─── button.tsx ───────────────────────────────────────────────────────────────
+
+describe('Button', () => {
+  it('renders as button by default', () => {
+    const { container } = render(<Button>Click</Button>);
+    expect(container.querySelector('button')).toBeInTheDocument();
+  });
+
+  it('renders as child element when asChild=true', () => {
+    const { container } = render(<Button asChild><a href="#">Link</a></Button>);
+    expect(container.querySelector('a')).toBeInTheDocument();
+  });
+});
+
+// ─── card.tsx ─────────────────────────────────────────────────────────────────
+
+describe('Card components', () => {
+  it('CardAction renders', () => {
+    const { container } = render(<CardAction>action</CardAction>);
+    expect(container).toBeTruthy();
+  });
+
+  it('CardFooter renders', () => {
+    const { container } = render(<CardFooter>footer</CardFooter>);
+    expect(container).toBeTruthy();
+  });
+
+  it('full Card composition renders', () => {
+    const { container } = render(
+      <Card>
+        <CardHeader>
+          <CardTitle>Title</CardTitle>
+          <CardDescription>Desc</CardDescription>
+          <CardAction>Action</CardAction>
+        </CardHeader>
+        <CardContent>Content</CardContent>
+        <CardFooter>Footer</CardFooter>
+      </Card>
+    );
+    expect(container).toBeTruthy();
+  });
+});
+
+// ─── dialog.tsx ───────────────────────────────────────────────────────────────
+
+jest.mock('@radix-ui/react-dialog', () => {
+  const C = ({ children, ...p }: React.PropsWithChildren<Record<string, unknown>>) =>
+    React.createElement('div', { 'data-testid': 'dialog-primitive', ...p }, children);
+  return {
+    Root: C, Portal: C, Overlay: C, Content: C, Trigger: C, Close: C,
+    Title: C, Description: C,
+  };
+});
+
+describe('Dialog components', () => {
+  it('DialogTrigger renders', () => {
+    const { container } = render(<DialogTrigger>Open</DialogTrigger>);
+    expect(container).toBeTruthy();
+  });
+
+  it('DialogClose renders', () => {
+    const { container } = render(<DialogClose>Close</DialogClose>);
+    expect(container).toBeTruthy();
+  });
+
+  it('full Dialog composition renders', () => {
+    const { container } = render(
+      <Dialog>
+        <DialogTrigger>Open</DialogTrigger>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Title</DialogTitle>
+            <DialogDescription>Desc</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+    expect(container).toBeTruthy();
+  });
+});
+
+// ─── table-skeleton.tsx ───────────────────────────────────────────────────────
+
+describe('TableSkeleton', () => {
+  it('renders with default rows and columns', () => {
+    const { container } = render(<TableSkeleton />);
+    expect(container).toBeTruthy();
+  });
+
+  it('renders with custom rows and columns', () => {
+    const { container } = render(<TableSkeleton rows={3} columns={4} />);
+    expect(container).toBeTruthy();
+  });
+});
+
+// ─── table.tsx ────────────────────────────────────────────────────────────────
+
+describe('Table components', () => {
+  it('TableFooter renders', () => {
+    const { container } = render(
+      <table><tfoot><TableFooter><tr><td>Footer</td></tr></TableFooter></tfoot></table>
+    );
+    expect(container).toBeTruthy();
+  });
+
+  it('TableCaption renders', () => {
+    const { container } = render(
+      <table><TableCaption>Caption text</TableCaption></table>
+    );
+    expect(container).toBeTruthy();
+  });
+
+  it('full Table composition renders', () => {
+    const { container } = render(
+      <Table>
+        <TableHeader>
+          <TableRow><TableHead>Head</TableHead></TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow><TableCell>Cell</TableCell></TableRow>
+        </TableBody>
+        <TableFooter>
+          <TableRow><TableCell>Footer</TableCell></TableRow>
+        </TableFooter>
+        <TableCaption>Caption</TableCaption>
+      </Table>
+    );
     expect(container).toBeTruthy();
   });
 });

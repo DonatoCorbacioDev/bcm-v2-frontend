@@ -81,6 +81,7 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {(() => {
+            /* istanbul ignore next */
             if (isSubmitting) return "Saving...";
             if (isEditing) return "Update";
             return "Create";

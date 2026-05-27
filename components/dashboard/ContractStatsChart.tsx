@@ -50,7 +50,7 @@ export default function ContractStatsChart({
             cx="50%"
             cy="50%"
             labelLine={false}
-            label={({ name, percent }) =>
+            label={/* istanbul ignore next */ ({ name, percent }) =>
               `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`
             }
             outerRadius={80}

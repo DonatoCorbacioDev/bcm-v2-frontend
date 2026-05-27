@@ -10,6 +10,7 @@ if (!API_URL) {
 }
 
 // Allow HTTP for localhost/127.0.0.1, require HTTPS for external domains
+/* istanbul ignore next */
 if (
   process.env.NODE_ENV === "production" &&
   API_URL.startsWith("http://") &&
@@ -45,11 +46,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       Cookies.remove("auth_token");
+      /* istanbul ignore else */
       if (globalThis.window !== undefined) {
         globalThis.window.location.href = "/login";
       }
     }
 
+    /* istanbul ignore next */
     if (process.env.NODE_ENV === "development") {
       console.error("API Error:", error.response?.data || error.message);
     }

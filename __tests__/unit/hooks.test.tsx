@@ -386,7 +386,7 @@ describe('useUpsertContract', () => {
 describe('useAuth', () => {
   it('logout calls clearAuth', () => {
     const mockClearAuth = jest.fn();
-    (useAuthStore as jest.Mock).mockReturnValue({
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: jest.fn(), clearAuth: mockClearAuth,
       user: null, isAuthenticated: false,
     });
@@ -397,7 +397,7 @@ describe('useAuth', () => {
 
   it('login succeeds and calls setAuth', async () => {
     const mockSetAuth = jest.fn();
-    (useAuthStore as jest.Mock).mockReturnValue({
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: mockSetAuth, clearAuth: jest.fn(),
       user: null, isAuthenticated: false,
     });
@@ -411,7 +411,7 @@ describe('useAuth', () => {
   });
 
   it('login fails and sets error message from response', async () => {
-    (useAuthStore as jest.Mock).mockReturnValue({
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: jest.fn(), clearAuth: jest.fn(),
       user: null, isAuthenticated: false,
     });
@@ -426,7 +426,7 @@ describe('useAuth', () => {
   });
 
   it('login fails with fallback message when response has no message', async () => {
-    (useAuthStore as jest.Mock).mockReturnValue({
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: jest.fn(), clearAuth: jest.fn(),
       user: null, isAuthenticated: false,
     });

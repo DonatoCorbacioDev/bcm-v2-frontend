@@ -42,7 +42,7 @@ describe('Header', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAuthStore as jest.Mock).mockReturnValue({ username: 'testuser', role: 'ADMIN' });
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ username: 'testuser', role: 'ADMIN' });
     (useAuth as jest.Mock).mockReturnValue({ logout: mockLogout });
   });
 
@@ -74,7 +74,7 @@ describe('Header', () => {
   });
 
   it('falls back to "User" when no user is set', () => {
-    (useAuthStore as jest.Mock).mockReturnValue(null);
+    (useAuthStore as unknown as jest.Mock).mockReturnValue(null);
     render(<Header onMenuClick={jest.fn()} />);
     expect(screen.getByText('User')).toBeInTheDocument();
   });

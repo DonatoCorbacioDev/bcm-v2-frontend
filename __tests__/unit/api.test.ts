@@ -44,6 +44,7 @@ describe('lib/api', () => {
       default: { get: mockCookiesGet, remove: mockCookiesRemove },
     }));
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return { mod: require('@/lib/api') as { api: typeof mockInstance; default: typeof mockInstance }, instance: mockInstance };
   }
 
@@ -69,6 +70,7 @@ describe('lib/api', () => {
     delete process.env.NEXT_PUBLIC_API_URL;
     jest.doMock('axios', () => ({ __esModule: true, default: { create: jest.fn() } }));
     jest.doMock('js-cookie', () => ({ __esModule: true, default: { get: jest.fn(), remove: jest.fn() } }));
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     expect(() => require('@/lib/api')).toThrow('NEXT_PUBLIC_API_URL is not defined');
   });
 

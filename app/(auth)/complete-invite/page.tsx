@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function CompleteInvitePage() {
+function CompleteInviteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -100,5 +100,13 @@ export default function CompleteInvitePage() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+export default function CompleteInvitePage() {
+  return (
+    <Suspense>
+      <CompleteInviteContent />
+    </Suspense>
   );
 }

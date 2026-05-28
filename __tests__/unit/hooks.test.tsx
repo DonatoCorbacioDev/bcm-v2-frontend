@@ -1,4 +1,3 @@
-import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { createWrapper } from '../mocks/wrapper';
 

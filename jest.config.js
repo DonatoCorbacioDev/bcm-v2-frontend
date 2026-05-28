@@ -27,6 +27,7 @@ const config = {
     "components/**/*.tsx",
     "hooks/**/*.ts",
     "services/**/*.ts",
+    "store/**/*.ts",
     "!**/*.d.ts",
   ],
 };

@@ -3,6 +3,7 @@
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useExpiringContracts } from "@/hooks/useExpiringContracts";
 import Link from "next/link";
+import { AlertTriangle, BarChart3, CheckCircle2, Clock, XCircle } from "lucide-react";
 import KPICard from "@/components/dashboard/KPICard";
 import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
 import ContractStatsChart from "@/components/dashboard/ContractStatsChart";
@@ -97,7 +98,9 @@ export default function DashboardPage() {
       {!isLoadingExpiring && !isErrorExpiring && expiringContracts.length > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg p-6">
           <div className="flex items-start gap-4">
-            <div className="text-4xl">⚠️</div>
+            <div className="p-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" aria-hidden="true" />
+              </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
                 {expiringContracts.length} Contract{expiringContracts.length > 1 ? 's' : ''} Expiring Soon
@@ -146,25 +149,25 @@ export default function DashboardPage() {
         <KPICard
           title="Total Contracts"
           value={stats?.total ?? 0}
-          icon="📊"
+          icon={<BarChart3 className="h-6 w-6" aria-hidden="true" />}
           variant="default"
         />
         <KPICard
           title="Active Contracts"
           value={stats?.active ?? 0}
-          icon="✅"
+          icon={<CheckCircle2 className="h-6 w-6" aria-hidden="true" />}
           variant="success"
         />
         <KPICard
           title="Expiring Soon"
           value={stats?.expiring ?? 0}
-          icon="⏰"
+          icon={<Clock className="h-6 w-6" aria-hidden="true" />}
           variant="warning"
         />
         <KPICard
           title="Expired Contracts"
           value={stats?.expired ?? 0}
-          icon="❌"
+          icon={<XCircle className="h-6 w-6" aria-hidden="true" />}
           variant="danger"
         />
       </div>

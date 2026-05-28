@@ -1,10 +1,14 @@
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContractsByArea } from '@/hooks/useContractsByArea';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const CHART_COLOR = "#3b82f6";
+
+function truncate(str: string, max = 14): string {
+  return str.length > max ? `${str.slice(0, max)}…` : str;
+}
 
 export function ContractsByAreaChart() {
   const { data, isLoading, isError } = useContractsByArea();
@@ -51,11 +55,6 @@ export function ContractsByAreaChart() {
     );
   }
 
-  const dataWithColors = data.map((item, index) => ({
-    ...item,
-    fill: COLORS[index % COLORS.length],
-  }));
-
   return (
     <Card>
       <CardHeader>
@@ -64,12 +63,16 @@ export function ContractsByAreaChart() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={dataWithColors}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="areaName" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Bar dataKey="count" name="Contracts" />
+          <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+            <XAxis
+              dataKey="areaName"
+              tick={{ fontSize: 12 }}
+              tickFormatter={(v: string) => truncate(v)}
+            />
+            <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={36} />
+            <Tooltip formatter={(value) => [value as number, "Contracts"]} />
+            <Bar dataKey="count" name="Contracts" fill={CHART_COLOR} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

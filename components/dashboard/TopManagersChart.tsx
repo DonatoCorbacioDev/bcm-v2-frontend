@@ -1,8 +1,10 @@
 'use client';
 
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useTopManagers } from '@/hooks/useTopManagers';
+
+const CHART_COLOR = "#3b82f6";
 
 export function TopManagersChart() {
   const { data, isLoading, isError } = useTopManagers();
@@ -57,13 +59,12 @@ export function TopManagersChart() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} layout="vertical">
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" allowDecimals={false} />
-            <YAxis dataKey="managerName" type="category" width={150} />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="contractsCount" fill="#82ca9d" name="Contracts" />
+          <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, left: 0, bottom: 4 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
+            <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
+            <YAxis dataKey="managerName" type="category" width={140} tick={{ fontSize: 12 }} />
+            <Tooltip formatter={(value) => [value as number, "Contracts"]} />
+            <Bar dataKey="contractsCount" name="Contracts" fill={CHART_COLOR} radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

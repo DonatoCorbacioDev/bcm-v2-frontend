@@ -1,6 +1,7 @@
 "use client";
 
-import { PieChart, Pie, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ContractStatsChartProps {
   readonly total: number;
@@ -9,57 +10,51 @@ interface ContractStatsChartProps {
   readonly expired: number;
 }
 
-export default function ContractStatsChart({
-  total,
-  active,
-  expiring,
-  expired,
-}: ContractStatsChartProps) {
-  // Prepare data for pie chart with fill property
-  const data = [
-    { name: "Active", value: active, fill: "#10b981" }, // green
-    { name: "Expiring Soon", value: expiring, fill: "#f59e0b" }, // orange
-    { name: "Expired", value: expired, fill: "#ef4444" }, // red
-  ];
+const SEGMENTS = [
+  { key: "active",   name: "Active",        fill: "#10b981" },
+  { key: "expiring", name: "Expiring Soon", fill: "#f59e0b" },
+  { key: "expired",  name: "Expired",       fill: "#ef4444" },
+] as const;
 
-  // Filter out zero values
-  const chartData = data.filter((item) => item.value > 0);
-
-  if (total === 0) {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Contract Distribution
-        </h3>
-        <div className="flex items-center justify-center h-64 text-gray-500">
-          No contracts available
-        </div>
-      </div>
-    );
-  }
+export default function ContractStatsChart({ total, active, expiring, expired }: ContractStatsChartProps) {
+  const values = { active, expiring, expired };
+  const data = SEGMENTS
+    .map((s) => ({ name: s.name, value: values[s.key], fill: s.fill }))
+    .filter((d) => d.value > 0);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Contract Distribution
-      </h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={/* istanbul ignore next */ ({ name, percent }) =>
-              `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`
-            }
-            outerRadius={80}
-            dataKey="value"
-          />
-          <Tooltip />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Contract Distribution</CardTitle>
+        <CardDescription>Status breakdown of all contracts</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {total === 0 ? (
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+            No contracts available
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={65}
+                outerRadius={95}
+                dataKey="value"
+                stroke="none"
+              >
+                {data.map((entry, i) => (
+                  <Cell key={`cell-${i}`} fill={entry.fill} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value) => [value as number, ""]} />
+              <Legend iconType="circle" iconSize={10} />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+      </CardContent>
+    </Card>
   );
 }

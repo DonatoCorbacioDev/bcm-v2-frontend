@@ -1,8 +1,10 @@
 'use client';
 
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useContractsTimeline } from '@/hooks/useContractsTimeline';
+
+const CHART_COLOR = "#3b82f6";
 
 export function ContractsTimelineChart() {
   const { data, isLoading, isError } = useContractsTimeline();
@@ -57,21 +59,27 @@ export function ContractsTimelineChart() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Legend />
-            <Line
+          <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+            <defs>
+              <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%"  stopColor={CHART_COLOR} stopOpacity={0.25} />
+                <stop offset="95%" stopColor={CHART_COLOR} stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={36} />
+            <Tooltip formatter={(value) => [value as number, "Contracts"]} />
+            <Area
               type="monotone"
               dataKey="count"
-              stroke="#8884d8"
-              strokeWidth={2}
               name="Contracts"
-              activeDot={{ r: 8 }}
+              stroke={CHART_COLOR}
+              strokeWidth={2}
+              fill="url(#timelineGradient)"
+              activeDot={{ r: 5 }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

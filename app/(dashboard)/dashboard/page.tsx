@@ -174,22 +174,24 @@ export default function DashboardPage() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Contract Status Distribution (Pie Chart) */}
+        {/* Row 1: Distribution + Top Managers (compact, side by side) */}
         <ContractStatsChart
           total={stats?.total ?? 0}
           active={stats?.active ?? 0}
           expiring={stats?.expiring ?? 0}
           expired={stats?.expired ?? 0}
         />
-
-        {/* Contracts by Business Area (Bar Chart) */}
-        <ContractsByAreaChart />
-
-        {/* Contracts Timeline (Line Chart) */}
-        <ContractsTimelineChart />
-
-        {/* Top Managers (Horizontal Bar Chart) */}
         <TopManagersChart />
+
+        {/* Row 2: Timeline full width (benefits from wider view) */}
+        <div className="lg:col-span-2">
+          <ContractsTimelineChart />
+        </div>
+
+        {/* Row 3: Bar by Area full width (area names don't get truncated) */}
+        <div className="lg:col-span-2">
+          <ContractsByAreaChart />
+        </div>
       </div>
     </div>
   );

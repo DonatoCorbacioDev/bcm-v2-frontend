@@ -19,7 +19,7 @@ export function PasswordFields({
   onConfirmChange,
   passwordLabel = "New password",
   error,
-}: PasswordFieldsProps) {
+}: Readonly<PasswordFieldsProps>) {
   return (
     <>
       <div className="space-y-2">

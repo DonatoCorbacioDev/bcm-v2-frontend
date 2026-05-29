@@ -17,17 +17,18 @@ import type { FinancialType } from "@/types";
 export default function FinancialTypesPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
-
-  useEffect(() => {
-    if (user && user.role !== "ADMIN") router.replace("/dashboard");
-  }, [user, router]);
-
-  if (!user || user.role !== "ADMIN") return null;
+  const isAdmin = user?.role === "ADMIN";
 
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
     financialType: FinancialType | null;
   }>({ open: false, financialType: null });
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
+
+  if (!isAdmin) return null;
 
   const handleCloseForm = () => {
     setFormDialog({ open: false, financialType: null });

@@ -18,12 +18,7 @@ import type { User } from "@/types";
 export default function UsersPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
-
-  useEffect(() => {
-    if (user && user.role !== "ADMIN") router.replace("/dashboard");
-  }, [user, router]);
-
-  if (!user || user.role !== "ADMIN") return null;
+  const isAdmin = user?.role === "ADMIN";
 
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
@@ -31,6 +26,12 @@ export default function UsersPage() {
   }>({ open: false, user: null });
 
   const [inviteOpen, setInviteOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
+
+  if (!isAdmin) return null;
 
   const handleCreateClick = () => {
     setFormDialog({ open: true, user: null });

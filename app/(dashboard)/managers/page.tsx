@@ -17,17 +17,18 @@ import type { Manager } from "@/types";
 export default function ManagersPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
-
-  useEffect(() => {
-    if (user && user.role !== "ADMIN") router.replace("/dashboard");
-  }, [user, router]);
-
-  if (!user || user.role !== "ADMIN") return null;
+  const isAdmin = user?.role === "ADMIN";
 
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
     manager: Manager | null;
   }>({ open: false, manager: null });
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
+
+  if (!isAdmin) return null;
 
   const handleCreateClick = () => {
     setFormDialog({ open: true, manager: null });

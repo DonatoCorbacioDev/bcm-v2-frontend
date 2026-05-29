@@ -30,7 +30,7 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
       </CardHeader>
       <CardContent>
         {total === 0 ? (
-          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+          <div className="h-75 flex items-center justify-center text-muted-foreground">
             No contracts available
           </div>
         ) : (

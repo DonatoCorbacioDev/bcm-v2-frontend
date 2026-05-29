@@ -357,6 +357,62 @@ describe('ContractTable', () => {
     });
   });
 
+  // ── Numbered pagination — ellipsis branches ──────────────────────────────
+
+  it('shows near-start ellipsis pattern for large page counts', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: { ...makePageResponse([activeContract], 10), totalElements: 100 },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    // page=0, total=10 → [0,1,2,3,4,"ellipsis-end",9] → pages 1–5 and 10 visible
+    expect(screen.getByRole('button', { name: 'Go to page 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Go to page 5' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Go to page 10' })).toBeInTheDocument();
+    expect(screen.getByText('…')).toBeInTheDocument();
+  });
+
+  it('shows middle double-ellipsis pattern when on a middle page', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: { ...makePageResponse([activeContract], 10), totalElements: 100 },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    // Click page 5 (index 4) → current=4 → middle: [0,"…",3,4,5,"…",9]
+    await userEvent.click(screen.getByRole('button', { name: 'Go to page 5' }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText('…')).toHaveLength(2);
+      expect(screen.getByRole('button', { name: 'Go to page 4' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Go to page 6' })).toBeInTheDocument();
+    });
+  });
+
+  it('shows near-end ellipsis pattern when on the last pages', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: { ...makePageResponse([activeContract], 10), totalElements: 100 },
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    // Click page 10 (index 9) → current=9 → near-end: [0,"…",5,6,7,8,9]
+    await userEvent.click(screen.getByRole('button', { name: 'Go to page 10' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('…')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Go to page 7' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /go to next page/i })).toBeDisabled();
+    });
+  });
+
   it('changes rows per page and resets to first page', async () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: makePageResponse([activeContract, expiredContract], 3),

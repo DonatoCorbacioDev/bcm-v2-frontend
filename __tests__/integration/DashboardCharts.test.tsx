@@ -14,10 +14,19 @@ jest.mock('recharts', () => ({
   Area: () => null,
   Line: () => null,
   Cell: () => null,
-  XAxis: () => null,
+  // Call tickFormatter with a short and a long string to cover both branches of truncate()
+  XAxis: ({ tickFormatter }: { tickFormatter?: (v: string) => string }) => {
+    tickFormatter?.('Short');
+    tickFormatter?.('A very long area name that exceeds the limit');
+    return null;
+  },
   YAxis: () => null,
   CartesianGrid: () => null,
-  Tooltip: () => null,
+  // Call formatter to cover the inline arrow functions in each chart's Tooltip
+  Tooltip: ({ formatter }: { formatter?: (v: number) => unknown }) => {
+    formatter?.(42);
+    return null;
+  },
   Legend: () => null,
 }));
 

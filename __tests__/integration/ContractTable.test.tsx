@@ -311,6 +311,17 @@ describe('ContractTable', () => {
     expect(within(rows[1]).getByRole('button', { name: /delete/i })).toBeInTheDocument();
   });
 
+  it('hides Edit and Delete buttons when user is not yet loaded', () => {
+    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
+      const state = { user: null, isAuthenticated: false };
+      return selector ? selector(state) : state;
+    });
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const rows = screen.getAllByRole('row');
+    expect(within(rows[1]).queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+  });
+
   it('hides Edit and Delete buttons for MANAGER', () => {
     mockAuthAs('MANAGER');
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });

@@ -58,6 +58,15 @@ describe('Sidebar', () => {
     expect(screen.getAllByRole('link', { name: /users/i })[0]).toBeInTheDocument();
   });
 
+  it('shows only public links when user is not yet loaded', () => {
+    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({ user: null, isAuthenticated: false })
+    );
+    render(<Sidebar isOpen={false} onClose={onClose} />);
+    expect(screen.getAllByRole('link', { name: /dashboard/i })[0]).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /financial types/i })).not.toBeInTheDocument();
+  });
+
   it('hides admin-only links for MANAGER role', () => {
     mockUser('MANAGER');
     render(<Sidebar isOpen={false} onClose={onClose} />);

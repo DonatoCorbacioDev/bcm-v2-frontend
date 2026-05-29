@@ -8,7 +8,7 @@ import { useContract } from "@/hooks/useContract";
 import { useAuthStore } from "@/store/authStore";
 import { contractsService } from "@/services/contracts.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
-import { Loader2, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -118,7 +118,11 @@ export default function ContractDetailPage() {
     if (!financialValues || financialValues.length === 0) {
       return (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">💰</div>
+          <div className="flex justify-center mb-4">
+            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-700">
+              <DollarSign className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            </div>
+          </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No Financial Values Yet
           </h3>
@@ -197,7 +201,11 @@ export default function ContractDetailPage() {
     if (!contractHistory || contractHistory.length === 0) {
       return (
         <div className="text-center py-12">
-          <div className="text-6xl mb-4">📜</div>
+          <div className="flex justify-center mb-4">
+            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-700">
+              <History className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            </div>
+          </div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No Change History
           </h3>

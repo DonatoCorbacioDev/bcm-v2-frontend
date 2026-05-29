@@ -32,7 +32,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
       {/* Skip navigation — visually hidden until focused (WCAG 2.4.1) */}
       <a
         href="#main-content"
@@ -45,13 +45,16 @@ export default function DashboardLayout({
         onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         isMenuOpen={isMobileMenuOpen}
       />
-      <div className="flex">
+
+      <div className="flex h-full pt-16">
         <Sidebar
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
         />
-        {/* Responsive margin */}
-        <main id="main-content" className="flex-1 p-4 md:p-8 md:ml-64 pt-20">
+        <main
+          id="main-content"
+          className="flex-1 min-w-0 md:ml-64 overflow-y-auto p-4 md:p-8"
+        >
           {children}
         </main>
       </div>

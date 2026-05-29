@@ -16,13 +16,13 @@ import {
 } from "lucide-react";
 
 const navItems: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Dashboard",        href: "/dashboard",        icon: LayoutDashboard },
-  { label: "Contracts",        href: "/contracts",        icon: FileText },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Contracts", href: "/contracts", icon: FileText },
   { label: "Financial Values", href: "/financial-values", icon: TrendingUp },
-  { label: "Financial Types",  href: "/financial-types",  icon: Tag },
-  { label: "Business Areas",   href: "/business-areas",   icon: Building2 },
-  { label: "Managers",         href: "/managers",         icon: Users },
-  { label: "Users",            href: "/users",            icon: User },
+  { label: "Financial Types", href: "/financial-types", icon: Tag },
+  { label: "Business Areas", href: "/business-areas", icon: Building2 },
+  { label: "Managers", href: "/managers", icon: Users },
+  { label: "Users", href: "/users", icon: User },
 ];
 
 interface SidebarProps {

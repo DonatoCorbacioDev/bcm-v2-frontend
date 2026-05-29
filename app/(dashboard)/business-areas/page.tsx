@@ -31,11 +31,11 @@ export default function BusinessAreasPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Business Areas</h1>
-          <p className="text-gray-600 mt-1">Manage your business areas</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Business Areas</h2>
+          <p className="text-gray-500 mt-2">Manage your business areas</p>
         </div>
         <Button onClick={handleCreateClick}>+ New Business Area</Button>
       </div>

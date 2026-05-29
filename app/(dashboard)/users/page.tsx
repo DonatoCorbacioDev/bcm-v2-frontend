@@ -34,11 +34,11 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Users</h1>
-          <p className="text-gray-600 mt-1">Manage system users</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Users</h2>
+          <p className="text-gray-500 mt-2">Manage system users</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setInviteOpen(true)}>

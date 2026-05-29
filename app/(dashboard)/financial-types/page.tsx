@@ -23,11 +23,11 @@ export default function FinancialTypesPage() {
   };
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex justify-between items-center">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Financial Types</h1>
-          <p className="text-gray-600 mt-1">Manage financial value categories</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Financial Types</h2>
+          <p className="text-gray-500 mt-2">Manage financial value categories</p>
         </div>
         <Button onClick={() => setFormDialog({ open: true, financialType: null })}>
           + New Financial Type
@@ -55,3 +55,4 @@ export default function FinancialTypesPage() {
     </div>
   );
 }
+

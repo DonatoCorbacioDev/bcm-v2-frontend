@@ -57,7 +57,7 @@ export default function ManagersPage() {
       <ManagerTable onEditClick={handleEditClick} />
 
       <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.manager ? "Edit Manager" : "Create New Manager"}

@@ -64,7 +64,7 @@ export default function UsersPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.user ? "Edit User" : "Create New User"}
@@ -80,7 +80,7 @@ export default function UsersPage() {
 
       {/* Invite User Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Invite User</DialogTitle>
           </DialogHeader>

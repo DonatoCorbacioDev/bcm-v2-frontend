@@ -56,7 +56,7 @@ export default function BusinessAreasPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.businessArea ? "Edit Business Area" : "Create New Business Area"}

@@ -423,7 +423,7 @@ export default function ContractDetailPage() {
       {/* Edit Dialog */}
       {isAdmin && (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle>Edit Contract</DialogTitle>
               <DialogDescription>

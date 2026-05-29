@@ -51,7 +51,7 @@ export default function FinancialTypesPage() {
       />
 
       <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.financialType ? "Edit Financial Type" : "Create New Financial Type"}

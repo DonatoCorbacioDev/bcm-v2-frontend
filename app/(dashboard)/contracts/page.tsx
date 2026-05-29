@@ -112,7 +112,7 @@ export default function ContractsPage() {
       <ContractTable onEditClick={handleEditClick} />
 
       <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.contract ? "Edit Contract" : "Create New Contract"}

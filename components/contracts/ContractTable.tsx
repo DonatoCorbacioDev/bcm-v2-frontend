@@ -33,15 +33,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
-function getPageNumbers(current: number, total: number): (number | string)[] {
+type PageItem = number | "ellipsis-start" | "ellipsis-end";
+
+function getPageNumbers(current: number, total: number): PageItem[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i);
   if (current <= 3) {
-    return [0, 1, 2, 3, 4, "…", total - 1];
+    return [0, 1, 2, 3, 4, "ellipsis-end", total - 1];
   }
   if (current >= total - 4) {
-    return [0, "…", total - 5, total - 4, total - 3, total - 2, total - 1];
+    return [0, "ellipsis-start", total - 5, total - 4, total - 3, total - 2, total - 1];
   }
-  return [0, "…", current - 1, current, current + 1, "…", total - 1];
+  return [0, "ellipsis-start", current - 1, current, current + 1, "ellipsis-end", total - 1];
 }
 
 interface ContractTableProps {
@@ -164,7 +166,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
     <>
       {/* Search and Filters */}
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-50">
           <Input
             aria-label="Search contracts"
             placeholder="Search contracts..."
@@ -306,10 +308,10 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
 
-              {getPageNumbers(page, totalPages).map((p, idx) =>
+              {getPageNumbers(page, totalPages).map((p) =>
                 typeof p === "string" ? (
                   <span
-                    key={`ellipsis-${idx}`}
+                    key={p}
                     className="px-1 text-sm text-gray-400 dark:text-gray-500 select-none"
                   >
                     …
@@ -322,7 +324,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                     onClick={() => setPage(p)}
                     aria-label={`Go to page ${p + 1}`}
                     aria-current={p === page ? "page" : undefined}
-                    className="min-w-[32px] px-2 text-xs"
+                    className="min-w-8 px-2 text-xs"
                   >
                     {p + 1}
                   </Button>

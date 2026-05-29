@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { PieChart, Pie, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ContractStatsChartProps {
@@ -44,11 +44,7 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
                 outerRadius={95}
                 dataKey="value"
                 stroke="none"
-              >
-                {data.map((entry, i) => (
-                  <Cell key={`cell-${i}`} fill={entry.fill} />
-                ))}
-              </Pie>
+              />
               <Tooltip formatter={(value) => [value as number, ""]} />
               <Legend iconType="circle" iconSize={10} />
             </PieChart>

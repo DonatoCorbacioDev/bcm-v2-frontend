@@ -54,7 +54,7 @@ function NavLink({
       <item.icon
         aria-hidden="true"
         className={cn(
-          "h-5 w-5 flex-shrink-0",
+          "h-5 w-5 shrink-0",
           isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"
         )}
       />
@@ -73,7 +73,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           key={item.href}
           item={item}
           isActive={pathname === item.href}
-          onClick={item.href !== pathname ? undefined : undefined}
         />
       ))}
     </nav>

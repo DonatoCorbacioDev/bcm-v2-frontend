@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import UserTable from "@/components/users/UserTable";
 import UserForm from "@/components/users/UserForm";
@@ -14,6 +16,15 @@ import {
 import type { User } from "@/types";
 
 export default function UsersPage() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (user && user.role !== "ADMIN") router.replace("/dashboard");
+  }, [user, router]);
+
+  if (!user || user.role !== "ADMIN") return null;
+
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
     user: User | null;

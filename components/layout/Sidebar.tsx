@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/authStore";
 import {
   X,
   LayoutDashboard,
@@ -15,14 +16,14 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-const navItems: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Contracts", href: "/contracts", icon: FileText },
+const navItems: { label: string; href: string; icon: LucideIcon; adminOnly?: boolean }[] = [
+  { label: "Dashboard",        href: "/dashboard",        icon: LayoutDashboard },
+  { label: "Contracts",        href: "/contracts",        icon: FileText },
   { label: "Financial Values", href: "/financial-values", icon: TrendingUp },
-  { label: "Financial Types", href: "/financial-types", icon: Tag },
-  { label: "Business Areas", href: "/business-areas", icon: Building2 },
-  { label: "Managers", href: "/managers", icon: Users },
-  { label: "Users", href: "/users", icon: User },
+  { label: "Financial Types",  href: "/financial-types",  icon: Tag,       adminOnly: true },
+  { label: "Business Areas",   href: "/business-areas",   icon: Building2, adminOnly: true },
+  { label: "Managers",         href: "/managers",         icon: Users,     adminOnly: true },
+  { label: "Users",            href: "/users",            icon: User,      adminOnly: true },
 ];
 
 interface SidebarProps {
@@ -65,25 +66,24 @@ function NavLink({
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-
-  const navContent = (
-    <nav aria-label="Main navigation" className="p-3 space-y-1">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.href}
-          item={item}
-          isActive={pathname === item.href}
-        />
-      ))}
-    </nav>
-  );
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "ADMIN";
+  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 fixed left-0 top-16 bottom-0 overflow-y-auto z-10">
         <div className="flex-1 py-4">
-          {navContent}
+          <nav aria-label="Main navigation" className="p-3 space-y-1">
+            {visibleItems.map((item) => (
+              <NavLink
+                key={item.href}
+                item={item}
+                isActive={pathname === item.href}
+              />
+            ))}
+          </nav>
         </div>
       </aside>
 
@@ -107,7 +107,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
         <div className="py-4">
           <nav aria-label="Main navigation" className="px-3 space-y-1">
-            {navItems.map((item) => (
+            {visibleItems.map((item) => (
               <NavLink
                 key={item.href}
                 item={item}

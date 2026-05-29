@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useContractsPaged } from "@/hooks/useContractsPaged";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { contractsService } from "@/services/contracts.service";
+import { useAuthStore } from "@/store/authStore";
 import type { Contract } from "@/types";
 
 import {
@@ -53,6 +54,8 @@ interface ContractTableProps {
 export default function ContractTable({ onEditClick }: ContractTableProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === "ADMIN";
 
   // Pagination state
   const [page, setPage] = useState(0);
@@ -251,22 +254,26 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                     >
                       View
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEditClick(c)}
-                      className="text-blue-600 hover:text-blue-700 text-xs px-2 hidden sm:inline-flex"
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick(c)}
-                      className="text-red-600 hover:text-red-700 text-xs px-2 hidden sm:inline-flex"
-                    >
-                      Delete
-                    </Button>
+                    {isAdmin && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditClick(c)}
+                          className="text-blue-600 hover:text-blue-700 text-xs px-2 hidden sm:inline-flex"
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(c)}
+                          className="text-red-600 hover:text-red-700 text-xs px-2 hidden sm:inline-flex"
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>

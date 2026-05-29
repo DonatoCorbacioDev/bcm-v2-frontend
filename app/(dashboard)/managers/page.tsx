@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import ManagerTable from "@/components/managers/ManagerTable";
 import ManagerForm from "@/components/managers/ManagerForm";
@@ -13,6 +15,15 @@ import {
 import type { Manager } from "@/types";
 
 export default function ManagersPage() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (user && user.role !== "ADMIN") router.replace("/dashboard");
+  }, [user, router]);
+
+  if (!user || user.role !== "ADMIN") return null;
+
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
     manager: Manager | null;

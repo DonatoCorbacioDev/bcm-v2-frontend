@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import BusinessAreaTable from "@/components/business-areas/BusinessAreaTable";
 import BusinessAreaForm from "@/components/business-areas/BusinessAreaForm";
@@ -13,6 +15,15 @@ import {
 import type { BusinessArea } from "@/types";
 
 export default function BusinessAreasPage() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (user && user.role !== "ADMIN") router.replace("/dashboard");
+  }, [user, router]);
+
+  if (!user || user.role !== "ADMIN") return null;
+
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
     businessArea: BusinessArea | null;

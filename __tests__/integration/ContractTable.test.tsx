@@ -48,12 +48,24 @@ jest.mock('@/lib/api', () => ({
   },
 }));
 
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(),
+}));
+
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useContractsPaged } from '@/hooks/useContractsPaged';
 import { contractsService } from '@/services/contracts.service';
+import { useAuthStore } from '@/store/authStore';
+
+const mockAuthAs = (role: string) => {
+  (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
+    const state = { user: { id: 1, username: 'user', role }, isAuthenticated: true };
+    return selector ? selector(state) : state;
+  });
+};
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
@@ -102,7 +114,8 @@ describe('ContractTable', () => {
       replace: jest.fn(),
       back: jest.fn(),
     });
-    // Default: two contracts, one page, loaded
+    // Default: ADMIN user, two contracts, one page, loaded
+    mockAuthAs('ADMIN');
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: makePageResponse([activeContract, expiredContract]),
       isLoading: false,
@@ -287,6 +300,24 @@ describe('ContractTable', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /clear/i }));
     expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
+  });
+
+  // ── Role-based visibility ─────────────────────────────────────────────────
+
+  it('shows Edit and Delete buttons for ADMIN', () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const rows = screen.getAllByRole('row');
+    expect(within(rows[1]).getByRole('button', { name: /edit/i })).toBeInTheDocument();
+    expect(within(rows[1]).getByRole('button', { name: /delete/i })).toBeInTheDocument();
+  });
+
+  it('hides Edit and Delete buttons for MANAGER', () => {
+    mockAuthAs('MANAGER');
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const rows = screen.getAllByRole('row');
+    expect(within(rows[1]).queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).getByRole('button', { name: /view/i })).toBeInTheDocument();
   });
 
   // ── Pagination ────────────────────────────────────────────────────────────

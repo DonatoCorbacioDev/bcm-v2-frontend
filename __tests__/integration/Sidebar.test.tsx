@@ -18,10 +18,23 @@ jest.mock('@/lib/api', () => ({
   },
 }));
 
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(),
+}));
+
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
 import { usePathname } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 import Sidebar from '@/components/layout/Sidebar';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const mockUser = (role: string) => {
+  (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
+    selector({ user: { id: 1, username: 'user', role }, isAuthenticated: true })
+  );
+};
 
 // ─── Test suite ──────────────────────────────────────────────────────────────
 
@@ -31,9 +44,10 @@ describe('Sidebar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (usePathname as jest.Mock).mockReturnValue('/dashboard');
+    mockUser('ADMIN');
   });
 
-  it('renders all navigation links', () => {
+  it('renders all navigation links for ADMIN', () => {
     render(<Sidebar isOpen={false} onClose={onClose} />);
     expect(screen.getAllByRole('link', { name: /dashboard/i })[0]).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /contracts/i })[0]).toBeInTheDocument();
@@ -42,6 +56,18 @@ describe('Sidebar', () => {
     expect(screen.getAllByRole('link', { name: /business areas/i })[0]).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /managers/i })[0]).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /users/i })[0]).toBeInTheDocument();
+  });
+
+  it('hides admin-only links for MANAGER role', () => {
+    mockUser('MANAGER');
+    render(<Sidebar isOpen={false} onClose={onClose} />);
+    expect(screen.getAllByRole('link', { name: /dashboard/i })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /contracts/i })[0]).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /financial values/i })[0]).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /financial types/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /business areas/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^managers$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^users$/i })).not.toBeInTheDocument();
   });
 
   it('marks the active route with aria-current="page"', () => {

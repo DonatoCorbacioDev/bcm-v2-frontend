@@ -285,4 +285,10 @@ describe('UserTable', () => {
     expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument();
     expect(screen.getByText('bob@example.com')).toBeInTheDocument();
   });
+
+  it('falls back to empty roles when useRoles returns undefined data', () => {
+    (useRoles as jest.Mock).mockReturnValue({ data: undefined });
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
 });

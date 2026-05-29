@@ -294,7 +294,7 @@ describe('ContractTable', () => {
   it('hides pagination controls when there is only one page', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /go to next page/i })).not.toBeInTheDocument();
   });
 
   it('shows pagination controls when there are multiple pages', () => {
@@ -306,15 +306,14 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /prev/i })).toBeInTheDocument();
-    // On page 1, First and Prev should be disabled
-    expect(screen.getByRole('button', { name: /first/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /prev/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /next/i })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /go to next page/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /go to previous page/i })).toBeInTheDocument();
+    // On page 1, Prev should be disabled; Next should be enabled
+    expect(screen.getByRole('button', { name: /go to previous page/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /go to next page/i })).not.toBeDisabled();
   });
 
-  it('disables Next and Last buttons on the last page', async () => {
+  it('disables Next button on the last page', async () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: { ...makePageResponse([activeContract], 2), totalElements: 20 },
       isLoading: false,
@@ -324,11 +323,10 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // Click Next to go to page 2 (last page since totalPages = 2)
-    await userEvent.click(screen.getByRole('button', { name: /next/i }));
+    await userEvent.click(screen.getByRole('button', { name: /go to next page/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
-      expect(screen.getByRole('button', { name: /last/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /go to next page/i })).toBeDisabled();
     });
   });
 
@@ -373,7 +371,7 @@ describe('ContractTable', () => {
     expect(screen.getByDisplayValue('25')).toBeInTheDocument();
   });
 
-  it('navigates to first page when First is clicked', async () => {
+  it('navigates to page 1 when page 1 button is clicked', async () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: { ...makePageResponse([activeContract], 3), totalElements: 30 },
       isLoading: false,
@@ -383,16 +381,16 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // Go to page 2 first
-    await userEvent.click(screen.getByRole('button', { name: /next/i }));
-    // Then click First
-    await userEvent.click(screen.getByRole('button', { name: /first/i }));
+    await userEvent.click(screen.getByRole('button', { name: /go to next page/i }));
+    // Then click page 1
+    await userEvent.click(screen.getByRole('button', { name: /go to page 1/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /first/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /go to previous page/i })).toBeDisabled();
     });
   });
 
-  it('navigates to previous page when Prev is clicked', async () => {
+  it('navigates to previous page when previous page button is clicked', async () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: { ...makePageResponse([activeContract], 3), totalElements: 30 },
       isLoading: false,
@@ -401,15 +399,15 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.click(screen.getByRole('button', { name: /next/i }));
-    await userEvent.click(screen.getByRole('button', { name: /prev/i }));
+    await userEvent.click(screen.getByRole('button', { name: /go to next page/i }));
+    await userEvent.click(screen.getByRole('button', { name: /go to previous page/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /prev/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /go to previous page/i })).toBeDisabled();
     });
   });
 
-  it('navigates to last page when Last is clicked', async () => {
+  it('navigates to last page when last page button is clicked', async () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: { ...makePageResponse([activeContract], 3), totalElements: 30 },
       isLoading: false,
@@ -418,10 +416,11 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.click(screen.getByRole('button', { name: /last/i }));
+    // totalPages=3, so click "Go to page 3"
+    await userEvent.click(screen.getByRole('button', { name: /go to page 3/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /last/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /go to next page/i })).toBeDisabled();
     });
   });
 });

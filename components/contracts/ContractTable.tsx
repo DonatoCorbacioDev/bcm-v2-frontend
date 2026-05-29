@@ -29,8 +29,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+
+function getPageNumbers(current: number, total: number): (number | string)[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i);
+  if (current <= 3) {
+    return [0, 1, 2, 3, 4, "…", total - 1];
+  }
+  if (current >= total - 4) {
+    return [0, "…", total - 5, total - 4, total - 3, total - 2, total - 1];
+  }
+  return [0, "…", current - 1, current, current + 1, "…", total - 1];
+}
 
 interface ContractTableProps {
   readonly onEditClick: (contract: Contract) => void;
@@ -264,7 +276,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
         {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-6 py-4 border-t border-gray-200 dark:border-gray-700 gap-4">
             <div className="flex items-center gap-2">
-              <label htmlFor="page-size" className="text-xs md:text-sm text-gray-600">Rows:</label>
+              <label htmlFor="page-size" className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Rows:</label>
               <select
                 id="page-size"
                 aria-label="Rows per page"
@@ -273,7 +285,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   setPageSize(Number(e.target.value));
                   setPage(0);
                 }}
-                className="px-2 py-1 border border-gray-300 rounded text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs md:text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -282,48 +294,51 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               </select>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-2">
-              <span className="text-xs md:text-sm text-gray-600">
-                Page {page + 1} of {totalPages}
-              </span>
-              <div className="flex gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(0)}
-                  disabled={page === 0}
-                  className="text-xs px-2"
-                >
-                  First
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 0}
-                  className="text-xs px-2"
-                >
-                  Prev
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page >= totalPages - 1}
-                  className="text-xs px-2"
-                >
-                  Next
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(totalPages - 1)}
-                  disabled={page >= totalPages - 1}
-                  className="text-xs px-2"
-                >
-                  Last
-                </Button>
-              </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page - 1)}
+                disabled={page === 0}
+                aria-label="Go to previous page"
+                className="px-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              {getPageNumbers(page, totalPages).map((p, idx) =>
+                typeof p === "string" ? (
+                  <span
+                    key={`ellipsis-${idx}`}
+                    className="px-1 text-sm text-gray-400 dark:text-gray-500 select-none"
+                  >
+                    …
+                  </span>
+                ) : (
+                  <Button
+                    key={p}
+                    variant={p === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setPage(p)}
+                    aria-label={`Go to page ${p + 1}`}
+                    aria-current={p === page ? "page" : undefined}
+                    className="min-w-[32px] px-2 text-xs"
+                  >
+                    {p + 1}
+                  </Button>
+                )
+              )}
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(page + 1)}
+                disabled={page >= totalPages - 1}
+                aria-label="Go to next page"
+                className="px-2"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         )}

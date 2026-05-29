@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useUsers, usersQueryKeys } from "@/hooks/useUsers";
 import { useManagers } from "@/hooks/useManagers";
+import { useRoles } from "@/hooks/useRoles";
 import { usersService } from "@/services/users.service";
 import type { User } from "@/types";
 
@@ -68,9 +69,14 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   const { data: users = [], isLoading, isError } = useUsers();
   /* istanbul ignore next */
   const { data: managers = [] } = useManagers();
+  const { data: roles = [] } = useRoles();
   const managerMap = useMemo(
     () => new Map(managers.map((m) => [m.id, `${m.firstName} ${m.lastName}`])),
     [managers]
+  );
+  const roleMap = useMemo(
+    () => new Map(roles.map((r) => [r.id, r.role])),
+    [roles]
   );
   const queryClient = useQueryClient();
 
@@ -137,7 +143,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
     <>
       {/* Search and Filters */}
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-50">
           <Input
             aria-label="Search users"
             placeholder="Search users..."
@@ -209,7 +215,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                   <TableCell className="hidden lg:table-cell font-medium text-sm">{user.id}</TableCell>
                   <TableCell className="text-sm">{user.username}</TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */managerMap.get(user.managerId) ?? "—"}</TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{user.role}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{roleMap.get(user.roleId) ?? "—"}</TableCell>
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${user.verified

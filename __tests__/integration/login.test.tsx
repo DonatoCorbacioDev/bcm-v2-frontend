@@ -37,10 +37,10 @@ describe('LoginPage', () => {
     jest.clearAllMocks();
   });
 
-  it('renders email and password fields and the sign in button', () => {
+  it('renders username and password fields and the sign in button', () => {
     render(<LoginPage />);
 
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
@@ -52,7 +52,7 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/email/i), 'wrong@example.com');
+    await userEvent.type(screen.getByLabelText(/username/i), 'wrong@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -68,7 +68,7 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/email/i), 'wrong@example.com');
+    await userEvent.type(screen.getByLabelText(/username/i), 'wrong@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -82,7 +82,7 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
+    await userEvent.type(screen.getByLabelText(/username/i), 'user@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
@@ -107,7 +107,7 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/email/i), 'admin@example.com');
+    await userEvent.type(screen.getByLabelText(/username/i), 'admin@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password123');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 

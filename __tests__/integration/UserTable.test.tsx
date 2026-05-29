@@ -19,6 +19,10 @@ jest.mock('@/hooks/useManagers', () => ({
   useManagers: jest.fn(),
 }));
 
+jest.mock('@/hooks/useRoles', () => ({
+  useRoles: jest.fn(),
+}));
+
 // Mock the service layer so delete mutations resolve immediately.
 jest.mock('@/services/users.service', () => ({
   usersService: {
@@ -50,6 +54,7 @@ jest.mock('@/lib/api', () => ({
 import { toast } from 'sonner';
 import { useUsers } from '@/hooks/useUsers';
 import { useManagers } from '@/hooks/useManagers';
+import { useRoles } from '@/hooks/useRoles';
 import { usersService } from '@/services/users.service';
 
 const mockUsers: User[] = [
@@ -89,6 +94,9 @@ describe('UserTable', () => {
       isError: false,
     });
     (useManagers as jest.Mock).mockReturnValue({ data: mockManagers });
+    (useRoles as jest.Mock).mockReturnValue({
+      data: [{ id: 1, role: 'ADMIN' }, { id: 2, role: 'VIEWER' }],
+    });
   });
 
   it('renders all user rows', () => {
@@ -96,6 +104,18 @@ describe('UserTable', () => {
 
     expect(screen.getByText('alice@example.com')).toBeInTheDocument();
     expect(screen.getByText('bob@example.com')).toBeInTheDocument();
+  });
+
+  it('displays role names resolved from roleId via roleMap', () => {
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    expect(screen.getByText('ADMIN')).toBeInTheDocument();
+    expect(screen.getByText('VIEWER')).toBeInTheDocument();
+  });
+
+  it('shows "—" when roleId has no matching role', () => {
+    (useRoles as jest.Mock).mockReturnValue({ data: [] });
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
 
   it('displays resolved manager names instead of raw IDs', () => {

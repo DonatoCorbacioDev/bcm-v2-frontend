@@ -58,11 +58,11 @@ function LoginContent() {
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
               id="username"
-              type="email"
-              placeholder="admin@example.com"
+              type="text"
+              placeholder="Enter your username"
               value={credentials.username}
               onChange={(e) =>
                 setCredentials({ ...credentials, username: e.target.value })

@@ -102,6 +102,13 @@ describe('FinancialForecastChart', () => {
     await waitFor(() => expect(screen.getByText(/financial forecast/i)).toBeInTheDocument());
   });
 
+  it('handles undefined financial values (uses empty array fallback) when FastAPI offline', async () => {
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: undefined, isLoading: false });
+    (forecastApi.get as jest.Mock).mockRejectedValue(new Error('offline'));
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText(/no financial data available/i)).toBeInTheDocument());
+  });
+
   it('aggregates financial values by month correctly', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
     (forecastApi.get as jest.Mock).mockRejectedValue(new Error('offline'));

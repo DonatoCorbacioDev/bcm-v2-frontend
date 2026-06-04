@@ -104,6 +104,25 @@ describe('NotificationBell', () => {
     await waitFor(() => expect(screen.queryByText('New Contract')).not.toBeInTheDocument());
   });
 
+  it('keeps dropdown open when clicking inside it', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [unread] });
+    render(<NotificationBell />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(screen.getByText('New Contract')).toBeInTheDocument();
+    fireEvent.mouseDown(screen.getByText('New Contract'));
+    expect(screen.getByText('New Contract')).toBeInTheDocument();
+  });
+
+  it('renders notification with unknown type falls back to INFO dot via outer ??', async () => {
+    const unknownType = { id: 20, title: 'Critical', message: 'msg', read: false, createdAt: new Date().toISOString(), type: 'CRITICAL' as 'INFO' };
+    (api.get as jest.Mock).mockResolvedValue({ data: [unknownType] });
+    render(<NotificationBell />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(screen.getByText('Critical')).toBeInTheDocument();
+  });
+
   it('renders notification with no type (falls back to INFO dot color)', async () => {
     const noType = { id: 10, title: 'No type', message: 'msg', read: false, createdAt: new Date().toISOString() };
     (api.get as jest.Mock).mockResolvedValue({ data: [noType] });

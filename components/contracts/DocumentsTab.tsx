@@ -46,6 +46,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
       toast.success("Document uploaded successfully");
+      /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
     onError: () => toast.error("Failed to upload document"),

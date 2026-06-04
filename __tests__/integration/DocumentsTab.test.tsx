@@ -199,6 +199,37 @@ describe('DocumentsTab', () => {
     expect(onApply).toHaveBeenCalledWith({});
   });
 
+  it('does nothing when file input fires with no file selected', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText(/upload pdf/i)).toBeInTheDocument());
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: null } });
+    expect(api.post).not.toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('shows uploading state while upload mutation is pending', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
+    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText(/upload pdf/i)).toBeInTheDocument());
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['%PDF'], 'loading.pdf', { type: 'application/pdf' });
+    fireEvent.change(input, { target: { files: [file] } });
+    await waitFor(() => expect(screen.getByText(/uploading.../i)).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /uploading/i })).toBeDisabled();
+  });
+
+  it('shows analyzing spinner while analyze mutation is pending', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+    (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
+    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Analizza con AI'));
+    await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeDisabled());
+  });
+
   it('shows error toast when download fails', async () => {
     (api.get as jest.Mock)
       .mockResolvedValueOnce({ data: [doc] })

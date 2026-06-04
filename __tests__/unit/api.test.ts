@@ -148,6 +148,7 @@ describe('lib/api', () => {
     mockAxiosPost.mockResolvedValue({ data: { token: 'new-token', refreshToken: 'new-refresh' } });
     instance.request.mockResolvedValue({ data: 'retried' });
 
+    // config with headers defined → covers `headers ?? {}` "defined" branch (line 124)
     const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
     await resErrorFn!(error);
 
@@ -184,9 +185,10 @@ describe('lib/api', () => {
     mockAxiosPost.mockReturnValueOnce(refreshPending);
     instance.request.mockResolvedValue({ data: 'retried' });
 
-    // configs with no headers to cover the `headers ?? {}` null branch
+    // error1 has NO headers → direct refresh path covers `headers ?? {}` "undefined" branch (line 124)
+    // error2 HAS headers → queue path covers `headers ?? {}` "defined" branch (line 105)
     const error1 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
-    const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
+    const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
 
     const promise1 = resErrorFn!(error1);
     const promise2 = resErrorFn!(error2);

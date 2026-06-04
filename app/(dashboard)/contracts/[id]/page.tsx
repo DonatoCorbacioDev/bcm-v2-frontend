@@ -8,7 +8,7 @@ import { useContract } from "@/hooks/useContract";
 import { useAuthStore } from "@/store/authStore";
 import { contractsService } from "@/services/contracts.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
-import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History } from "lucide-react";
+import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -20,9 +20,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ContractForm from "@/components/contracts/ContractForm";
+import DocumentsTab from "@/components/contracts/DocumentsTab";
 import api from "@/lib/api";
 import { getContractStatusVariant } from "@/lib/utils";
-import type { FinancialValue, ContractHistory } from "@/types";
+import type { Contract, FinancialValue, ContractHistory } from "@/types";
+
+type Tab = "documents" | "financials" | "history";
 
 export default function ContractDetailPage() {
   const params = useParams();
@@ -30,19 +33,16 @@ export default function ContractDetailPage() {
   const queryClient = useQueryClient();
   const contractId = Number(params.id);
 
-  // Get current user to check permissions
   const { user } = useAuthStore();
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === "ADMIN";
 
   const { data: contract, isLoading, isError } = useContract(contractId);
+  const [activeTab, setActiveTab] = useState<Tab>("documents");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [prefilledContract, setPrefilledContract] = useState<Contract | null>(null);
 
-  // Fetch financial values for this contract
-  const {
-    data: financialValues,
-    isLoading: isLoadingFinancials
-  } = useQuery<FinancialValue[]>({
+  const { data: financialValues, isLoading: isLoadingFinancials } = useQuery<FinancialValue[]>({
     queryKey: ["financial-values", "by-contract", contractId],
     queryFn: async () => {
       const response = await api.get(`/financial-values/by-contract/${contractId}`);
@@ -51,11 +51,7 @@ export default function ContractDetailPage() {
     enabled: !!contractId,
   });
 
-  // Fetch contract history
-  const {
-    data: contractHistory,
-    isLoading: isLoadingHistory
-  } = useQuery<ContractHistory[]>({
+  const { data: contractHistory, isLoading: isLoadingHistory } = useQuery<ContractHistory[]>({
     queryKey: ["contract-history", "by-contract", contractId],
     queryFn: async () => {
       const response = await api.get(`/contract-history/contract/${contractId}`);
@@ -64,7 +60,6 @@ export default function ContractDetailPage() {
     enabled: !!contractId,
   });
 
-  // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       await contractsService.delete(id);
@@ -80,32 +75,29 @@ export default function ContractDetailPage() {
     },
   });
 
-  const handleDeleteClick = () => {
-    setDeleteDialogOpen(true);
-  };
-
   const handleDeleteConfirm = () => {
-    if (contractId) {
-      deleteMutation.mutate(contractId);
-    }
-  };
-
-  const handleEditClick = () => {
-    setEditDialogOpen(true);
+    if (contractId) deleteMutation.mutate(contractId);
   };
 
   const handleEditSuccess = () => {
     setEditDialogOpen(false);
-
-    queryClient.invalidateQueries({
-      queryKey: ["contracts", contractId]
-    });
-    queryClient.invalidateQueries({
-      queryKey: ["contract-history", "by-contract", contractId]
-    });
+    setPrefilledContract(null);
+    queryClient.invalidateQueries({ queryKey: ["contracts", contractId] });
+    queryClient.invalidateQueries({ queryKey: ["contract-history", "by-contract", contractId] });
   };
 
-  // Helper function to render Financial Values section content
+  const handleApplyAnalysis = (detected: Partial<Contract>) => {
+    if (!contract) return;
+    setPrefilledContract({ ...contract, ...detected });
+    setEditDialogOpen(true);
+  };
+
+  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    { id: "documents", label: "Documents", icon: <FileText className="h-4 w-4" /> },
+    { id: "financials", label: "Financial Values", icon: <DollarSign className="h-4 w-4" /> },
+    { id: "history", label: "Change History", icon: <History className="h-4 w-4" /> },
+  ];
+
   const renderFinancialValues = () => {
     if (isLoadingFinancials) {
       return (
@@ -114,7 +106,6 @@ export default function ContractDetailPage() {
         </div>
       );
     }
-
     if (!financialValues || financialValues.length === 0) {
       return (
         <div className="text-center py-12">
@@ -132,55 +123,38 @@ export default function ContractDetailPage() {
         </div>
       );
     }
-
     return (
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead className="bg-gray-50 dark:bg-gray-900">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Type
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Business Area
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Amount
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                Month/Year
-              </th>
+              {["Type", "Business Area", "Amount", "Month/Year"].map((h) => (
+                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {financialValues.map((fv: FinancialValue) => (
               <tr key={fv.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  {fv.typeName || 'N/A'}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                  {fv.areaName || 'N/A'}
-                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">{fv.typeName || "N/A"}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">{fv.areaName || "N/A"}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
-                  €{fv.financialAmount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  €{fv.financialAmount?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                   {fv.month}/{fv.year}
                 </td>
               </tr>
             ))}
-
-            {/* Total Row */}
             <tr className="bg-gray-100 dark:bg-gray-900 font-bold">
-              <td colSpan={2} className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                Total
-              </td>
+              <td colSpan={2} className="px-4 py-3 text-sm text-gray-900 dark:text-white">Total</td>
               <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                €{financialValues.reduce((sum: number, fv: FinancialValue) =>
-                  sum + (fv.financialAmount || 0), 0
-                ).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                €{financialValues.reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0)
+                  .toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </td>
-              <td></td>
+              <td />
             </tr>
           </tbody>
         </table>
@@ -188,8 +162,7 @@ export default function ContractDetailPage() {
     );
   };
 
-  // Helper function to render Contract History section
-  const renderContractHistory = () => {
+  const renderHistory = () => {
     if (isLoadingHistory) {
       return (
         <div className="flex items-center justify-center py-8">
@@ -197,7 +170,6 @@ export default function ContractDetailPage() {
         </div>
       );
     }
-
     if (!contractHistory || contractHistory.length === 0) {
       return (
         <div className="text-center py-12">
@@ -206,51 +178,32 @@ export default function ContractDetailPage() {
               <History className="h-8 w-8 text-gray-400 dark:text-gray-500" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            No Change History
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Status changes and modifications will be tracked here.
-          </p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Change History</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Status changes and modifications will be tracked here.</p>
         </div>
       );
     }
-
     return (
       <div className="space-y-4">
         {contractHistory.map((history, index) => (
-          <div
-            key={history.id}
-            className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0"
-          >
-            {/* Timeline dot */}
+          <div key={history.id} className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
             <div className="flex flex-col items-center">
-              <div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5"></div>
+              <div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5" />
               {index < contractHistory.length - 1 && (
-                <div className="w-0.5 flex-1 bg-gray-300 dark:bg-gray-600 mt-2"></div>
+                <div className="w-0.5 flex-1 bg-gray-300 dark:bg-gray-600 mt-2" />
               )}
             </div>
-
-            {/* Content */}
             <div className="flex-1">
               <div className="flex items-start justify-between gap-4 mb-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white flex-wrap">
                   <span>Status Changed:</span>
-                  <Badge variant={getContractStatusVariant(history.previousStatus)}>
-                    {history.previousStatus}
-                  </Badge>
+                  <Badge variant={getContractStatusVariant(history.previousStatus)}>{history.previousStatus}</Badge>
                   <span>→</span>
-                  <Badge variant={getContractStatusVariant(history.newStatus)}>
-                    {history.newStatus}
-                  </Badge>
+                  <Badge variant={getContractStatusVariant(history.newStatus)}>{history.newStatus}</Badge>
                 </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                  {new Date(history.modificationDate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                  {new Date(history.modificationDate).toLocaleDateString("en-US", {
+                    year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
                   })}
                 </span>
               </div>
@@ -275,18 +228,12 @@ export default function ContractDetailPage() {
   if (isError || !contract) {
     return (
       <div className="space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/contracts")}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={() => router.push("/contracts")} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Contracts
         </Button>
         <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-          <p className="text-red-600 dark:text-red-400">
-            Contract not found or error loading data
-          </p>
+          <p className="text-red-600 dark:text-red-400">Contract not found or error loading data</p>
         </div>
       </div>
     );
@@ -294,40 +241,28 @@ export default function ContractDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Actions */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/contracts")}
-            className="mb-2"
-          >
+          <Button variant="ghost" onClick={() => router.push("/contracts")} className="mb-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Contracts
           </Button>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Contract Details
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Contract Details</h2>
           <p className="text-gray-500 mt-1">{contract.customerName}</p>
         </div>
         <div className="flex gap-2">
-          {/* Show Edit button only for ADMIN */}
           {isAdmin && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEditClick}
-            >
+            <Button variant="outline" size="sm" onClick={() => { setPrefilledContract(null); setEditDialogOpen(true); }}>
               <Pencil className="h-4 w-4 mr-2" />
               Edit
             </Button>
           )}
-          {/* Show Delete button only for ADMIN */}
           {isAdmin && (
             <Button
               variant="destructive"
               size="sm"
-              onClick={handleDeleteClick}
+              onClick={() => setDeleteDialogOpen(true)}
               disabled={deleteMutation.isPending}
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -337,60 +272,31 @@ export default function ContractDetailPage() {
         </div>
       </div>
 
-      {/* Contract Information Card */}
+      {/* General Information */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          General Information
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">General Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Customer Name</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
-              {contract.customerName}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Contract Number</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
-              {contract.contractNumber}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Project Name</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
-              {contract.projectName}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">WBS Code</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
-              {contract.wbsCode}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Start Date</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
-              {new Date(contract.startDate).toLocaleDateString()}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">End Date</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
-              {new Date(contract.endDate).toLocaleDateString()}
-            </p>
-          </div>
+          {[
+            { label: "Customer Name", value: contract.customerName },
+            { label: "Contract Number", value: contract.contractNumber },
+            { label: "Project Name", value: contract.projectName },
+            { label: "WBS Code", value: contract.wbsCode },
+            { label: "Start Date", value: new Date(contract.startDate).toLocaleDateString() },
+            { label: "End Date", value: new Date(contract.endDate).toLocaleDateString() },
+          ].map(({ label, value }) => (
+            <div key={label}>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+              <p className="text-base font-medium text-gray-900 dark:text-white">{value}</p>
+            </div>
+          ))}
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
-            <Badge variant={getContractStatusVariant(contract.status)}>
-              {contract.status}
-            </Badge>
+            <Badge variant={getContractStatusVariant(contract.status)}>{contract.status}</Badge>
           </div>
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400">Manager</p>
             <p className="text-base font-medium text-gray-900 dark:text-white">
-              {contract.manager
-                ? `${contract.manager.firstName} ${contract.manager.lastName}`
-                : "Not assigned"}
+              {contract.manager ? `${contract.manager.firstName} ${contract.manager.lastName}` : "Not assigned"}
             </p>
           </div>
           <div>
@@ -402,47 +308,59 @@ export default function ContractDetailPage() {
         </div>
       </div>
 
-      {/* Financial Values Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Financial Values
-        </h3>
+      {/* Tabs */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        {/* Tab bar */}
+        <div className="flex border-b border-gray-200 dark:border-gray-700">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.id
+                  ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                  : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-        {renderFinancialValues()}
-      </div>
-
-      {/* Contract History Section */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Change History
-        </h3>
-
-        {renderContractHistory()}
+        {/* Tab content */}
+        <div className="p-6">
+          {activeTab === "documents" && (
+            <DocumentsTab
+              contractId={contractId}
+              isAdmin={isAdmin}
+              onApply={handleApplyAnalysis}
+            />
+          )}
+          {activeTab === "financials" && renderFinancialValues()}
+          {activeTab === "history" && renderHistory()}
+        </div>
       </div>
 
       {/* Edit Dialog */}
       {isAdmin && (
-        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) { setPrefilledContract(null); } setEditDialogOpen(open); }}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle>Edit Contract</DialogTitle>
-              <DialogDescription>
-                Update the contract information below
-              </DialogDescription>
+              <DialogDescription>Update the contract information below</DialogDescription>
             </DialogHeader>
-
-            {contract && (
-              <ContractForm
-                contract={contract}
-                onClose={() => setEditDialogOpen(false)}
-                onSuccess={handleEditSuccess}
-              />
-            )}
+            <ContractForm
+              contract={prefilledContract ?? contract}
+              onClose={() => { setPrefilledContract(null); setEditDialogOpen(false); }}
+              onSuccess={handleEditSuccess}
+            />
           </DialogContent>
         </Dialog>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Dialog */}
       {isAdmin && (
         <Dialog
           open={deleteDialogOpen}
@@ -458,18 +376,10 @@ export default function ContractDetailPage() {
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setDeleteDialogOpen(false)}
-                disabled={deleteMutation.isPending}
-              >
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleteMutation.isPending}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={handleDeleteConfirm}
-                disabled={deleteMutation.isPending}
-              >
+              <Button variant="destructive" onClick={handleDeleteConfirm} disabled={deleteMutation.isPending}>
                 {deleteMutation.isPending ? "Deleting..." : "Delete"}
               </Button>
             </DialogFooter>

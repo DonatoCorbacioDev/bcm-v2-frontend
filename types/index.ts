@@ -75,6 +75,26 @@ export interface ContractHistory {
   newStatus: string;
 }
 
+export interface ContractDocument {
+  id: number;
+  contractId: number;
+  fileName: string;
+  fileSize: number;
+  contentType: string;
+  uploadedAt: string;
+  downloadUrl: string;
+}
+
+export interface DocumentAnalysis {
+  documentId: number;
+  rawText: string;
+  detectedCustomerName: string | null;
+  detectedContractNumber: string | null;
+  detectedStartDate: string | null;
+  detectedEndDate: string | null;
+  detectedAmount: string | null;
+}
+
 // Auth types
 export interface LoginRequest {
   username: string;

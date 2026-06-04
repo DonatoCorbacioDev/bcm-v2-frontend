@@ -75,6 +75,16 @@ export interface ContractHistory {
   newStatus: string;
 }
 
+// Notifications
+export interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  type?: "INFO" | "WARNING" | "ERROR";
+}
+
 // Forecasting (FastAPI on port 8000)
 export interface ForecastPoint {
   month: string;

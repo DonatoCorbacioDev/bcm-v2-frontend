@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import NotificationBell from "@/components/layout/NotificationBell";
 
 interface HeaderProps {
   readonly onMenuClick: () => void;
@@ -46,6 +47,7 @@ export default function Header({ onMenuClick, isMenuOpen = false }: HeaderProps)
         </div>
 
         <div className="flex items-center gap-4">
+          <NotificationBell />
           <Link href="/profile" className="hidden sm:block text-sm text-right hover:opacity-75 transition-opacity">
             <p className="font-medium text-gray-900 dark:text-white">
               {user?.username || "User"}

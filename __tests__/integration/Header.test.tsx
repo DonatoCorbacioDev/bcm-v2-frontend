@@ -19,6 +19,11 @@ jest.mock('@/hooks/useAuth', () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock('@/components/layout/NotificationBell', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 jest.mock('@/lib/api', () => ({
   __esModule: true,
   default: {

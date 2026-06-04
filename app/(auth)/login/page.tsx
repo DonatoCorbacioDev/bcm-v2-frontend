@@ -89,10 +89,18 @@ function LoginContent() {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Sign In"}
           </Button>
-          <div className="text-center">
-            <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
-              Forgot password?
-            </Link>
+          <div className="text-center space-y-1">
+            <div>
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">New here? </span>
+              <Link href="/register-org" className="text-sm text-blue-600 hover:underline">
+                Register your organization
+              </Link>
+            </div>
           </div>
         </form>
       </CardContent>

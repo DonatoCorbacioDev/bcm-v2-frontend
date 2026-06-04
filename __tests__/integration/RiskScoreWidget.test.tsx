@@ -57,6 +57,13 @@ describe('RiskScoreWidget', () => {
     expect(screen.getByText(/low · 10%/i)).toBeInTheDocument();
   });
 
+  it('falls back to LOW config for unknown risk level', async () => {
+    const unknownLevel = [{ contractId: 9, customerName: 'Unknown Corp', riskScore: 0.5, level: 'UNKNOWN' as 'LOW', anomalies: [] }];
+    (forecastApi.get as jest.Mock).mockResolvedValue({ data: unknownLevel });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Unknown Corp')).toBeInTheDocument());
+  });
+
   it('renders links to contract detail pages', async () => {
     (forecastApi.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });

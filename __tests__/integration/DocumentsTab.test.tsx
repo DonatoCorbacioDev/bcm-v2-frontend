@@ -177,6 +177,28 @@ describe('DocumentsTab', () => {
     ));
   });
 
+  it('hides raw text section when rawText is empty', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+    (api.post as jest.Mock).mockResolvedValue({ data: { ...analysis, rawText: '' } });
+    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Analizza con AI'));
+    await waitFor(() => expect(screen.getByText(/ai extraction results/i)).toBeInTheDocument());
+    expect(screen.queryByText(/show extracted text/i)).not.toBeInTheDocument();
+  });
+
+  it('apply skips null detected fields', async () => {
+    const nullAnalysis = { ...analysis, detectedCustomerName: null, detectedContractNumber: null, detectedStartDate: null, detectedEndDate: null };
+    (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+    (api.post as jest.Mock).mockResolvedValue({ data: nullAnalysis });
+    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Analizza con AI'));
+    await waitFor(() => expect(screen.getByText(/apply to contract/i)).toBeInTheDocument());
+    await userEvent.click(screen.getByText(/apply to contract/i));
+    expect(onApply).toHaveBeenCalledWith({});
+  });
+
   it('shows error toast when download fails', async () => {
     (api.get as jest.Mock)
       .mockResolvedValueOnce({ data: [doc] })

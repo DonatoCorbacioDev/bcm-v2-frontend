@@ -184,12 +184,11 @@ describe('lib/api', () => {
     mockAxiosPost.mockReturnValueOnce(refreshPending);
     instance.request.mockResolvedValue({ data: 'retried' });
 
-    const error1 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
-    const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
+    // configs with no headers to cover the `headers ?? {}` null branch
+    const error1 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
+    const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
 
-    // First call starts the refresh (isRefreshing becomes true synchronously before the await)
     const promise1 = resErrorFn!(error1);
-    // Second call sees isRefreshing=true and queues itself
     const promise2 = resErrorFn!(error2);
 
     resolveRefresh({ data: { token: 'new-token', refreshToken: 'new-refresh' } });

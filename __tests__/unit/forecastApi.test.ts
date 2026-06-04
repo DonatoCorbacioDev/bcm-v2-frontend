@@ -13,4 +13,13 @@ describe('forecastApi', () => {
   it('has correct timeout', () => {
     expect(forecastApi.defaults.timeout).toBe(8000);
   });
+
+  it('uses NEXT_PUBLIC_FORECAST_URL when defined', () => {
+    jest.resetModules();
+    process.env.NEXT_PUBLIC_FORECAST_URL = 'http://my-fastapi:9000';
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { forecastApi: freshApi } = require('@/lib/forecastApi');
+    expect(freshApi.defaults.baseURL).toBe('http://my-fastapi:9000');
+    delete process.env.NEXT_PUBLIC_FORECAST_URL;
+  });
 });

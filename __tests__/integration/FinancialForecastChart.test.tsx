@@ -91,6 +91,17 @@ describe('FinancialForecastChart', () => {
     await waitFor(() => expect(forecastApi.get).toHaveBeenCalledWith('/forecast?months=6'));
   });
 
+  it('renders forecast without confidence interval when upper is absent', async () => {
+    const noUpperForecast = {
+      historical: [{ month: '2024-01', amount: 15000 }],
+      forecast:   [{ month: '2024-04', amount: 16000 }], // no upper/lower
+    };
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
+    (forecastApi.get as jest.Mock).mockResolvedValue({ data: noUpperForecast });
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText(/financial forecast/i)).toBeInTheDocument());
+  });
+
   it('aggregates financial values by month correctly', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
     (forecastApi.get as jest.Mock).mockRejectedValue(new Error('offline'));

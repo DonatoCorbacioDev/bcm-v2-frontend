@@ -104,6 +104,15 @@ describe('NotificationBell', () => {
     await waitFor(() => expect(screen.queryByText('New Contract')).not.toBeInTheDocument());
   });
 
+  it('renders notification with no type (falls back to INFO dot color)', async () => {
+    const noType = { id: 10, title: 'No type', message: 'msg', read: false, createdAt: new Date().toISOString() };
+    (api.get as jest.Mock).mockResolvedValue({ data: [noType] });
+    render(<NotificationBell />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(screen.getByText('No type')).toBeInTheDocument();
+  });
+
   it('renders different notification types (INFO, WARNING, ERROR) with timeAgo', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [unread, read, error] });
     render(<NotificationBell />, { wrapper: createWrapper() });

@@ -9,9 +9,9 @@ import api from "@/lib/api";
 import type { Contract, ContractDocument, DocumentAnalysis } from "@/types";
 
 interface DocumentsTabProps {
-  contractId: number;
-  isAdmin: boolean;
-  onApply: (detected: Partial<Contract>) => void;
+  readonly contractId: number;
+  readonly isAdmin: boolean;
+  readonly onApply: (detected: Partial<Contract>) => void;
 }
 
 function formatBytes(bytes: number) {

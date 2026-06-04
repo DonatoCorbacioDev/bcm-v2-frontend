@@ -111,10 +111,10 @@ describe('lib/api', () => {
     expect(config.headers).not.toHaveProperty('Authorization');
   });
 
-  it('request error handler rejects with the error', async () => {
+  it('request error handler throws the error', () => {
     loadModule('http://localhost:8080');
     const error = new Error('network error');
-    await expect(reqErrorFn!(error)).rejects.toBe(error);
+    expect(() => reqErrorFn!(error)).toThrow(error);
   });
 
   // ── Response interceptor ───────────────────────────────────────────────────

@@ -47,7 +47,7 @@ function buildChartData(
   }));
   // Join last historical point with first forecast for visual continuity
   if (histPoints.length > 0 && forePoints.length > 0) {
-    const last = histPoints[histPoints.length - 1];
+    const last = histPoints.at(-1)!
     forePoints[0] = { ...forePoints[0], historical: last.historical };
   }
   return [...histPoints, ...forePoints];
@@ -117,15 +117,17 @@ export function FinancialForecastChart() {
       </CardHeader>
 
       <CardContent>
-        {isLoading ? (
+        {isLoading && (
           <div className="h-[300px] flex items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
           </div>
-        ) : chartData.length === 0 ? (
+        )}
+        {!isLoading && chartData.length === 0 && (
           <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">
             No financial data available
           </div>
-        ) : (
+        )}
+        {!isLoading && chartData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
               <defs>

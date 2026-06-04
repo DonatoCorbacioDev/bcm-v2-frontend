@@ -36,7 +36,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error: unknown) => { throw error; }
 );
 
 let isRefreshing = false;
@@ -56,6 +56,13 @@ function processQueue(error: unknown, token: string | null = null) {
   failedQueue = [];
 }
 
+function redirectToLogin() {
+  /* istanbul ignore else */
+  if (globalThis.window !== undefined) {
+    globalThis.window.location.href = "/login";
+  }
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError & { userMessage?: string }) => {
@@ -63,61 +70,11 @@ api.interceptors.response.use(
 
     if (error.response?.status === 429) {
       error.userMessage = "Troppi tentativi, riprova tra 1 minuto";
-      return Promise.reject(error);
+      throw error;
     }
 
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-      const refreshToken = localStorage.getItem("auth_refresh_token");
-
-      if (!refreshToken) {
-        localStorage.removeItem("auth_token");
-        /* istanbul ignore else */
-        if (globalThis.window !== undefined) {
-          globalThis.window.location.href = "/login";
-        }
-        return Promise.reject(error);
-      }
-
-      if (isRefreshing) {
-        return new Promise<string>((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers = originalRequest.headers ?? {};
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api.request(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const response = await axios.post<{ token: string; refreshToken: string }>(
-          `${API_URL}/auth/refresh`,
-          { refreshToken }
-        );
-        const { token, refreshToken: newRefreshToken } = response.data;
-        localStorage.setItem("auth_token", token);
-        localStorage.setItem("auth_refresh_token", newRefreshToken);
-        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        processQueue(null, token);
-        originalRequest.headers = originalRequest.headers ?? {};
-        originalRequest.headers.Authorization = `Bearer ${token}`;
-        return api.request(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError, null);
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem("auth_refresh_token");
-        /* istanbul ignore else */
-        if (globalThis.window !== undefined) {
-          globalThis.window.location.href = "/login";
-        }
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+      return handle401(error, originalRequest);
     }
 
     /* istanbul ignore next */
@@ -125,8 +82,57 @@ api.interceptors.response.use(
       console.error("API Error:", error.response?.data || error.message);
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );
+
+async function handle401(
+  error: AxiosError,
+  originalRequest: NonNullable<typeof error.config> & { _retry?: boolean }
+) {
+  const refreshToken = localStorage.getItem("auth_refresh_token");
+
+  if (!refreshToken) {
+    localStorage.removeItem("auth_token");
+    redirectToLogin();
+    throw error;
+  }
+
+  if (isRefreshing) {
+    return new Promise<string>((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    }).then((token) => {
+      originalRequest.headers = originalRequest.headers ?? {};
+      originalRequest.headers.Authorization = `Bearer ${token}`;
+      return api.request(originalRequest);
+    });
+  }
+
+  originalRequest._retry = true;
+  isRefreshing = true;
+
+  try {
+    const response = await axios.post<{ token: string; refreshToken: string }>(
+      `${API_URL}/auth/refresh`,
+      { refreshToken }
+    );
+    const { token, refreshToken: newRefreshToken } = response.data;
+    localStorage.setItem("auth_token", token);
+    localStorage.setItem("auth_refresh_token", newRefreshToken);
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    processQueue(null, token);
+    originalRequest.headers = originalRequest.headers ?? {};
+    originalRequest.headers.Authorization = `Bearer ${token}`;
+    return api.request(originalRequest);
+  } catch (refreshError) {
+    processQueue(refreshError, null);
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_refresh_token");
+    redirectToLogin();
+    throw refreshError;
+  } finally {
+    isRefreshing = false;
+  }
+}
 
 export default api;

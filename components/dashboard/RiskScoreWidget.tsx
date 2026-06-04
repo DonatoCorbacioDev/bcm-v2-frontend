@@ -99,7 +99,7 @@ export function RiskScoreWidget() {
                           key={a}
                           className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded px-1.5 py-0.5"
                         >
-                          {a.replace(/_/g, " ")}
+                          {a.replaceAll("_", " ")}
                         </span>
                       ))}
                     </div>

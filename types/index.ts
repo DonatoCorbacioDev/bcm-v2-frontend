@@ -75,6 +75,27 @@ export interface ContractHistory {
   newStatus: string;
 }
 
+// Forecasting (FastAPI on port 8000)
+export interface ForecastPoint {
+  month: string;
+  amount: number;
+  lower?: number;
+  upper?: number;
+}
+
+export interface ForecastResponse {
+  historical: ForecastPoint[];
+  forecast: ForecastPoint[];
+}
+
+export interface RiskScore {
+  contractId: number;
+  customerName: string;
+  riskScore: number;
+  level: "LOW" | "MEDIUM" | "HIGH";
+  anomalies: string[];
+}
+
 export interface ContractDocument {
   id: number;
   contractId: number;

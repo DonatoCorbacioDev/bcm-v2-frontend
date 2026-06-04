@@ -10,6 +10,8 @@ import ContractStatsChart from "@/components/dashboard/ContractStatsChart";
 import { ContractsByAreaChart } from "@/components/dashboard/ContractsByAreaChart";
 import { ContractsTimelineChart } from "@/components/dashboard/ContractsTimelineChart";
 import { TopManagersChart } from "@/components/dashboard/TopManagersChart";
+import { FinancialForecastChart } from "@/components/dashboard/FinancialForecastChart";
+import { RiskScoreWidget } from "@/components/dashboard/RiskScoreWidget";
 
 export default function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
@@ -192,6 +194,10 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <ContractsByAreaChart />
         </div>
+
+        {/* Row 4: Financial Forecast (full width) + Risk Score Widget */}
+        <FinancialForecastChart />
+        <RiskScoreWidget />
       </div>
     </div>
   );

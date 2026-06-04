@@ -398,6 +398,19 @@ describe('useAuth', () => {
     expect(mockClearAuth).toHaveBeenCalled();
   });
 
+  it('logout skips api.post and still calls clearAuth when no refreshToken', async () => {
+    const mockClearAuth = jest.fn();
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: mockClearAuth,
+      user: null, isAuthenticated: false,
+    });
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
+    const { result } = renderHook(() => useAuth());
+    await act(async () => { await result.current.logout(); });
+    expect(api.post).not.toHaveBeenCalled();
+    expect(mockClearAuth).toHaveBeenCalled();
+  });
+
   it('logout still calls clearAuth even if api.post fails', async () => {
     const mockClearAuth = jest.fn();
     (useAuthStore as unknown as jest.Mock).mockReturnValue({

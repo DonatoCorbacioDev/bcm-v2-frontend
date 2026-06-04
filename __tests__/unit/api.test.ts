@@ -173,6 +173,31 @@ describe('lib/api', () => {
     expect(mockLocalStorageRemoveItem).toHaveBeenCalledWith('auth_refresh_token');
   });
 
+  it('queues concurrent 401 requests when refresh is already in progress', async () => {
+    const { instance } = loadModule('http://localhost:8080');
+    mockLocalStorageGetItem.mockImplementation((key: string) =>
+      key === 'auth_refresh_token' ? 'refresh-token' : null
+    );
+
+    let resolveRefresh!: (v: unknown) => void;
+    const refreshPending = new Promise((resolve) => { resolveRefresh = resolve; });
+    mockAxiosPost.mockReturnValueOnce(refreshPending);
+    instance.request.mockResolvedValue({ data: 'retried' });
+
+    const error1 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
+    const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
+
+    // First call starts the refresh (isRefreshing becomes true synchronously before the await)
+    const promise1 = resErrorFn!(error1);
+    // Second call sees isRefreshing=true and queues itself
+    const promise2 = resErrorFn!(error2);
+
+    resolveRefresh({ data: { token: 'new-token', refreshToken: 'new-refresh' } });
+
+    await Promise.all([promise1, promise2]);
+    expect(instance.request).toHaveBeenCalledTimes(2);
+  });
+
   it('response error handler skips refresh on already-retried request', async () => {
     loadModule('http://localhost:8080');
     const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: true } };

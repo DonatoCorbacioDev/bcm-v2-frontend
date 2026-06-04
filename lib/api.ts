@@ -1,5 +1,4 @@
-import axios from "axios";
-import Cookies from "js-cookie";
+import axios, { AxiosError } from "axios";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,7 +8,6 @@ if (!API_URL) {
   );
 }
 
-// Allow HTTP for localhost/127.0.0.1, require HTTPS for external domains
 /* istanbul ignore next */
 if (
   process.env.NODE_ENV === "production" &&
@@ -32,7 +30,7 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("auth_token");
+    const token = localStorage.getItem("auth_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -41,14 +39,84 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}> = [];
+
+function processQueue(error: unknown, token: string | null = null) {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token!);
+    }
+  });
+  failedQueue = [];
+}
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      Cookies.remove("auth_token");
-      /* istanbul ignore else */
-      if (globalThis.window !== undefined) {
-        globalThis.window.location.href = "/login";
+  async (error: AxiosError & { userMessage?: string }) => {
+    const originalRequest = error.config as typeof error.config & { _retry?: boolean };
+
+    if (error.response?.status === 429) {
+      error.userMessage = "Troppi tentativi, riprova tra 1 minuto";
+      return Promise.reject(error);
+    }
+
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      const refreshToken = localStorage.getItem("auth_refresh_token");
+
+      if (!refreshToken) {
+        localStorage.removeItem("auth_token");
+        /* istanbul ignore else */
+        if (globalThis.window !== undefined) {
+          globalThis.window.location.href = "/login";
+        }
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        return new Promise<string>((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers = originalRequest.headers ?? {};
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api.request(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const response = await axios.post<{ token: string; refreshToken: string }>(
+          `${API_URL}/auth/refresh`,
+          { refreshToken }
+        );
+        const { token, refreshToken: newRefreshToken } = response.data;
+        localStorage.setItem("auth_token", token);
+        localStorage.setItem("auth_refresh_token", newRefreshToken);
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        processQueue(null, token);
+        originalRequest.headers = originalRequest.headers ?? {};
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return api.request(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_refresh_token");
+        /* istanbul ignore else */
+        if (globalThis.window !== undefined) {
+          globalThis.window.location.href = "/login";
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

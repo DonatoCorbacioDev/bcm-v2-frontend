@@ -1,14 +1,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import Cookies from "js-cookie";
 import type { User } from "@/types";
+
+const TOKEN_KEY = "auth_token";
+const REFRESH_TOKEN_KEY = "auth_refresh_token";
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  setAuth: (user: User, token: string) => void;
+  setAuth: (user: User, token: string, refreshToken: string) => void;
   clearAuth: () => void;
-  getToken: () => string | undefined;
+  getToken: () => string | null;
+  getRefreshToken: () => string | null;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -16,19 +19,18 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      setAuth: (user, token) => {
-        Cookies.set("auth_token", token, {
-          expires: 7,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-        });
+      setAuth: (user, token, refreshToken) => {
+        localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
         set({ user, isAuthenticated: true });
       },
       clearAuth: () => {
-        Cookies.remove("auth_token");
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
         set({ user: null, isAuthenticated: false });
       },
-      getToken: () => Cookies.get("auth_token"),
+      getToken: () => localStorage.getItem(TOKEN_KEY),
+      getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
     }),
     {
       name: "auth-storage",

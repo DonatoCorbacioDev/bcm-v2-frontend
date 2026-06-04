@@ -1,26 +1,35 @@
-import Cookies from "js-cookie";
 import { useAuthStore } from "@/store/authStore";
 
-jest.mock("js-cookie");
-
 const mockUser = { id: 1, username: "testuser", role: "ADMIN", roleId: 1, managerId: 1, verified: true, createdAt: "2024-01-01" };
+
+let setItemSpy: jest.SpyInstance;
+let removeItemSpy: jest.SpyInstance;
+let getItemSpy: jest.SpyInstance;
 
 describe("authStore", () => {
   beforeEach(() => {
     useAuthStore.setState({ user: null, isAuthenticated: false });
-    jest.clearAllMocks();
+    localStorage.clear();
+    setItemSpy = jest.spyOn(Storage.prototype, "setItem");
+    removeItemSpy = jest.spyOn(Storage.prototype, "removeItem");
+    getItemSpy = jest.spyOn(Storage.prototype, "getItem");
   });
 
-  it("setAuth stores user, sets isAuthenticated, and writes cookie", () => {
-    useAuthStore.getState().setAuth(mockUser, "token-abc");
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("setAuth stores user, sets isAuthenticated, and writes tokens to localStorage", () => {
+    useAuthStore.getState().setAuth(mockUser, "token-abc", "refresh-xyz");
 
     const state = useAuthStore.getState();
     expect(state.user).toEqual(mockUser);
     expect(state.isAuthenticated).toBe(true);
-    expect(Cookies.set).toHaveBeenCalledWith("auth_token", "token-abc", expect.objectContaining({ expires: 7 }));
+    expect(setItemSpy).toHaveBeenCalledWith("auth_token", "token-abc");
+    expect(setItemSpy).toHaveBeenCalledWith("auth_refresh_token", "refresh-xyz");
   });
 
-  it("clearAuth removes user, sets isAuthenticated false, and removes cookie", () => {
+  it("clearAuth removes user, sets isAuthenticated false, and removes tokens from localStorage", () => {
     useAuthStore.setState({ user: mockUser, isAuthenticated: true });
 
     useAuthStore.getState().clearAuth();
@@ -28,21 +37,25 @@ describe("authStore", () => {
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();
     expect(state.isAuthenticated).toBe(false);
-    expect(Cookies.remove).toHaveBeenCalledWith("auth_token");
+    expect(removeItemSpy).toHaveBeenCalledWith("auth_token");
+    expect(removeItemSpy).toHaveBeenCalledWith("auth_refresh_token");
   });
 
-  it("getToken returns the cookie value", () => {
-    (Cookies.get as jest.Mock).mockReturnValue("my-token");
+  it("getToken returns the localStorage value", () => {
+    localStorage.setItem("auth_token", "my-token");
     expect(useAuthStore.getState().getToken()).toBe("my-token");
   });
 
-  it("setAuth passes secure and sameSite options to cookie", () => {
-    useAuthStore.getState().setAuth(mockUser, "token-abc");
+  it("getToken returns null when no token in localStorage", () => {
+    expect(useAuthStore.getState().getToken()).toBeNull();
+  });
 
-    expect(Cookies.set).toHaveBeenCalledWith(
-      "auth_token",
-      "token-abc",
-      expect.objectContaining({ sameSite: "strict" })
-    );
+  it("getRefreshToken returns the localStorage value", () => {
+    localStorage.setItem("auth_refresh_token", "my-refresh");
+    expect(useAuthStore.getState().getRefreshToken()).toBe("my-refresh");
+  });
+
+  it("getRefreshToken returns null when no refresh token in localStorage", () => {
+    expect(useAuthStore.getState().getRefreshToken()).toBeNull();
   });
 });

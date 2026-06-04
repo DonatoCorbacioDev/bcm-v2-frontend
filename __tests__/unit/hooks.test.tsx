@@ -383,30 +383,52 @@ describe('useUpsertContract', () => {
 // ─── useAuth ─────────────────────────────────────────────────────────────────
 
 describe('useAuth', () => {
-  it('logout calls clearAuth', () => {
+  it('logout calls api.post with refreshToken and then clearAuth', async () => {
     const mockClearAuth = jest.fn();
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: jest.fn(), clearAuth: mockClearAuth,
       user: null, isAuthenticated: false,
     });
+    (api.post as jest.Mock).mockResolvedValue({});
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('refresh-token');
+
     const { result } = renderHook(() => useAuth());
-    act(() => { result.current.logout(); });
+    await act(async () => { await result.current.logout(); });
+    expect(api.post).toHaveBeenCalledWith('/auth/logout', { refreshToken: 'refresh-token' });
     expect(mockClearAuth).toHaveBeenCalled();
   });
 
-  it('login succeeds and calls setAuth', async () => {
+  it('logout still calls clearAuth even if api.post fails', async () => {
+    const mockClearAuth = jest.fn();
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: mockClearAuth,
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue(new Error('network error'));
+    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('refresh-token');
+
+    const { result } = renderHook(() => useAuth());
+    await act(async () => { await result.current.logout(); });
+    expect(mockClearAuth).toHaveBeenCalled();
+  });
+
+  it('login succeeds and calls setAuth with token and refreshToken', async () => {
     const mockSetAuth = jest.fn();
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: mockSetAuth, clearAuth: jest.fn(),
       user: null, isAuthenticated: false,
     });
-    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123' } });
+    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123', refreshToken: 'refresh-xyz' } });
     (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
     const { result } = renderHook(() => useAuth());
     let success: boolean | undefined;
     await act(async () => { success = await result.current.login({ username: 'alice', password: 'pw' }); });
     expect(success).toBe(true);
-    expect(mockSetAuth).toHaveBeenCalled();
+    expect(mockSetAuth).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1, username: 'alice' }),
+      'abc123',
+      'refresh-xyz'
+    );
   });
 
   it('login fails and sets error message from response', async () => {

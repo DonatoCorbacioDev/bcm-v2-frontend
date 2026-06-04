@@ -83,6 +83,7 @@ export interface LoginRequest {
 
 export interface AuthResponse {
   token: string;
+  refreshToken: string;
   user: User;
 }
 

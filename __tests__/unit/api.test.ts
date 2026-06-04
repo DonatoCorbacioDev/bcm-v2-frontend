@@ -1,4 +1,4 @@
-// Tests for lib/api.ts using jest.isolateModules so each test loads a fresh
+// Tests for lib/api.ts using jest.resetModules so each test loads a fresh
 // copy of the module with the desired env configuration.
 
 const ORIGINAL_API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -8,16 +8,32 @@ describe('lib/api', () => {
   let reqErrorFn: ((error: unknown) => Promise<unknown>) | undefined;
   let resSuccessFn: ((response: unknown) => unknown) | undefined;
   let resErrorFn: ((error: unknown) => Promise<unknown>) | undefined;
-  let mockCookiesGet: jest.Mock;
-  let mockCookiesRemove: jest.Mock;
+  let mockLocalStorageGetItem: jest.Mock;
+  let mockLocalStorageSetItem: jest.Mock;
+  let mockLocalStorageRemoveItem: jest.Mock;
+  let mockAxiosPost: jest.Mock;
 
   function loadModule(url: string) {
     process.env.NEXT_PUBLIC_API_URL = url;
 
-    mockCookiesGet = jest.fn();
-    mockCookiesRemove = jest.fn();
+    mockLocalStorageGetItem = jest.fn();
+    mockLocalStorageSetItem = jest.fn();
+    mockLocalStorageRemoveItem = jest.fn();
+    mockAxiosPost = jest.fn();
+
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: {
+        getItem: mockLocalStorageGetItem,
+        setItem: mockLocalStorageSetItem,
+        removeItem: mockLocalStorageRemoveItem,
+      },
+      configurable: true,
+      writable: true,
+    });
 
     const mockInstance = {
+      request: jest.fn(),
+      defaults: { headers: { common: {} } },
       interceptors: {
         request: {
           use: jest.fn((success: typeof reqSuccessFn, error: typeof reqErrorFn) => {
@@ -36,12 +52,10 @@ describe('lib/api', () => {
 
     jest.doMock('axios', () => ({
       __esModule: true,
-      default: { create: jest.fn(() => mockInstance) },
-    }));
-
-    jest.doMock('js-cookie', () => ({
-      __esModule: true,
-      default: { get: mockCookiesGet, remove: mockCookiesRemove },
+      default: {
+        create: jest.fn(() => mockInstance),
+        post: mockAxiosPost,
+      },
     }));
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -69,7 +83,6 @@ describe('lib/api', () => {
   it('throws when NEXT_PUBLIC_API_URL is not defined', () => {
     delete process.env.NEXT_PUBLIC_API_URL;
     jest.doMock('axios', () => ({ __esModule: true, default: { create: jest.fn() } }));
-    jest.doMock('js-cookie', () => ({ __esModule: true, default: { get: jest.fn(), remove: jest.fn() } }));
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     expect(() => require('@/lib/api')).toThrow('NEXT_PUBLIC_API_URL is not defined');
   });
@@ -84,7 +97,7 @@ describe('lib/api', () => {
 
   it('request interceptor adds Authorization header when token exists', () => {
     loadModule('http://localhost:8080');
-    mockCookiesGet.mockReturnValue('mytoken');
+    mockLocalStorageGetItem.mockReturnValue('mytoken');
     const config = { headers: {} as Record<string, string> };
     const result = reqSuccessFn!(config) as typeof config;
     expect(result.headers.Authorization).toBe('Bearer mytoken');
@@ -92,7 +105,7 @@ describe('lib/api', () => {
 
   it('request interceptor skips Authorization when no token', () => {
     loadModule('http://localhost:8080');
-    mockCookiesGet.mockReturnValue(undefined);
+    mockLocalStorageGetItem.mockReturnValue(null);
     const config = { headers: {} as Record<string, string> };
     reqSuccessFn!(config);
     expect(config.headers).not.toHaveProperty('Authorization');
@@ -112,24 +125,73 @@ describe('lib/api', () => {
     expect(resSuccessFn!(response)).toBe(response);
   });
 
-  it('response error handler removes cookie on 401', async () => {
+  it('response error handler on 429 attaches userMessage and rejects', async () => {
     loadModule('http://localhost:8080');
-    const error = { response: { status: 401, data: null }, message: 'Unauthorized' };
-    await expect(resErrorFn!(error)).rejects.toBe(error);
-    expect(mockCookiesRemove).toHaveBeenCalledWith('auth_token');
+    const error = { response: { status: 429, data: null }, message: 'Too Many Requests', config: {} };
+    const rejected = resErrorFn!(error) as Promise<unknown>;
+    await expect(rejected).rejects.toMatchObject({ userMessage: 'Troppi tentativi, riprova tra 1 minuto' });
   });
 
-  it('response error handler does not remove cookie on non-401', async () => {
+  it('response error handler on 401 without refreshToken removes token and redirects', async () => {
     loadModule('http://localhost:8080');
-    const error = { response: { status: 500, data: null }, message: 'Server Error' };
+    mockLocalStorageGetItem.mockReturnValue(null);
+    const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
     await expect(resErrorFn!(error)).rejects.toBe(error);
-    expect(mockCookiesRemove).not.toHaveBeenCalled();
+    expect(mockLocalStorageRemoveItem).toHaveBeenCalledWith('auth_token');
   });
 
-  it('response error handler does not remove cookie when response is absent', async () => {
+  it('response error handler on 401 with refreshToken calls refresh endpoint', async () => {
+    const { instance } = loadModule('http://localhost:8080');
+    mockLocalStorageGetItem.mockImplementation((key: string) =>
+      key === 'auth_refresh_token' ? 'refresh-token' : null
+    );
+    mockAxiosPost.mockResolvedValue({ data: { token: 'new-token', refreshToken: 'new-refresh' } });
+    instance.request.mockResolvedValue({ data: 'retried' });
+
+    const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
+    await resErrorFn!(error);
+
+    expect(mockAxiosPost).toHaveBeenCalledWith(
+      'http://localhost:8080/auth/refresh',
+      { refreshToken: 'refresh-token' }
+    );
+    expect(mockLocalStorageSetItem).toHaveBeenCalledWith('auth_token', 'new-token');
+    expect(mockLocalStorageSetItem).toHaveBeenCalledWith('auth_refresh_token', 'new-refresh');
+    expect(instance.request).toHaveBeenCalled();
+  });
+
+  it('response error handler on 401 with refreshToken → refresh fails → redirects', async () => {
     loadModule('http://localhost:8080');
-    const error = { response: undefined, message: 'Network Error' };
+    mockLocalStorageGetItem.mockImplementation((key: string) =>
+      key === 'auth_refresh_token' ? 'refresh-token' : null
+    );
+    mockAxiosPost.mockRejectedValue(new Error('refresh failed'));
+
+    const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
+    await expect(resErrorFn!(error)).rejects.toThrow('refresh failed');
+    expect(mockLocalStorageRemoveItem).toHaveBeenCalledWith('auth_token');
+    expect(mockLocalStorageRemoveItem).toHaveBeenCalledWith('auth_refresh_token');
+  });
+
+  it('response error handler skips refresh on already-retried request', async () => {
+    loadModule('http://localhost:8080');
+    const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: true } };
     await expect(resErrorFn!(error)).rejects.toBe(error);
-    expect(mockCookiesRemove).not.toHaveBeenCalled();
+    expect(mockAxiosPost).not.toHaveBeenCalled();
+  });
+
+  it('response error handler does not act on non-401 non-429', async () => {
+    loadModule('http://localhost:8080');
+    const error = { response: { status: 500, data: null }, message: 'Server Error', config: {} };
+    await expect(resErrorFn!(error)).rejects.toBe(error);
+    expect(mockLocalStorageRemoveItem).not.toHaveBeenCalled();
+    expect(mockAxiosPost).not.toHaveBeenCalled();
+  });
+
+  it('response error handler does not act when response is absent', async () => {
+    loadModule('http://localhost:8080');
+    const error = { response: undefined, message: 'Network Error', config: {} };
+    await expect(resErrorFn!(error)).rejects.toBe(error);
+    expect(mockLocalStorageRemoveItem).not.toHaveBeenCalled();
   });
 });

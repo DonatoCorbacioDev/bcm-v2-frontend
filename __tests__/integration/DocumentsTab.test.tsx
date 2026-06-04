@@ -251,6 +251,25 @@ describe('DocumentsTab', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to upload document'));
   });
 
+  it('shows error toast when delete fails', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+    (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));
+    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Delete'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to delete document'));
+  });
+
+  it('clicks the hidden file input when upload button is clicked', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByRole('button', { name: /upload pdf/i })).toBeInTheDocument());
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const clickSpy = jest.spyOn(input, 'click').mockImplementation(() => {});
+    await userEvent.click(screen.getByRole('button', { name: /upload pdf/i }));
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
   it('shows error toast when analysis fails', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockRejectedValue(new Error('analysis failed'));

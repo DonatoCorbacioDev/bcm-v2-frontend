@@ -161,6 +161,30 @@ describe('lib/api', () => {
     expect(instance.request).toHaveBeenCalled();
   });
 
+  it('processQueue rejects queued requests when refresh fails', async () => {
+    const { instance } = loadModule('http://localhost:8080');
+    mockLocalStorageGetItem.mockImplementation((key: string) =>
+      key === 'auth_refresh_token' ? 'refresh-token' : null
+    );
+
+    let rejectRefresh!: (e: unknown) => void;
+    const refreshPending = new Promise((_, reject) => { rejectRefresh = reject; });
+    mockAxiosPost.mockReturnValueOnce(refreshPending);
+    instance.request.mockResolvedValue({ data: 'retried' });
+
+    const error1 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
+    const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
+
+    const promise1 = resErrorFn!(error1);
+    const promise2 = resErrorFn!(error2); // queued — will hit reject(error) when refresh fails
+
+    const refreshErr = new Error('refresh failed');
+    rejectRefresh(refreshErr);
+
+    await expect(promise1).rejects.toBe(refreshErr);
+    await expect(promise2).rejects.toBe(refreshErr);
+  });
+
   it('response error handler on 401 with refreshToken → refresh fails → redirects', async () => {
     loadModule('http://localhost:8080');
     mockLocalStorageGetItem.mockImplementation((key: string) =>

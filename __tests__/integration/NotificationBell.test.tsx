@@ -18,9 +18,10 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }))
 import api from '@/lib/api';
 import NotificationBell from '@/components/layout/NotificationBell';
 
-const unread = { id: 1, title: 'New Contract', message: 'A new contract was added', read: false, createdAt: new Date().toISOString(), type: 'INFO' as const };
-const read   = { id: 2, title: 'Reminder',     message: 'Contract expiring',         read: true,  createdAt: new Date(Date.now() - 3700000).toISOString(), type: 'WARNING' as const };
-const error  = { id: 3, title: 'Error',         message: 'Something failed',          read: false, createdAt: new Date(Date.now() - 90000000).toISOString(), type: 'ERROR' as const };
+const unread  = { id: 1, title: 'New Contract', message: 'A new contract was added', read: false, createdAt: new Date().toISOString(),                        type: 'INFO' as const };
+const read    = { id: 2, title: 'Reminder',     message: 'Contract expiring',         read: true,  createdAt: new Date(Date.now() - 1800000).toISOString(),  type: 'WARNING' as const }; // 30m ago
+const error   = { id: 3, title: 'Error',         message: 'Something failed',          read: false, createdAt: new Date(Date.now() - 3700000).toISOString(),  type: 'ERROR' as const };  // 1h ago
+const oldNote = { id: 4, title: 'Old',           message: 'Old notification',          read: true,  createdAt: new Date(Date.now() - 90000000).toISOString(), type: 'INFO' as const };   // 1d ago
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -133,7 +134,7 @@ describe('NotificationBell', () => {
   });
 
   it('renders different notification types (INFO, WARNING, ERROR) with timeAgo', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [unread, read, error] });
+    (api.get as jest.Mock).mockResolvedValue({ data: [unread, read, error, oldNote] });
     render(<NotificationBell />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByRole('button', { name: /notifications/i })).toBeInTheDocument());
     await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
@@ -142,6 +143,7 @@ describe('NotificationBell', () => {
     expect(screen.getByText('Error')).toBeInTheDocument();
     // timeAgo branches: just now, h ago, d ago
     expect(screen.getByText('just now')).toBeInTheDocument();
+    expect(screen.getByText('30m ago')).toBeInTheDocument();
     expect(screen.getByText('1h ago')).toBeInTheDocument();
     expect(screen.getByText('1d ago')).toBeInTheDocument();
   });

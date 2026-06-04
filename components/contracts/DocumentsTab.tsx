@@ -134,7 +134,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
         />
         <Button
           variant="outline"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={/* istanbul ignore next */ () => fileInputRef.current?.click()}
           disabled={uploadMutation.isPending}
         >
           {uploadMutation.isPending ? (

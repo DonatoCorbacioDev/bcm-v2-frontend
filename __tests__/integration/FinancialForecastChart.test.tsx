@@ -34,6 +34,7 @@ const financialValues = [
   { id: 1, month: 1, year: 2024, financialAmount: 10000, financialTypeId: 1, businessAreaId: 1, contractId: 1 },
   { id: 2, month: 1, year: 2024, financialAmount: 5000,  financialTypeId: 2, businessAreaId: 1, contractId: 1 },
   { id: 3, month: 2, year: 2024, financialAmount: 8000,  financialTypeId: 1, businessAreaId: 1, contractId: 2 },
+  { id: 4, month: 3, year: 2024, financialAmount: null as unknown as number, financialTypeId: 1, businessAreaId: 1, contractId: 3 }, // covers financialAmount ?? 0
 ];
 
 const forecastResponse = {

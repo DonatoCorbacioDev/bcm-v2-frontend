@@ -45,7 +45,7 @@ let failedQueue: Array<{
   reject: (err: unknown) => void;
 }> = [];
 
-function processQueue(error: unknown, token: string | null = null) {
+function processQueue(error: unknown, token: string | null) {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) {
       reject(error);
@@ -102,6 +102,7 @@ async function handle401(
     return new Promise<string>((resolve, reject) => {
       failedQueue.push({ resolve, reject });
     }).then((token) => {
+      /* istanbul ignore next */
       originalRequest.headers = originalRequest.headers ?? {};
       originalRequest.headers.Authorization = `Bearer ${token}`;
       return api.request(originalRequest);

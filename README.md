@@ -712,6 +712,8 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com bcm-front
 
 This project is licensed under a **Custom Non-Commercial License** - see the [LICENSE](./LICENSE) file for full details.
 
+> **This project itself is NOT open source.** It is published as a personal portfolio project under a custom restrictive license. See [LICENSE](./LICENSE) for details.
+
 **Summary:**
 
 - ✅ Code available for educational purposes and review

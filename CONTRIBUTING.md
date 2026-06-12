@@ -120,7 +120,7 @@ Users working at night need a dark theme to reduce eye strain.
 ### Contributing Code
 
 1. **Fork the repository**
-2. **Create a feature branch** from `develop`
+2. **Create a feature branch** from `main`
 3. **Make your changes** following coding standards
 4. **Write/update tests** (if applicable)
 5. **Update documentation** if needed
@@ -477,7 +477,7 @@ chore(deps): update dependencies to latest versions
 - [ ] Tested in multiple browsers (Chrome, Firefox, Safari)
 - [ ] Tested responsive design (mobile, tablet, desktop)
 - [ ] Commit messages follow convention
-- [ ] Branch is up-to-date with `develop`
+- [ ] Branch is up-to-date with `main`
 
 ### Submitting
 
@@ -487,7 +487,7 @@ chore(deps): update dependencies to latest versions
    ```
 
 2. **Open Pull Request:**
-   - Base: `develop` (not `main`)
+   - Base: `main`
    - Title: Use conventional commit format
    - Description: Use the template
 

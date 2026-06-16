@@ -13,6 +13,7 @@ import {
   Building2,
   Users,
   User,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 
@@ -24,6 +25,7 @@ const navItems: { label: string; href: string; icon: LucideIcon; adminOnly?: boo
   { label: "Business Areas",   href: "/business-areas",   icon: Building2, adminOnly: true },
   { label: "Managers",         href: "/managers",         icon: Users,     adminOnly: true },
   { label: "Users",            href: "/users",            icon: User,      adminOnly: true },
+  { label: "Audit Log",        href: "/audit-logs",       icon: Shield,    adminOnly: true },
 ];
 
 interface SidebarProps {

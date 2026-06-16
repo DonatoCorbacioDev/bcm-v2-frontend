@@ -41,6 +41,7 @@ function actionBadgeClass(action: string): string {
 }
 
 const PAGE_SIZE = 20;
+const SKELETON_ROW_KEYS = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"];
 
 export default function AuditLogsPage() {
   const router = useRouter();
@@ -72,6 +73,102 @@ function AuditLogsContent({
     },
   });
 
+  const renderTableContent = () => {
+    if (!data || data.content.length === 0) return <EmptyState />;
+    return (
+      <>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900">
+              <tr>
+                {["Timestamp", "Action", "Entity Type", "Entity ID", "Username", "Details"].map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {data.content.map((log) => (
+                <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    {new Date(log.timestamp).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <Badge
+                      variant={actionBadgeVariant(log.action)}
+                      className={actionBadgeClass(log.action)}
+                    >
+                      {log.action}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
+                    {log.entityType}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    {log.entityId}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
+                    {log.username}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[240px]">
+                    {log.details ? (
+                      <span title={log.details}>
+                        {log.details.length > 60
+                          ? `${log.details.slice(0, 60)}…`
+                          : log.details}
+                      </span>
+                    ) : (
+                      <span className="italic text-gray-400 dark:text-gray-600">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {data.totalElements} total entries
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page - 1)}
+              disabled={page === 0}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              Page {page + 1} of {data.totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onPageChange(page + 1)}
+              disabled={page >= data.totalPages - 1}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -89,102 +186,7 @@ function AuditLogsContent({
 
       {/* Table card */}
       <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        {isLoading ? (
-          <SkeletonTable />
-        ) : !data || data.content.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-900">
-                  <tr>
-                    {["Timestamp", "Action", "Entity Type", "Entity ID", "Username", "Details"].map((h) => (
-                      <th
-                        key={h}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                  {data.content.map((log) => (
-                    <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                        {new Date(log.timestamp).toLocaleString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                        })}
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <Badge
-                          variant={actionBadgeVariant(log.action)}
-                          className={actionBadgeClass(log.action)}
-                        >
-                          {log.action}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
-                        {log.entityType}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                        {log.entityId}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
-                        {log.username}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[240px]">
-                        {log.details ? (
-                          <span title={log.details}>
-                            {log.details.length > 60
-                              ? `${log.details.slice(0, 60)}…`
-                              : log.details}
-                          </span>
-                        ) : (
-                          <span className="italic text-gray-400 dark:text-gray-600">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {data.totalElements} total entries
-              </p>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onPageChange(page - 1)}
-                  disabled={page === 0}
-                >
-                  Previous
-                </Button>
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Page {page + 1} of {data.totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onPageChange(page + 1)}
-                  disabled={page >= data.totalPages - 1}
-                >
-                  Next
-                </Button>
-              </div>
-            </div>
-          </>
-        )}
+        {isLoading ? <SkeletonTable /> : renderTableContent()}
       </div>
     </div>
   );
@@ -194,8 +196,8 @@ function SkeletonTable() {
   return (
     <div className="p-4 space-y-3">
       <div className="h-8 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="h-10 w-full bg-gray-100 dark:bg-gray-750 rounded animate-pulse" />
+      {SKELETON_ROW_KEYS.map((key) => (
+        <div key={key} className="h-10 w-full bg-gray-100 dark:bg-gray-750 rounded animate-pulse" />
       ))}
     </div>
   );

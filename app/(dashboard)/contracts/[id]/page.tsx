@@ -8,7 +8,7 @@ import { useContract } from "@/hooks/useContract";
 import { useAuthStore } from "@/store/authStore";
 import { contractsService } from "@/services/contracts.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
-import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText } from "lucide-react";
+import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,11 +21,12 @@ import {
 } from "@/components/ui/dialog";
 import ContractForm from "@/components/contracts/ContractForm";
 import DocumentsTab from "@/components/contracts/DocumentsTab";
+import InvoicesTab from "@/components/contracts/InvoicesTab";
 import api from "@/lib/api";
 import { getContractStatusVariant } from "@/lib/utils";
 import type { Contract, FinancialValue, ContractHistory } from "@/types";
 
-type Tab = "documents" | "financials" | "history";
+type Tab = "documents" | "financials" | "history" | "invoices";
 
 export default function ContractDetailPage() {
   const params = useParams();
@@ -96,6 +97,7 @@ export default function ContractDetailPage() {
     { id: "documents", label: "Documents", icon: <FileText className="h-4 w-4" /> },
     { id: "financials", label: "Financial Values", icon: <DollarSign className="h-4 w-4" /> },
     { id: "history", label: "Change History", icon: <History className="h-4 w-4" /> },
+    { id: "invoices", label: "Invoices", icon: <Receipt className="h-4 w-4" /> },
   ];
 
   const renderFinancialValues = () => {
@@ -340,6 +342,9 @@ export default function ContractDetailPage() {
           )}
           {activeTab === "financials" && renderFinancialValues()}
           {activeTab === "history" && renderHistory()}
+          {activeTab === "invoices" && (
+            <InvoicesTab contractId={contractId} isAdmin={isAdmin} />
+          )}
         </div>
       </div>
 

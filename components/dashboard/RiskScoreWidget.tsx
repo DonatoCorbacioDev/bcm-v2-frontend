@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ShieldAlert, WifiOff, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { forecastApi } from "@/lib/forecastApi";
+import { api } from "@/lib/api";
 import type { RiskScore } from "@/types";
 
 const LEVEL_CONFIG = {
@@ -22,7 +22,7 @@ export function RiskScoreWidget() {
   } = useQuery<RiskScore[]>({
     queryKey: ["risk-scores"],
     queryFn: async () => {
-      const res = await forecastApi.get<RiskScore[]>("/risk-scores");
+      const res = await api.get<RiskScore[]>("/risk-scores");
       return res.data;
     },
     retry: false,
@@ -53,7 +53,7 @@ export function RiskScoreWidget() {
               Risk analysis unavailable
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Start the forecasting service on port 8000
+              Make sure the backend and forecasting service are running
             </p>
           </div>
         )}

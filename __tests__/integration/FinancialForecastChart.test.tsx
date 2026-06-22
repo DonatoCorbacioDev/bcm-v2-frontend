@@ -24,10 +24,10 @@ jest.mock('recharts', () => ({
 }));
 
 jest.mock('@/hooks/useFinancialValues', () => ({ useFinancialValues: jest.fn() }));
-jest.mock('@/lib/forecastApi', () => ({ forecastApi: { get: jest.fn() } }));
+jest.mock('@/lib/api', () => ({ api: { get: jest.fn() } }));
 
 import { useFinancialValues } from '@/hooks/useFinancialValues';
-import { forecastApi } from '@/lib/forecastApi';
+import { api } from '@/lib/api';
 import { FinancialForecastChart } from '@/components/dashboard/FinancialForecastChart';
 
 const financialValues = [
@@ -47,28 +47,28 @@ beforeEach(() => jest.clearAllMocks());
 describe('FinancialForecastChart', () => {
   it('shows loading spinner while data is fetching', () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: undefined, isLoading: true });
-    (forecastApi.get as jest.Mock).mockReturnValue(new Promise(() => {}));
+    (api.get as jest.Mock).mockReturnValue(new Promise(() => {}));
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   it('shows empty state when no data', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
-    (forecastApi.get as jest.Mock).mockResolvedValue({ data: { historical: [], forecast: [] } });
+    (api.get as jest.Mock).mockResolvedValue({ data: { historical: [], forecast: [] } });
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByText(/no financial data available/i)).toBeInTheDocument());
   });
 
   it('renders chart with historical data from useFinancialValues when FastAPI offline', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
-    (forecastApi.get as jest.Mock).mockRejectedValue(new Error('offline'));
+    (api.get as jest.Mock).mockRejectedValue(new Error('offline'));
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByText(/forecast offline/i)).toBeInTheDocument());
   });
 
   it('renders chart with historical + forecast data from FastAPI', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
-    (forecastApi.get as jest.Mock).mockResolvedValue({ data: forecastResponse });
+    (api.get as jest.Mock).mockResolvedValue({ data: forecastResponse });
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByText(/financial forecast/i)).toBeInTheDocument());
     expect(screen.queryByText(/forecast offline/i)).not.toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('FinancialForecastChart', () => {
 
   it('disables horizon buttons when forecast is offline', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
-    (forecastApi.get as jest.Mock).mockRejectedValue(new Error('offline'));
+    (api.get as jest.Mock).mockRejectedValue(new Error('offline'));
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByText(/forecast offline/i)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: '3M' })).toBeDisabled();
@@ -85,11 +85,11 @@ describe('FinancialForecastChart', () => {
 
   it('switches horizon from 3M to 6M', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
-    (forecastApi.get as jest.Mock).mockResolvedValue({ data: forecastResponse });
+    (api.get as jest.Mock).mockResolvedValue({ data: forecastResponse });
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByRole('button', { name: '6M' })).toBeInTheDocument());
     await userEvent.click(screen.getByRole('button', { name: '6M' }));
-    await waitFor(() => expect(forecastApi.get).toHaveBeenCalledWith('/forecast?months=6'));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/forecast?months=6'));
   });
 
   it('renders forecast without confidence interval when upper is absent', async () => {
@@ -98,21 +98,21 @@ describe('FinancialForecastChart', () => {
       forecast:   [{ month: '2024-04', amount: 16000 }], // no upper/lower
     };
     (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
-    (forecastApi.get as jest.Mock).mockResolvedValue({ data: noUpperForecast });
+    (api.get as jest.Mock).mockResolvedValue({ data: noUpperForecast });
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByText(/financial forecast/i)).toBeInTheDocument());
   });
 
   it('handles undefined financial values (uses empty array fallback) when FastAPI offline', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: undefined, isLoading: false });
-    (forecastApi.get as jest.Mock).mockRejectedValue(new Error('offline'));
+    (api.get as jest.Mock).mockRejectedValue(new Error('offline'));
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByText(/no financial data available/i)).toBeInTheDocument());
   });
 
   it('aggregates financial values by month correctly', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
-    (forecastApi.get as jest.Mock).mockRejectedValue(new Error('offline'));
+    (api.get as jest.Mock).mockRejectedValue(new Error('offline'));
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     // aggregateHistorical groups month=1/year=2024 → 15000, month=2/year=2024 → 8000
     await waitFor(() => expect(screen.getByText(/financial forecast/i)).toBeInTheDocument());

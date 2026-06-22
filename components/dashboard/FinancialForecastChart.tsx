@@ -9,7 +9,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WifiOff, Loader2 } from "lucide-react";
-import { forecastApi } from "@/lib/forecastApi";
+import { api } from "@/lib/api";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
 import type { ForecastResponse, ForecastPoint, FinancialValue } from "@/types";
 
@@ -68,7 +68,7 @@ export function FinancialForecastChart() {
   } = useQuery<ForecastResponse>({
     queryKey: ["forecast", horizon],
     queryFn: async () => {
-      const res = await forecastApi.get<ForecastResponse>(`/forecast?months=${horizon}`);
+      const res = await api.get<ForecastResponse>(`/forecast?months=${horizon}`);
       return res.data;
     },
     retry: false,

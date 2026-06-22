@@ -6,7 +6,6 @@ import { AxiosError } from "axios";
 
 interface BackendAuthResponse {
   token: string;
-  refreshToken: string;
 }
 
 interface UserProfile {
@@ -33,14 +32,17 @@ export const useAuth = () => {
     setError(null);
     try {
       const loginResponse = await api.post<BackendAuthResponse>("/auth/login", credentials);
-      const { token, refreshToken } = loginResponse.data;
+      const { token } = loginResponse.data;
 
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-      const profileResponse = await api.get<UserProfile>("/auth/me");
+      // setAuth() stores the access token in memory; the request interceptor
+      // in lib/api.ts reads it from the store on every call, so there's no
+      // need to set a default Authorization header here.
+      const profileResponse = await api.get<UserProfile>("/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const userProfile = profileResponse.data;
 
-      setAuth(userProfile, token, refreshToken);
+      setAuth(userProfile, token);
       return true;
     } catch (err) {
       const apiError = err as ApiError;
@@ -57,10 +59,9 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      const refreshToken = localStorage.getItem("auth_refresh_token");
-      if (refreshToken) {
-        await api.post("/auth/logout", { refreshToken });
-      }
+      // The refresh_token cookie is sent automatically; the backend revokes
+      // it and clears the cookie in its response.
+      await api.post("/auth/logout");
     } catch {
       // proceed with clearing auth even if server-side revocation fails
     } finally {

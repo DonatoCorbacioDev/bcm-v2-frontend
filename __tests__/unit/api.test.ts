@@ -8,28 +8,28 @@ describe('lib/api', () => {
   let reqErrorFn: ((error: unknown) => Promise<unknown>) | undefined;
   let resSuccessFn: ((response: unknown) => unknown) | undefined;
   let resErrorFn: ((error: unknown) => Promise<unknown>) | undefined;
-  let mockLocalStorageGetItem: jest.Mock;
-  let mockLocalStorageSetItem: jest.Mock;
-  let mockLocalStorageRemoveItem: jest.Mock;
+  let mockGetToken: jest.Mock;
+  let mockSetAccessToken: jest.Mock;
+  let mockClearAuth: jest.Mock;
   let mockAxiosPost: jest.Mock;
 
   function loadModule(url: string) {
     process.env.NEXT_PUBLIC_API_URL = url;
 
-    mockLocalStorageGetItem = jest.fn();
-    mockLocalStorageSetItem = jest.fn();
-    mockLocalStorageRemoveItem = jest.fn();
+    mockGetToken = jest.fn();
+    mockSetAccessToken = jest.fn();
+    mockClearAuth = jest.fn();
     mockAxiosPost = jest.fn();
 
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: {
-        getItem: mockLocalStorageGetItem,
-        setItem: mockLocalStorageSetItem,
-        removeItem: mockLocalStorageRemoveItem,
+    jest.doMock('@/store/authStore', () => ({
+      useAuthStore: {
+        getState: () => ({
+          getToken: mockGetToken,
+          setAccessToken: mockSetAccessToken,
+          clearAuth: mockClearAuth,
+        }),
       },
-      configurable: true,
-      writable: true,
-    });
+    }));
 
     const mockInstance = {
       request: jest.fn(),
@@ -97,7 +97,7 @@ describe('lib/api', () => {
 
   it('request interceptor adds Authorization header when token exists', () => {
     loadModule('http://localhost:8080');
-    mockLocalStorageGetItem.mockReturnValue('mytoken');
+    mockGetToken.mockReturnValue('mytoken');
     const config = { headers: {} as Record<string, string> };
     const result = reqSuccessFn!(config) as typeof config;
     expect(result.headers.Authorization).toBe('Bearer mytoken');
@@ -105,7 +105,7 @@ describe('lib/api', () => {
 
   it('request interceptor skips Authorization when no token', () => {
     loadModule('http://localhost:8080');
-    mockLocalStorageGetItem.mockReturnValue(null);
+    mockGetToken.mockReturnValue(null);
     const config = { headers: {} as Record<string, string> };
     reqSuccessFn!(config);
     expect(config.headers).not.toHaveProperty('Authorization');
@@ -132,40 +132,25 @@ describe('lib/api', () => {
     await expect(rejected).rejects.toMatchObject({ userMessage: 'Troppi tentativi, riprova tra 1 minuto' });
   });
 
-  it('response error handler on 401 without refreshToken removes token and redirects', async () => {
-    loadModule('http://localhost:8080');
-    mockLocalStorageGetItem.mockReturnValue(null);
-    const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
-    await expect(resErrorFn!(error)).rejects.toBe(error);
-    expect(mockLocalStorageRemoveItem).toHaveBeenCalledWith('auth_token');
-  });
-
-  it('response error handler on 401 with refreshToken calls refresh endpoint', async () => {
+  it('response error handler on 401 calls refresh endpoint with credentials and no body', async () => {
     const { instance } = loadModule('http://localhost:8080');
-    mockLocalStorageGetItem.mockImplementation((key: string) =>
-      key === 'auth_refresh_token' ? 'refresh-token' : null
-    );
-    mockAxiosPost.mockResolvedValue({ data: { token: 'new-token', refreshToken: 'new-refresh' } });
+    mockAxiosPost.mockResolvedValue({ data: { token: 'new-token' } });
     instance.request.mockResolvedValue({ data: 'retried' });
 
-    // config with headers defined → covers `headers ?? {}` "defined" branch (line 124)
     const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
     await resErrorFn!(error);
 
     expect(mockAxiosPost).toHaveBeenCalledWith(
       'http://localhost:8080/auth/refresh',
-      { refreshToken: 'refresh-token' }
+      {},
+      { withCredentials: true }
     );
-    expect(mockLocalStorageSetItem).toHaveBeenCalledWith('auth_token', 'new-token');
-    expect(mockLocalStorageSetItem).toHaveBeenCalledWith('auth_refresh_token', 'new-refresh');
+    expect(mockSetAccessToken).toHaveBeenCalledWith('new-token');
     expect(instance.request).toHaveBeenCalled();
   });
 
   it('processQueue rejects queued requests when refresh fails', async () => {
     const { instance } = loadModule('http://localhost:8080');
-    mockLocalStorageGetItem.mockImplementation((key: string) =>
-      key === 'auth_refresh_token' ? 'refresh-token' : null
-    );
 
     let rejectRefresh!: (e: unknown) => void;
     const refreshPending = new Promise((_, reject) => { rejectRefresh = reject; });
@@ -185,39 +170,32 @@ describe('lib/api', () => {
     await expect(promise2).rejects.toBe(refreshErr);
   });
 
-  it('response error handler on 401 with refreshToken → refresh fails → redirects', async () => {
+  it('response error handler on 401 → refresh fails → clears auth and redirects', async () => {
     loadModule('http://localhost:8080');
-    mockLocalStorageGetItem.mockImplementation((key: string) =>
-      key === 'auth_refresh_token' ? 'refresh-token' : null
-    );
     mockAxiosPost.mockRejectedValue(new Error('refresh failed'));
 
     const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
     await expect(resErrorFn!(error)).rejects.toThrow('refresh failed');
-    expect(mockLocalStorageRemoveItem).toHaveBeenCalledWith('auth_token');
-    expect(mockLocalStorageRemoveItem).toHaveBeenCalledWith('auth_refresh_token');
+    expect(mockClearAuth).toHaveBeenCalled();
   });
 
   it('queues concurrent 401 requests when refresh is already in progress', async () => {
     const { instance } = loadModule('http://localhost:8080');
-    mockLocalStorageGetItem.mockImplementation((key: string) =>
-      key === 'auth_refresh_token' ? 'refresh-token' : null
-    );
 
     let resolveRefresh!: (v: unknown) => void;
     const refreshPending = new Promise((resolve) => { resolveRefresh = resolve; });
     mockAxiosPost.mockReturnValueOnce(refreshPending);
     instance.request.mockResolvedValue({ data: 'retried' });
 
-    // error1 has NO headers → direct refresh path covers `headers ?? {}` "undefined" branch (line 124)
-    // error2 HAS headers → queue path covers `headers ?? {}` "defined" branch (line 105)
+    // error1 has NO headers → direct refresh path covers `headers ?? {}` "undefined" branch
+    // error2 HAS headers → queue path covers `headers ?? {}` "defined" branch
     const error1 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
     const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
 
     const promise1 = resErrorFn!(error1);
     const promise2 = resErrorFn!(error2);
 
-    resolveRefresh({ data: { token: 'new-token', refreshToken: 'new-refresh' } });
+    resolveRefresh({ data: { token: 'new-token' } });
 
     await Promise.all([promise1, promise2]);
     expect(instance.request).toHaveBeenCalledTimes(2);
@@ -234,7 +212,7 @@ describe('lib/api', () => {
     loadModule('http://localhost:8080');
     const error = { response: { status: 500, data: null }, message: 'Server Error', config: {} };
     await expect(resErrorFn!(error)).rejects.toBe(error);
-    expect(mockLocalStorageRemoveItem).not.toHaveBeenCalled();
+    expect(mockClearAuth).not.toHaveBeenCalled();
     expect(mockAxiosPost).not.toHaveBeenCalled();
   });
 
@@ -242,6 +220,6 @@ describe('lib/api', () => {
     loadModule('http://localhost:8080');
     const error = { response: undefined, message: 'Network Error', config: {} };
     await expect(resErrorFn!(error)).rejects.toBe(error);
-    expect(mockLocalStorageRemoveItem).not.toHaveBeenCalled();
+    expect(mockClearAuth).not.toHaveBeenCalled();
   });
 });

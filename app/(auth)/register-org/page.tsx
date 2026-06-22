@@ -28,7 +28,6 @@ interface RegisterOrgRequest {
 
 interface AuthTokenResponse {
   token: string;
-  refreshToken: string;
 }
 
 interface UserProfile {
@@ -66,12 +65,13 @@ export default function RegisterOrgPage() {
 
     try {
       const { data } = await api.post<AuthTokenResponse>("/organizations/register", form);
-      const { token, refreshToken } = data;
+      const { token } = data;
 
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      const { data: userProfile } = await api.get<UserProfile>("/auth/me");
+      const { data: userProfile } = await api.get<UserProfile>("/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      setAuth(userProfile, token, refreshToken);
+      setAuth(userProfile, token);
       router.push("/dashboard");
     } catch (err) {
       const axiosError = err as AxiosError<{ message?: string }> & { userMessage?: string };

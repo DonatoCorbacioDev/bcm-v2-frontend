@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { useAuthStore } from "@/store/authStore";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,11 +27,12 @@ export const api = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 10000,
+  withCredentials: true,
 });
 
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("auth_token");
+    const token = useAuthStore.getState().getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -90,14 +92,6 @@ async function handle401(
   error: AxiosError,
   originalRequest: NonNullable<typeof error.config> & { _retry?: boolean }
 ) {
-  const refreshToken = localStorage.getItem("auth_refresh_token");
-
-  if (!refreshToken) {
-    localStorage.removeItem("auth_token");
-    redirectToLogin();
-    throw error;
-  }
-
   if (isRefreshing) {
     return new Promise<string>((resolve, reject) => {
       failedQueue.push({ resolve, reject });
@@ -113,22 +107,22 @@ async function handle401(
   isRefreshing = true;
 
   try {
-    const response = await axios.post<{ token: string; refreshToken: string }>(
+    // No body needed: the refresh_token cookie (HttpOnly, set by the backend
+    // on login) is sent automatically because withCredentials is true.
+    const response = await axios.post<{ token: string }>(
       `${API_URL}/auth/refresh`,
-      { refreshToken }
+      {},
+      { withCredentials: true }
     );
-    const { token, refreshToken: newRefreshToken } = response.data;
-    localStorage.setItem("auth_token", token);
-    localStorage.setItem("auth_refresh_token", newRefreshToken);
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    const { token } = response.data;
+    useAuthStore.getState().setAccessToken(token);
     processQueue(null, token);
     originalRequest.headers = originalRequest.headers ?? {};
     originalRequest.headers.Authorization = `Bearer ${token}`;
     return api.request(originalRequest);
   } catch (refreshError) {
     processQueue(refreshError, null);
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_refresh_token");
+    useAuthStore.getState().clearAuth();
     redirectToLogin();
     throw refreshError;
   } finally {

@@ -78,11 +78,11 @@ Use DOMPurify or rely on React's built-in XSS protection
 ### Current Implementation
 
 #### Authentication & Session Management
-- ✅ **JWT in HTTP-only cookies** - XSS protection (no localStorage)
-- ✅ **Secure cookie flags** - `Secure`, `SameSite=Strict` in production
-- ✅ **Automatic token refresh** - Seamless authentication flow
-- ✅ **Auto-logout on 401** - Immediate redirect on unauthorized
-- ✅ **HTTPS enforcement** - Production deployment best practice
+- ✅ **Refresh token in an HTTP-only cookie** - never reachable from JS, `Secure` (prod) + `SameSite=Lax`, scoped to `/auth`
+- ✅ **Access token kept in memory only** - never written to localStorage/sessionStorage; lost on reload by design, silently restored via the refresh cookie
+- ✅ **Automatic token refresh** - seamless re-authentication on 401 and on page reload
+- ✅ **Auto-logout on 401** - immediate redirect on unauthorized when refresh also fails
+- ✅ **HTTPS enforcement** - production deployment best practice
 
 #### Data Protection
 - ✅ **XSS Prevention** - React's automatic escaping
@@ -147,8 +147,8 @@ This is a **portfolio/demonstration project**. The following security considerat
    - Set max lengths on all inputs
 
 3. **Authentication/Authorization**
-   - Never store tokens in localStorage (XSS risk)
-   - Use HTTP-only cookies for JWT
+   - Never store tokens in localStorage/sessionStorage (XSS risk)
+   - Refresh token: HTTP-only cookie only; access token: in-memory only (see `store/authStore.ts`)
    - Check auth state before sensitive operations
    - Handle 401/403 gracefully
 

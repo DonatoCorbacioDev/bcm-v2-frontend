@@ -2,35 +2,36 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/types";
 
-const TOKEN_KEY = "auth_token";
-const REFRESH_TOKEN_KEY = "auth_refresh_token";
-
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  setAuth: (user: User, token: string, refreshToken: string) => void;
+  accessToken: string | null;
+  setAuth: (user: User, token: string) => void;
+  setAccessToken: (token: string | null) => void;
   clearAuth: () => void;
   getToken: () => string | null;
-  getRefreshToken: () => string | null;
 }
 
+// The access token is intentionally kept in memory only (never persisted to
+// localStorage/sessionStorage): an XSS payload that can run JS can also read
+// any storage API, so the only way to keep the token out of its reach is to
+// never write it to disk. It is lost on full page reload by design — the
+// dashboard layout silently re-fetches it via the HttpOnly refresh_token
+// cookie (see app/(dashboard)/layout.tsx) before rendering protected content.
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
-      setAuth: (user, token, refreshToken) => {
-        localStorage.setItem(TOKEN_KEY, token);
-        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-        set({ user, isAuthenticated: true });
+      accessToken: null,
+      setAuth: (user, token) => {
+        set({ user, isAuthenticated: true, accessToken: token });
       },
+      setAccessToken: (token) => set({ accessToken: token }),
       clearAuth: () => {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-        set({ user: null, isAuthenticated: false });
+        set({ user: null, isAuthenticated: false, accessToken: null });
       },
-      getToken: () => localStorage.getItem(TOKEN_KEY),
-      getRefreshToken: () => localStorage.getItem(REFRESH_TOKEN_KEY),
+      getToken: () => get().accessToken,
     }),
     {
       name: "auth-storage",

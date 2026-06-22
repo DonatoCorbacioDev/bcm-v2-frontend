@@ -383,31 +383,17 @@ describe('useUpsertContract', () => {
 // ─── useAuth ─────────────────────────────────────────────────────────────────
 
 describe('useAuth', () => {
-  it('logout calls api.post with refreshToken and then clearAuth', async () => {
+  it('logout calls api.post on /auth/logout and then clearAuth', async () => {
     const mockClearAuth = jest.fn();
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: jest.fn(), clearAuth: mockClearAuth,
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockResolvedValue({});
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('refresh-token');
 
     const { result } = renderHook(() => useAuth());
     await act(async () => { await result.current.logout(); });
-    expect(api.post).toHaveBeenCalledWith('/auth/logout', { refreshToken: 'refresh-token' });
-    expect(mockClearAuth).toHaveBeenCalled();
-  });
-
-  it('logout skips api.post and still calls clearAuth when no refreshToken', async () => {
-    const mockClearAuth = jest.fn();
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      setAuth: jest.fn(), clearAuth: mockClearAuth,
-      user: null, isAuthenticated: false,
-    });
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue(null);
-    const { result } = renderHook(() => useAuth());
-    await act(async () => { await result.current.logout(); });
-    expect(api.post).not.toHaveBeenCalled();
+    expect(api.post).toHaveBeenCalledWith('/auth/logout');
     expect(mockClearAuth).toHaveBeenCalled();
   });
 
@@ -418,20 +404,19 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockRejectedValue(new Error('network error'));
-    jest.spyOn(Storage.prototype, 'getItem').mockReturnValue('refresh-token');
 
     const { result } = renderHook(() => useAuth());
     await act(async () => { await result.current.logout(); });
     expect(mockClearAuth).toHaveBeenCalled();
   });
 
-  it('login succeeds and calls setAuth with token and refreshToken', async () => {
+  it('login succeeds and calls setAuth with the access token', async () => {
     const mockSetAuth = jest.fn();
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: mockSetAuth, clearAuth: jest.fn(),
       user: null, isAuthenticated: false,
     });
-    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123', refreshToken: 'refresh-xyz' } });
+    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123' } });
     (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
     const { result } = renderHook(() => useAuth());
     let success: boolean | undefined;
@@ -439,8 +424,7 @@ describe('useAuth', () => {
     expect(success).toBe(true);
     expect(mockSetAuth).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, username: 'alice' }),
-      'abc123',
-      'refresh-xyz'
+      'abc123'
     );
   });
 

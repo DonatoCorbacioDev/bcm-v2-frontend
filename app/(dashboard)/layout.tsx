@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { api } from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 
@@ -13,6 +14,9 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const accessToken = useAuthStore((state) => state.accessToken);
+  const setAccessToken = useAuthStore((state) => state.setAccessToken);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
 
   // Mobile menu state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,10 +24,26 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/login");
+      return;
     }
-  }, [isAuthenticated, router]);
+    if (!accessToken) {
+      api
+        .post<{ token: string }>("/auth/refresh")
+        .then((res) => setAccessToken(res.data.token))
+        .catch(() => {
+          clearAuth();
+          router.push("/login");
+        });
+    }
+  }, [isAuthenticated, accessToken, router, setAccessToken, clearAuth]);
 
-  if (!isAuthenticated) {
+  // The access token lives in memory only, so it's lost on a full page
+  // reload even though isAuthenticated (persisted) is still true. While
+  // that's the case, the effect above is restoring it via the HttpOnly
+  // refresh_token cookie — keep showing the loading state until it lands.
+  const isRestoringSession = isAuthenticated && !accessToken;
+
+  if (!isAuthenticated || isRestoringSession) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500">Verifying authentication...</p>

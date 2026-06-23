@@ -111,7 +111,7 @@ export default function ContractForm({
 
   if (isReferenceLoading) {
     return (
-      <div className="py-8 text-center text-sm text-gray-500">
+      <div className="py-8 text-center text-sm text-muted-foreground">
         Loading form data...
       </div>
     );
@@ -119,7 +119,7 @@ export default function ContractForm({
 
   if (isReferenceError) {
     return (
-      <div className="py-8 text-center text-sm text-red-500">
+      <div className="py-8 text-center text-sm text-destructive">
         Failed to load business areas/managers.
       </div>
     );
@@ -130,7 +130,7 @@ export default function ContractForm({
       {/* Customer Name */}
       <div className="space-y-2">
         <Label htmlFor="customerName">
-          Customer Name <span className="text-red-500">*</span>
+          Customer Name <span className="text-destructive">*</span>
         </Label>
         <Input
           id="customerName"
@@ -138,14 +138,14 @@ export default function ContractForm({
           placeholder="Enter customer name"
         />
         {errors.customerName && (
-          <p className="text-sm text-red-500">{errors.customerName.message}</p>
+          <p className="text-sm text-destructive">{errors.customerName.message}</p>
         )}
       </div>
 
       {/* Contract Number */}
       <div className="space-y-2">
         <Label htmlFor="contractNumber">
-          Contract Number <span className="text-red-500">*</span>
+          Contract Number <span className="text-destructive">*</span>
         </Label>
         <Input
           id="contractNumber"
@@ -153,7 +153,7 @@ export default function ContractForm({
           placeholder="e.g., CNT-2024-001"
         />
         {errors.contractNumber && (
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             {errors.contractNumber.message}
           </p>
         )}
@@ -162,7 +162,7 @@ export default function ContractForm({
       {/* WBS Code */}
       <div className="space-y-2">
         <Label htmlFor="wbsCode">
-          WBS Code <span className="text-red-500">*</span>
+          WBS Code <span className="text-destructive">*</span>
         </Label>
         <Input
           id="wbsCode"
@@ -170,14 +170,14 @@ export default function ContractForm({
           placeholder="e.g., WBS-001"
         />
         {errors.wbsCode && (
-          <p className="text-sm text-red-500">{errors.wbsCode.message}</p>
+          <p className="text-sm text-destructive">{errors.wbsCode.message}</p>
         )}
       </div>
 
       {/* Project Name */}
       <div className="space-y-2">
         <Label htmlFor="projectName">
-          Project Name <span className="text-red-500">*</span>
+          Project Name <span className="text-destructive">*</span>
         </Label>
         <Input
           id="projectName"
@@ -185,7 +185,7 @@ export default function ContractForm({
           placeholder="Enter project name"
         />
         {errors.projectName && (
-          <p className="text-sm text-red-500">{errors.projectName.message}</p>
+          <p className="text-sm text-destructive">{errors.projectName.message}</p>
         )}
       </div>
 
@@ -193,21 +193,21 @@ export default function ContractForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="startDate">
-            Start Date <span className="text-red-500">*</span>
+            Start Date <span className="text-destructive">*</span>
           </Label>
           <Input id="startDate" type="date" {...register("startDate")} />
           {errors.startDate && (
-            <p className="text-sm text-red-500">{errors.startDate.message}</p>
+            <p className="text-sm text-destructive">{errors.startDate.message}</p>
           )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="endDate">
-            End Date <span className="text-red-500">*</span>
+            End Date <span className="text-destructive">*</span>
           </Label>
           <Input id="endDate" type="date" {...register("endDate")} />
           {errors.endDate && (
-            <p className="text-sm text-red-500">{errors.endDate.message}</p>
+            <p className="text-sm text-destructive">{errors.endDate.message}</p>
           )}
         </div>
       </div>
@@ -219,7 +219,7 @@ export default function ContractForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="status">
-              Status <span className="text-red-500">*</span>
+              Status <span className="text-destructive">*</span>
             </Label>
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger>
@@ -232,7 +232,7 @@ export default function ContractForm({
               </SelectContent>
             </Select>
             {/* istanbul ignore next */errors.status && (
-              <p className="text-sm text-red-500">{errors.status.message}</p>
+              <p className="text-sm text-destructive">{errors.status.message}</p>
             )}
           </div>
         )}
@@ -245,7 +245,7 @@ export default function ContractForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="areaId">
-              Business Area <span className="text-red-500">*</span>
+              Business Area <span className="text-destructive">*</span>
             </Label>
 
             <Select
@@ -265,7 +265,7 @@ export default function ContractForm({
             </Select>
 
             {errors.areaId && (
-              <p className="text-sm text-red-500">{errors.areaId.message}</p>
+              <p className="text-sm text-destructive">{errors.areaId.message}</p>
             )}
           </div>
         )}
@@ -278,7 +278,7 @@ export default function ContractForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="managerId">
-              Manager <span className="text-red-500">*</span>
+              Manager <span className="text-destructive">*</span>
             </Label>
 
             <Select
@@ -298,7 +298,7 @@ export default function ContractForm({
             </Select>
 
             {errors.managerId && (
-              <p className="text-sm text-red-500">{errors.managerId.message}</p>
+              <p className="text-sm text-destructive">{errors.managerId.message}</p>
             )}
           </div>
         )}

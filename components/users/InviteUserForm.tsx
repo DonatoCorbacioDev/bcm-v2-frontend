@@ -67,7 +67,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           id="invite-role"
           value={form.role}
           onChange={(e) => setForm({ ...form, role: e.target.value })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           required
         >
           <option value="">Select a role</option>
@@ -85,7 +85,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           id="invite-manager"
           value={form.managerId || ""}
           onChange={(e) => setForm({ ...form, managerId: Number(e.target.value) })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           required
         >
           <option value="">Select a manager</option>

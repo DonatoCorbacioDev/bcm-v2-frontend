@@ -9,9 +9,9 @@ interface KPICardProps {
 
 const variantConfig = {
   default: {
-    accent: "border-l-blue-500",
-    iconBg: "bg-blue-50 dark:bg-blue-900/20",
-    iconColor: "text-blue-600 dark:text-blue-400",
+    accent: "border-l-primary",
+    iconBg: "bg-primary/10",
+    iconColor: "text-primary",
   },
   success: {
     accent: "border-l-green-500",
@@ -41,14 +41,14 @@ export default function KPICard({
   return (
     <div
       className={cn(
-        "bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm border-l-4 p-6",
+        "bg-card rounded-xl border border-border shadow-sm border-l-4 p-6",
         config.accent
       )}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{value}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-3xl font-bold text-foreground mt-2">{value}</p>
         </div>
         {icon && (
           <div className={cn("p-3 rounded-xl", config.iconBg, config.iconColor)}>

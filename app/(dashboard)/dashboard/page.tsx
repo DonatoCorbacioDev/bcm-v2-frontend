@@ -30,10 +30,10 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold text-foreground">
             Dashboard
           </h2>
-          <p className="text-gray-500 mt-2">Overview of your contracts</p>
+          <p className="text-muted-foreground mt-2">Overview of your contracts</p>
         </div>
 
         {/* KPI Cards Skeleton */}
@@ -46,10 +46,10 @@ export default function DashboardPage() {
         {/* Charts Skeleton */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 animate-pulse">
-              <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+            <div key={i} className="h-80 bg-card rounded-lg border border-border p-6 animate-pulse">
+              <div className="h-6 w-32 bg-muted rounded mb-4"></div>
               <div className="flex items-center justify-center h-64">
-                <div className="w-48 h-48 rounded-full border-8 border-gray-200 dark:border-gray-700"></div>
+                <div className="w-48 h-48 rounded-full border-8 border-muted"></div>
               </div>
             </div>
           ))}
@@ -62,16 +62,16 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold text-foreground">
             Dashboard
           </h2>
-          <p className="text-gray-500 mt-2">Overview of your contracts</p>
+          <p className="text-muted-foreground mt-2">Overview of your contracts</p>
         </div>
-        <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-          <p className="text-red-600 dark:text-red-400">
+        <div className="text-center py-12 bg-destructive/10 rounded-lg border border-destructive/30">
+          <p className="text-destructive">
             Failed to load dashboard statistics
           </p>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             Please check your API connection
           </p>
         </div>
@@ -82,16 +82,16 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h2 className="text-3xl font-bold text-foreground">
           Dashboard
         </h2>
-        <p className="text-gray-500 mt-2">Overview of your contracts</p>
+        <p className="text-muted-foreground mt-2">Overview of your contracts</p>
       </div>
 
       {/* Expiring Contracts Alert */}
       {isErrorExpiring && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-sm text-red-600 dark:text-red-400">
+        <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4">
+          <p className="text-sm text-destructive">
             Failed to load expiring contracts
           </p>
         </div>
@@ -115,14 +115,14 @@ export default function DashboardPage() {
                   <Link
                     key={contract.id}
                     href={`/contracts/${contract.id}`}
-                    className="block p-3 bg-white dark:bg-gray-800 rounded border border-yellow-300 dark:border-yellow-700 hover:border-yellow-500 dark:hover:border-yellow-500 transition-colors"
+                    className="block p-3 bg-card rounded border border-yellow-300 dark:border-yellow-700 hover:border-yellow-500 dark:hover:border-yellow-500 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-foreground">
                           {contract.contractNumber} - {contract.customerName}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-muted-foreground">
                           Expires: {new Date(contract.endDate).toLocaleDateString()}
                         </p>
                       </div>

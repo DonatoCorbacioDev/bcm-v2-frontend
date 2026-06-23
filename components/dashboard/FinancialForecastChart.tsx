@@ -119,11 +119,11 @@ export function FinancialForecastChart() {
       <CardContent>
         {isLoading && (
           <div className="h-[300px] flex items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
         {!isLoading && chartData.length === 0 && (
-          <div className="h-[300px] flex items-center justify-center text-sm text-gray-500">
+          <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
             No financial data available
           </div>
         )}

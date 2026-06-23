@@ -84,20 +84,20 @@ function LoginContent() {
             />
           </div>
           {error && (
-            <div role="alert" className="text-sm text-red-500 text-center">{error}</div>
+            <div role="alert" className="text-sm text-destructive text-center">{error}</div>
           )}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Logging in..." : "Sign In"}
           </Button>
           <div className="text-center space-y-1">
             <div>
-              <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
                 Forgot password?
               </Link>
             </div>
             <div>
-              <span className="text-sm text-gray-500">New here? </span>
-              <Link href="/register-org" className="text-sm text-blue-600 hover:underline">
+              <span className="text-sm text-muted-foreground">New here? </span>
+              <Link href="/register-org" className="text-sm text-primary hover:underline">
                 Register your organization
               </Link>
             </div>

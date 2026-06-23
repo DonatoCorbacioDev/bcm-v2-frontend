@@ -69,7 +69,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
 
   if (isError) {
     return (
-      <div className="text-center py-8 text-red-600">
+      <div className="text-center py-8 text-destructive">
         Failed to load financial types. Please try again.
       </div>
     );
@@ -77,7 +77,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
 
   if (financialTypes.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         No financial types found. Create your first one!
       </div>
     );
@@ -99,19 +99,19 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
             Clear
           </Button>
         )}
-        <div className="text-xs md:text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-muted-foreground">
           {filtered.length} / {financialTypes.length} types
         </div>
       </div>
 
       {filtered.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No financial types match your search
         </div>
       )}
 
       {filtered.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <div className="bg-card rounded-lg border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -133,7 +133,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(ft)}
-                        className="text-blue-600 hover:text-blue-700 text-xs px-2"
+                        className="text-primary hover:text-primary text-xs px-2"
                       >
                         Edit
                       </Button>
@@ -141,7 +141,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
                         variant="ghost"
                         size="sm"
                         onClick={() => setDeleteDialog({ open: true, financialType: ft })}
-                        className="text-red-600 hover:text-red-700 text-xs px-2"
+                        className="text-destructive hover:text-destructive text-xs px-2"
                       >
                         Delete
                       </Button>

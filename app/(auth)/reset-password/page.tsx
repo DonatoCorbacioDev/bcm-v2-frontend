@@ -34,7 +34,7 @@ function ResetPasswordContent() {
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-          <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+          <Link href="/forgot-password" className="text-sm text-primary hover:underline">
             Request a new link
           </Link>
         </CardContent>

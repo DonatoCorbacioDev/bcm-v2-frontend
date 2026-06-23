@@ -106,7 +106,7 @@ export default function FinancialValueForm({
 
   if (isReferenceLoading) {
     return (
-      <div className="py-8 text-center text-sm text-gray-500">
+      <div className="py-8 text-center text-sm text-muted-foreground">
         Loading form data...
       </div>
     );
@@ -114,7 +114,7 @@ export default function FinancialValueForm({
 
   if (isReferenceError) {
     return (
-      <div className="py-8 text-center text-sm text-red-500">
+      <div className="py-8 text-center text-sm text-destructive">
         Failed to load reference data.
       </div>
     );
@@ -130,7 +130,7 @@ export default function FinancialValueForm({
           render={({ field }) => (
             <div className="space-y-2">
               <Label htmlFor="month">
-                Month <span className="text-red-500">*</span>
+                Month <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={/* istanbul ignore next */field.value ? String(field.value) : ""}
@@ -150,7 +150,7 @@ export default function FinancialValueForm({
                 </SelectContent>
               </Select>
               {/* istanbul ignore next */errors.month && (
-                <p className="text-sm text-red-500">{errors.month.message}</p>
+                <p className="text-sm text-destructive">{errors.month.message}</p>
               )}
             </div>
           )}
@@ -158,7 +158,7 @@ export default function FinancialValueForm({
 
         <div className="space-y-2">
           <Label htmlFor="year">
-            Year <span className="text-red-500">*</span>
+            Year <span className="text-destructive">*</span>
           </Label>
           <Input
             id="year"
@@ -167,7 +167,7 @@ export default function FinancialValueForm({
             placeholder="2024"
           />
           {errors.year && (
-            <p className="text-sm text-red-500">{errors.year.message}</p>
+            <p className="text-sm text-destructive">{errors.year.message}</p>
           )}
         </div>
       </div>
@@ -175,7 +175,7 @@ export default function FinancialValueForm({
       {/* Financial Amount */}
       <div className="space-y-2">
         <Label htmlFor="financialAmount">
-          Amount (€) <span className="text-red-500">*</span>
+          Amount (€) <span className="text-destructive">*</span>
         </Label>
         <Input
           id="financialAmount"
@@ -185,7 +185,7 @@ export default function FinancialValueForm({
           placeholder="10000.00"
         />
         {errors.financialAmount && (
-          <p className="text-sm text-red-500">{errors.financialAmount.message}</p>
+          <p className="text-sm text-destructive">{errors.financialAmount.message}</p>
         )}
       </div>
 
@@ -196,7 +196,7 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="contractId">
-              Contract <span className="text-red-500">*</span>
+              Contract <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
@@ -214,7 +214,7 @@ export default function FinancialValueForm({
               </SelectContent>
             </Select>
             {errors.contractId && (
-              <p className="text-sm text-red-500">{errors.contractId.message}</p>
+              <p className="text-sm text-destructive">{errors.contractId.message}</p>
             )}
           </div>
         )}
@@ -227,7 +227,7 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="financialTypeId">
-              Financial Type <span className="text-red-500">*</span>
+              Financial Type <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
@@ -245,7 +245,7 @@ export default function FinancialValueForm({
               </SelectContent>
             </Select>
             {errors.financialTypeId && (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-destructive">
                 {errors.financialTypeId.message}
               </p>
             )}
@@ -260,7 +260,7 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="businessAreaId">
-              Business Area <span className="text-red-500">*</span>
+              Business Area <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
@@ -278,7 +278,7 @@ export default function FinancialValueForm({
               </SelectContent>
             </Select>
             {errors.businessAreaId && (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-destructive">
                 {errors.businessAreaId.message}
               </p>
             )}

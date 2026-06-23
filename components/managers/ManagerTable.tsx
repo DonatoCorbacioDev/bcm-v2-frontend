@@ -104,18 +104,18 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
 
   if (isError) {
     return (
-      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <p className="text-red-500">Failed to load managers</p>
-        <p className="text-sm text-gray-400 mt-2">Check API / network</p>
+      <div className="text-center py-12 bg-card rounded-lg border border-border">
+        <p className="text-destructive">Failed to load managers</p>
+        <p className="text-sm text-muted-foreground mt-2">Check API / network</p>
       </div>
     );
   }
 
   if (managers.length === 0) {
     return (
-      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <p className="text-gray-500">No managers found</p>
-        <p className="text-sm text-gray-400 mt-2">
+      <div className="text-center py-12 bg-card rounded-lg border border-border">
+        <p className="text-muted-foreground">No managers found</p>
+        <p className="text-sm text-muted-foreground mt-2">
           Create your first manager to get started
         </p>
       </div>
@@ -147,21 +147,21 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
           </Button>
         )}
 
-        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-gray-600">
+        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
           {filteredManagers.length} / {managers.length} managers
         </div>
       </div>
 
       {/* Empty state after search */}
       {filteredManagers.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No managers match your search
         </div>
       )}
 
       {/* Table with Responsive Columns */}
       {filteredManagers.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <div className="bg-card rounded-lg border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -187,7 +187,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(m)}
-                        className="text-blue-600 hover:text-blue-700 text-xs px-1 sm:px-2"
+                        className="text-primary hover:text-primary text-xs px-1 sm:px-2"
                       >
                         Edit
                       </Button>
@@ -195,7 +195,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteClick(m)}
-                        className="text-red-600 hover:text-red-700 text-xs px-1 sm:px-2"
+                        className="text-destructive hover:text-destructive text-xs px-1 sm:px-2"
                       >
                         Delete
                       </Button>

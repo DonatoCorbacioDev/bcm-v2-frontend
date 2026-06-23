@@ -81,10 +81,10 @@ export default function ContractsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-3xl font-bold text-foreground">
             Contracts
           </h2>
-          <p className="text-gray-500 mt-2">Manage all business contracts</p>
+          <p className="text-muted-foreground mt-2">Manage all business contracts</p>
         </div>
         <div className="flex gap-2">
           <Button

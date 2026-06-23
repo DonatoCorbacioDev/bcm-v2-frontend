@@ -42,17 +42,17 @@ export function RiskScoreWidget() {
       <CardContent>
         {isLoading && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         )}
 
         {isError && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <WifiOff className="h-6 w-6 text-amber-500" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="text-sm font-medium text-foreground">
               Risk analysis unavailable
             </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Make sure the backend and forecasting service are running
             </p>
           </div>
@@ -60,7 +60,7 @@ export function RiskScoreWidget() {
 
         {!isLoading && !isError && (!riskScores || riskScores.length === 0) && (
           <div className="flex items-center justify-center py-8">
-            <p className="text-sm text-gray-500">No risk data available</p>
+            <p className="text-sm text-muted-foreground">No risk data available</p>
           </div>
         )}
 
@@ -74,17 +74,17 @@ export function RiskScoreWidget() {
                 <Link
                   key={item.contractId}
                   href={`/contracts/${item.contractId}`}
-                  className="block rounded-lg border border-gray-200 dark:border-gray-700 p-3 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                  className="block rounded-lg border border-border p-3 hover:border-muted-foreground transition-colors"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[60%]">
+                    <span className="text-sm font-medium text-foreground truncate max-w-[60%]">
                       {item.customerName}
                     </span>
                     <Badge variant={cfg.badge}>{cfg.label} · {pct}%</Badge>
                   </div>
 
                   {/* Progress bar */}
-                  <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${cfg.color}`}
                       style={{ width: `${pct}%` }}
@@ -97,7 +97,7 @@ export function RiskScoreWidget() {
                       {item.anomalies.map((a) => (
                         <span
                           key={a}
-                          className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded px-1.5 py-0.5"
+                          className="text-xs bg-muted text-muted-foreground rounded px-1.5 py-0.5"
                         >
                           {a.replaceAll("_", " ")}
                         </span>

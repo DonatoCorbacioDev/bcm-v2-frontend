@@ -76,7 +76,7 @@ export default function ManagerForm({
       {/* First Name */}
       <div className="space-y-2">
         <Label htmlFor="firstName">
-          First Name <span className="text-red-500">*</span>
+          First Name <span className="text-destructive">*</span>
         </Label>
         <Input
           id="firstName"
@@ -84,14 +84,14 @@ export default function ManagerForm({
           placeholder="Enter first name"
         />
         {errors.firstName && (
-          <p className="text-sm text-red-500">{errors.firstName.message}</p>
+          <p className="text-sm text-destructive">{errors.firstName.message}</p>
         )}
       </div>
 
       {/* Last Name */}
       <div className="space-y-2">
         <Label htmlFor="lastName">
-          Last Name <span className="text-red-500">*</span>
+          Last Name <span className="text-destructive">*</span>
         </Label>
         <Input
           id="lastName"
@@ -99,14 +99,14 @@ export default function ManagerForm({
           placeholder="Enter last name"
         />
         {errors.lastName && (
-          <p className="text-sm text-red-500">{errors.lastName.message}</p>
+          <p className="text-sm text-destructive">{errors.lastName.message}</p>
         )}
       </div>
 
       {/* Email */}
       <div className="space-y-2">
         <Label htmlFor="email">
-          Email <span className="text-red-500">*</span>
+          Email <span className="text-destructive">*</span>
         </Label>
         <Input
           id="email"
@@ -115,14 +115,14 @@ export default function ManagerForm({
           placeholder="manager@example.com"
         />
         {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
+          <p className="text-sm text-destructive">{errors.email.message}</p>
         )}
       </div>
 
       {/* Phone Number */}
       <div className="space-y-2">
         <Label htmlFor="phoneNumber">
-          Phone Number <span className="text-red-500">*</span>
+          Phone Number <span className="text-destructive">*</span>
         </Label>
         <Input
           id="phoneNumber"
@@ -130,14 +130,14 @@ export default function ManagerForm({
           placeholder="+39 123 456 7890"
         />
         {errors.phoneNumber && (
-          <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>
+          <p className="text-sm text-destructive">{errors.phoneNumber.message}</p>
         )}
       </div>
 
       {/* Department */}
       <div className="space-y-2">
         <Label htmlFor="department">
-          Department <span className="text-red-500">*</span>
+          Department <span className="text-destructive">*</span>
         </Label>
         <Input
           id="department"
@@ -145,7 +145,7 @@ export default function ManagerForm({
           placeholder="e.g., Sales, IT, HR"
         />
         {errors.department && (
-          <p className="text-sm text-red-500">{errors.department.message}</p>
+          <p className="text-sm text-destructive">{errors.department.message}</p>
         )}
       </div>
 

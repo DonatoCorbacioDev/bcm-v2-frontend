@@ -38,8 +38,8 @@ export default function FinancialTypesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Financial Types</h2>
-          <p className="text-gray-500 mt-2">Manage financial value categories</p>
+          <h2 className="text-3xl font-bold text-foreground">Financial Types</h2>
+          <p className="text-muted-foreground mt-2">Manage financial value categories</p>
         </div>
         <Button onClick={() => setFormDialog({ open: true, financialType: null })}>
           + New Financial Type

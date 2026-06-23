@@ -177,7 +177,7 @@ export default function RegisterOrgPage() {
           </div>
 
           {error && (
-            <div role="alert" className="text-sm text-red-500 text-center">
+            <div role="alert" className="text-sm text-destructive text-center">
               {error}
             </div>
           )}
@@ -187,8 +187,8 @@ export default function RegisterOrgPage() {
           </Button>
 
           <div className="text-center">
-            <span className="text-sm text-gray-500">Already have an account? </span>
-            <Link href="/login" className="text-sm text-blue-600 hover:underline">
+            <span className="text-sm text-muted-foreground">Already have an account? </span>
+            <Link href="/login" className="text-sm text-primary hover:underline">
               Sign in
             </Link>
           </div>

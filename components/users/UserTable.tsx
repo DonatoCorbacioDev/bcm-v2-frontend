@@ -125,7 +125,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
 
   if (isError) {
     return (
-      <div className="text-center py-8 text-red-600">
+      <div className="text-center py-8 text-destructive">
         Failed to load users. Please try again.
       </div>
     );
@@ -133,7 +133,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
 
   if (users.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         No users found. Create your first one!
       </div>
     );
@@ -154,13 +154,13 @@ export default function UserTable({ onEditClick }: UserTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="verified-filter" className="text-sm text-gray-600 hidden sm:inline">Status:</label>
+          <label htmlFor="verified-filter" className="text-sm text-muted-foreground hidden sm:inline">Status:</label>
           <select
             id="verified-filter"
             aria-label="Filter by verification status"
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.target.value)}
-            className="px-2 md:px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ALL">All</option>
             <option value="VERIFIED">Verified</option>
@@ -182,21 +182,21 @@ export default function UserTable({ onEditClick }: UserTableProps) {
           )}
         </div>
 
-        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-gray-600">
+        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
           {filteredUsers.length} / {users.length} users
         </div>
       </div>
 
       {/* Empty state after filtering */}
       {filteredUsers.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No users match your filters
         </div>
       )}
 
       {/* Table with Responsive Columns */}
       {filteredUsers.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <div className="bg-card rounded-lg border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -220,7 +220,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${user.verified
                           ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
+                          : "bg-muted text-muted-foreground"
                         }`}
                     >
                       {user.verified ? "Yes" : "No"}
@@ -235,7 +235,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(user)}
-                        className="text-blue-600 hover:text-blue-700 text-xs px-2"
+                        className="text-primary hover:text-primary text-xs px-2"
                       >
                         Edit
                       </Button>
@@ -243,7 +243,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteClick(user)}
-                        className="text-red-600 hover:text-red-700 text-xs px-2"
+                        className="text-destructive hover:text-destructive text-xs px-2"
                       >
                         Delete
                       </Button>

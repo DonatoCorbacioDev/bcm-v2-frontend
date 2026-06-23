@@ -49,8 +49,8 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Users</h2>
-          <p className="text-gray-500 mt-2">Manage system users</p>
+          <h2 className="text-3xl font-bold text-foreground">Users</h2>
+          <p className="text-muted-foreground mt-2">Manage system users</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setInviteOpen(true)}>

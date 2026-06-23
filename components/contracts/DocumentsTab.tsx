@@ -116,7 +116,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -144,21 +144,21 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
           )}
           {uploadMutation.isPending ? "Uploading..." : "Upload PDF"}
         </Button>
-        <span className="text-xs text-gray-500">PDF only · max 10 MB</span>
+        <span className="text-xs text-muted-foreground">PDF only · max 10 MB</span>
       </div>
 
       {/* Document list */}
       {!documents || documents.length === 0 ? (
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-700">
-              <FileText className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            <div className="p-4 rounded-full bg-muted">
+              <FileText className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             No Documents Yet
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Upload a PDF to attach it to this contract.
           </p>
         </div>
@@ -172,17 +172,17 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
             return (
               <div
                 key={doc.id}
-                className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
+                className="border border-border rounded-lg overflow-hidden"
               >
                 {/* Document row */}
-                <div className="flex items-center justify-between gap-4 p-4 bg-white dark:bg-gray-800">
+                <div className="flex items-center justify-between gap-4 p-4 bg-card">
                   <div className="flex items-center gap-3 min-w-0">
-                    <FileText className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                    <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {doc.fileName}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-muted-foreground">
                         {formatBytes(doc.fileSize)} ·{" "}
                         {new Date(doc.uploadedAt).toLocaleDateString("en-US", {
                           year: "numeric", month: "short", day: "numeric",
@@ -211,7 +211,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       {isAnalyzing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Sparkles className="h-4 w-4 text-blue-500" />
+                        <Sparkles className="h-4 w-4 text-primary" />
                       )}
                     </Button>
 
@@ -237,7 +237,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                         onClick={() => deleteMutation.mutate(doc.id)}
                         disabled={deleteMutation.isPending}
                         title="Delete"
-                        className="text-red-500 hover:text-red-600"
+                        className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -247,9 +247,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
 
                 {/* Analysis panel */}
                 {analysis && isExpanded && (
-                  <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-blue-50 dark:bg-blue-900/20 space-y-3">
+                  <div className="border-t border-border p-4 bg-primary/10 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+                      <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
                         <Sparkles className="h-4 w-4" />
                         AI Extraction Results
                       </h4>
@@ -267,9 +267,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                         { label: "Amount", value: analysis.detectedAmount },
                       ].map(({ label, value }) => (
                         <div key={label}>
-                          <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">{label}</p>
-                          <p className="text-sm text-gray-900 dark:text-white">
-                            {value ?? <span className="text-gray-400 italic">Not detected</span>}
+                          <p className="text-xs text-primary font-medium">{label}</p>
+                          <p className="text-sm text-foreground">
+                            {value ?? <span className="text-muted-foreground italic">Not detected</span>}
                           </p>
                         </div>
                       ))}
@@ -277,10 +277,10 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
 
                     {analysis.rawText && (
                       <details className="mt-2">
-                        <summary className="text-xs text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">
+                        <summary className="text-xs text-primary cursor-pointer hover:underline">
                           Show extracted text
                         </summary>
-                        <pre className="mt-2 text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-white dark:bg-gray-800 rounded p-3 max-h-40 overflow-y-auto">
+                        <pre className="mt-2 text-xs text-muted-foreground whitespace-pre-wrap bg-card rounded p-3 max-h-40 overflow-y-auto">
                           {analysis.rawText}
                         </pre>
                       </details>

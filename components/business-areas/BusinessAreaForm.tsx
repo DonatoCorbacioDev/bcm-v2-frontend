@@ -71,10 +71,10 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
           id="name"
           {...register("name")}
           placeholder="e.g., IT Department"
-          className={errors.name ? "border-red-500" : ""}
+          className={errors.name ? "border-destructive" : ""}
         />
         {errors.name && (
-          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
         )}
       </div>
 
@@ -88,10 +88,10 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
           {...register("description")}
           placeholder="Describe the business area..."
           rows={4}
-          className={errors.description ? "border-red-500" : ""}
+          className={errors.description ? "border-destructive" : ""}
         />
         {errors.description && (
-          <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.description.message}</p>
         )}
       </div>
 

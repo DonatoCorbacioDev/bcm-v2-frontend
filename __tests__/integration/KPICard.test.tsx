@@ -32,7 +32,7 @@ describe('KPICard', () => {
   it('applies the default variant accent', () => {
     const { container } = render(<KPICard title="Default" value={1} />);
 
-    expect(container.firstChild).toHaveClass('border-l-blue-500');
+    expect(container.firstChild).toHaveClass('border-l-primary');
   });
 
   it('applies success variant accent', () => {

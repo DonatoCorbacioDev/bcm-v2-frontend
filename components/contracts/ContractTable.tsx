@@ -143,9 +143,9 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
 
   if (isError) {
     return (
-      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <p className="text-red-500">Failed to load contracts</p>
-        <p className="text-sm text-gray-400 mt-2">
+      <div className="text-center py-12 bg-card rounded-lg border border-border">
+        <p className="text-destructive">Failed to load contracts</p>
+        <p className="text-sm text-muted-foreground mt-2">
           Check API / network / auth token
         </p>
       </div>
@@ -154,9 +154,9 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
 
   if (totalElements === 0) {
     return (
-      <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-        <p className="text-gray-500">No contracts found</p>
-        <p className="text-sm text-gray-400 mt-2">
+      <div className="text-center py-12 bg-card rounded-lg border border-border">
+        <p className="text-muted-foreground">No contracts found</p>
+        <p className="text-sm text-muted-foreground mt-2">
           {searchQuery || statusFilter !== "ALL"
             ? "Try adjusting your search or filter criteria"
             : "Create your first contract to get started"}
@@ -180,13 +180,13 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="status-filter" className="text-sm text-gray-600 hidden sm:inline">Status:</label>
+          <label htmlFor="status-filter" className="text-sm text-muted-foreground hidden sm:inline">Status:</label>
           <select
             id="status-filter"
             aria-label="Filter by status"
             value={statusFilter}
             onChange={(e) => handleStatusChange(e.target.value)}
-            className="px-2 md:px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ALL">All</option>
             <option value="ACTIVE">Active</option>
@@ -206,13 +206,13 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
           )}
         </div>
 
-        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-gray-600">
+        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
           {totalElements} contract{totalElements === 1 ? "" : "s"}
         </div>
       </div>
 
       {/* Table with Responsive Columns */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+      <div className="bg-card rounded-lg border border-border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -260,7 +260,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => onEditClick(c)}
-                          className="text-blue-600 hover:text-blue-700 text-xs px-2 hidden sm:inline-flex"
+                          className="text-primary hover:text-primary text-xs px-2 hidden sm:inline-flex"
                         >
                           Edit
                         </Button>
@@ -268,7 +268,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDeleteClick(c)}
-                          className="text-red-600 hover:text-red-700 text-xs px-2 hidden sm:inline-flex"
+                          className="text-destructive hover:text-destructive text-xs px-2 hidden sm:inline-flex"
                         >
                           Delete
                         </Button>
@@ -283,9 +283,9 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-6 py-4 border-t border-gray-200 dark:border-gray-700 gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-6 py-4 border-t border-border gap-4">
             <div className="flex items-center gap-2">
-              <label htmlFor="page-size" className="text-xs md:text-sm text-gray-600 dark:text-gray-400">Rows:</label>
+              <label htmlFor="page-size" className="text-xs md:text-sm text-muted-foreground">Rows:</label>
               <select
                 id="page-size"
                 aria-label="Rows per page"
@@ -294,7 +294,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   setPageSize(Number(e.target.value));
                   setPage(0);
                 }}
-                className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs md:text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 border border-input rounded text-xs md:text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -319,7 +319,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                 typeof p === "string" ? (
                   <span
                     key={p}
-                    className="px-1 text-sm text-gray-400 dark:text-gray-500 select-none"
+                    className="px-1 text-sm text-muted-foreground select-none"
                   >
                     …
                   </span>

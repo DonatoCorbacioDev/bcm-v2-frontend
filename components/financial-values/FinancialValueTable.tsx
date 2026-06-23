@@ -119,7 +119,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
 
   if (isError) {
     return (
-      <div className="text-center py-8 text-red-600">
+      <div className="text-center py-8 text-destructive">
         Failed to load financial values. Please try again.
       </div>
     );
@@ -127,7 +127,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
 
   if (financialValues.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         No financial values found. Create your first one!
       </div>
     );
@@ -147,11 +147,11 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-sm text-gray-600 hidden sm:inline">Month:</span>
+          <span className="text-sm text-muted-foreground hidden sm:inline">Month:</span>
           <select
             value={monthFilter}
             onChange={(e) => setMonthFilter(e.target.value)}
-            className="px-2 md:px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ALL">All</option>
             <option value="1">January</option>
@@ -183,21 +183,21 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
           )}
         </div>
 
-        <div className="text-xs md:text-sm text-gray-600">
+        <div className="text-xs md:text-sm text-muted-foreground">
           {filteredFinancialValues.length} / {financialValues.length} values
         </div>
       </div>
 
       {/* Empty state after filtering */}
       {filteredFinancialValues.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No financial values match your filters
         </div>
       )}
 
       {/* Table with Responsive Columns */}
       {filteredFinancialValues.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <div className="bg-card rounded-lg border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -225,7 +225,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(fv)}
-                        className="text-blue-600 hover:text-blue-700 text-xs px-2"
+                        className="text-primary hover:text-primary text-xs px-2"
                       >
                         Edit
                       </Button>
@@ -233,7 +233,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteClick(fv)}
-                        className="text-red-600 hover:text-red-700 text-xs px-2"
+                        className="text-destructive hover:text-destructive text-xs px-2"
                       >
                         Delete
                       </Button>

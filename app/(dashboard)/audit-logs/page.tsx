@@ -36,8 +36,8 @@ function actionBadgeVariant(action: string): "default" | "secondary" | "destruct
 
 function actionBadgeClass(action: string): string {
   if (action === "CREATE") return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
-  if (action === "DELETE") return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
-  return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+  if (action === "DELETE") return "bg-destructive/10 text-destructive";
+  return "bg-primary/10 text-primary";
 }
 
 const PAGE_SIZE = 20;
@@ -78,23 +78,23 @@ function AuditLogsContent({
     return (
       <>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-900">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
                 {["Timestamp", "Action", "Entity Type", "Entity ID", "Username", "Details"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-card divide-y divide-border">
               {data.content.map((log) => (
-                <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <tr key={log.id} className="hover:bg-accent">
+                  <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                     {new Date(log.timestamp).toLocaleString("en-US", {
                       year: "numeric",
                       month: "short",
@@ -112,16 +112,16 @@ function AuditLogsContent({
                       {log.action}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
                     {log.entityType}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                     {log.entityId}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
                     {log.username}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 max-w-[240px]">
+                  <td className="px-4 py-3 text-sm text-muted-foreground max-w-[240px]">
                     {log.details ? (
                       <span title={log.details}>
                         {log.details.length > 60
@@ -129,7 +129,7 @@ function AuditLogsContent({
                           : log.details}
                       </span>
                     ) : (
-                      <span className="italic text-gray-400 dark:text-gray-600">—</span>
+                      <span className="italic text-muted-foreground">—</span>
                     )}
                   </td>
                 </tr>
@@ -139,8 +139,8 @@ function AuditLogsContent({
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+          <p className="text-sm text-muted-foreground">
             {data.totalElements} total entries
           </p>
           <div className="flex items-center gap-3">
@@ -152,7 +152,7 @@ function AuditLogsContent({
             >
               Previous
             </Button>
-            <span className="text-sm text-gray-700 dark:text-gray-300">
+            <span className="text-sm text-muted-foreground">
               Page {page + 1} of {data.totalPages}
             </span>
             <Button
@@ -173,19 +173,19 @@ function AuditLogsContent({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700">
-          <Shield className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+        <div className="p-2 rounded-lg bg-muted">
+          <Shield className="h-6 w-6 text-muted-foreground" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Audit Log</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
+          <h2 className="text-3xl font-bold text-foreground">Audit Log</h2>
+          <p className="text-muted-foreground text-sm mt-0.5">
             System operations history
           </p>
         </div>
       </div>
 
       {/* Table card */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="bg-card rounded-lg border border-border">
         {isLoading ? <SkeletonTable /> : renderTableContent()}
       </div>
     </div>
@@ -195,9 +195,9 @@ function AuditLogsContent({
 function SkeletonTable() {
   return (
     <div className="p-4 space-y-3">
-      <div className="h-8 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      <div className="h-8 w-full bg-muted rounded animate-pulse" />
       {SKELETON_ROW_KEYS.map((key) => (
-        <div key={key} className="h-10 w-full bg-gray-100 dark:bg-gray-750 rounded animate-pulse" />
+        <div key={key} className="h-10 w-full bg-muted rounded animate-pulse" />
       ))}
     </div>
   );
@@ -207,14 +207,14 @@ function EmptyState() {
   return (
     <div className="text-center py-16">
       <div className="flex justify-center mb-4">
-        <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-700">
-          <Shield className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+        <div className="p-4 rounded-full bg-muted">
+          <Shield className="h-8 w-8 text-muted-foreground" />
         </div>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         No Audit Logs Yet
       </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-sm text-muted-foreground">
         System operations will be tracked here.
       </p>
     </div>

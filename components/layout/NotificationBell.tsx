@@ -19,7 +19,7 @@ function timeAgo(dateStr: string): string {
 const TYPE_DOT: Record<string, string> = {
   ERROR:   "bg-red-500",
   WARNING: "bg-yellow-400",
-  INFO:    "bg-blue-500",
+  INFO:    "bg-primary",
 };
 
 export default function NotificationBell() {
@@ -82,10 +82,10 @@ export default function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-accent transition-colors"
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
       >
-        <Bell className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+        <Bell className="h-5 w-5 text-muted-foreground" />
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -95,13 +95,13 @@ export default function NotificationBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+        <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-lg border border-border z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <span className="text-sm font-semibold text-foreground">
               Notifications
               {unreadCount > 0 && (
-                <span className="ml-2 text-xs text-gray-500">({unreadCount} unread)</span>
+                <span className="ml-2 text-xs text-muted-foreground">({unreadCount} unread)</span>
               )}
             </span>
             {unreadCount > 0 && (
@@ -109,7 +109,7 @@ export default function NotificationBell() {
                 type="button"
                 onClick={() => markAllMutation.mutate()}
                 disabled={markAllMutation.isPending}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 disabled:opacity-50"
+                className="flex items-center gap-1 text-xs text-primary hover:text-primary disabled:opacity-50"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 Mark all read
@@ -120,30 +120,30 @@ export default function NotificationBell() {
           {/* List */}
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                 No notifications
               </div>
             ) : (
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`flex items-start gap-3 px-4 py-3 border-b border-gray-50 dark:border-gray-700/50 last:border-0 transition-colors ${
+                  className={`flex items-start gap-3 px-4 py-3 border-b border-border last:border-0 transition-colors ${
                     n.read
-                      ? "bg-white dark:bg-gray-800"
-                      : "bg-blue-50/50 dark:bg-blue-900/10"
+                      ? "bg-card"
+                      : "bg-primary/5"
                   }`}
                 >
                   {/* Type dot */}
                   <div className={`mt-1.5 h-2 w-2 rounded-full flex-shrink-0 ${TYPE_DOT[n.type ?? "INFO"] ?? TYPE_DOT.INFO}`} />
 
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium truncate ${n.read ? "text-gray-600 dark:text-gray-400" : "text-gray-900 dark:text-white"}`}>
+                    <p className={`text-sm font-medium truncate ${n.read ? "text-muted-foreground" : "text-foreground"}`}>
                       {n.title}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                       {n.message}
                     </p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {timeAgo(n.createdAt)}
                     </p>
                   </div>
@@ -154,7 +154,7 @@ export default function NotificationBell() {
                       type="button"
                       onClick={() => markReadMutation.mutate(n.id)}
                       disabled={markReadMutation.isPending}
-                      className="mt-1 text-blue-500 hover:text-blue-600 disabled:opacity-50 flex-shrink-0"
+                      className="mt-1 text-primary hover:text-primary disabled:opacity-50 flex-shrink-0"
                       aria-label="Mark as read"
                     >
                       <Check className="h-4 w-4" />

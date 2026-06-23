@@ -140,9 +140,9 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-8 w-40 bg-muted rounded animate-pulse" />
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div key={i} className="h-12 bg-muted rounded animate-pulse" />
         ))}
       </div>
     );
@@ -171,71 +171,71 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           )}
           {uploadMutation.isPending ? "Uploading..." : "Upload Invoice"}
         </Button>
-        <span className="text-xs text-gray-500">XML FatturaPA only</span>
+        <span className="text-xs text-muted-foreground">XML FatturaPA only</span>
       </div>
 
       {/* Invoice list */}
       {!invoices || invoices.length === 0 ? (
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-700">
-              <Receipt className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            <div className="p-4 rounded-full bg-muted">
+              <Receipt className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             No Invoices Yet
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Upload a FatturaPA XML to attach it to this contract.
           </p>
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-900">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted">
               <tr>
                 {["File", "Supplier", "Invoice #", "Date", "Total", "Actions"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="bg-card divide-y divide-border">
               {invoices.map((invoice) => (
                 <tr
                   key={invoice.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  className="hover:bg-accent cursor-pointer"
                   onClick={() => handleRowClick(invoice)}
                 >
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                  <td className="px-4 py-3 text-sm text-foreground">
                     <div className="flex items-center gap-2">
-                      <Receipt className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <Receipt className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <span className="truncate max-w-[180px]" title={invoice.fileName}>
                         {invoice.fileName}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                    <p className="text-xs text-muted-foreground ml-6">
                       {formatBytes(invoice.fileSize)}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
                     {invoice.supplierName}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-white whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
                     {invoice.invoiceNumber}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                     {new Date(invoice.invoiceDate).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
                   </td>
-                  <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                  <td className="px-4 py-3 text-sm font-bold text-foreground whitespace-nowrap">
                     {formatAmount(invoice.totalAmount, invoice.currency)}
                   </td>
                   <td
@@ -258,7 +258,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                           onClick={() => deleteMutation.mutate(invoice.id)}
                           disabled={deleteMutation.isPending}
                           title="Delete"
-                          className="text-red-500 hover:text-red-600"
+                          className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -305,10 +305,10 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">
+                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                       {label}
                     </p>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
+                    <p className="text-sm font-medium text-foreground mt-0.5">
                       {value}
                     </p>
                   </div>
@@ -318,51 +318,51 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
               {/* Line items */}
               {selectedInvoice.lineItems && selectedInvoice.lineItems.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                  <h4 className="text-sm font-semibold text-foreground mb-3">
                     Line Items
                   </h4>
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                      <thead className="bg-gray-50 dark:bg-gray-900">
+                    <table className="min-w-full divide-y divide-border text-sm">
+                      <thead className="bg-muted">
                         <tr>
                           {["#", "Description", "Qty", "UoM", "Unit Price", "Total", "VAT %"].map((h) => (
                             <th
                               key={h}
-                              className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                              className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
                             >
                               {h}
                             </th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                      <tbody className="bg-card divide-y divide-border">
                         {selectedInvoice.lineItems.map((item) => (
-                          <tr key={item.lineNumber} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td className="px-3 py-2 text-gray-500 dark:text-gray-400">
+                          <tr key={item.lineNumber} className="hover:bg-accent">
+                            <td className="px-3 py-2 text-muted-foreground">
                               {item.lineNumber}
                             </td>
-                            <td className="px-3 py-2 text-gray-900 dark:text-white max-w-[200px]">
+                            <td className="px-3 py-2 text-foreground max-w-[200px]">
                               {item.description}
                             </td>
-                            <td className="px-3 py-2 text-gray-900 dark:text-white whitespace-nowrap">
+                            <td className="px-3 py-2 text-foreground whitespace-nowrap">
                               {item.quantity}
                             </td>
-                            <td className="px-3 py-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
                               {item.unitOfMeasure}
                             </td>
-                            <td className="px-3 py-2 text-gray-900 dark:text-white whitespace-nowrap">
+                            <td className="px-3 py-2 text-foreground whitespace-nowrap">
                               {item.unitPrice.toLocaleString("en-US", {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })}
                             </td>
-                            <td className="px-3 py-2 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                            <td className="px-3 py-2 font-medium text-foreground whitespace-nowrap">
                               {item.totalPrice.toLocaleString("en-US", {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })}
                             </td>
-                            <td className="px-3 py-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
                               {item.vatRate}%
                             </td>
                           </tr>

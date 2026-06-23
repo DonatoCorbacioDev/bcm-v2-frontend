@@ -104,10 +104,10 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           id="username"
           {...register("username")}
           placeholder="e.g., john_doe"
-          className={errors.username ? "border-red-500" : ""}
+          className={errors.username ? "border-destructive" : ""}
         />
         {errors.username && (
-          <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.username.message}</p>
         )}
       </div>
 
@@ -121,10 +121,10 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           type="password"
           {...register("password")}
           placeholder={isEditing ? "Enter new password (optional)" : "Enter password"}
-          className={errors.password ? "border-red-500" : ""}
+          className={errors.password ? "border-destructive" : ""}
         />
         {errors.password && (
-          <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.password.message}</p>
         )}
       </div>
 
@@ -142,7 +142,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
               disabled={loadingManagers}
             >
-              <SelectTrigger className={errors.managerId ? "border-red-500" : ""}>
+              <SelectTrigger className={errors.managerId ? "border-destructive" : ""}>
                 <SelectValue placeholder="Select a manager" />
               </SelectTrigger>
               <SelectContent>
@@ -156,7 +156,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           )}
         />
         {errors.managerId && (
-          <p className="text-red-500 text-sm mt-1">{errors.managerId.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.managerId.message}</p>
         )}
       </div>
 
@@ -174,7 +174,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
               disabled={loadingRoles}
             >
-              <SelectTrigger className={errors.roleId ? "border-red-500" : ""}>
+              <SelectTrigger className={errors.roleId ? "border-destructive" : ""}>
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
@@ -188,7 +188,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           )}
         />
         {errors.roleId && (
-          <p className="text-red-500 text-sm mt-1">{errors.roleId.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.roleId.message}</p>
         )}
       </div>
 

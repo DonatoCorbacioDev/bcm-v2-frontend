@@ -52,10 +52,10 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
           id="name"
           {...register("name")}
           placeholder="e.g., Revenue"
-          className={errors.name ? "border-red-500" : ""}
+          className={errors.name ? "border-destructive" : ""}
         />
         {errors.name && (
-          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.name.message}</p>
         )}
       </div>
 
@@ -68,10 +68,10 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
           {...register("description")}
           placeholder="Describe this financial type..."
           rows={4}
-          className={errors.description ? "border-red-500" : ""}
+          className={errors.description ? "border-destructive" : ""}
         />
         {errors.description && (
-          <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>
+          <p className="text-destructive text-sm mt-1">{errors.description.message}</p>
         )}
       </div>
 

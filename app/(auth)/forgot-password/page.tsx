@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
-          <Link href="/login" className="text-sm text-blue-600 hover:underline">
+          <Link href="/login" className="text-sm text-primary hover:underline">
             Back to login
           </Link>
         </CardContent>
@@ -74,12 +74,12 @@ export default function ForgotPasswordPage() {
               required
             />
           </div>
-          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+          {error && <p className="text-sm text-destructive text-center">{error}</p>}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Sending..." : "Send reset link"}
           </Button>
           <div className="text-center">
-            <Link href="/login" className="text-sm text-blue-600 hover:underline">
+            <Link href="/login" className="text-sm text-primary hover:underline">
               Back to login
             </Link>
           </div>

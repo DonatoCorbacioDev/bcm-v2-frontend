@@ -104,7 +104,7 @@ export default function ContractDetailPage() {
     if (isLoadingFinancials) {
       return (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       );
     }
@@ -112,14 +112,14 @@ export default function ContractDetailPage() {
       return (
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-700">
-              <DollarSign className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            <div className="p-4 rounded-full bg-muted">
+              <DollarSign className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             No Financial Values Yet
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Financial data will appear here once added to this contract.
           </p>
         </div>
@@ -127,32 +127,32 @@ export default function ContractDetailPage() {
     }
     return (
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-900">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted">
             <tr>
               {["Type", "Business Area", "Amount", "Month/Year"].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-card divide-y divide-border">
             {financialValues.map((fv: FinancialValue) => (
-              <tr key={fv.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">{fv.typeName || "N/A"}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">{fv.areaName || "N/A"}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
+              <tr key={fv.id} className="hover:bg-accent">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.typeName || "N/A"}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.areaName || "N/A"}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-foreground">
                   €{fv.financialAmount?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                   {fv.month}/{fv.year}
                 </td>
               </tr>
             ))}
-            <tr className="bg-gray-100 dark:bg-gray-900 font-bold">
-              <td colSpan={2} className="px-4 py-3 text-sm text-gray-900 dark:text-white">Total</td>
-              <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+            <tr className="bg-muted font-bold">
+              <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Total</td>
+              <td className="px-4 py-3 text-sm text-foreground">
                 €{financialValues.reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0)
                   .toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </td>
@@ -168,7 +168,7 @@ export default function ContractDetailPage() {
     if (isLoadingHistory) {
       return (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       );
     }
@@ -176,40 +176,40 @@ export default function ContractDetailPage() {
       return (
         <div className="text-center py-12">
           <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full bg-gray-100 dark:bg-gray-700">
-              <History className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            <div className="p-4 rounded-full bg-muted">
+              <History className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Change History</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Status changes and modifications will be tracked here.</p>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No Change History</h3>
+          <p className="text-sm text-muted-foreground">Status changes and modifications will be tracked here.</p>
         </div>
       );
     }
     return (
       <div className="space-y-4">
         {contractHistory.map((history, index) => (
-          <div key={history.id} className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
+          <div key={history.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
             <div className="flex flex-col items-center">
-              <div className="w-3 h-3 rounded-full bg-blue-500 mt-1.5" />
+              <div className="w-3 h-3 rounded-full bg-primary mt-1.5" />
               {index < contractHistory.length - 1 && (
-                <div className="w-0.5 flex-1 bg-gray-300 dark:bg-gray-600 mt-2" />
+                <div className="w-0.5 flex-1 bg-border mt-2" />
               )}
             </div>
             <div className="flex-1">
               <div className="flex items-start justify-between gap-4 mb-1">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white flex-wrap">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground flex-wrap">
                   <span>Status Changed:</span>
                   <Badge variant={getContractStatusVariant(history.previousStatus)}>{history.previousStatus}</Badge>
                   <span>→</span>
                   <Badge variant={getContractStatusVariant(history.newStatus)}>{history.newStatus}</Badge>
                 </div>
-                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {new Date(history.modificationDate).toLocaleDateString("en-US", {
                     year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
                   })}
                 </span>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 Modified by User ID: {history.modifiedById}
               </p>
             </div>
@@ -222,7 +222,7 @@ export default function ContractDetailPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-100">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -234,8 +234,8 @@ export default function ContractDetailPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Contracts
         </Button>
-        <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-          <p className="text-red-600 dark:text-red-400">Contract not found or error loading data</p>
+        <div className="text-center py-12 bg-destructive/10 rounded-lg border border-destructive/30">
+          <p className="text-destructive">Contract not found or error loading data</p>
         </div>
       </div>
     );
@@ -250,8 +250,8 @@ export default function ContractDetailPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Contracts
           </Button>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Contract Details</h2>
-          <p className="text-gray-500 mt-1">{contract.customerName}</p>
+          <h2 className="text-3xl font-bold text-foreground">Contract Details</h2>
+          <p className="text-muted-foreground mt-1">{contract.customerName}</p>
         </div>
         <div className="flex gap-2">
           {isAdmin && (
@@ -275,8 +275,8 @@ export default function ContractDetailPage() {
       </div>
 
       {/* General Information */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">General Information</h3>
+      <div className="bg-card rounded-lg border border-border p-6">
+        <h3 className="text-lg font-semibold text-foreground mb-4">General Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { label: "Customer Name", value: contract.customerName },
@@ -287,23 +287,23 @@ export default function ContractDetailPage() {
             { label: "End Date", value: new Date(contract.endDate).toLocaleDateString() },
           ].map(({ label, value }) => (
             <div key={label}>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
-              <p className="text-base font-medium text-gray-900 dark:text-white">{value}</p>
+              <p className="text-sm text-muted-foreground">{label}</p>
+              <p className="text-base font-medium text-foreground">{value}</p>
             </div>
           ))}
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
+            <p className="text-sm text-muted-foreground">Status</p>
             <Badge variant={getContractStatusVariant(contract.status)}>{contract.status}</Badge>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Manager</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
+            <p className="text-sm text-muted-foreground">Manager</p>
+            <p className="text-base font-medium text-foreground">
               {contract.manager ? `${contract.manager.firstName} ${contract.manager.lastName}` : "Not assigned"}
             </p>
           </div>
           <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Business Area</p>
-            <p className="text-base font-medium text-gray-900 dark:text-white">
+            <p className="text-sm text-muted-foreground">Business Area</p>
+            <p className="text-base font-medium text-foreground">
               {contract.area?.name || "Not assigned"}
             </p>
           </div>
@@ -311,9 +311,9 @@ export default function ContractDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="bg-card rounded-lg border border-border">
         {/* Tab bar */}
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <div className="flex border-b border-border">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -321,8 +321,8 @@ export default function ContractDetailPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? "border-blue-600 text-blue-600 dark:text-blue-400"
-                  : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
               {tab.icon}

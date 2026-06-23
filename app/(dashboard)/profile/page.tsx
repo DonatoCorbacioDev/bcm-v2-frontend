@@ -67,8 +67,8 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">My Profile</h2>
-        <p className="text-gray-500 mt-2">Your account information</p>
+        <h2 className="text-3xl font-bold text-foreground">My Profile</h2>
+        <p className="text-muted-foreground mt-2">Your account information</p>
       </div>
 
       {/* Account Info */}
@@ -79,19 +79,19 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
-            <p className="text-sm text-gray-500">Loading...</p>
+            <p className="text-sm text-muted-foreground">Loading...</p>
           ) : (
             <>
-              <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                <span className="text-sm text-gray-500">Username</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Username</span>
                 <span className="text-sm font-medium">{displayProfile?.username}</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                <span className="text-sm text-gray-500">Role</span>
+              <div className="flex items-center justify-between py-2 border-b border-border">
+                <span className="text-sm text-muted-foreground">Role</span>
                 <Badge variant="secondary">{displayProfile?.role}</Badge>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-500">Account status</span>
+                <span className="text-sm text-muted-foreground">Account status</span>
                 {displayProfile?.verified ? (
                   <Badge variant="success">Verified</Badge>
                 ) : (

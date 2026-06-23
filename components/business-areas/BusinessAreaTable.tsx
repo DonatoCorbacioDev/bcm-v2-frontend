@@ -99,7 +99,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
 
   if (isError) {
     return (
-      <div className="text-center py-8 text-red-600">
+      <div className="text-center py-8 text-destructive">
         Failed to load business areas. Please try again.
       </div>
     );
@@ -107,7 +107,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
 
   if (businessAreas.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         No business areas found. Create your first one!
       </div>
     );
@@ -138,21 +138,21 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
           </Button>
         )}
 
-        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-gray-600">
+        <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
           {filteredBusinessAreas.length} / {businessAreas.length} areas
         </div>
       </div>
 
       {/* Empty state after search */}
       {filteredBusinessAreas.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-muted-foreground">
           No business areas match your search
         </div>
       )}
 
       {/* Table with Responsive Columns */}
       {filteredBusinessAreas.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-x-auto">
+        <div className="bg-card rounded-lg border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -174,7 +174,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(area)}
-                        className="text-blue-600 hover:text-blue-700 text-xs px-2"
+                        className="text-primary hover:text-primary text-xs px-2"
                       >
                         Edit
                       </Button>
@@ -182,7 +182,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteClick(area)}
-                        className="text-red-600 hover:text-red-700 text-xs px-2"
+                        className="text-destructive hover:text-destructive text-xs px-2"
                       >
                         Delete
                       </Button>

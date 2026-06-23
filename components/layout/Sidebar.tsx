@@ -50,15 +50,15 @@ function NavLink({
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
         isActive
-          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700/60 dark:hover:text-gray-100"
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       )}
     >
       <item.icon
         aria-hidden="true"
         className={cn(
           "h-5 w-5 shrink-0",
-          isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"
+          isActive ? "text-primary-foreground" : "text-muted-foreground"
         )}
       />
       <span>{item.label}</span>
@@ -75,7 +75,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 fixed left-0 top-16 bottom-0 overflow-y-auto z-10">
+      <aside className="hidden md:flex flex-col w-64 bg-card border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto z-10">
         <div className="flex-1 py-4">
           <nav aria-label="Main navigation" className="p-3 space-y-1">
             {visibleItems.map((item) => (
@@ -94,17 +94,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         id="mobile-sidebar"
         aria-label="Mobile navigation"
         className={cn(
-          "md:hidden fixed left-0 top-16 bottom-0 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-y-auto z-30 transition-transform duration-300",
+          "md:hidden fixed left-0 top-16 bottom-0 w-64 bg-card border-r border-border overflow-y-auto z-30 transition-transform duration-300",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-3 border-b border-gray-200 dark:border-gray-800 flex justify-end">
+        <div className="p-3 border-b border-border flex justify-end">
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-lg hover:bg-accent transition-colors"
             aria-label="Close menu"
           >
-            <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            <X className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
         <div className="py-4">

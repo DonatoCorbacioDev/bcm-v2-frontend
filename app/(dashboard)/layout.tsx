@@ -46,17 +46,17 @@ export default function DashboardLayout({
   if (!isAuthenticated || isRestoringSession) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Verifying authentication...</p>
+        <p className="text-muted-foreground">Verifying authentication...</p>
       </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen overflow-hidden bg-background">
       {/* Skip navigation — visually hidden until focused (WCAG 2.4.1) */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-blue-700 focus:rounded focus:shadow-lg focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:text-primary focus:rounded focus:shadow-lg focus:outline-none"
       >
         Skip to main content
       </a>

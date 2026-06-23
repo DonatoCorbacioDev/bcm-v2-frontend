@@ -48,6 +48,19 @@ function mockAuthState(state: { isAuthenticated: boolean; accessToken: string | 
   );
 }
 
+// NOTE on the hasMounted gate (app/(dashboard)/layout.tsx): the bug it fixes
+// is a Next.js SSR/hydration-snapshot artifact — on a hard page load, React
+// forces the *first client render* of this "use client" component to match
+// the server-rendered snapshot (isAuthenticated: false), and only the render
+// after mount picks up the real, persisted client state. jsdom's `render()`
+// has no server-rendered markup to reconcile against and flushes all effects
+// (including the mount effect that flips hasMounted) synchronously within a
+// single `act()`, so it cannot reproduce that two-render SSR mismatch — by
+// the time `render()` returns here, hasMounted is already true, same as it
+// would be by the *second* render in a real browser. That's why this exact
+// regression was verified with Playwright against a running Next.js build
+// instead (see session notes) rather than as a unit test here.
+
 describe('DashboardLayout', () => {
   beforeEach(() => {
     jest.clearAllMocks();

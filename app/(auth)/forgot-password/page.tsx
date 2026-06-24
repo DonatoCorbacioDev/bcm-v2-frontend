@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { LogoMark } from "@/components/layout/Logo";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -39,6 +40,7 @@ export default function ForgotPasswordPage() {
     return (
       <Card>
         <CardHeader className="space-y-1">
+          <LogoMark className="h-12 w-12 mx-auto mb-2" />
           <CardTitle className="text-2xl font-bold text-center">Check your email</CardTitle>
           <CardDescription className="text-center">
             If an account exists for <span className="font-medium">{email}</span>, a password reset link has been sent.

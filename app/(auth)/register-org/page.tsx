@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { LogoMark } from "@/components/layout/Logo";
 
 interface RegisterOrgRequest {
   organizationName: string;
@@ -88,6 +89,7 @@ export default function RegisterOrgPage() {
   return (
     <Card>
       <CardHeader className="space-y-1">
+        <LogoMark className="h-12 w-12 mx-auto mb-2" />
         <CardTitle className="text-2xl font-bold text-center">
           Register Organization
         </CardTitle>

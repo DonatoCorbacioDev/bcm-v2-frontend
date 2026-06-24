@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import NotificationBell from "@/components/layout/NotificationBell";
+import Logo from "@/components/layout/Logo";
 
 interface HeaderProps {
   readonly onMenuClick: () => void;
@@ -38,9 +39,7 @@ export default function Header({ onMenuClick, isMenuOpen = false }: HeaderProps)
             <Menu className="h-6 w-6 text-muted-foreground" />
           </button>
 
-          <span className="text-xl font-bold text-foreground">
-            BCM
-          </span>
+          <Logo iconClassName="h-8 w-8" />
           <span className="hidden sm:inline text-sm text-muted-foreground">
             Business Contracts Manager
           </span>

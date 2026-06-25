@@ -89,11 +89,11 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
     mutationFn: (id: number) => contractsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
-      toast.success("Contract deleted successfully!");
+      toast.success("Contratto eliminato con successo!");
       setDeleteDialog({ open: false, contract: null });
     },
     onError: () => {
-      toast.error("Failed to delete contract");
+      toast.error("Eliminazione del contratto non riuscita");
     },
   });
 
@@ -144,9 +144,9 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   if (isError) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-destructive">Failed to load contracts</p>
+        <p className="text-destructive">Impossibile caricare i contratti</p>
         <p className="text-sm text-muted-foreground mt-2">
-          Check API / network / auth token
+          Controlla API / rete / token di autenticazione
         </p>
       </div>
     );
@@ -155,11 +155,11 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   if (totalElements === 0) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">No contracts found</p>
+        <p className="text-muted-foreground">Nessun contratto trovato</p>
         <p className="text-sm text-muted-foreground mt-2">
           {searchQuery || statusFilter !== "ALL"
-            ? "Try adjusting your search or filter criteria"
-            : "Create your first contract to get started"}
+            ? "Modifica i criteri di ricerca o i filtri"
+            : "Crea il tuo primo contratto per iniziare"}
         </p>
       </div>
     );
@@ -171,8 +171,8 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-50">
           <Input
-            aria-label="Search contracts"
-            placeholder="Search contracts..."
+            aria-label="Cerca contratti"
+            placeholder="Cerca contratti..."
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="max-w-md"
@@ -180,18 +180,18 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="status-filter" className="text-sm text-muted-foreground hidden sm:inline">Status:</label>
+          <label htmlFor="status-filter" className="text-sm text-muted-foreground hidden sm:inline">Stato:</label>
           <select
             id="status-filter"
-            aria-label="Filter by status"
+            aria-label="Filtra per stato"
             value={statusFilter}
             onChange={(e) => handleStatusChange(e.target.value)}
             className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="ALL">All</option>
-            <option value="ACTIVE">Active</option>
-            <option value="EXPIRED">Expired</option>
-            <option value="CANCELLED">Cancelled</option>
+            <option value="ALL">Tutti</option>
+            <option value="ACTIVE">Attivo</option>
+            <option value="EXPIRED">Scaduto</option>
+            <option value="CANCELLED">Annullato</option>
           </select>
 
           {(searchQuery || statusFilter !== "ALL") && (
@@ -201,13 +201,13 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               onClick={handleClearFilters}
               className="hidden sm:inline-flex"
             >
-              Clear
+              Pulisci
             </Button>
           )}
         </div>
 
         <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
-          {totalElements} contract{totalElements === 1 ? "" : "s"}
+          {totalElements} contratt{totalElements === 1 ? "o" : "i"}
         </div>
       </div>
 
@@ -216,15 +216,15 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Number</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead className="hidden md:table-cell">Project</TableHead>
-              <TableHead className="hidden lg:table-cell">WBS Code</TableHead>
-              <TableHead className="hidden lg:table-cell">Manager</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="hidden md:table-cell">Start Date</TableHead>
-              <TableHead className="hidden lg:table-cell">End Date</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Numero</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead className="hidden md:table-cell">Progetto</TableHead>
+              <TableHead className="hidden lg:table-cell">Codice WBS</TableHead>
+              <TableHead className="hidden lg:table-cell">Responsabile</TableHead>
+              <TableHead>Stato</TableHead>
+              <TableHead className="hidden md:table-cell">Data inizio</TableHead>
+              <TableHead className="hidden lg:table-cell">Data fine</TableHead>
+              <TableHead>Azioni</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -243,7 +243,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm">{c.startDate}</TableCell>
-                <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */c.endDate || "N/A"}</TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */c.endDate || "N/D"}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button
@@ -252,7 +252,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                       onClick={() => router.push(`/contracts/${c.id}`)}
                       className="text-green-600 hover:text-green-700 text-xs px-2"
                     >
-                      View
+                      Visualizza
                     </Button>
                     {isAdmin && (
                       <>
@@ -262,7 +262,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                           onClick={() => onEditClick(c)}
                           className="text-primary hover:text-primary text-xs px-2 hidden sm:inline-flex"
                         >
-                          Edit
+                          Modifica
                         </Button>
                         <Button
                           variant="ghost"
@@ -270,7 +270,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                           onClick={() => handleDeleteClick(c)}
                           className="text-destructive hover:text-destructive text-xs px-2 hidden sm:inline-flex"
                         >
-                          Delete
+                          Elimina
                         </Button>
                       </>
                     )}
@@ -285,10 +285,10 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
         {totalPages > 1 && (
           <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-6 py-4 border-t border-border gap-4">
             <div className="flex items-center gap-2">
-              <label htmlFor="page-size" className="text-xs md:text-sm text-muted-foreground">Rows:</label>
+              <label htmlFor="page-size" className="text-xs md:text-sm text-muted-foreground">Righe:</label>
               <select
                 id="page-size"
-                aria-label="Rows per page"
+                aria-label="Righe per pagina"
                 value={pageSize}
                 onChange={(e) => {
                   setPageSize(Number(e.target.value));
@@ -309,7 +309,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                 size="sm"
                 onClick={() => setPage(page - 1)}
                 disabled={page === 0}
-                aria-label="Go to previous page"
+                aria-label="Pagina precedente"
                 className="px-2"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -329,7 +329,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                     variant={p === page ? "default" : "outline"}
                     size="sm"
                     onClick={() => setPage(p)}
-                    aria-label={`Go to page ${p + 1}`}
+                    aria-label={`Vai a pagina ${p + 1}`}
                     aria-current={p === page ? "page" : undefined}
                     className="min-w-8 px-2 text-xs"
                   >
@@ -343,7 +343,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                 size="sm"
                 onClick={() => setPage(page + 1)}
                 disabled={page >= totalPages - 1}
-                aria-label="Go to next page"
+                aria-label="Pagina successiva"
                 className="px-2"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -363,12 +363,12 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Contract</DialogTitle>
+            <DialogTitle>Elimina contratto</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete contract{" "}
+              Sei sicuro di voler eliminare il contratto{" "}
               <span className="font-semibold">
                 {deleteDialog.contract?.contractNumber}
-              </span>? This action cannot be undone.
+              </span>? L&apos;operazione non può essere annullata.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -377,14 +377,14 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               onClick={() => setDeleteDialog({ open: false, contract: null })}
               disabled={deleteMutation.isPending}
             >
-              Cancel
+              Annulla
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteConfirm}
               disabled={deleteMutation.isPending}
             >
-              {/* istanbul ignore next */deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {/* istanbul ignore next */deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
             </Button>
           </DialogFooter>
         </DialogContent>

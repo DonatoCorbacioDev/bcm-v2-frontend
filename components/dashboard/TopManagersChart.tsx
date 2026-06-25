@@ -13,11 +13,11 @@ export function TopManagersChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top Managers</CardTitle>
-          <CardDescription>Managers with most contracts</CardDescription>
+          <CardTitle>Top manager</CardTitle>
+          <CardDescription>Manager con più contratti assegnati</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Caricamento...</p>
         </CardContent>
       </Card>
     );
@@ -27,11 +27,11 @@ export function TopManagersChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top Managers</CardTitle>
-          <CardDescription>Managers with most contracts</CardDescription>
+          <CardTitle>Top manager</CardTitle>
+          <CardDescription>Manager con più contratti assegnati</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-destructive text-sm">Failed to load chart data</p>
+          <p className="text-destructive text-sm">Impossibile caricare i dati del grafico</p>
         </CardContent>
       </Card>
     );
@@ -41,11 +41,11 @@ export function TopManagersChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top Managers</CardTitle>
-          <CardDescription>Managers with most contracts</CardDescription>
+          <CardTitle>Top manager</CardTitle>
+          <CardDescription>Manager con più contratti assegnati</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">No data available</p>
+          <p className="text-muted-foreground">Nessun dato disponibile</p>
         </CardContent>
       </Card>
     );
@@ -54,8 +54,8 @@ export function TopManagersChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Managers</CardTitle>
-        <CardDescription>Managers with most contracts</CardDescription>
+        <CardTitle>Top manager</CardTitle>
+        <CardDescription>Manager con più contratti assegnati</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -63,8 +63,8 @@ export function TopManagersChart() {
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" horizontal={false} />
             <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12 }} />
             <YAxis dataKey="managerName" type="category" width={140} tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(value) => [value as number, "Contracts"]} />
-            <Bar dataKey="contractsCount" name="Contracts" fill={CHART_COLOR} radius={[0, 6, 6, 0]} />
+            <Tooltip formatter={(value) => [value as number, "Contratti"]} />
+            <Bar dataKey="contractsCount" name="Contratti" fill={CHART_COLOR} radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

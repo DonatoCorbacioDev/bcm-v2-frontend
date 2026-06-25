@@ -13,11 +13,11 @@ export function ContractsTimelineChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contracts Timeline</CardTitle>
-          <CardDescription>Contracts created in the last 12 months</CardDescription>
+          <CardTitle>Andamento contratti</CardTitle>
+          <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Caricamento...</p>
         </CardContent>
       </Card>
     );
@@ -27,11 +27,11 @@ export function ContractsTimelineChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contracts Timeline</CardTitle>
-          <CardDescription>Contracts created in the last 12 months</CardDescription>
+          <CardTitle>Andamento contratti</CardTitle>
+          <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-destructive text-sm">Failed to load chart data</p>
+          <p className="text-destructive text-sm">Impossibile caricare i dati del grafico</p>
         </CardContent>
       </Card>
     );
@@ -41,11 +41,11 @@ export function ContractsTimelineChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contracts Timeline</CardTitle>
-          <CardDescription>Contracts created in the last 12 months</CardDescription>
+          <CardTitle>Andamento contratti</CardTitle>
+          <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">No data available</p>
+          <p className="text-muted-foreground">Nessun dato disponibile</p>
         </CardContent>
       </Card>
     );
@@ -54,8 +54,8 @@ export function ContractsTimelineChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contracts Timeline</CardTitle>
-        <CardDescription>Contracts created in the last 12 months</CardDescription>
+        <CardTitle>Andamento contratti</CardTitle>
+        <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -69,11 +69,11 @@ export function ContractsTimelineChart() {
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
             <XAxis dataKey="month" tick={{ fontSize: 12 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={36} />
-            <Tooltip formatter={(value) => [value as number, "Contracts"]} />
+            <Tooltip formatter={(value) => [value as number, "Contratti"]} />
             <Area
               type="monotone"
               dataKey="count"
-              name="Contracts"
+              name="Contratti"
               stroke={CHART_COLOR}
               strokeWidth={2}
               fill="url(#timelineGradient)"

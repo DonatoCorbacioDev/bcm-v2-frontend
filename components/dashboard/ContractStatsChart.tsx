@@ -11,9 +11,9 @@ interface ContractStatsChartProps {
 }
 
 const SEGMENTS = [
-  { key: "active",   name: "Active",        fill: "#10b981" },
-  { key: "expiring", name: "Expiring Soon", fill: "#f59e0b" },
-  { key: "expired",  name: "Expired",       fill: "#ef4444" },
+  { key: "active",   name: "Attivi",          fill: "#10b981" },
+  { key: "expiring", name: "In scadenza",     fill: "#f59e0b" },
+  { key: "expired",  name: "Scaduti",         fill: "#ef4444" },
 ] as const;
 
 export default function ContractStatsChart({ total, active, expiring, expired }: ContractStatsChartProps) {
@@ -25,13 +25,13 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contract Distribution</CardTitle>
-        <CardDescription>Status breakdown of all contracts</CardDescription>
+        <CardTitle>Distribuzione contratti</CardTitle>
+        <CardDescription>Ripartizione per stato di tutti i contratti</CardDescription>
       </CardHeader>
       <CardContent>
         {total === 0 ? (
           <div className="h-75 flex items-center justify-center text-muted-foreground">
-            No contracts available
+            Nessun contratto disponibile
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>

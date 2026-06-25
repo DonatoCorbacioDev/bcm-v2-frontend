@@ -44,27 +44,27 @@ function LoginContent() {
           Business Contracts Manager
         </CardTitle>
         <CardDescription className="text-center">
-          Enter your credentials to access the system
+          Inserisci le tue credenziali per accedere al sistema
         </CardDescription>
       </CardHeader>
       <CardContent>
         {resetSuccess && (
           <div role="status" aria-live="polite" className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
-            Password reset successfully. You can now log in.
+            Password reimpostata con successo. Ora puoi accedere.
           </div>
         )}
         {inviteSuccess && (
           <div role="status" aria-live="polite" className="mb-4 text-sm text-green-600 text-center bg-green-50 dark:bg-green-900/20 rounded-md py-2 px-3">
-            Account activated successfully. You can now log in.
+            Account attivato con successo. Ora puoi accedere.
           </div>
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Nome utente</Label>
             <Input
               id="username"
               type="text"
-              placeholder="Enter your username"
+              placeholder="Inserisci il nome utente"
               value={credentials.username}
               onChange={(e) =>
                 setCredentials({ ...credentials, username: e.target.value })
@@ -89,18 +89,18 @@ function LoginContent() {
             <div role="alert" className="text-sm text-destructive text-center">{error}</div>
           )}
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Sign In"}
+            {isLoading ? "Accesso in corso..." : "Accedi"}
           </Button>
           <div className="text-center space-y-1">
             <div>
               <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                Forgot password?
+                Password dimenticata?
               </Link>
             </div>
             <div>
-              <span className="text-sm text-muted-foreground">New here? </span>
+              <span className="text-sm text-muted-foreground">Non hai un account? </span>
               <Link href="/register-org" className="text-sm text-primary hover:underline">
-                Register your organization
+                Registra la tua organizzazione
               </Link>
             </div>
           </div>

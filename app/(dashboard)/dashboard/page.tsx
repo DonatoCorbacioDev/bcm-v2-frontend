@@ -20,10 +20,10 @@ export default function DashboardPage() {
   // Helper function to format days remaining
   const formatDaysLeft = (days: number | null | undefined): string => {
     if (days === null || days === undefined) {
-      return 'Expiring soon';
+      return 'In scadenza a breve';
     }
-    const dayWord = days === 1 ? 'day' : 'days';
-    return `${days} ${dayWord} left`;
+    const dayWord = days === 1 ? 'giorno' : 'giorni';
+    return `${days} ${dayWord} rimanenti`;
   };
 
   if (isLoading) {
@@ -33,7 +33,7 @@ export default function DashboardPage() {
           <h2 className="text-3xl font-bold text-foreground">
             Dashboard
           </h2>
-          <p className="text-muted-foreground mt-2">Overview of your contracts</p>
+          <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
         </div>
 
         {/* KPI Cards Skeleton */}
@@ -65,14 +65,14 @@ export default function DashboardPage() {
           <h2 className="text-3xl font-bold text-foreground">
             Dashboard
           </h2>
-          <p className="text-muted-foreground mt-2">Overview of your contracts</p>
+          <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
         </div>
         <div className="text-center py-12 bg-destructive/10 rounded-lg border border-destructive/30">
           <p className="text-destructive">
-            Failed to load dashboard statistics
+            Impossibile caricare le statistiche della dashboard
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Please check your API connection
+            Verifica la connessione all&apos;API
           </p>
         </div>
       </div>
@@ -85,14 +85,14 @@ export default function DashboardPage() {
         <h2 className="text-3xl font-bold text-foreground">
           Dashboard
         </h2>
-        <p className="text-muted-foreground mt-2">Overview of your contracts</p>
+        <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
       </div>
 
       {/* Expiring Contracts Alert */}
       {isErrorExpiring && (
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4">
           <p className="text-sm text-destructive">
-            Failed to load expiring contracts
+            Impossibile caricare i contratti in scadenza
           </p>
         </div>
       )}
@@ -105,10 +105,10 @@ export default function DashboardPage() {
               </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-                {expiringContracts.length} Contract{expiringContracts.length > 1 ? 's' : ''} Expiring Soon
+                {expiringContracts.length} contratt{expiringContracts.length > 1 ? 'i' : 'o'} in scadenza
               </h3>
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
-                The following contracts will expire within the next 30 days. Take action to renew or close them.
+                I seguenti contratti scadranno nei prossimi 30 giorni. Rinnovali o chiudili.
               </p>
               <div className="space-y-2">
                 {expiringContracts.slice(0, 5).map((contract) => (
@@ -123,7 +123,7 @@ export default function DashboardPage() {
                           {contract.contractNumber} - {contract.customerName}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Expires: {new Date(contract.endDate).toLocaleDateString()}
+                          Scade il: {new Date(contract.endDate).toLocaleDateString("it-IT")}
                         </p>
                       </div>
                       <div className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
@@ -137,7 +137,7 @@ export default function DashboardPage() {
                     href="/contracts?status=ACTIVE"
                     className="block text-center p-2 text-sm text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-100 font-medium"
                   >
-                    + View {expiringContracts.length - 5} more expiring contracts
+                    + Mostra altri {expiringContracts.length - 5} contratti in scadenza
                   </Link>
                 )}
               </div>
@@ -149,25 +149,25 @@ export default function DashboardPage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
-          title="Total Contracts"
+          title="Contratti totali"
           value={stats?.total ?? 0}
           icon={<BarChart3 className="h-6 w-6" aria-hidden="true" />}
           variant="default"
         />
         <KPICard
-          title="Active Contracts"
+          title="Contratti attivi"
           value={stats?.active ?? 0}
           icon={<CheckCircle2 className="h-6 w-6" aria-hidden="true" />}
           variant="success"
         />
         <KPICard
-          title="Expiring Soon"
+          title="In scadenza"
           value={stats?.expiring ?? 0}
           icon={<Clock className="h-6 w-6" aria-hidden="true" />}
           variant="warning"
         />
         <KPICard
-          title="Expired Contracts"
+          title="Contratti scaduti"
           value={stats?.expired ?? 0}
           icon={<XCircle className="h-6 w-6" aria-hidden="true" />}
           variant="danger"

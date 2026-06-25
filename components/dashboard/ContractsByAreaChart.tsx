@@ -17,11 +17,11 @@ export function ContractsByAreaChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contracts by Business Area</CardTitle>
-          <CardDescription>Contract distribution by business area</CardDescription>
+          <CardTitle>Contratti per area di business</CardTitle>
+          <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Caricamento...</p>
         </CardContent>
       </Card>
     );
@@ -31,11 +31,11 @@ export function ContractsByAreaChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contracts by Business Area</CardTitle>
-          <CardDescription>Contract distribution by business area</CardDescription>
+          <CardTitle>Contratti per area di business</CardTitle>
+          <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-destructive text-sm">Failed to load chart data</p>
+          <p className="text-destructive text-sm">Impossibile caricare i dati del grafico</p>
         </CardContent>
       </Card>
     );
@@ -45,11 +45,11 @@ export function ContractsByAreaChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contracts by Business Area</CardTitle>
-          <CardDescription>Contract distribution by business area</CardDescription>
+          <CardTitle>Contratti per area di business</CardTitle>
+          <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">No data available</p>
+          <p className="text-muted-foreground">Nessun dato disponibile</p>
         </CardContent>
       </Card>
     );
@@ -58,8 +58,8 @@ export function ContractsByAreaChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contracts by Business Area</CardTitle>
-        <CardDescription>Contract distribution by business area</CardDescription>
+        <CardTitle>Contratti per area di business</CardTitle>
+        <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -71,8 +71,8 @@ export function ContractsByAreaChart() {
               tickFormatter={(v: string) => truncate(v)}
             />
             <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={36} />
-            <Tooltip formatter={(value) => [value as number, "Contracts"]} />
-            <Bar dataKey="count" name="Contracts" fill={CHART_COLOR} radius={[6, 6, 0, 0]} />
+            <Tooltip formatter={(value) => [value as number, "Contratti"]} />
+            <Bar dataKey="count" name="Contratti" fill={CHART_COLOR} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

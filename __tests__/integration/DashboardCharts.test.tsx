@@ -59,14 +59,14 @@ import KPICardSkeleton from '@/components/dashboard/KPICardSkeleton';
 // ─── ContractStatsChart ───────────────────────────────────────────────────────
 
 describe('ContractStatsChart', () => {
-  it('shows "No contracts available" when total is 0', () => {
+  it('shows "Nessun contratto disponibile" when total is 0', () => {
     render(<ContractStatsChart total={0} active={0} expiring={0} expired={0} />);
-    expect(screen.getByText(/no contracts available/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun contratto disponibile/i)).toBeInTheDocument();
   });
 
   it('renders chart title when there are contracts', () => {
     render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} />);
-    expect(screen.getByText(/contract distribution/i)).toBeInTheDocument();
+    expect(screen.getByText(/distribuzione contratti/i)).toBeInTheDocument();
   });
 });
 
@@ -78,19 +78,19 @@ describe('ContractsByAreaChart', () => {
   it('shows loading state', () => {
     (useContractsByArea as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
     render(<ContractsByAreaChart />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByText(/caricamento/i)).toBeInTheDocument();
   });
 
   it('shows error state', () => {
     (useContractsByArea as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: true });
     render(<ContractsByAreaChart />);
-    expect(screen.getByText(/failed to load chart data/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i dati del grafico/i)).toBeInTheDocument();
   });
 
   it('shows empty state when data is empty', () => {
     (useContractsByArea as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false });
     render(<ContractsByAreaChart />);
-    expect(screen.getByText(/no data available/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun dato disponibile/i)).toBeInTheDocument();
   });
 
   it('renders chart title with data', () => {
@@ -100,7 +100,7 @@ describe('ContractsByAreaChart', () => {
       isError: false,
     });
     render(<ContractsByAreaChart />);
-    expect(screen.getByText(/contracts by business area/i)).toBeInTheDocument();
+    expect(screen.getByText(/^contratti per area di business$/i)).toBeInTheDocument();
   });
 });
 
@@ -112,19 +112,19 @@ describe('ContractsTimelineChart', () => {
   it('shows loading state', () => {
     (useContractsTimeline as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
     render(<ContractsTimelineChart />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByText(/caricamento/i)).toBeInTheDocument();
   });
 
   it('shows error state', () => {
     (useContractsTimeline as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: true });
     render(<ContractsTimelineChart />);
-    expect(screen.getByText(/failed to load chart data/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i dati del grafico/i)).toBeInTheDocument();
   });
 
   it('shows empty state when data is empty', () => {
     (useContractsTimeline as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false });
     render(<ContractsTimelineChart />);
-    expect(screen.getByText(/no data available/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun dato disponibile/i)).toBeInTheDocument();
   });
 
   it('renders chart title with data', () => {
@@ -134,7 +134,7 @@ describe('ContractsTimelineChart', () => {
       isError: false,
     });
     render(<ContractsTimelineChart />);
-    expect(screen.getByText(/contracts timeline/i)).toBeInTheDocument();
+    expect(screen.getByText(/andamento contratti/i)).toBeInTheDocument();
   });
 });
 
@@ -146,19 +146,19 @@ describe('TopManagersChart', () => {
   it('shows loading state', () => {
     (useTopManagers as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
     render(<TopManagersChart />);
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByText(/caricamento/i)).toBeInTheDocument();
   });
 
   it('shows error state', () => {
     (useTopManagers as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: true });
     render(<TopManagersChart />);
-    expect(screen.getByText(/failed to load chart data/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i dati del grafico/i)).toBeInTheDocument();
   });
 
   it('shows empty state when data is empty', () => {
     (useTopManagers as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false });
     render(<TopManagersChart />);
-    expect(screen.getByText(/no data available/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun dato disponibile/i)).toBeInTheDocument();
   });
 
   it('renders chart title with data', () => {
@@ -168,7 +168,7 @@ describe('TopManagersChart', () => {
       isError: false,
     });
     render(<TopManagersChart />);
-    expect(screen.getByText(/top managers/i)).toBeInTheDocument();
+    expect(screen.getByText(/top manager/i)).toBeInTheDocument();
   });
 });
 

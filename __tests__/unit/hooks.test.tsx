@@ -453,6 +453,6 @@ describe('useAuth', () => {
     let success: boolean | undefined;
     await act(async () => { success = await result.current.login({ username: 'alice', password: 'wrong' }); });
     expect(success).toBe(false);
-    expect(result.current.error).toBe('Login failed. Please try again.');
+    expect(result.current.error).toBe('Accesso non riuscito. Riprova.');
   });
 });

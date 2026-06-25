@@ -529,24 +529,24 @@ describe('ContractForm', () => {
   it('shows loading state when reference data is loading', () => {
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: true, isError: false });
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/loading form data/i)).toBeInTheDocument();
+    expect(screen.getByText(/caricamento dati del form/i)).toBeInTheDocument();
   });
 
   it('shows error state when reference data fails', () => {
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: true });
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/failed to load business areas/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare aree di business/i)).toBeInTheDocument();
   });
 
   it('renders form fields in create mode', () => {
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByLabelText(/customer name/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /create contract/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/nome cliente/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /crea contratto/i })).toBeInTheDocument();
   });
 
   it('renders Update Contract button in edit mode', () => {
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('button', { name: /update contract/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /aggiorna contratto/i })).toBeInTheDocument();
   });
 
   it('pre-fills fields in edit mode', () => {
@@ -559,9 +559,9 @@ describe('ContractForm', () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ContractForm onClose={onClose} onSuccess={onSuccess} contract={validContract} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /update contract/i }));
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
-    expect(toast.success).toHaveBeenCalledWith('Contract updated successfully!');
+    expect(toast.success).toHaveBeenCalledWith('Contratto aggiornato con successo!');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
@@ -570,21 +570,21 @@ describe('ContractForm', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /update contract/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to update contract'));
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento del contratto non riuscito'));
   });
 
   it('calls onClose when Cancel is clicked', async () => {
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
     expect(onClose).toHaveBeenCalled();
   });
 
   it('shows validation errors for areaId and managerId when submitting empty form', async () => {
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /create contract/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crea contratto/i }));
     await waitFor(() => {
-      expect(screen.getAllByText(/required|at least|invalid/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/obbligator|almeno|non valid/i).length).toBeGreaterThan(0);
     });
   });
 });

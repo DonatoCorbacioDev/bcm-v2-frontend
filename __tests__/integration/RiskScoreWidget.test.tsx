@@ -27,14 +27,14 @@ describe('RiskScoreWidget', () => {
   it('shows offline message when FastAPI is unavailable', async () => {
     (api.get as jest.Mock).mockRejectedValue(new Error('Network Error'));
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/risk analysis unavailable/i)).toBeInTheDocument());
-    expect(screen.getByText(/make sure the backend and forecasting service/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/analisi del rischio non disponibile/i)).toBeInTheDocument());
+    expect(screen.getByText(/verifica che il backend e il servizio di previsione/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no risk scores', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/no risk data available/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/nessun dato sul rischio disponibile/i)).toBeInTheDocument());
   });
 
   it('renders risk scores with levels and anomalies', async () => {
@@ -52,9 +52,9 @@ describe('RiskScoreWidget', () => {
   it('shows correct risk level badges', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/high · 85%/i)).toBeInTheDocument());
-    expect(screen.getByText(/medium · 45%/i)).toBeInTheDocument();
-    expect(screen.getByText(/low · 10%/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/alto · 85%/i)).toBeInTheDocument());
+    expect(screen.getByText(/medio · 45%/i)).toBeInTheDocument();
+    expect(screen.getByText(/basso · 10%/i)).toBeInTheDocument();
   });
 
   it('falls back to LOW config for unknown risk level', async () => {

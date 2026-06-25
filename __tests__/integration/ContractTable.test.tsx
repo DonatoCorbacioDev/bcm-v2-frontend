@@ -146,7 +146,7 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/failed to load contracts/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i contratti/i)).toBeInTheDocument();
   });
 
   it('shows empty state with a create prompt when no contracts exist', () => {
@@ -158,8 +158,8 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/no contracts found/i)).toBeInTheDocument();
-    expect(screen.getByText(/create your first contract/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun contratto trovato/i)).toBeInTheDocument();
+    expect(screen.getByText(/crea il tuo primo contratto/i)).toBeInTheDocument();
   });
 
   it('shows filter hint when search is active but results are empty', async () => {
@@ -179,10 +179,10 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const searchInput = screen.getByPlaceholderText(/search contracts/i);
+    const searchInput = screen.getByPlaceholderText(/cerca contratti/i);
     await userEvent.type(searchInput, 'xyz-no-match');
 
-    expect(screen.getByText(/try adjusting your search/i)).toBeInTheDocument();
+    expect(screen.getByText(/modifica i criteri di ricerca/i)).toBeInTheDocument();
   });
 
   // ── Data rendering ────────────────────────────────────────────────────────
@@ -202,7 +202,7 @@ describe('ContractTable', () => {
   it('shows total contract count in the toolbar', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/2 contracts/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 contratti/i)).toBeInTheDocument();
   });
 
   it('shows singular "contract" when there is exactly one', () => {
@@ -214,7 +214,7 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('1 contract')).toBeInTheDocument();
+    expect(screen.getByText('1 contratto')).toBeInTheDocument();
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -223,7 +223,7 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    const viewButton = within(rows[1]).getByRole('button', { name: /view/i });
+    const viewButton = within(rows[1]).getByRole('button', { name: /visualizza/i });
     await userEvent.click(viewButton);
 
     expect(mockPush).toHaveBeenCalledWith('/contracts/1');
@@ -233,7 +233,7 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    const editButton = within(rows[1]).getByRole('button', { name: /edit/i });
+    const editButton = within(rows[1]).getByRole('button', { name: /modifica/i });
     await userEvent.click(editButton);
 
     expect(onEditClick).toHaveBeenCalledTimes(1);
@@ -246,12 +246,12 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    const deleteButton = within(rows[1]).getByRole('button', { name: /delete/i });
+    const deleteButton = within(rows[1]).getByRole('button', { name: /elimina/i });
     await userEvent.click(deleteButton);
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(within(dialog).getByText(/are you sure/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/sei sicuro/i)).toBeInTheDocument();
     expect(within(dialog).getByText('CNT-001')).toBeInTheDocument();
   });
 
@@ -259,10 +259,10 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -274,32 +274,32 @@ describe('ContractTable', () => {
   it('renders the status filter select with all options', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const select = screen.getByDisplayValue('All');
+    const select = screen.getByDisplayValue('Tutti');
     expect(select).toBeInTheDocument();
-    expect(within(select.closest('div') ?? document.body).queryByRole('option', { name: /active/i })).toBeInTheDocument();
+    expect(within(select.closest('div') ?? document.body).queryByRole('option', { name: /attivo/i })).toBeInTheDocument();
   });
 
   it('shows the Clear button when status filter is active', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // Initially no Clear button
-    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /pulisci/i })).not.toBeInTheDocument();
 
-    const select = screen.getByDisplayValue('All');
+    const select = screen.getByDisplayValue('Tutti');
     await userEvent.selectOptions(select, 'ACTIVE');
 
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
   it('hides the Clear button after filters are reset', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const select = screen.getByDisplayValue('All');
+    const select = screen.getByDisplayValue('Tutti');
     await userEvent.selectOptions(select, 'ACTIVE');
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
-    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
+    expect(screen.queryByRole('button', { name: /pulisci/i })).not.toBeInTheDocument();
   });
 
   // ── Role-based visibility ─────────────────────────────────────────────────
@@ -307,8 +307,8 @@ describe('ContractTable', () => {
   it('shows Edit and Delete buttons for ADMIN', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).getByRole('button', { name: /edit/i })).toBeInTheDocument();
-    expect(within(rows[1]).getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    expect(within(rows[1]).getByRole('button', { name: /modifica/i })).toBeInTheDocument();
+    expect(within(rows[1]).getByRole('button', { name: /elimina/i })).toBeInTheDocument();
   });
 
   it('hides Edit and Delete buttons when user is not yet loaded', () => {
@@ -318,17 +318,17 @@ describe('ContractTable', () => {
     });
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
-    expect(within(rows[1]).queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /modifica/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /elimina/i })).not.toBeInTheDocument();
   });
 
   it('hides Edit and Delete buttons for MANAGER', () => {
     mockAuthAs('MANAGER');
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).queryByRole('button', { name: /edit/i })).not.toBeInTheDocument();
-    expect(within(rows[1]).queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
-    expect(within(rows[1]).getByRole('button', { name: /view/i })).toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /modifica/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /elimina/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).getByRole('button', { name: /visualizza/i })).toBeInTheDocument();
   });
 
   // ── Pagination ────────────────────────────────────────────────────────────
@@ -336,7 +336,7 @@ describe('ContractTable', () => {
   it('hides pagination controls when there is only one page', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.queryByRole('button', { name: /go to next page/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /pagina successiva/i })).not.toBeInTheDocument();
   });
 
   it('shows pagination controls when there are multiple pages', () => {
@@ -348,11 +348,11 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByRole('button', { name: /go to next page/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /go to previous page/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pagina successiva/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pagina precedente/i })).toBeInTheDocument();
     // On page 1, Prev should be disabled; Next should be enabled
-    expect(screen.getByRole('button', { name: /go to previous page/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /go to next page/i })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: /pagina precedente/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /pagina successiva/i })).not.toBeDisabled();
   });
 
   it('disables Next button on the last page', async () => {
@@ -365,10 +365,10 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // Click Next to go to page 2 (last page since totalPages = 2)
-    await userEvent.click(screen.getByRole('button', { name: /go to next page/i }));
+    await userEvent.click(screen.getByRole('button', { name: /pagina successiva/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /go to next page/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /pagina successiva/i })).toBeDisabled();
     });
   });
 
@@ -376,12 +376,12 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Contract deleted successfully!');
+      expect(toast.success).toHaveBeenCalledWith('Contratto eliminato con successo!');
     });
   });
 
@@ -390,12 +390,12 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete contract');
+      expect(toast.error).toHaveBeenCalledWith('Eliminazione del contratto non riuscita');
     });
   });
 
@@ -411,9 +411,9 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // page=0, total=10 → [0,1,2,3,4,"ellipsis-end",9] → pages 1–5 and 10 visible
-    expect(screen.getByRole('button', { name: 'Go to page 1' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Go to page 5' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Go to page 10' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Vai a pagina 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Vai a pagina 5' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Vai a pagina 10' })).toBeInTheDocument();
     expect(screen.getByText('…')).toBeInTheDocument();
   });
 
@@ -427,12 +427,12 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // Click page 5 (index 4) → current=4 → middle: [0,"…",3,4,5,"…",9]
-    await userEvent.click(screen.getByRole('button', { name: 'Go to page 5' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Vai a pagina 5' }));
 
     await waitFor(() => {
       expect(screen.getAllByText('…')).toHaveLength(2);
-      expect(screen.getByRole('button', { name: 'Go to page 4' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Go to page 6' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Vai a pagina 4' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Vai a pagina 6' })).toBeInTheDocument();
     });
   });
 
@@ -446,16 +446,16 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // Click page 10 (index 9) → current=9 → near-end: [0,"…",5,6,7,8,9]
-    await userEvent.click(screen.getByRole('button', { name: 'Go to page 10' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Vai a pagina 10' }));
 
     await waitFor(() => {
       expect(screen.getByText('…')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Go to page 7' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /go to next page/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Vai a pagina 7' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /pagina successiva/i })).toBeDisabled();
     });
   });
 
-  it('changes rows per page and resets to first page', async () => {
+  it('changes righe per pagina and resets to first page', async () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: makePageResponse([activeContract, expiredContract], 3),
       isLoading: false,
@@ -464,7 +464,7 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.selectOptions(screen.getByLabelText(/rows per page/i), '25');
+    await userEvent.selectOptions(screen.getByLabelText(/righe per pagina/i), '25');
 
     expect(screen.getByDisplayValue('25')).toBeInTheDocument();
   });
@@ -479,12 +479,12 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // Go to page 2 first
-    await userEvent.click(screen.getByRole('button', { name: /go to next page/i }));
+    await userEvent.click(screen.getByRole('button', { name: /pagina successiva/i }));
     // Then click page 1
-    await userEvent.click(screen.getByRole('button', { name: /go to page 1/i }));
+    await userEvent.click(screen.getByRole('button', { name: /vai a pagina 1/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /go to previous page/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /pagina precedente/i })).toBeDisabled();
     });
   });
 
@@ -497,11 +497,11 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.click(screen.getByRole('button', { name: /go to next page/i }));
-    await userEvent.click(screen.getByRole('button', { name: /go to previous page/i }));
+    await userEvent.click(screen.getByRole('button', { name: /pagina successiva/i }));
+    await userEvent.click(screen.getByRole('button', { name: /pagina precedente/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /go to previous page/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /pagina precedente/i })).toBeDisabled();
     });
   });
 
@@ -515,10 +515,10 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // totalPages=3, so click "Go to page 3"
-    await userEvent.click(screen.getByRole('button', { name: /go to page 3/i }));
+    await userEvent.click(screen.getByRole('button', { name: /vai a pagina 3/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /go to next page/i })).toBeDisabled();
+      expect(screen.getByRole('button', { name: /pagina successiva/i })).toBeDisabled();
     });
   });
 });

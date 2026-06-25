@@ -7,70 +7,70 @@ import { z } from "zod";
 export const contractSchema = z.object({
   // Customer information
   customerName: z
-    .string({ message: "Customer name is required" })
-    .min(2, "Customer name must be at least 2 characters")
-    .max(100, "Customer name must not exceed 100 characters")
+    .string({ message: "Il nome del cliente è obbligatorio" })
+    .min(2, "Il nome del cliente deve contenere almeno 2 caratteri")
+    .max(100, "Il nome del cliente non può superare i 100 caratteri")
     .trim(),
 
   // Contract number (format: C001, C002, etc.)
   contractNumber: z
-    .string({ message: "Contract number is required" })
-    .min(1, "Contract number is required")
-    .max(50, "Contract number must not exceed 50 characters")
+    .string({ message: "Il numero di contratto è obbligatorio" })
+    .min(1, "Il numero di contratto è obbligatorio")
+    .max(50, "Il numero di contratto non può superare i 50 caratteri")
     .regex(
       /^[A-Z0-9-]+$/,
-      "Contract number must contain only uppercase letters, numbers, and hyphens"
+      "Il numero di contratto può contenere solo lettere maiuscole, numeri e trattini"
     )
     .trim(),
 
   // WBS code (Work Breakdown Structure)
   wbsCode: z
-    .string({ message: "WBS code is required" })
-    .min(1, "WBS code is required")
-    .max(50, "WBS code must not exceed 50 characters")
+    .string({ message: "Il codice WBS è obbligatorio" })
+    .min(1, "Il codice WBS è obbligatorio")
+    .max(50, "Il codice WBS non può superare i 50 caratteri")
     .trim(),
 
   // Project name
   projectName: z
-    .string({ message: "Project name is required" })
-    .min(3, "Project name must be at least 3 characters")
-    .max(200, "Project name must not exceed 200 characters")
+    .string({ message: "Il nome del progetto è obbligatorio" })
+    .min(3, "Il nome del progetto deve contenere almeno 3 caratteri")
+    .max(200, "Il nome del progetto non può superare i 200 caratteri")
     .trim(),
 
   // Start date (ISO format: YYYY-MM-DD)
   startDate: z
-    .string({ message: "Start date is required" })
-    .min(1, "Start date is required")
+    .string({ message: "La data di inizio è obbligatoria" })
+    .min(1, "La data di inizio è obbligatoria")
     .regex(
       /^\d{4}-\d{2}-\d{2}$/,
-      "Start date must be in YYYY-MM-DD format"
+      "La data di inizio deve essere nel formato AAAA-MM-GG"
     ),
 
   // End date (ISO format: YYYY-MM-DD)
   endDate: z
-    .string({ message: "End date is required" })
-    .min(1, "End date is required")
+    .string({ message: "La data di fine è obbligatoria" })
+    .min(1, "La data di fine è obbligatoria")
     .regex(
       /^\d{4}-\d{2}-\d{2}$/,
-      "End date must be in YYYY-MM-DD format"
+      "La data di fine deve essere nel formato AAAA-MM-GG"
     ),
 
   // Contract status
   status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED"], {
-    message: "Status must be ACTIVE, EXPIRED, or CANCELLED",
+    message: "Lo stato deve essere ACTIVE, EXPIRED o CANCELLED",
   }),
 
   // Business area ID (foreign key)
   areaId: z
-    .number({ message: "Business area is required" })
-    .int("Business area must be an integer")
-    .positive("Business area must be a positive number"),
+    .number({ message: "L'area di business è obbligatoria" })
+    .int("L'area di business deve essere un numero intero")
+    .positive("L'area di business deve essere un numero positivo"),
 
   // Manager ID (foreign key)
   managerId: z
-    .number({ message: "Manager is required" })
-    .int("Manager must be an integer")
-    .positive("Manager must be a positive number"),
+    .number({ message: "Il responsabile è obbligatorio" })
+    .int("Il responsabile deve essere un numero intero")
+    .positive("Il responsabile deve essere un numero positivo"),
 })
   // Cross-field validation: endDate must be after or equal to startDate
   .refine(
@@ -80,7 +80,7 @@ export const contractSchema = z.object({
       return end >= start;
     },
     {
-      message: "End date must be equal to or after start date",
+      message: "La data di fine deve essere uguale o successiva alla data di inizio",
       path: ["endDate"], // Show error on endDate field
     }
   );

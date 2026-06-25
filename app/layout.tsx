@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BCM - Business Contracts Manager",
   description:
-    "Enterprise contract management system with financial tracking and reporting capabilities.",
+    "Gestione contratti aziendali con monitoraggio finanziario, scadenze e reportistica.",
 };
 
 export default function RootLayout({
@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="it">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReactQueryProvider>
           {children}

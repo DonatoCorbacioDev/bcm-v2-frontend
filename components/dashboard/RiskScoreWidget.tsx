@@ -9,9 +9,9 @@ import { api } from "@/lib/api";
 import type { RiskScore } from "@/types";
 
 const LEVEL_CONFIG = {
-  HIGH:   { color: "bg-red-500",    badge: "destructive" as const, label: "High" },
-  MEDIUM: { color: "bg-yellow-400", badge: "warning" as const,     label: "Medium" },
-  LOW:    { color: "bg-green-500",  badge: "success" as const,     label: "Low" },
+  HIGH:   { color: "bg-red-500",    badge: "destructive" as const, label: "Alto" },
+  MEDIUM: { color: "bg-yellow-400", badge: "warning" as const,     label: "Medio" },
+  LOW:    { color: "bg-green-500",  badge: "success" as const,     label: "Basso" },
 };
 
 export function RiskScoreWidget() {
@@ -34,9 +34,9 @@ export function RiskScoreWidget() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ShieldAlert className="h-5 w-5 text-amber-500" />
-          Risk & Anomalies
+          Rischi e anomalie
         </CardTitle>
-        <CardDescription>AI-based risk score per contract</CardDescription>
+        <CardDescription>Punteggio di rischio per contratto, calcolato dal modello</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -50,17 +50,17 @@ export function RiskScoreWidget() {
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <WifiOff className="h-6 w-6 text-amber-500" />
             <p className="text-sm font-medium text-foreground">
-              Risk analysis unavailable
+              Analisi del rischio non disponibile
             </p>
             <p className="text-xs text-muted-foreground">
-              Make sure the backend and forecasting service are running
+              Verifica che il backend e il servizio di previsione siano attivi
             </p>
           </div>
         )}
 
         {!isLoading && !isError && (!riskScores || riskScores.length === 0) && (
           <div className="flex items-center justify-center py-8">
-            <p className="text-sm text-muted-foreground">No risk data available</p>
+            <p className="text-sm text-muted-foreground">Nessun dato sul rischio disponibile</p>
           </div>
         )}
 

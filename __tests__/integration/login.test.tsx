@@ -40,9 +40,9 @@ describe('LoginPage', () => {
   it('renders username and password fields and the sign in button', () => {
     render(<LoginPage />);
 
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/nome utente/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /accedi/i })).toBeInTheDocument();
   });
 
   it('shows error message returned by the server on invalid credentials', async () => {
@@ -52,9 +52,9 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'wrong@example.com');
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'wrong@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword');
-    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
@@ -68,12 +68,12 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'wrong@example.com');
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'wrong@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword');
-    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/login failed/i)).toBeInTheDocument();
+      expect(screen.getByText(/accesso non riuscito/i)).toBeInTheDocument();
     });
   });
 
@@ -82,12 +82,12 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'user@example.com');
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'user@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password');
-    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/login failed/i)).toBeInTheDocument();
+      expect(screen.getByText(/accesso non riuscito/i)).toBeInTheDocument();
     });
   });
 
@@ -107,9 +107,9 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    await userEvent.type(screen.getByLabelText(/username/i), 'admin@example.com');
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'admin@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password123');
-    await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
 
     await waitFor(() => {
       expect(mockPost).toHaveBeenCalledWith('/auth/login', {

@@ -82,13 +82,13 @@ export default function ContractForm({
           id: contract.id,
           payload: data,
         });
-        toast.success("Contract updated successfully!");
+        toast.success("Contratto aggiornato con successo!");
       } else {
         await upsertMutation.mutateAsync({
           mode: "create",
           payload: data,
         });
-        toast.success("Contract created successfully!");
+        toast.success("Contratto creato con successo!");
       }
 
       /* istanbul ignore next */
@@ -97,7 +97,7 @@ export default function ContractForm({
     } catch (error) {
       toast.error(
         /* istanbul ignore next */
-        contract?.id ? "Failed to update contract" : "Failed to create contract"
+        contract?.id ? "Aggiornamento del contratto non riuscito" : "Creazione del contratto non riuscita"
       );
       console.error(error);
     }
@@ -105,14 +105,14 @@ export default function ContractForm({
 
   const submitLabel = useMemo(() => {
     /* istanbul ignore next */
-    if (upsertMutation.isPending) return "Saving...";
-    return contract?.id ? "Update Contract" : "Create Contract";
+    if (upsertMutation.isPending) return "Salvataggio...";
+    return contract?.id ? "Aggiorna contratto" : "Crea contratto";
   }, [upsertMutation.isPending, contract?.id]);
 
   if (isReferenceLoading) {
     return (
       <div className="py-8 text-center text-sm text-muted-foreground">
-        Loading form data...
+        Caricamento dati del form...
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function ContractForm({
   if (isReferenceError) {
     return (
       <div className="py-8 text-center text-sm text-destructive">
-        Failed to load business areas/managers.
+        Impossibile caricare aree di business/responsabili.
       </div>
     );
   }
@@ -130,12 +130,12 @@ export default function ContractForm({
       {/* Customer Name */}
       <div className="space-y-2">
         <Label htmlFor="customerName">
-          Customer Name <span className="text-destructive">*</span>
+          Nome cliente <span className="text-destructive">*</span>
         </Label>
         <Input
           id="customerName"
           {...register("customerName")}
-          placeholder="Enter customer name"
+          placeholder="Inserisci il nome del cliente"
         />
         {errors.customerName && (
           <p className="text-sm text-destructive">{errors.customerName.message}</p>
@@ -145,12 +145,12 @@ export default function ContractForm({
       {/* Contract Number */}
       <div className="space-y-2">
         <Label htmlFor="contractNumber">
-          Contract Number <span className="text-destructive">*</span>
+          Numero contratto <span className="text-destructive">*</span>
         </Label>
         <Input
           id="contractNumber"
           {...register("contractNumber")}
-          placeholder="e.g., CNT-2024-001"
+          placeholder="es. CNT-2024-001"
         />
         {errors.contractNumber && (
           <p className="text-sm text-destructive">
@@ -162,12 +162,12 @@ export default function ContractForm({
       {/* WBS Code */}
       <div className="space-y-2">
         <Label htmlFor="wbsCode">
-          WBS Code <span className="text-destructive">*</span>
+          Codice WBS <span className="text-destructive">*</span>
         </Label>
         <Input
           id="wbsCode"
           {...register("wbsCode")}
-          placeholder="e.g., WBS-001"
+          placeholder="es. WBS-001"
         />
         {errors.wbsCode && (
           <p className="text-sm text-destructive">{errors.wbsCode.message}</p>
@@ -177,12 +177,12 @@ export default function ContractForm({
       {/* Project Name */}
       <div className="space-y-2">
         <Label htmlFor="projectName">
-          Project Name <span className="text-destructive">*</span>
+          Nome progetto <span className="text-destructive">*</span>
         </Label>
         <Input
           id="projectName"
           {...register("projectName")}
-          placeholder="Enter project name"
+          placeholder="Inserisci il nome del progetto"
         />
         {errors.projectName && (
           <p className="text-sm text-destructive">{errors.projectName.message}</p>
@@ -193,7 +193,7 @@ export default function ContractForm({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="startDate">
-            Start Date <span className="text-destructive">*</span>
+            Data inizio <span className="text-destructive">*</span>
           </Label>
           <Input id="startDate" type="date" {...register("startDate")} />
           {errors.startDate && (
@@ -203,7 +203,7 @@ export default function ContractForm({
 
         <div className="space-y-2">
           <Label htmlFor="endDate">
-            End Date <span className="text-destructive">*</span>
+            Data fine <span className="text-destructive">*</span>
           </Label>
           <Input id="endDate" type="date" {...register("endDate")} />
           {errors.endDate && (
@@ -219,16 +219,16 @@ export default function ContractForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="status">
-              Status <span className="text-destructive">*</span>
+              Stato <span className="text-destructive">*</span>
             </Label>
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger>
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder="Seleziona lo stato" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="EXPIRED">Expired</SelectItem>
-                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                <SelectItem value="ACTIVE">Attivo</SelectItem>
+                <SelectItem value="EXPIRED">Scaduto</SelectItem>
+                <SelectItem value="CANCELLED">Annullato</SelectItem>
               </SelectContent>
             </Select>
             {/* istanbul ignore next */errors.status && (
@@ -245,7 +245,7 @@ export default function ContractForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="areaId">
-              Business Area <span className="text-destructive">*</span>
+              Area di business <span className="text-destructive">*</span>
             </Label>
 
             <Select
@@ -253,7 +253,7 @@ export default function ContractForm({
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select business area" />
+                <SelectValue placeholder="Seleziona l'area di business" />
               </SelectTrigger>
               <SelectContent>
                 {businessAreas.map((area) => (
@@ -278,7 +278,7 @@ export default function ContractForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="managerId">
-              Manager <span className="text-destructive">*</span>
+              Responsabile <span className="text-destructive">*</span>
             </Label>
 
             <Select
@@ -286,7 +286,7 @@ export default function ContractForm({
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select manager" />
+                <SelectValue placeholder="Seleziona il responsabile" />
               </SelectTrigger>
               <SelectContent>
                 {managers.map((m) => (
@@ -307,7 +307,7 @@ export default function ContractForm({
       {/* Buttons */}
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annulla
         </Button>
         <Button type="submit" disabled={upsertMutation.isPending}>
           {submitLabel}

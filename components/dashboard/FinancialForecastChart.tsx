@@ -89,16 +89,16 @@ export function FinancialForecastChart() {
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <CardTitle>Financial Forecast</CardTitle>
+            <CardTitle>Previsione finanziaria</CardTitle>
             <CardDescription>
-              Historical financial values{isForecastOffline ? "" : ` + ${horizon}-month forecast`}
+              Valori finanziari storici{isForecastOffline ? "" : ` + previsione a ${horizon} mesi`}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {isForecastOffline && (
               <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">
                 <WifiOff className="h-3 w-3" />
-                Forecast offline
+                Previsione non disponibile
               </span>
             )}
             {[3, 6].map((m) => (
@@ -124,7 +124,7 @@ export function FinancialForecastChart() {
         )}
         {!isLoading && chartData.length === 0 && (
           <div className="h-[300px] flex items-center justify-center text-sm text-muted-foreground">
-            No financial data available
+            Nessun dato finanziario disponibile
           </div>
         )}
         {!isLoading && chartData.length > 0 && (
@@ -146,10 +146,10 @@ export function FinancialForecastChart() {
               <Tooltip
                 formatter={(value, name) => {
                   const labels: Record<string, string> = {
-                    historical: "Historical",
-                    forecast: "Forecast",
-                    upper: "Upper bound",
-                    lower: "Lower bound",
+                    historical: "Storico",
+                    forecast: "Previsione",
+                    upper: "Limite superiore",
+                    lower: "Limite inferiore",
                   };
                   return [formatEur(value as number), labels[name as string] ?? name];
                 }}
@@ -161,7 +161,7 @@ export function FinancialForecastChart() {
                   x={firstForecastMonth}
                   stroke="#a855f7"
                   strokeDasharray="4 4"
-                  label={{ value: "Forecast →", position: "insideTopRight", fontSize: 11, fill: "#a855f7" }}
+                  label={{ value: "Previsione →", position: "insideTopRight", fontSize: 11, fill: "#a855f7" }}
                 />
               )}
 

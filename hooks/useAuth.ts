@@ -49,7 +49,7 @@ export const useAuth = () => {
       const message =
         apiError.userMessage ||
         apiError.response?.data?.message ||
-        "Login failed. Please try again.";
+        "Accesso non riuscito. Riprova.";
       setError(message);
       return false;
     } finally {

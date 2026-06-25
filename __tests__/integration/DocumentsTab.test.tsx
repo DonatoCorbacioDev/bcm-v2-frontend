@@ -72,21 +72,21 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     render(<DocumentsTab contractId={1} isAdmin={false} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByText('contract.pdf')).toBeInTheDocument());
-    expect(screen.queryByTitle('Delete')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Elimina documento')).not.toBeInTheDocument();
   });
 
   it('shows delete button for admin users', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
   });
 
   it('calls delete mutation and shows success toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.delete as jest.Mock).mockResolvedValue({});
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Delete'));
+    await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Elimina documento'));
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/contracts/1/documents/1'));
     expect(toast.success).toHaveBeenCalledWith('Document deleted');
   });
@@ -156,11 +156,11 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Analizza con AI'));
-    await waitFor(() => expect(screen.getByTitle('Toggle analysis')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Toggle analysis'));
+    await waitFor(() => expect(screen.getByTitle('Comprimi analisi')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Comprimi analisi'));
     expect(screen.queryByText(/ai extraction results/i)).not.toBeInTheDocument();
     // Re-expand
-    await userEvent.click(screen.getByTitle('Toggle analysis'));
+    await userEvent.click(screen.getByTitle('Espandi analisi'));
     expect(screen.getByText(/ai extraction results/i)).toBeInTheDocument();
   });
 
@@ -169,8 +169,8 @@ describe('DocumentsTab', () => {
       .mockResolvedValueOnce({ data: [doc] })
       .mockResolvedValueOnce({ data: new Blob(['%PDF']) });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Download')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Download'));
+    await waitFor(() => expect(screen.getByTitle('Scarica documento')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Scarica documento'));
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(
       '/contracts/1/documents/1/download',
       { responseType: 'blob' }
@@ -235,8 +235,8 @@ describe('DocumentsTab', () => {
       .mockResolvedValueOnce({ data: [doc] })
       .mockRejectedValueOnce(new Error('download failed'));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Download')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Download'));
+    await waitFor(() => expect(screen.getByTitle('Scarica documento')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Scarica documento'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to download document'));
   });
 
@@ -255,8 +255,8 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Delete'));
+    await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Elimina documento'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to delete document'));
   });
 

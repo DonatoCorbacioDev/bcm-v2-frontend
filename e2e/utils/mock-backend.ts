@@ -81,6 +81,38 @@ export async function mockApi(
       number: 0,
       size: 10,
     },
+    "**/api/v1/contracts/1": sampleContract,
+    "**/api/v1/contracts/1/documents": [
+      {
+        id: 1,
+        contractId: 1,
+        fileName: "msa.pdf",
+        fileSize: 204800,
+        contentType: "application/pdf",
+        uploadedAt: "2024-03-01T00:00:00Z",
+        downloadUrl: "/contracts/1/documents/1/download",
+      },
+    ],
+    "**/api/v1/contracts/1/invoices": [
+      {
+        id: 1,
+        contractId: 1,
+        fileName: "ft-2024-001.xml",
+        fileSize: 10240,
+        uploadedAt: "2024-03-01T00:00:00Z",
+        downloadUrl: "/contracts/1/invoices/1/download",
+        supplierName: "Acme Corp",
+        supplierVatNumber: "IT12345678901",
+        documentType: "TD01",
+        invoiceNumber: "FT-2024-001",
+        invoiceDate: "2024-03-01",
+        totalAmount: 5000,
+        currency: "EUR",
+        lineItems: [],
+      },
+    ],
+    "**/api/v1/financial-values/by-contract/1": [],
+    "**/api/v1/contract-history/contract/1": [],
   };
 
   for (const [pattern, body] of Object.entries(routes)) {

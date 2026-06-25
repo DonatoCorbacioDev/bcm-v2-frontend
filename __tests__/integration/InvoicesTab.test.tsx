@@ -124,13 +124,13 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
     renderTab(false);
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
-    expect(screen.queryByTitle('Delete')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Elimina fattura')).not.toBeInTheDocument();
   });
 
   it('shows delete button for admin users', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
     renderTab(true);
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
   });
 
   // ── upload ─────────────────────────────────────────────────────────────────
@@ -204,8 +204,8 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
     (api.delete as jest.Mock).mockResolvedValue({});
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Delete'));
+    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Elimina fattura'));
     await waitFor(() =>
       expect(api.delete).toHaveBeenCalledWith('/contracts/1/invoices/1'),
     );
@@ -216,8 +216,8 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
     (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Delete'));
+    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Elimina fattura'));
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Failed to delete invoice'),
     );
@@ -227,9 +227,9 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
     (api.delete as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Delete'));
-    await waitFor(() => expect(screen.getByTitle('Delete')).toBeDisabled());
+    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Elimina fattura'));
+    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeDisabled());
   });
 
   // ── download ───────────────────────────────────────────────────────────────
@@ -239,8 +239,8 @@ describe('InvoicesTab', () => {
       .mockResolvedValueOnce({ data: [invoice] })
       .mockResolvedValueOnce({ data: new Blob(['<xml/>']) });
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Download')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Download'));
+    await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Scarica fattura'));
     await waitFor(() =>
       expect(api.get).toHaveBeenCalledWith(
         '/contracts/1/invoices/1/download',
@@ -256,8 +256,8 @@ describe('InvoicesTab', () => {
       .mockResolvedValueOnce({ data: [invoice] })
       .mockRejectedValueOnce(new Error('network error'));
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Download')).toBeInTheDocument());
-    await userEvent.click(screen.getByTitle('Download'));
+    await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Scarica fattura'));
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Failed to download invoice'),
     );
@@ -268,9 +268,9 @@ describe('InvoicesTab', () => {
   it('clicking the actions cell does not open the detail dialog', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Download')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
     // Click the actions <td> directly — propagation should be stopped
-    const actionsTd = screen.getByTitle('Download').closest('td')!;
+    const actionsTd = screen.getByTitle('Scarica fattura').closest('td')!;
     fireEvent.click(actionsTd);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });

@@ -155,9 +155,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
               <FileText className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
+          <h2 className="text-lg font-semibold text-foreground mb-2">
             No Documents Yet
-          </h3>
+          </h2>
           <p className="text-sm text-muted-foreground">
             Upload a PDF to attach it to this contract.
           </p>
@@ -196,7 +196,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDownload(doc)}
-                      title="Download"
+                      title="Scarica documento"
+                      aria-label="Scarica documento"
                     >
                       <Download className="h-4 w-4" />
                     </Button>
@@ -207,6 +208,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       onClick={() => analyzeMutation.mutate(doc.id)}
                       disabled={isAnalyzing}
                       title="Analizza con AI"
+                      aria-label="Analizza documento con AI"
                     >
                       {isAnalyzing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -220,7 +222,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                         variant="ghost"
                         size="sm"
                         onClick={() => setExpandedDoc(isExpanded ? null : doc.id)}
-                        title="Toggle analysis"
+                        title={isExpanded ? "Comprimi analisi" : "Espandi analisi"}
+                        aria-label={isExpanded ? "Comprimi analisi" : "Espandi analisi"}
+                        aria-expanded={isExpanded}
                       >
                         {isExpanded ? (
                           <ChevronUp className="h-4 w-4" />
@@ -236,7 +240,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                         size="sm"
                         onClick={() => deleteMutation.mutate(doc.id)}
                         disabled={deleteMutation.isPending}
-                        title="Delete"
+                        title="Elimina documento"
+                        aria-label="Elimina documento"
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -249,10 +254,10 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                 {analysis && isExpanded && (
                   <div className="border-t border-border p-4 bg-primary/10 space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                      <h2 className="text-sm font-semibold text-primary flex items-center gap-2">
                         <Sparkles className="h-4 w-4" />
                         AI Extraction Results
-                      </h4>
+                      </h2>
                       <Button size="sm" onClick={() => handleApply(analysis)}>
                         Apply to Contract
                       </Button>

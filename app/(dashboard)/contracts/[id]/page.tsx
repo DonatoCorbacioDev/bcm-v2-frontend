@@ -116,9 +116,9 @@ export default function ContractDetailPage() {
               <DollarSign className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
+          <h2 className="text-lg font-semibold text-foreground mb-2">
             No Financial Values Yet
-          </h3>
+          </h2>
           <p className="text-sm text-muted-foreground">
             Financial data will appear here once added to this contract.
           </p>
@@ -180,7 +180,7 @@ export default function ContractDetailPage() {
               <History className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No Change History</h3>
+          <h2 className="text-lg font-semibold text-foreground mb-2">No Change History</h2>
           <p className="text-sm text-muted-foreground">Status changes and modifications will be tracked here.</p>
         </div>
       );
@@ -276,7 +276,7 @@ export default function ContractDetailPage() {
 
       {/* General Information */}
       <div className="bg-card rounded-lg border border-border p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">General Information</h3>
+        <h2 className="text-lg font-semibold text-foreground mb-4">General Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { label: "Customer Name", value: contract.customerName },

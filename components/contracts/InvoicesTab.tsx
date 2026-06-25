@@ -182,9 +182,9 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
               <Receipt className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
+          <h2 className="text-lg font-semibold text-foreground mb-2">
             No Invoices Yet
-          </h3>
+          </h2>
           <p className="text-sm text-muted-foreground">
             Upload a FatturaPA XML to attach it to this contract.
           </p>
@@ -247,7 +247,8 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDownload(invoice)}
-                        title="Download"
+                        title="Scarica fattura"
+                        aria-label="Scarica fattura"
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -257,7 +258,8 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                           size="sm"
                           onClick={() => deleteMutation.mutate(invoice.id)}
                           disabled={deleteMutation.isPending}
-                          title="Delete"
+                          title="Elimina fattura"
+                          aria-label="Elimina fattura"
                           className="text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -318,9 +320,9 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
               {/* Line items */}
               {selectedInvoice.lineItems && selectedInvoice.lineItems.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground mb-3">
+                  <h3 className="text-sm font-semibold text-foreground mb-3">
                     Line Items
-                  </h4>
+                  </h3>
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-border text-sm">
                       <thead className="bg-muted">

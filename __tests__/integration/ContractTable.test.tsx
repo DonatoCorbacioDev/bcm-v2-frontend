@@ -521,4 +521,118 @@ describe('ContractTable', () => {
       expect(screen.getByRole('button', { name: /pagina successiva/i })).toBeDisabled();
     });
   });
+
+  // ── Sorting (client-side, current page only) ─────────────────────────────
+
+  it('sorts ascending then descending when a column header is clicked twice', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const getCustomerOrder = () =>
+      screen.getAllByRole('row').slice(1).map((row) => within(row).getByText(/corp|ltd/i).textContent);
+
+    const header = screen.getByRole('button', { name: /cliente/i });
+    await userEvent.click(header);
+    expect(getCustomerOrder()).toEqual(['Acme Corp', 'Beta Ltd']);
+    expect(header.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+
+    await userEvent.click(header);
+    expect(getCustomerOrder()).toEqual(['Beta Ltd', 'Acme Corp']);
+    expect(header.closest('th')).toHaveAttribute('aria-sort', 'descending');
+  });
+
+  it('resets to ascending when switching to a different column', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const customerHeader = screen.getByRole('button', { name: /cliente/i });
+    await userEvent.click(customerHeader);
+    await userEvent.click(customerHeader);
+    expect(customerHeader.closest('th')).toHaveAttribute('aria-sort', 'descending');
+
+    const numberHeader = screen.getByRole('button', { name: /^numero/i });
+    await userEvent.click(numberHeader);
+    expect(numberHeader.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+    expect(customerHeader.closest('th')).toHaveAttribute('aria-sort', 'none');
+  });
+
+  // ── Bulk actions ───────────────────────────────────────────────────────────
+
+  it('does not show row checkboxes for non-admin users', () => {
+    mockAuthAs('MANAGER');
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
+
+  it('shows the bulk action bar with a count when rows are selected', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+
+    expect(screen.getByText('1 contratto selezionato')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /elimina selezionati/i })).toBeInTheDocument();
+  });
+
+  it('selects and deselects all rows with the header checkbox', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const headerCheckbox = screen.getByRole('checkbox', { name: /seleziona tutti/i });
+    await userEvent.click(headerCheckbox);
+    expect(screen.getByText('2 contratti selezionati')).toBeInTheDocument();
+
+    await userEvent.click(headerCheckbox);
+    expect(screen.queryByText(/selezionat/i)).not.toBeInTheDocument();
+  });
+
+  it('bulk-deletes selected contracts and shows a success toast', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    await userEvent.click(within(rows[2]).getByRole('checkbox'));
+    await userEvent.click(screen.getByRole('button', { name: /elimina selezionati/i }));
+
+    const dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('2')).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
+
+    await waitFor(() => {
+      expect(contractsService.delete).toHaveBeenCalledWith(1);
+      expect(contractsService.delete).toHaveBeenCalledWith(2);
+      expect(toast.success).toHaveBeenCalledWith('2 contratti eliminati con successo!');
+    });
+  });
+
+  it('reports partial failure when some bulk deletes fail', async () => {
+    (contractsService.delete as jest.Mock)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('fail'));
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    await userEvent.click(within(rows[2]).getByRole('checkbox'));
+    await userEvent.click(screen.getByRole('button', { name: /elimina selezionati/i }));
+
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('1 eliminati, 1 non riusciti');
+    });
+  });
+
+  it('clears the selection when filters change', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    expect(screen.getByText('1 contratto selezionato')).toBeInTheDocument();
+
+    const select = screen.getByDisplayValue('Tutti');
+    await userEvent.selectOptions(select, 'ACTIVE');
+
+    expect(screen.queryByText(/selezionat/i)).not.toBeInTheDocument();
+  });
 });

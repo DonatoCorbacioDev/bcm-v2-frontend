@@ -109,6 +109,7 @@ describe('ContractTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
     (useRouter as jest.Mock).mockReturnValue({
       push: mockPush,
       replace: jest.fn(),
@@ -634,5 +635,86 @@ describe('ContractTable', () => {
     await userEvent.selectOptions(select, 'ACTIVE');
 
     expect(screen.queryByText(/selezionat/i)).not.toBeInTheDocument();
+  });
+
+  // ── Saved views ───────────────────────────────────────────────────────────
+
+  it('shows a placeholder when no views are saved', () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('Viste salvate')).toBeInTheDocument();
+  });
+
+  it('saves the current filters as a named view and persists it to localStorage', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /salva vista corrente/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.type(within(dialog).getByLabelText(/nome vista/i), 'La mia vista');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^salva$/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.getByText('La mia vista')).toBeInTheDocument();
+
+    const stored = JSON.parse(localStorage.getItem('bcm-contract-views-1') ?? '[]');
+    expect(stored).toEqual([
+      expect.objectContaining({ name: 'La mia vista', statusFilter: 'ALL' }),
+    ]);
+  });
+
+  it('disables the Save button until a name is entered', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /salva vista corrente/i }));
+    const dialog = screen.getByRole('dialog');
+
+    expect(within(dialog).getByRole('button', { name: /^salva$/i })).toBeDisabled();
+    await userEvent.type(within(dialog).getByLabelText(/nome vista/i), 'X');
+    expect(within(dialog).getByRole('button', { name: /^salva$/i })).not.toBeDisabled();
+  });
+
+  it('deletes the active saved view', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /salva vista corrente/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.type(within(dialog).getByLabelText(/nome vista/i), 'Temporanea');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^salva$/i }));
+
+    expect(screen.getByText('Temporanea')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /elimina vista corrente/i }));
+
+    expect(screen.queryByText('Temporanea')).not.toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem('bcm-contract-views-1') ?? '[]')).toEqual([]);
+  });
+
+  it('loads previously saved views for the current user on mount (without dropping them on a new save)', async () => {
+    localStorage.setItem(
+      'bcm-contract-views-1',
+      JSON.stringify([{ name: 'Esistente', searchQuery: '', statusFilter: 'ACTIVE', pageSize: 10, sortKey: null, sortDirection: 'asc' }])
+    );
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /salva vista corrente/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.type(within(dialog).getByLabelText(/nome vista/i), 'Nuova');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^salva$/i }));
+
+    const stored = JSON.parse(localStorage.getItem('bcm-contract-views-1') ?? '[]');
+    expect(stored.map((v: { name: string }) => v.name)).toEqual(['Esistente', 'Nuova']);
+  });
+
+  it('does not load saved views belonging to a different user', () => {
+    localStorage.setItem(
+      'bcm-contract-views-2',
+      JSON.stringify([{ name: 'Di un altro utente', searchQuery: '', statusFilter: 'ALL', pageSize: 10, sortKey: null, sortDirection: 'asc' }])
+    );
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.queryByText('Di un altro utente')).not.toBeInTheDocument();
   });
 });

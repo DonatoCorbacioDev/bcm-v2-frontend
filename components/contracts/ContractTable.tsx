@@ -31,7 +31,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Trash2, Save } from "lucide-react";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
@@ -81,6 +88,34 @@ function sortContracts(
   return direction === "asc" ? sorted : sorted.reverse();
 }
 
+interface SavedView {
+  name: string;
+  searchQuery: string;
+  statusFilter: string;
+  pageSize: number;
+  sortKey: SortableColumn | null;
+  sortDirection: SortDirection;
+}
+
+// Keyed per user (not just per browser) so two accounts sharing a machine
+// don't see each other's saved filter combinations.
+function savedViewsKey(userId: number) {
+  return `bcm-contract-views-${userId}`;
+}
+
+function loadSavedViews(userId: number): SavedView[] {
+  try {
+    const raw = localStorage.getItem(savedViewsKey(userId));
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistSavedViews(userId: number, views: SavedView[]) {
+  localStorage.setItem(savedViewsKey(userId), JSON.stringify(views));
+}
+
 function getPageNumbers(current: number, total: number): PageItem[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i);
   if (current <= 3) {
@@ -113,6 +148,60 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   // Sort state (client-side, current page only — see sortContracts)
   const [sortKey, setSortKey] = useState<SortableColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+  // Saved views (localStorage, per user). Read once at mount via a lazy
+  // initializer — same hydration caveat as `isAdmin` above: on a hard
+  // reload landing directly on this page, the persisted auth store can
+  // still be null on this exact render, in which case views load empty
+  // until the next mount (e.g. navigating away and back). Acceptable since
+  // it self-corrects, and avoids an extra render-and-refetch cycle on every
+  // normal (already-hydrated) mount.
+  const [savedViews, setSavedViews] = useState<SavedView[]>(() =>
+    user?.id ? loadSavedViews(user.id) : []
+  );
+  const [activeViewName, setActiveViewName] = useState<string | null>(null);
+  const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
+  const [newViewName, setNewViewName] = useState("");
+
+  const handleApplyView = (name: string) => {
+    const view = savedViews.find((v) => v.name === name);
+    if (!view) return;
+    setActiveViewName(name);
+    setSearchQuery(view.searchQuery);
+    setStatusFilter(view.statusFilter);
+    setPageSize(view.pageSize);
+    setSortKey(view.sortKey);
+    setSortDirection(view.sortDirection);
+    setPage(0);
+  };
+
+  const handleSaveView = () => {
+    /* istanbul ignore next */
+    if (!user?.id || !newViewName.trim()) return;
+    const view: SavedView = {
+      name: newViewName.trim(),
+      searchQuery,
+      statusFilter,
+      pageSize,
+      sortKey,
+      sortDirection,
+    };
+    const next = [...savedViews.filter((v) => v.name !== view.name), view];
+    setSavedViews(next);
+    persistSavedViews(user.id, next);
+    setActiveViewName(view.name);
+    setNewViewName("");
+    setSaveViewDialogOpen(false);
+  };
+
+  const handleDeleteView = (name: string) => {
+    /* istanbul ignore next */
+    if (!user?.id) return;
+    const next = savedViews.filter((v) => v.name !== name);
+    setSavedViews(next);
+    persistSavedViews(user.id, next);
+    if (activeViewName === name) setActiveViewName(null);
+  };
 
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -315,6 +404,44 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               className="hidden sm:inline-flex"
             >
               Pulisci
+            </Button>
+          )}
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <Select
+            value={activeViewName ?? ""}
+            onValueChange={handleApplyView}
+          >
+            <SelectTrigger id="saved-views" className="w-40" aria-label="Viste salvate">
+              <SelectValue placeholder="Viste salvate" />
+            </SelectTrigger>
+            <SelectContent>
+              {savedViews.map((v) => (
+                <SelectItem key={v.name} value={v.name}>
+                  {v.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSaveViewDialogOpen(true)}
+            aria-label="Salva vista corrente"
+          >
+            <Save className="h-4 w-4" />
+          </Button>
+
+          {activeViewName && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDeleteView(activeViewName)}
+              aria-label="Elimina vista corrente"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
@@ -585,6 +712,37 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
               disabled={isBulkDeleting}
             >
               {isBulkDeleting ? "Eliminazione..." : "Elimina"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save View Dialog */}
+      <Dialog open={saveViewDialogOpen} onOpenChange={setSaveViewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Salva vista corrente</DialogTitle>
+            <DialogDescription>
+              Salva la combinazione attuale di ricerca, filtro stato, ordinamento e righe per pagina.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <label htmlFor="new-view-name" className="text-sm text-muted-foreground">
+              Nome vista
+            </label>
+            <Input
+              id="new-view-name"
+              value={newViewName}
+              onChange={(e) => setNewViewName(e.target.value)}
+              placeholder="es. Contratti attivi per area Sales"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveViewDialogOpen(false)}>
+              Annulla
+            </Button>
+            <Button onClick={handleSaveView} disabled={!newViewName.trim()}>
+              Salva
             </Button>
           </DialogFooter>
         </DialogContent>

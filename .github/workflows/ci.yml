@@ -60,10 +60,12 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      # Version pinned to match the @playwright/test devDependency in
-      # package.json — bump both together.
+      # Calls the locally installed binary (from the @playwright/test
+      # devDependency, just installed via `npm ci` above and integrity-checked
+      # against package-lock.json) instead of npx, which would fetch and
+      # execute a package on demand at CI time.
       - name: Install Playwright Chromium
-        run: npx playwright@1.61.1 install --with-deps chromium
+        run: ./node_modules/.bin/playwright install --with-deps chromium
 
       - name: Run accessibility tests
         run: npm run test:e2e

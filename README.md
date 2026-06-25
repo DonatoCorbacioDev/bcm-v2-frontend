@@ -283,6 +283,7 @@ graph LR
 | **Pagination**         | ✅     | Server-side, all paginated tables              |
 | **Column Sorting**     | ✅     | Contracts table, client-side on current page   |
 | **Bulk Actions**       | ✅     | Multi-select + bulk delete on contracts table  |
+| **Saved Views**        | ✅     | Per-user, localStorage-only, contracts table   |
 
 ---
 

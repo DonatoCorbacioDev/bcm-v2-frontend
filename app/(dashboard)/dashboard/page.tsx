@@ -12,10 +12,21 @@ import { ContractsTimelineChart } from "@/components/dashboard/ContractsTimeline
 import { TopManagersChart } from "@/components/dashboard/TopManagersChart";
 import { FinancialForecastChart } from "@/components/dashboard/FinancialForecastChart";
 import { RiskScoreWidget } from "@/components/dashboard/RiskScoreWidget";
+import { RecommendedActions, CRITICAL_RENEWAL_DAYS } from "@/components/dashboard/RecommendedActions";
 
 export default function DashboardPage() {
   const { data: stats, isLoading, isError } = useDashboardStats();
   const { data: expiringContracts = [], isLoading: isLoadingExpiring, isError: isErrorExpiring } = useExpiringContracts(30);
+
+  // Contracts expiring very soon move into the "Azioni consigliate" panel
+  // instead of the general 30-day banner below, so the same contract isn't
+  // listed twice at two different urgency levels.
+  const criticalRenewals = expiringContracts.filter(
+    (c) => c.daysUntilExpiry == null || c.daysUntilExpiry <= CRITICAL_RENEWAL_DAYS
+  );
+  const nonCriticalExpiring = expiringContracts.filter(
+    (c) => c.daysUntilExpiry != null && c.daysUntilExpiry > CRITICAL_RENEWAL_DAYS
+  );
 
   // Helper function to format days remaining
   const formatDaysLeft = (days: number | null | undefined): string => {
@@ -88,6 +99,9 @@ export default function DashboardPage() {
         <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
       </div>
 
+      {/* Recommended Actions: the most urgent renewals + highest-risk contracts */}
+      <RecommendedActions criticalRenewals={criticalRenewals} />
+
       {/* Expiring Contracts Alert */}
       {isErrorExpiring && (
         <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4">
@@ -97,7 +111,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {!isLoadingExpiring && !isErrorExpiring && expiringContracts.length > 0 && (
+      {!isLoadingExpiring && !isErrorExpiring && nonCriticalExpiring.length > 0 && (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg p-6">
           <div className="flex items-start gap-4">
             <div className="p-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg">
@@ -105,13 +119,13 @@ export default function DashboardPage() {
               </div>
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-                {expiringContracts.length} contratt{expiringContracts.length > 1 ? 'i' : 'o'} in scadenza
+                {nonCriticalExpiring.length} contratt{nonCriticalExpiring.length > 1 ? 'i' : 'o'} in scadenza
               </h2>
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
                 I seguenti contratti scadranno nei prossimi 30 giorni. Rinnovali o chiudili.
               </p>
               <div className="space-y-2">
-                {expiringContracts.slice(0, 5).map((contract) => (
+                {nonCriticalExpiring.slice(0, 5).map((contract) => (
                   <Link
                     key={contract.id}
                     href={`/contracts/${contract.id}`}
@@ -132,12 +146,12 @@ export default function DashboardPage() {
                     </div>
                   </Link>
                 ))}
-                {expiringContracts.length > 5 && (
+                {nonCriticalExpiring.length > 5 && (
                   <Link
                     href="/contracts?status=ACTIVE"
                     className="block text-center p-2 text-sm text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-100 font-medium"
                   >
-                    + Mostra altri {expiringContracts.length - 5} contratti in scadenza
+                    + Mostra altri {nonCriticalExpiring.length - 5} contratti in scadenza
                   </Link>
                 )}
               </div>

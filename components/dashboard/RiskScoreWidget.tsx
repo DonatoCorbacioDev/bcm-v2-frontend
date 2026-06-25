@@ -1,12 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ShieldAlert, WifiOff, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { api } from "@/lib/api";
-import type { RiskScore } from "@/types";
+import { useRiskScores } from "@/hooks/useRiskScores";
 
 const LEVEL_CONFIG = {
   HIGH:   { color: "bg-red-500",    badge: "destructive" as const, label: "Alto" },
@@ -15,19 +13,7 @@ const LEVEL_CONFIG = {
 };
 
 export function RiskScoreWidget() {
-  const {
-    data: riskScores,
-    isLoading,
-    isError,
-  } = useQuery<RiskScore[]>({
-    queryKey: ["risk-scores"],
-    queryFn: async () => {
-      const res = await api.get<RiskScore[]>("/risk-scores");
-      return res.data;
-    },
-    retry: false,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: riskScores, isLoading, isError } = useRiskScores();
 
   return (
     <Card>

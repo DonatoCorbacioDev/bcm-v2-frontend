@@ -539,6 +539,10 @@ describe('ContractTable', () => {
     await userEvent.click(header);
     expect(getCustomerOrder()).toEqual(['Beta Ltd', 'Acme Corp']);
     expect(header.closest('th')).toHaveAttribute('aria-sort', 'descending');
+
+    await userEvent.click(header);
+    expect(getCustomerOrder()).toEqual(['Acme Corp', 'Beta Ltd']);
+    expect(header.closest('th')).toHaveAttribute('aria-sort', 'ascending');
   });
 
   it('resets to ascending when switching to a different column', async () => {
@@ -622,6 +626,68 @@ describe('ContractTable', () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('1 eliminati, 1 non riusciti');
     });
+  });
+
+  it('uses singular wording when bulk-deleting exactly one contract', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    await userEvent.click(screen.getByRole('button', { name: /elimina selezionati/i }));
+
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
+
+    await waitFor(() => {
+      expect(toast.success).toHaveBeenCalledWith('1 contratto eliminato con successo!');
+    });
+  });
+
+  it('reports total failure when every bulk delete fails', async () => {
+    (contractsService.delete as jest.Mock).mockRejectedValue(new Error('fail'));
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    await userEvent.click(within(rows[2]).getByRole('checkbox'));
+    await userEvent.click(screen.getByRole('button', { name: /elimina selezionati/i }));
+
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Eliminazione dei contratti selezionati non riuscita');
+    });
+  });
+
+  it('cancels the bulk delete dialog without deleting anything', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    await userEvent.click(screen.getByRole('button', { name: /elimina selezionati/i }));
+
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^annulla$/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(contractsService.delete).not.toHaveBeenCalled();
+    expect(screen.getByText('1 contratto selezionato')).toBeInTheDocument();
+  });
+
+  it('deselects a single row without affecting the others', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const rows = screen.getAllByRole('row');
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    await userEvent.click(within(rows[2]).getByRole('checkbox'));
+    expect(screen.getByText('2 contratti selezionati')).toBeInTheDocument();
+
+    await userEvent.click(within(rows[1]).getByRole('checkbox'));
+    expect(screen.getByText('1 contratto selezionato')).toBeInTheDocument();
   });
 
   it('clears the selection when filters change', async () => {
@@ -716,5 +782,28 @@ describe('ContractTable', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     expect(screen.queryByText('Di un altro utente')).not.toBeInTheDocument();
+  });
+
+  it('shows a corrupt saved-views entry as an empty list instead of crashing', () => {
+    localStorage.setItem('bcm-contract-views-1', '{not valid json');
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('Viste salvate')).toBeInTheDocument();
+  });
+
+  it('cancels the save-view dialog without persisting anything', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /salva vista corrente/i }));
+    const dialog = screen.getByRole('dialog');
+    await userEvent.type(within(dialog).getByLabelText(/nome vista/i), 'Mai salvata');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^annulla$/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByText('Mai salvata')).not.toBeInTheDocument();
+    expect(localStorage.getItem('bcm-contract-views-1')).toBeNull();
   });
 });

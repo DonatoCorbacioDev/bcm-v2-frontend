@@ -81,7 +81,11 @@ function sortContracts(
 ): Contract[] {
   if (!sortKey) return contracts;
   const sorted = [...contracts].sort((a, b) => {
+    // Every SortableColumn is a non-nullable string on Contract; the
+    // fallback only guards against malformed API data slipping past types.
+    /* istanbul ignore next */
     const aVal = a[sortKey] ?? "";
+    /* istanbul ignore next */
     const bVal = b[sortKey] ?? "";
     return String(aVal).localeCompare(String(bVal), "it", { numeric: true });
   });
@@ -163,6 +167,11 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   const [saveViewDialogOpen, setSaveViewDialogOpen] = useState(false);
   const [newViewName, setNewViewName] = useState("");
 
+  // Only reachable via the Select's onValueChange — Radix's dropdown doesn't
+  // open under jsdom (no real pointer events), so this can't be driven from
+  // an RTL test the way the rest of the saved-views UI is. Same accepted gap
+  // already documented for ContractForm's Select fields.
+  /* istanbul ignore next */
   const handleApplyView = (name: string) => {
     const view = savedViews.find((v) => v.name === name);
     if (!view) return;
@@ -200,6 +209,10 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
     const next = savedViews.filter((v) => v.name !== name);
     setSavedViews(next);
     persistSavedViews(user.id, next);
+    // The only caller passes activeViewName, so this is always true today —
+    // kept as a guard in case a future per-row delete button can target a
+    // non-active view.
+    /* istanbul ignore else */
     if (activeViewName === name) setActiveViewName(null);
   };
 
@@ -481,34 +494,34 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                   />
                 </TableHead>
               )}
-              {COLUMNS.map((col) => (
-                <TableHead
-                  key={col.key}
-                  className={col.className}
-                  aria-sort={
-                    sortKey === col.key
-                      ? sortDirection === "asc" ? "ascending" : "descending"
-                      : "none"
-                  }
-                >
-                  <button
-                    type="button"
-                    onClick={() => handleSort(col.key)}
-                    className="flex items-center gap-1 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
-                  >
-                    {col.label}
-                    {sortKey === col.key ? (
-                      sortDirection === "asc" ? (
-                        <ArrowUp className="h-3 w-3" aria-hidden="true" />
-                      ) : (
-                        <ArrowDown className="h-3 w-3" aria-hidden="true" />
-                      )
-                    ) : (
-                      <ArrowUpDown className="h-3 w-3 opacity-40" aria-hidden="true" />
-                    )}
-                  </button>
-                </TableHead>
-              ))}
+              {COLUMNS.map((col) => {
+                const isActiveSort = sortKey === col.key;
+
+                let ariaSortValue: "ascending" | "descending" | "none" = "none";
+                if (isActiveSort) {
+                  ariaSortValue = sortDirection === "asc" ? "ascending" : "descending";
+                }
+
+                let sortIcon = <ArrowUpDown className="h-3 w-3 opacity-40" aria-hidden="true" />;
+                if (isActiveSort) {
+                  sortIcon = sortDirection === "asc"
+                    ? <ArrowUp className="h-3 w-3" aria-hidden="true" />
+                    : <ArrowDown className="h-3 w-3" aria-hidden="true" />;
+                }
+
+                return (
+                  <TableHead key={col.key} className={col.className} aria-sort={ariaSortValue}>
+                    <button
+                      type="button"
+                      onClick={() => handleSort(col.key)}
+                      className="flex items-center gap-1 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                    >
+                      {col.label}
+                      {sortIcon}
+                    </button>
+                  </TableHead>
+                );
+              })}
               <TableHead>Azioni</TableHead>
             </TableRow>
           </TableHeader>

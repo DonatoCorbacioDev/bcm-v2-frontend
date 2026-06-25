@@ -145,4 +145,49 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText(/urgent corp/i).closest('a')).toHaveAttribute('href', '/contracts/1');
   });
+
+  it('caps critical renewals at 3 and notes how many more there are', async () => {
+    const manyCritical = Array.from({ length: 5 }, (_, i) => ({
+      ...criticalContract,
+      id: i + 1,
+      contractNumber: `CNT-CRIT-${i}`,
+      customerName: `Urgent ${i}`,
+    }));
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: manyCritical,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<DashboardPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/\+ altri 2 rinnovi critici/i)).toBeInTheDocument();
+  });
+
+  it('caps high-risk contracts at 3 and notes how many more there are', async () => {
+    const manyHighRisk = Array.from({ length: 5 }, (_, i) => ({
+      ...highRiskScore,
+      contractId: i + 1,
+      customerName: `Risky ${i}`,
+    }));
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.resolve({ data: manyHighRisk });
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<DashboardPage />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/\+ altri 2 contratti ad alto rischio/i)).toBeInTheDocument();
+  });
+
+  it('shows a note when the risk analysis is unavailable', async () => {
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.reject(new Error('unavailable'));
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<DashboardPage />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/analisi del rischio non disponibile al momento/i)).toBeInTheDocument();
+  });
 });

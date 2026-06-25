@@ -3,9 +3,9 @@ interface LogoMarkProps {
 }
 
 /**
- * Standalone icon: a document with a folded corner and a checkmark,
- * representing a verified/tracked contract. Original mark, no external
- * reference — colors come from the design tokens (currentColor + primary-foreground).
+ * Standalone icon: two interlocking rings, representing an agreement
+ * binding two parties. Original mark, no external reference — colors
+ * come from the design tokens (fill-primary + stroke-primary-foreground).
  */
 export function LogoMark({ className }: LogoMarkProps) {
   return (
@@ -17,19 +17,8 @@ export function LogoMark({ className }: LogoMarkProps) {
       aria-hidden="true"
     >
       <rect width="32" height="32" rx="8" className="fill-primary" />
-      <path
-        d="M11 8h7l5 5v11a2 2 0 0 1-2 2H11a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2Z"
-        className="fill-primary-foreground"
-        opacity="0.92"
-      />
-      <path d="M18 8v5h5" className="stroke-primary" strokeWidth="1.4" strokeLinejoin="round" />
-      <path
-        d="M12.5 18.5l2.6 2.6 5.4-6"
-        className="stroke-primary"
-        strokeWidth="2.1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <circle cx="13" cy="16" r="7" className="stroke-primary-foreground" strokeWidth="2.4" />
+      <circle cx="19" cy="16" r="7" className="stroke-primary-foreground" strokeWidth="2.4" />
     </svg>
   );
 }

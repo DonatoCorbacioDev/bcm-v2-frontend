@@ -21,7 +21,7 @@ const mockUser = {
 /** Seeds localStorage with an authenticated session before any script runs. */
 export async function mockAuthenticatedSession(page: Page) {
   await page.addInitScript((user) => {
-    window.localStorage.setItem(
+    globalThis.localStorage.setItem(
       "auth-storage",
       JSON.stringify({ state: { user, isAuthenticated: true }, version: 0 })
     );

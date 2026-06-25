@@ -563,11 +563,16 @@ npx tsc --noEmit
 
 # Lint
 npm run lint
+
+# Accessibility tests (Playwright + axe-core)
+npm run test:e2e
 ```
 
 **509 tests** across 31 test suites as of the last run (2026-06-25) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
 
 `lib/validations` has **100% coverage** across all 6 schemas.
+
+`npm run test:e2e` runs axe-core against the login page, dashboard, and the contracts table/form dialog (`e2e/a11y/`). It starts its own `next dev` instance on port 3001 with every backend call mocked via `page.route` — no database or running backend required, and it won't collide with a docker-compose stack already using port 3000. Covers 4 of the app's surfaces; the rest (financial values, managers, users, etc.) aren't tested yet.
 
 ---
 

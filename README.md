@@ -269,7 +269,7 @@ graph LR
 | Feature                | Status | Description                                    |
 | ---------------------- | ------ | ---------------------------------------------- |
 | **Authentication**     | ✅     | JWT with HTTP-only cookies                     |
-| **Dashboard**          | ✅     | Real-time KPIs and analytics                   |
+| **Dashboard**          | ✅     | KPIs, analytics, and a recommended-actions panel |
 | **Contracts CRUD**     | ✅     | Full lifecycle management                      |
 | **Managers CRUD**      | ✅     | Department heads management                    |
 | **Users CRUD**         | ✅     | User accounts with roles                       |
@@ -570,11 +570,11 @@ npm run lint
 npm run test:e2e
 ```
 
-**509 tests** across 31 test suites as of the last run (2026-06-25) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
+**528 tests** across 32 test suites as of the last run (2026-06-26) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
 
 `lib/validations` has **100% coverage** across all 6 schemas.
 
-`npm run test:e2e` runs axe-core against the login page, dashboard, and the contracts table/form dialog (`e2e/a11y/`). It starts its own `next dev` instance on port 3001 with every backend call mocked via `page.route` — no database or running backend required, and it won't collide with a docker-compose stack already using port 3000. Covers 4 of the app's surfaces; the rest (financial values, managers, users, etc.) aren't tested yet.
+`npm run test:e2e` runs axe-core against the login page, dashboard, the contracts table/form dialog, and the contract detail page's documents/invoices tabs (`e2e/a11y/`). It starts its own `next dev` instance on port 3001 with every backend call mocked via `page.route` — no database or running backend required, and it won't collide with a docker-compose stack already using port 3000. The rest (financial values, managers, users, business areas) aren't covered yet.
 
 ---
 

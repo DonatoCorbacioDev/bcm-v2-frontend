@@ -7,12 +7,12 @@
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwind-css)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-107%20passing-brightgreen)](./\_\_tests\_\_)
+[![Tests](https://img.shields.io/badge/Tests-509%20passing-brightgreen)](./\_\_tests\_\_)
 [![License](https://img.shields.io/badge/License-Custom-blue)](./LICENSE)
 
 ## 🎯 Overview
 
-BCM v2.0 Frontend is the client application for the Business Contracts Manager system, built with modern React practices and Next.js App Router. This represents the second iteration of my BCM project, showcasing professional TypeScript development, comprehensive form validation, optimized data fetching, and production-ready UX patterns.
+BCM v2.0 Frontend is the client application for the Business Contracts Manager system, built with modern React practices and Next.js App Router. This represents the second iteration of my BCM project, showcasing professional TypeScript development, comprehensive form validation, and optimized data fetching. The UI is in Italian (the target market for this product); code, comments, and this README stay in English. It is a portfolio/MVP project moving toward production readiness — see the backend's [docs/SECURITY.md](../bcm-v2-backend/docs/SECURITY.md) for what's done and what's still open.
 
 **Project Type:** Portfolio Project | Full-Stack SaaS Frontend  
 **Status:** Active Development  
@@ -260,8 +260,7 @@ graph LR
 - Sonner (toast notifications)
 
 **HTTP & API:**
-- Axios (HTTP client)
-- js-cookie (cookie management)
+- Axios (HTTP client, with interceptors for token refresh)
 
 ---
 
@@ -443,21 +442,14 @@ npm start
 
 ```
 1. User submits credentials → POST /api/v1/auth/login
-2. Backend validates → Returns { token, user }
-3. Frontend stores token in HTTP-only cookie
+2. Backend validates → returns { token } and sets an HttpOnly refresh-token cookie
+3. Frontend keeps the access token in memory only (Zustand store), not in a cookie/localStorage
 4. All subsequent requests include: Authorization: Bearer <token>
-5. On 401 response → Clear auth state → Redirect to /login
+5. On 401 response → axios interceptor calls POST /auth/refresh (cookie sent automatically) → retries the original request
+6. If refresh also fails → clear auth state → redirect to /login
 ```
 
-### Cookie Configuration
-
-```typescript
-Cookies.set("auth_token", token, {
-  expires: 7,                              // 7 days
-  secure: process.env.NODE_ENV === "production",  // HTTPS only in prod
-  sameSite: "strict",                      // CSRF protection
-});
-```
+The refresh-token cookie itself (`HttpOnly`, `Secure`, `SameSite=Lax`) is set by the backend — see `RefreshCookieFactory` in `bcm-v2-backend`. The frontend never reads or writes it directly; see `lib/api.ts` for the request/response interceptors.
 
 ---
 
@@ -573,19 +565,7 @@ npx tsc --noEmit
 npm run lint
 ```
 
-**107 tests** across 9 test suites:
-
-| Suite | Tests | Description |
-|---|---|---|
-| `validations/contract.schema` | 15 | Contract Zod schema — boundaries, cross-field |
-| `validations/user.schema` | 7 | User Zod schema |
-| `validations/businessArea.schema` | 9 | BusinessArea schema |
-| `validations/financialType.schema` | 8 | FinancialType schema |
-| `validations/manager.schema` | 18 | Manager schema — email, phone regex |
-| `validations/financialValue.schema` | 18 | FinancialValue schema — month/year ranges |
-| `integration/login` | 4 | LoginPage rendering, error handling, API payload |
-| `integration/UserTable` | 11 | States, search filter, delete dialog, edit callback |
-| `integration/ContractTable` | 17 | States, pagination, filters, actions, navigation |
+**509 tests** across 31 test suites as of the last run (2026-06-25) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
 
 `lib/validations` has **100% coverage** across all 6 schemas.
 
@@ -666,26 +646,23 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com bcm-front
 
 ### Current Limitations
 
-- No pagination (client-side filtering only)
 - No column sorting (click to sort)
 - No bulk operations (select multiple + action)
-- No export functionality (CSV/Excel)
 - No real-time updates (WebSocket)
+- Dark-mode color tokens exist in `globals.css` (`.dark` class) but nothing toggles that class yet — there's no theme switcher wired up
 
 ### Planned Improvements
 
-- [ ] Add pagination for large datasets
 - [ ] Implement column sorting
 - [ ] Add bulk delete/update operations
-- [ ] Export to CSV/Excel
-- [ ] Dark mode implementation
+- [ ] Wire up a dark mode toggle (the color tokens already exist)
 - [ ] Real-time notifications (WebSocket)
 - [ ] Offline support (PWA)
-- [ ] Unit tests (React Testing Library)
-- [ ] E2E tests (Playwright/Cypress)
-- [ ] Accessibility audit (WCAG 2.1)
+- [ ] E2E tests (Playwright — already a devDependency, not yet configured)
+- [ ] Accessibility audit (axe + manual WCAG 2.1 review)
 - [ ] Performance optimization (Lighthouse 95+)
-- [ ] i18n support (multiple languages)
+
+Already done, despite older notes in this README suggesting otherwise: server-side pagination (`ContractTable`), CSV/Excel/PDF export (`contractsService.exportExcel`/`exportPdf`), and 509 unit/integration tests (Jest + React Testing Library).
 
 ---
 
@@ -765,7 +742,7 @@ Special thanks to all library maintainers and contributors.
 
 ## 🔗 Related Projects
 
-- **BCM Backend v2.0**: Spring Boot 3.5.9 + Java 21 REST API with 100% test coverage
+- **BCM Backend v2.0**: Spring Boot 3.5.10 + Java 21 REST API, ~99% instruction/branch test coverage
 - **BCM v1.0** (Thesis Project): Angular-based original version
 
 ---

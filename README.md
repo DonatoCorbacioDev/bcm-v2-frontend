@@ -280,8 +280,9 @@ graph LR
 | **Form Validation**    | ✅     | Comprehensive Zod schemas                      |
 | **Toast Notifications**| ✅     | Real-time user feedback                        |
 | **Dark Mode**          | ⏳     | Prepared (future implementation)               |
-| **Pagination**         | ⏳     | Planned for large datasets                     |
-| **Column Sorting**     | ⏳     | Planned for tables                             |
+| **Pagination**         | ✅     | Server-side, all paginated tables              |
+| **Column Sorting**     | ✅     | Contracts table, client-side on current page   |
+| **Bulk Actions**       | ✅     | Multi-select + bulk delete on contracts table  |
 
 ---
 
@@ -651,20 +652,19 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com bcm-front
 
 ### Current Limitations
 
-- No column sorting (click to sort)
-- No bulk operations (select multiple + action)
+- Column sorting and bulk delete only exist on the contracts table, not the other CRUD tables (managers, users, business areas, financial values/types)
 - No real-time updates (WebSocket)
 - Dark-mode color tokens exist in `globals.css` (`.dark` class) but nothing toggles that class yet — there's no theme switcher wired up
+- Automated accessibility coverage (`npm run test:e2e`) only checks login, dashboard, and the contracts/contract-detail pages — managers, users, business areas, financial values/types aren't covered yet
 
 ### Planned Improvements
 
-- [ ] Implement column sorting
-- [ ] Add bulk delete/update operations
+- [ ] Extend column sorting/bulk actions to the other CRUD tables
 - [ ] Wire up a dark mode toggle (the color tokens already exist)
 - [ ] Real-time notifications (WebSocket)
 - [ ] Offline support (PWA)
-- [ ] E2E tests (Playwright — already a devDependency, not yet configured)
-- [ ] Accessibility audit (axe + manual WCAG 2.1 review)
+- [ ] Extend the Playwright + axe suite to the remaining CRUD pages
+- [ ] Manual WCAG 2.1 review (screen reader, keyboard-only pass)
 - [ ] Performance optimization (Lighthouse 95+)
 
 Already done, despite older notes in this README suggesting otherwise: server-side pagination (`ContractTable`), CSV/Excel/PDF export (`contractsService.exportExcel`/`exportPdf`), and 509 unit/integration tests (Jest + React Testing Library).

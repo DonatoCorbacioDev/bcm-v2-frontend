@@ -177,7 +177,7 @@ function AuditLogsContent({
           <Shield className="h-6 w-6 text-muted-foreground" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Audit Log</h2>
+          <h1 className="text-3xl font-bold text-foreground">Audit Log</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             System operations history
           </p>

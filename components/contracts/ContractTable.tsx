@@ -250,7 +250,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => router.push(`/contracts/${c.id}`)}
-                      className="text-green-600 hover:text-green-700 text-xs px-2"
+                      className="text-green-800 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-xs px-2"
                     >
                       Visualizza
                     </Button>

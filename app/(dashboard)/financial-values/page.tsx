@@ -34,9 +34,9 @@ export default function FinancialValuesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">
+          <h1 className="text-3xl font-bold text-foreground">
             Financial Values
-          </h2>
+          </h1>
           <p className="text-muted-foreground mt-2">Track financial data per contract</p>
         </div>
         <Button onClick={handleCreateClick}>+ New Financial Value</Button>

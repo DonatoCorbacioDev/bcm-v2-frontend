@@ -30,9 +30,9 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">
+          <h1 className="text-3xl font-bold text-foreground">
             Dashboard
-          </h2>
+          </h1>
           <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
         </div>
 
@@ -62,9 +62,9 @@ export default function DashboardPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">
+          <h1 className="text-3xl font-bold text-foreground">
             Dashboard
-          </h2>
+          </h1>
           <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
         </div>
         <div className="text-center py-12 bg-destructive/10 rounded-lg border border-destructive/30">
@@ -82,9 +82,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-foreground">
+        <h1 className="text-3xl font-bold text-foreground">
           Dashboard
-        </h2>
+        </h1>
         <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
       </div>
 
@@ -104,9 +104,9 @@ export default function DashboardPage() {
                 <AlertTriangle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" aria-hidden="true" />
               </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+              <h2 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
                 {expiringContracts.length} contratt{expiringContracts.length > 1 ? 'i' : 'o'} in scadenza
-              </h3>
+              </h2>
               <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
                 I seguenti contratti scadranno nei prossimi 30 giorni. Rinnovali o chiudili.
               </p>
@@ -126,7 +126,7 @@ export default function DashboardPage() {
                           Scade il: {new Date(contract.endDate).toLocaleDateString("it-IT")}
                         </p>
                       </div>
-                      <div className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                      <div className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
                         {formatDaysLeft(contract.daysUntilExpiry)}
                       </div>
                     </div>

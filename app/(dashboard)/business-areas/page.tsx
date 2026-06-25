@@ -46,7 +46,7 @@ export default function BusinessAreasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">Business Areas</h2>
+          <h1 className="text-3xl font-bold text-foreground">Business Areas</h1>
           <p className="text-muted-foreground mt-2">Manage your business areas</p>
         </div>
         <Button onClick={handleCreateClick}>+ New Business Area</Button>

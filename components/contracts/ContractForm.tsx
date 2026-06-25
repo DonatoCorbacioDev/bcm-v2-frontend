@@ -222,7 +222,7 @@ export default function ContractForm({
               Stato <span className="text-destructive">*</span>
             </Label>
             <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger>
+              <SelectTrigger id="status">
                 <SelectValue placeholder="Seleziona lo stato" />
               </SelectTrigger>
               <SelectContent>
@@ -252,7 +252,7 @@ export default function ContractForm({
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
             >
-              <SelectTrigger>
+              <SelectTrigger id="areaId">
                 <SelectValue placeholder="Seleziona l'area di business" />
               </SelectTrigger>
               <SelectContent>
@@ -285,7 +285,7 @@ export default function ContractForm({
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
             >
-              <SelectTrigger>
+              <SelectTrigger id="managerId">
                 <SelectValue placeholder="Seleziona il responsabile" />
               </SelectTrigger>
               <SelectContent>

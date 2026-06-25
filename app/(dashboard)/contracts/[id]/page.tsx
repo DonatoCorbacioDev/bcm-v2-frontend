@@ -250,7 +250,7 @@ export default function ContractDetailPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Contracts
           </Button>
-          <h2 className="text-3xl font-bold text-foreground">Contract Details</h2>
+          <h1 className="text-3xl font-bold text-foreground">Contract Details</h1>
           <p className="text-muted-foreground mt-1">{contract.customerName}</p>
         </div>
         <div className="flex gap-2">

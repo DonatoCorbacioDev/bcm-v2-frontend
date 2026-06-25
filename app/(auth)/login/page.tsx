@@ -12,7 +12,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
 
@@ -40,9 +39,9 @@ function LoginContent() {
     <Card>
       <CardHeader className="space-y-1">
         <LogoMark className="h-12 w-12 mx-auto mb-2" />
-        <CardTitle className="text-2xl font-bold text-center">
+        <h1 className="text-2xl font-bold text-center leading-none">
           Business Contracts Manager
-        </CardTitle>
+        </h1>
         <CardDescription className="text-center">
           Inserisci le tue credenziali per accedere al sistema
         </CardDescription>

@@ -100,4 +100,19 @@ describe('Header', () => {
     render(<Header onMenuClick={jest.fn()} isMenuOpen={false} />);
     expect(screen.getByRole('button', { name: /toggle navigation menu/i })).toHaveAttribute('aria-expanded', 'false');
   });
+
+  it('renders the dark mode toggle button', () => {
+    render(<Header onMenuClick={jest.fn()} />);
+    expect(
+      screen.getByRole('button', { name: /switch to (dark|light) mode/i })
+    ).toBeInTheDocument();
+  });
+
+  it('toggles dark class on html element when dark mode button is clicked', async () => {
+    render(<Header onMenuClick={jest.fn()} />);
+    const toggle = screen.getByRole('button', { name: /switch to (dark|light) mode/i });
+    const initialDark = document.documentElement.classList.contains('dark');
+    await userEvent.click(toggle);
+    expect(document.documentElement.classList.contains('dark')).toBe(!initialDark);
+  });
 });

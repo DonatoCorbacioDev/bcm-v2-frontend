@@ -5,9 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 import NotificationBell from "@/components/layout/NotificationBell";
 import Logo from "@/components/layout/Logo";
+import { useDarkMode } from "@/hooks/useDarkMode";
 
 interface HeaderProps {
   readonly onMenuClick: () => void;
@@ -18,6 +19,8 @@ export default function Header({ onMenuClick, isMenuOpen = false }: HeaderProps)
   const user = useAuthStore(/* istanbul ignore next */ (state) => state.user);
   const { logout } = useAuth();
   const router = useRouter();
+
+  const { isDark, toggle: toggleDark } = useDarkMode();
 
   const handleLogout = () => {
     logout();
@@ -46,6 +49,17 @@ export default function Header({ onMenuClick, isMenuOpen = false }: HeaderProps)
         </div>
 
         <div className="flex items-center gap-4">
+          <button
+            onClick={toggleDark}
+            className="p-2 rounded-lg hover:bg-accent transition-colors"
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? (
+              <Sun className="h-5 w-5 text-muted-foreground" />
+            ) : (
+              <Moon className="h-5 w-5 text-muted-foreground" />
+            )}
+          </button>
           <NotificationBell />
           <Link href="/profile" className="hidden sm:block text-sm text-right hover:opacity-75 transition-opacity">
             <p className="font-medium text-foreground">

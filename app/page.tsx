@@ -1,24 +1,21 @@
-"use client";
+import { LandingNav } from "@/components/landing/LandingNav";
+import { Hero } from "@/components/landing/Hero";
+import { Features } from "@/components/landing/Features";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Pricing } from "@/components/landing/Pricing";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/authStore";
-
-export default function Home() {
-  const router = useRouter();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    } else {
-      router.push("/login");
-    }
-  }, [isAuthenticated, router]);
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-muted-foreground">Redirecting...</p>
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <LandingNav />
+      <main>
+        <Hero />
+        <Features />
+        <HowItWorks />
+        <Pricing />
+      </main>
+      <LandingFooter />
     </div>
   );
 }

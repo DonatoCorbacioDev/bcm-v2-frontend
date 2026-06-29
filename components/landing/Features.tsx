@@ -30,7 +30,7 @@ const FEATURES = [
     icon: BarChart2,
     title: "Dashboard finanziaria",
     description:
-      "Monitora i valori economici per area di business e tipo di finanziamento. Forecast con smoothing esponenziale di Holt.",
+      "Monitora i valori economici per area di business e tipo di finanziamento. Forecast con Facebook Prophet (trend + stagionalità).",
   },
   {
     icon: Receipt,

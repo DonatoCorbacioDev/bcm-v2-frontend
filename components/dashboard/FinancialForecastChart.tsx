@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { WifiOff, Loader2 } from "lucide-react";
+import { WifiOff, Loader2, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
 import type { ForecastResponse, ForecastPoint, FinancialValue } from "@/types";
@@ -80,6 +80,7 @@ export function FinancialForecastChart() {
   const historical =
     forecastData?.historical ?? aggregateHistorical(financialValues ?? []);
   const forecast = forecastData?.forecast ?? [];
+  const isReliable = forecastData?.reliable ?? true;
   const chartData = buildChartData(historical, forecast);
 
   const firstForecastMonth = forecast[0]?.month;
@@ -99,6 +100,12 @@ export function FinancialForecastChart() {
               <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">
                 <WifiOff className="h-3 w-3" />
                 Previsione non disponibile
+              </span>
+            )}
+            {!isForecastOffline && !isReliable && forecast.length > 0 && (
+              <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">
+                <AlertTriangle className="h-3 w-3" />
+                Dati insufficienti (&lt;12 mesi)
               </span>
             )}
             {[3, 6].map((m) => (

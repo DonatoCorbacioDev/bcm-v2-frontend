@@ -117,4 +117,26 @@ describe('FinancialForecastChart', () => {
     // aggregateHistorical groups month=1/year=2024 → 15000, month=2/year=2024 → 8000
     await waitFor(() => expect(screen.getByText(/previsione finanziaria/i)).toBeInTheDocument());
   });
+
+  it('shows unreliable warning when reliable=false and forecast is present', async () => {
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
+    (api.get as jest.Mock).mockResolvedValue({
+      data: { ...forecastResponse, reliable: false },
+    });
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+    await waitFor(() =>
+      expect(screen.getByText(/dati insufficienti/i)).toBeInTheDocument()
+    );
+  });
+
+  it('hides unreliable warning when reliable=true', async () => {
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
+    (api.get as jest.Mock).mockResolvedValue({
+      data: { ...forecastResponse, reliable: true },
+    });
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+    await waitFor(() =>
+      expect(screen.queryByText(/dati insufficienti/i)).not.toBeInTheDocument()
+    );
+  });
 });

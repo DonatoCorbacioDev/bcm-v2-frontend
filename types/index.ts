@@ -96,6 +96,7 @@ export interface ForecastPoint {
 export interface ForecastResponse {
   historical: ForecastPoint[];
   forecast: ForecastPoint[];
+  reliable?: boolean;
 }
 
 export interface RiskScore {

@@ -9,7 +9,7 @@ class ResizeObserverMock {
 globalThis.ResizeObserver = ResizeObserverMock;
 
 // Polyfill matchMedia — not implemented in jsdom
-Object.defineProperty(window, "matchMedia", {
+Object.defineProperty(globalThis, "matchMedia", {
   writable: true,
   value: (query: string) => ({
     matches: false,

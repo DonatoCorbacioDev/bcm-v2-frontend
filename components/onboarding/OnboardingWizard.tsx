@@ -26,6 +26,12 @@ const STEPS = [
   { id: 3, label: "Pronto!" },
 ];
 
+function stepCircleClass(index: number, currentStep: number): string {
+  if (index < currentStep) return "bg-primary border-primary text-primary-foreground";
+  if (index === currentStep) return "border-primary text-primary bg-background";
+  return "border-border text-muted-foreground bg-background";
+}
+
 export function OnboardingWizard() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -70,13 +76,7 @@ export function OnboardingWizard() {
               <div className="flex flex-col items-center gap-1">
                 <div
                   aria-current={index === currentStep ? "step" : undefined}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-colors ${
-                    index < currentStep
-                      ? "bg-primary border-primary text-primary-foreground"
-                      : index === currentStep
-                      ? "border-primary text-primary bg-background"
-                      : "border-border text-muted-foreground bg-background"
-                  }`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium border-2 transition-colors ${stepCircleClass(index, currentStep)}`}
                 >
                   {index < currentStep ? (
                     <Check className="w-4 h-4" aria-hidden="true" />

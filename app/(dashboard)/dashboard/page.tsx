@@ -19,6 +19,7 @@ import { ContractsTimelineChart } from "@/components/dashboard/ContractsTimeline
 import { TopManagersChart } from "@/components/dashboard/TopManagersChart";
 import { FinancialForecastChart } from "@/components/dashboard/FinancialForecastChart";
 import { RiskScoreWidget } from "@/components/dashboard/RiskScoreWidget";
+import { AnomalyWidget } from "@/components/dashboard/AnomalyWidget";
 import { RecommendedActions, CRITICAL_RENEWAL_DAYS } from "@/components/dashboard/RecommendedActions";
 
 export default function DashboardPage() {
@@ -247,9 +248,14 @@ export default function DashboardPage() {
           <ContractsByAreaChart />
         </div>
 
-        {/* Row 4: Financial Forecast (full width) + Risk Score Widget */}
+        {/* Row 4: Financial Forecast + Risk Score Widget */}
         <FinancialForecastChart />
         <RiskScoreWidget />
+
+        {/* Row 5: Financial anomalies (full width — table benefits from wider layout) */}
+        <div className="lg:col-span-2">
+          <AnomalyWidget />
+        </div>
       </div>
     </div>
   );

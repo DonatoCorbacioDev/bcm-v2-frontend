@@ -6,6 +6,11 @@ import type { Contract } from '@/types';
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
+// DashboardPage now uses useRouter (for onboarding redirect check)
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
 jest.mock('@/hooks/useDashboardStats', () => ({
   useDashboardStats: jest.fn(),
 }));

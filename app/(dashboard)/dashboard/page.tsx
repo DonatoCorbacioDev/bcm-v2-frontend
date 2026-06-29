@@ -1,7 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useExpiringContracts } from "@/hooks/useExpiringContracts";
+import { useAuthStore } from "@/store/authStore";
+import { businessAreasService } from "@/services/businessAreas.service";
+import { managersService } from "@/services/managers.service";
+import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
 import Link from "next/link";
 import { AlertTriangle, BarChart3, CheckCircle2, Clock, XCircle } from "lucide-react";
 import KPICard from "@/components/dashboard/KPICard";
@@ -15,8 +22,39 @@ import { RiskScoreWidget } from "@/components/dashboard/RiskScoreWidget";
 import { RecommendedActions, CRITICAL_RENEWAL_DAYS } from "@/components/dashboard/RecommendedActions";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const isAdmin = user?.role === "ADMIN";
+
+  // Setup check: redirect new ADMIN orgs (no areas + no managers) to the onboarding wizard.
+  // Queries are disabled for non-admins; enabled queries share cache with the reference hooks.
+  const { data: businessAreas = [], isLoading: loadingAreas } = useQuery({
+    queryKey: referenceQueryKeys.businessAreas,
+    queryFn: businessAreasService.list,
+    enabled: isAdmin,
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: managers = [], isLoading: loadingManagers } = useQuery({
+    queryKey: referenceQueryKeys.managers,
+    queryFn: managersService.list,
+    enabled: isAdmin,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  useEffect(() => {
+    if (!isAdmin || loadingAreas || loadingManagers) return;
+    if (localStorage.getItem(`bcm-setup-skip-${user?.id}`)) return;
+    if (businessAreas.length === 0 && managers.length === 0) {
+      router.push("/onboarding");
+    }
+  }, [isAdmin, loadingAreas, loadingManagers, businessAreas, managers, router, user?.id]);
+
   const { data: stats, isLoading, isError } = useDashboardStats();
   const { data: expiringContracts = [], isLoading: isLoadingExpiring, isError: isErrorExpiring } = useExpiringContracts(30);
+
+  // For admin users, keep the skeleton visible until the setup check resolves
+  // so there is no flash of dashboard content before a potential redirect.
+  const isSetupChecking = isAdmin && (loadingAreas || loadingManagers);
 
   // Contracts expiring very soon move into the "Azioni consigliate" panel
   // instead of the general 30-day banner below, so the same contract isn't
@@ -37,7 +75,7 @@ export default function DashboardPage() {
     return `${days} ${dayWord} rimanenti`;
   };
 
-  if (isLoading) {
+  if (isLoading || isSetupChecking) {
     return (
       <div className="space-y-6">
         <div>

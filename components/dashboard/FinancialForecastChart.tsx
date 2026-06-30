@@ -205,7 +205,7 @@ export function FinancialForecastChart() {
                   stroke="#a855f7"
                   strokeWidth={2}
                   strokeDasharray="6 3"
-                  dot={{ r: 3, fill: "#a855f7" }}
+                  dot={false}
                   activeDot={{ r: 5 }}
                   connectNulls
                   name="forecast"

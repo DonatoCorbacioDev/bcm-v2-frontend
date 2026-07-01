@@ -14,18 +14,20 @@ import {
   Users,
   User,
   Shield,
+  LayoutTemplate,
   type LucideIcon,
 } from "lucide-react";
 
 const navItems: { label: string; href: string; icon: LucideIcon; adminOnly?: boolean }[] = [
-  { label: "Dashboard",        href: "/dashboard",        icon: LayoutDashboard },
-  { label: "Contracts",        href: "/contracts",        icon: FileText },
-  { label: "Financial Values", href: "/financial-values", icon: TrendingUp },
-  { label: "Financial Types",  href: "/financial-types",  icon: Tag,       adminOnly: true },
-  { label: "Business Areas",   href: "/business-areas",   icon: Building2, adminOnly: true },
-  { label: "Managers",         href: "/managers",         icon: Users,     adminOnly: true },
-  { label: "Users",            href: "/users",            icon: User,      adminOnly: true },
-  { label: "Audit Log",        href: "/audit-logs",       icon: Shield,    adminOnly: true },
+  { label: "Dashboard",           href: "/dashboard",           icon: LayoutDashboard },
+  { label: "Contracts",           href: "/contracts",           icon: FileText },
+  { label: "Contract Templates",  href: "/contract-templates",  icon: LayoutTemplate },
+  { label: "Financial Values",    href: "/financial-values",    icon: TrendingUp },
+  { label: "Financial Types",     href: "/financial-types",     icon: Tag,            adminOnly: true },
+  { label: "Business Areas",      href: "/business-areas",      icon: Building2,      adminOnly: true },
+  { label: "Managers",            href: "/managers",            icon: Users,          adminOnly: true },
+  { label: "Users",               href: "/users",               icon: User,           adminOnly: true },
+  { label: "Audit Log",           href: "/audit-logs",          icon: Shield,         adminOnly: true },
 ];
 
 interface SidebarProps {

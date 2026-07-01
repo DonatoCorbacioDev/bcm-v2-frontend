@@ -127,6 +127,20 @@ export interface DocumentAnalysis {
   detectedAmount: string | null;
 }
 
+// Contract Templates
+export interface ContractTemplate {
+  id: number;
+  name: string;
+  description: string | null;
+  defaultStatus: "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT" | null;
+  defaultDurationDays: number | null;
+  businessAreaId: number | null;
+  defaultManagerId: number | null;
+  autoRenew: boolean;
+  notificationDays: number | null;
+  createdAt: string;
+}
+
 // Auth types
 export interface LoginRequest {
   username: string;

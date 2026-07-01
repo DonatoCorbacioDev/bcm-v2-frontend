@@ -79,9 +79,12 @@ export const instantiateTemplateSchema = z.object({
 
   endDate: z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Formato AAAA-MM-GG")
     .optional()
-    .nullable(),
+    .nullable()
+    .refine(
+      (val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val),
+      "Formato AAAA-MM-GG"
+    ),
 
   businessAreaId: z.number().int().positive().optional().nullable(),
   managerId: z.number().int().positive().optional().nullable(),

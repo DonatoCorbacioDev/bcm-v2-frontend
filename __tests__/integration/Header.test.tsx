@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
-  usePathname: () => '/dashboard',
+  usePathname: jest.fn(() => '/dashboard'),
 }));
 
 jest.mock('@/store/authStore', () => ({
@@ -34,6 +34,7 @@ jest.mock('@/lib/api', () => ({
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
+import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
@@ -123,5 +124,37 @@ describe('Header', () => {
     const initialDark = document.documentElement.classList.contains('dark');
     await userEvent.click(toggle);
     expect(document.documentElement.classList.contains('dark')).toBe(!initialDark);
+  });
+
+  it('shows "Responsabile" role label for MANAGER users', () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ username: 'manager1', role: 'MANAGER' });
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('Responsabile')).toBeInTheDocument();
+  });
+
+  it('shows "Amministratore" role label for ADMIN users', () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ username: 'admin1', role: 'ADMIN' });
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('Amministratore')).toBeInTheDocument();
+  });
+
+  it('derives initials from a dotted username (e.g. mario.rossi → MR)', () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ username: 'mario.rossi', role: 'ADMIN' });
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('MR')).toBeInTheDocument();
+  });
+
+  it('uses "Dettaglio contratto" title for /contracts/:id paths', () => {
+    const { usePathname } = jest.requireMock('next/navigation');
+    (usePathname as jest.Mock).mockReturnValueOnce('/contracts/42');
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('Dettaglio contratto')).toBeInTheDocument();
+  });
+
+  it('falls back to app name for unknown routes', () => {
+    const { usePathname } = jest.requireMock('next/navigation');
+    (usePathname as jest.Mock).mockReturnValueOnce('/unknown-page');
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('Business Contracts Manager')).toBeInTheDocument();
   });
 });

@@ -174,7 +174,7 @@ export default function InstantiateTemplateDialog({
               <Label htmlFor="inst-startDate">
                 Data inizio <span className="text-destructive">*</span>
               </Label>
-              <Input id="inst-startDate" type="date" {...register("startDate")} />
+              <Input id="inst-startDate" type="date" data-testid="inst-startDate" {...register("startDate")} />
               {errors.startDate && (
                 <p className="text-sm text-destructive">{errors.startDate.message}</p>
               )}

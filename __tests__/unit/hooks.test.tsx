@@ -31,6 +31,9 @@ jest.mock('@/services/contracts.service', () => ({
 jest.mock('@/services/dashboard.service', () => ({
   dashboardService: { getStats: jest.fn() },
 }));
+jest.mock('@/services/contractTemplates.service', () => ({
+  contractTemplatesService: { list: jest.fn(), create: jest.fn(), update: jest.fn() },
+}));
 
 jest.mock('@/store/authStore', () => ({
   useAuthStore: jest.fn(() => ({
@@ -61,6 +64,7 @@ import { usersService } from '@/services/users.service';
 import { rolesService } from '@/services/roles.service';
 import { contractsService } from '@/services/contracts.service';
 import { dashboardService } from '@/services/dashboard.service';
+import { contractTemplatesService } from '@/services/contractTemplates.service';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 
@@ -80,6 +84,9 @@ import { useContract } from '@/hooks/useContract';
 import { useExpiringContracts } from '@/hooks/useExpiringContracts';
 import { useUpsertBusinessArea } from '@/hooks/useUpsertBusinessArea';
 import { useUpsertFinancialType } from '@/hooks/useUpsertFinancialType';
+import { useContractTemplates } from '@/hooks/useContractTemplates';
+import { useUpsertContractTemplate } from '@/hooks/useUpsertContractTemplate';
+import { contractTemplatesQueryKeys } from '@/hooks/queries/contractTemplates.queryKeys';
 import { useUpsertFinancialValue } from '@/hooks/useUpsertFinancialValue';
 import { useUpsertManager } from '@/hooks/useUpsertManager';
 import { useUpsertUser } from '@/hooks/useUpsertUser';
@@ -454,5 +461,60 @@ describe('useAuth', () => {
     await act(async () => { success = await result.current.login({ username: 'alice', password: 'wrong' }); });
     expect(success).toBe(false);
     expect(result.current.error).toBe('Accesso non riuscito. Riprova.');
+  });
+});
+
+// ─── contractTemplatesQueryKeys ───────────────────────────────────────────────
+
+describe('contractTemplatesQueryKeys', () => {
+  it('all returns the base key', () => {
+    expect(contractTemplatesQueryKeys.all).toEqual(['contract-templates']);
+  });
+
+  it('list() returns the base key array', () => {
+    expect(contractTemplatesQueryKeys.list()).toEqual(['contract-templates']);
+  });
+
+  it('detail() returns key with id', () => {
+    expect(contractTemplatesQueryKeys.detail(42)).toEqual(['contract-templates', 'detail', 42]);
+  });
+});
+
+// ─── useContractTemplates ─────────────────────────────────────────────────────
+
+describe('useContractTemplates', () => {
+  it('fetches template list via service', async () => {
+    const templates = [{ id: 1, name: 'NDA', autoRenew: false }];
+    (contractTemplatesService.list as jest.Mock).mockResolvedValue(templates);
+    const { result } = renderHook(() => useContractTemplates(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(templates);
+    expect(contractTemplatesService.list).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ─── useUpsertContractTemplate ────────────────────────────────────────────────
+
+describe('useUpsertContractTemplate', () => {
+  const payload = { name: 'NDA', autoRenew: false };
+
+  it('calls create when mode is "create"', async () => {
+    const created = { id: 1, ...payload };
+    (contractTemplatesService.create as jest.Mock).mockResolvedValue(created);
+    const { result } = renderHook(() => useUpsertContractTemplate(), { wrapper: createWrapper() });
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'create', payload });
+    });
+    expect(contractTemplatesService.create).toHaveBeenCalledWith(payload);
+  });
+
+  it('calls update when mode is "update"', async () => {
+    const updated = { id: 5, ...payload };
+    (contractTemplatesService.update as jest.Mock).mockResolvedValue(updated);
+    const { result } = renderHook(() => useUpsertContractTemplate(), { wrapper: createWrapper() });
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'update', id: 5, payload });
+    });
+    expect(contractTemplatesService.update).toHaveBeenCalledWith(5, payload);
   });
 });

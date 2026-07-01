@@ -21,6 +21,7 @@ import { usersService } from '@/services/users.service';
 import { contractsService } from '@/services/contracts.service';
 import { dashboardService } from '@/services/dashboard.service';
 import { rolesService } from '@/services/roles.service';
+import { contractTemplatesService } from '@/services/contractTemplates.service';
 
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
@@ -342,5 +343,55 @@ describe('rolesService', () => {
     const result = await rolesService.list();
     expect(mockGet).toHaveBeenCalledWith('/roles');
     expect(result).toEqual(data);
+  });
+});
+
+// ─── contractTemplatesService ─────────────────────────────────────────────────
+
+describe('contractTemplatesService', () => {
+  const template = { id: 1, name: 'NDA', autoRenew: false };
+  const payload = { name: 'NDA', autoRenew: false };
+
+  it('list() calls GET /contract-templates', async () => {
+    mockGet.mockResolvedValue({ data: [template] });
+    const result = await contractTemplatesService.list();
+    expect(mockGet).toHaveBeenCalledWith('/contract-templates');
+    expect(result).toEqual([template]);
+  });
+
+  it('getById() calls GET /contract-templates/:id', async () => {
+    mockGet.mockResolvedValue({ data: template });
+    const result = await contractTemplatesService.getById(1);
+    expect(mockGet).toHaveBeenCalledWith('/contract-templates/1');
+    expect(result).toEqual(template);
+  });
+
+  it('create() calls POST /contract-templates', async () => {
+    mockPost.mockResolvedValue({ data: { id: 1, ...payload } });
+    const result = await contractTemplatesService.create(payload);
+    expect(mockPost).toHaveBeenCalledWith('/contract-templates', payload);
+    expect(result).toEqual({ id: 1, ...payload });
+  });
+
+  it('update() calls PUT /contract-templates/:id', async () => {
+    mockPut.mockResolvedValue({ data: { id: 1, ...payload } });
+    const result = await contractTemplatesService.update(1, payload);
+    expect(mockPut).toHaveBeenCalledWith('/contract-templates/1', payload);
+    expect(result).toEqual({ id: 1, ...payload });
+  });
+
+  it('delete() calls DELETE /contract-templates/:id', async () => {
+    mockDelete.mockResolvedValue({});
+    await contractTemplatesService.delete(1);
+    expect(mockDelete).toHaveBeenCalledWith('/contract-templates/1');
+  });
+
+  it('instantiate() calls POST /contract-templates/:id/instantiate', async () => {
+    const instantiatePayload = { customerName: 'Acme', contractNumber: 'CTR-001', startDate: '2024-01-01' };
+    const contract = { id: 10, customerName: 'Acme' };
+    mockPost.mockResolvedValue({ data: contract });
+    const result = await contractTemplatesService.instantiate(1, instantiatePayload);
+    expect(mockPost).toHaveBeenCalledWith('/contract-templates/1/instantiate', instantiatePayload);
+    expect(result).toEqual(contract);
   });
 });

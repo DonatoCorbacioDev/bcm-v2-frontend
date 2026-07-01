@@ -6,48 +6,8 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { LogoMark } from "@/components/layout/Logo";
-import {
-  LayoutDashboard,
-  FileText,
-  LayoutTemplate,
-  TrendingUp,
-  Tag,
-  Building2,
-  Users,
-  User,
-  Shield,
-  LogOut,
-  type LucideIcon,
-} from "lucide-react";
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  adminOnly?: boolean;
-}
-
-const navGroups: { title: string; items: NavItem[] }[] = [
-  {
-    title: "GENERALE",
-    items: [
-      { label: "Dashboard",            href: "/dashboard",          icon: LayoutDashboard },
-      { label: "Contratti",            href: "/contracts",          icon: FileText },
-      { label: "Modelli di contratto", href: "/contract-templates", icon: LayoutTemplate },
-      { label: "Valori finanziari",    href: "/financial-values",   icon: TrendingUp },
-    ],
-  },
-  {
-    title: "AMMINISTRAZIONE",
-    items: [
-      { label: "Tipi finanziari",  href: "/financial-types", icon: Tag,      adminOnly: true },
-      { label: "Aree di business", href: "/business-areas",  icon: Building2,adminOnly: true },
-      { label: "Responsabili",     href: "/managers",         icon: Users,    adminOnly: true },
-      { label: "Utenti",           href: "/users",            icon: User,     adminOnly: true },
-      { label: "Registro attività",href: "/audit-logs",       icon: Shield,   adminOnly: true },
-    ],
-  },
-];
+import { LogOut } from "lucide-react";
+import { navGroups, type NavItem } from "@/components/layout/sidebarNavConfig";
 
 interface SidebarProps {
   readonly collapsed: boolean;

@@ -30,7 +30,8 @@ function LoginContent() {
   return (
     <div className="flex-1 grid md:grid-cols-[1.08fr_1fr] min-h-screen">
       {/* ── Left brand panel ── */}
-      <div
+      <aside
+        aria-label="Presentazione applicazione"
         className="hidden md:flex flex-col justify-between p-10 text-white relative overflow-hidden"
         style={{
           background: "linear-gradient(155deg,#13235f 0%,#1d3fa8 48%,#2563eb 100%)",
@@ -78,7 +79,7 @@ function LoginContent() {
             Conforme GDPR · AgID · ISO&nbsp;27001 — dati ospitati in Italia
           </span>
         </div>
-      </div>
+      </aside>
 
       {/* ── Right form panel ── */}
       <main

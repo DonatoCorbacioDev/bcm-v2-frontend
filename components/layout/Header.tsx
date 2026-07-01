@@ -84,11 +84,11 @@ export default function Header({
         <PanelLeft className="h-[18px] w-[18px] text-muted-foreground" aria-hidden="true" />
       </button>
 
-      {/* Page title */}
+      {/* Page title — intentionally a <p>, not <h1>; the real h1 lives in each page's main content */}
       <div className="hidden sm:flex flex-col justify-center min-w-0">
-        <h1 className="text-[14.5px] font-semibold text-foreground leading-tight truncate">
+        <p className="text-[14.5px] font-semibold text-foreground leading-tight truncate">
           {title}
-        </h1>
+        </p>
         {subtitle && (
           <p className="text-[11.5px] text-muted-foreground leading-tight truncate">
             {subtitle}

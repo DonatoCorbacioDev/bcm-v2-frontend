@@ -214,7 +214,7 @@ function LoginContent() {
             >
               <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-primary text-white text-[10px] font-bold shrink-0">
                 ID
-              </span>
+              </span>{" "}
               Entra con SPID / CIE
             </Button>
           </form>

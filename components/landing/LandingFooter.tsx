@@ -10,7 +10,7 @@ export function LandingFooter() {
         <div className="grid sm:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div className="space-y-3">
-            <Logo iconClassName="h-8 w-8" />
+            <Logo />
             <p className="text-sm text-muted-foreground max-w-xs">
               Software SaaS per la gestione dei contratti aziendali con AI integrata.
             </p>

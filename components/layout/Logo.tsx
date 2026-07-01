@@ -59,15 +59,13 @@ export function LogoMark({ className, size = 32 }: LogoMarkProps) {
 interface LogoProps {
   readonly className?: string;
   readonly size?: number;
-  /** @deprecated use size prop instead */
-  readonly iconClassName?: string;
   readonly showWordmark?: boolean;
 }
 
-export default function Logo({ className, size = 32, iconClassName, showWordmark = true }: LogoProps) {
+export default function Logo({ className, size = 32, showWordmark = true }: LogoProps) {
   return (
     <span className={`inline-flex items-center gap-2.5 ${className ?? ""}`}>
-      <LogoMark size={size} className={iconClassName} />
+      <LogoMark size={size} />
       {showWordmark && (
         <span className="text-[15px] font-bold text-foreground tracking-tight leading-tight">
           Business Contracts

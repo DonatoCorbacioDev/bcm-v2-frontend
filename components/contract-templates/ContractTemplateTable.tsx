@@ -52,6 +52,10 @@ const STATUS_VARIANTS: Record<string, "success" | "secondary" | "destructive" | 
   CANCELLED: "secondary",
 };
 
+function getEmptyMessage(isAdmin: boolean): string {
+  return isAdmin ? "Crea il primo template per iniziare" : "Nessun template disponibile";
+}
+
 export default function ContractTemplateTable({ onEditClick }: ContractTemplateTableProps) {
   const qc = useQueryClient();
   const { user } = useAuthStore();
@@ -110,7 +114,7 @@ export default function ContractTemplateTable({ onEditClick }: ContractTemplateT
           className="max-w-sm"
         />
         <span className="text-sm text-muted-foreground">
-          {filteredTemplates.length} template{filteredTemplates.length !== 1 ? "" : ""}
+          {filteredTemplates.length} template
         </span>
       </div>
 
@@ -120,9 +124,7 @@ export default function ContractTemplateTable({ onEditClick }: ContractTemplateT
           <p className="text-sm text-muted-foreground mt-2">
             {search
               ? "Modifica i criteri di ricerca"
-              : isAdmin
-              ? "Crea il primo template per iniziare"
-              : "Nessun template disponibile"}
+              : getEmptyMessage(isAdmin)}
           </p>
         </div>
       ) : (

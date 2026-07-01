@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,7 +51,6 @@ const navGroups: { title: string; items: NavItem[] }[] = [
 
 interface SidebarProps {
   readonly collapsed: boolean;
-  readonly onToggle?: () => void;
 }
 
 function NavLink({
@@ -173,7 +171,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
                   {group.title}
                 </p>
               )}
-              <div className={cn("space-y-0.5", collapsed ? "px-2" : "px-2")}>
+              <div className={cn("space-y-0.5 px-2")}>
                 {visibleItems.map((item) => (
                   <NavLink
                     key={item.href}
@@ -189,12 +187,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div
-        className={cn(
-          "border-t border-[var(--sidebar-border)] shrink-0 py-3",
-          collapsed ? "px-2" : "px-2"
-        )}
-      >
+      <div className="border-t border-[var(--sidebar-border)] shrink-0 py-3 px-2">
         <button
           type="button"
           onClick={handleLogout}

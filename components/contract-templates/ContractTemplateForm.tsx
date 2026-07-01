@@ -53,8 +53,6 @@ export default function ContractTemplateForm({
     handleSubmit,
     formState: { errors },
     control,
-    watch,
-    setValue,
   } = useForm<ContractTemplateFormData>({
     resolver: zodResolver(contractTemplateSchema),
     defaultValues: template
@@ -70,8 +68,6 @@ export default function ContractTemplateForm({
         }
       : { autoRenew: false },
   });
-
-  const autoRenew = watch("autoRenew");
 
   const onSubmit = async (data: ContractTemplateFormData) => {
     const payload = {

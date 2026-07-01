@@ -23,7 +23,7 @@ export function LandingNav() {
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
         <Link href="/" aria-label="BCM home">
-          <Logo iconClassName="h-8 w-8" />
+          <Logo />
         </Link>
 
         {/* Desktop nav */}

@@ -42,8 +42,5 @@ describe('Logo', () => {
     expect(container.querySelector('span')).toHaveClass('custom-wrapper');
   });
 
-  it('applies iconClassName to the svg (backward compat)', () => {
-    const { container } = render(<Logo iconClassName="h-4 w-4" />);
-    expect(container.querySelector('svg')).toHaveClass('h-4 w-4');
-  });
+
 });

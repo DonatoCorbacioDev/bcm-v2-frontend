@@ -87,11 +87,13 @@ export default function RegisterOrgPage() {
   };
 
   return (
+    <main id="main-content" className="flex-1 flex items-center justify-center p-8">
+    <div className="w-full max-w-md">
     <Card>
       <CardHeader className="space-y-1">
         <LogoMark className="h-12 w-12 mx-auto mb-2" />
         <CardTitle className="text-2xl font-bold text-center">
-          Register Organization
+          Registra Organizzazione
         </CardTitle>
         <CardDescription className="text-center">
           Create your organization and admin account
@@ -197,5 +199,7 @@ export default function RegisterOrgPage() {
         </form>
       </CardContent>
     </Card>
+    </div>
+    </main>
   );
 }

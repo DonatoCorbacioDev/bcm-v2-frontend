@@ -4,11 +4,9 @@ import userEvent from '@testing-library/user-event';
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
-const mockPush = jest.fn();
-
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: mockPush }),
-  usePathname: () => '/',
+  useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => '/dashboard',
 }));
 
 jest.mock('@/store/authStore', () => ({
@@ -40,77 +38,88 @@ import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const defaultProps = {
+  onMenuClick: jest.fn(),
+  collapsed: false,
+  onCollapseToggle: jest.fn(),
+};
+
 // ─── Test suite ──────────────────────────────────────────────────────────────
 
 describe('Header', () => {
-  const mockLogout = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useAuthStore as unknown as jest.Mock).mockReturnValue({ username: 'testuser', role: 'ADMIN' });
-    (useAuth as jest.Mock).mockReturnValue({ logout: mockLogout });
+    (useAuth as jest.Mock).mockReturnValue({ logout: jest.fn() });
   });
 
-  it('renders the BCM brand name', () => {
-    render(<Header onMenuClick={jest.fn()} />);
-    expect(screen.getByText('BCM')).toBeInTheDocument();
-  });
-
-  it('renders the logout button', () => {
-    render(<Header onMenuClick={jest.fn()} />);
-    expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument();
+  it('renders the page title for the current route', () => {
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
   });
 
   it('renders the mobile menu toggle button', () => {
-    render(<Header onMenuClick={jest.fn()} />);
-    expect(screen.getByRole('button', { name: /toggle navigation menu/i })).toBeInTheDocument();
+    render(<Header {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /apri menu/i })).toBeInTheDocument();
   });
 
-  it('calls onMenuClick when the menu button is clicked', async () => {
+  it('calls onMenuClick when the mobile menu button is clicked', async () => {
     const onMenuClick = jest.fn();
-    render(<Header onMenuClick={onMenuClick} />);
-    await userEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    render(<Header {...defaultProps} onMenuClick={onMenuClick} />);
+    await userEvent.click(screen.getByRole('button', { name: /apri menu/i }));
     expect(onMenuClick).toHaveBeenCalledTimes(1);
   });
 
+  it('renders the sidebar collapse toggle button', () => {
+    render(<Header {...defaultProps} />);
+    expect(screen.getByRole('button', { name: /comprimi menu/i })).toBeInTheDocument();
+  });
+
+  it('calls onCollapseToggle when the collapse button is clicked', async () => {
+    const onCollapseToggle = jest.fn();
+    render(<Header {...defaultProps} onCollapseToggle={onCollapseToggle} />);
+    await userEvent.click(screen.getByRole('button', { name: /comprimi menu/i }));
+    expect(onCollapseToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows "Espandi menu" label when sidebar is collapsed', () => {
+    render(<Header {...defaultProps} collapsed={true} />);
+    expect(screen.getByRole('button', { name: /espandi menu/i })).toBeInTheDocument();
+  });
+
   it('shows the logged-in username', () => {
-    render(<Header onMenuClick={jest.fn()} />);
+    render(<Header {...defaultProps} />);
     expect(screen.getByText('testuser')).toBeInTheDocument();
   });
 
-  it('falls back to "User" when no user is set', () => {
+  it('falls back to "Utente" when no user is set', () => {
     (useAuthStore as unknown as jest.Mock).mockReturnValue(null);
-    render(<Header onMenuClick={jest.fn()} />);
-    expect(screen.getByText('User')).toBeInTheDocument();
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('Utente')).toBeInTheDocument();
   });
 
-  it('calls logout and redirects to /login', async () => {
-    render(<Header onMenuClick={jest.fn()} />);
-    await userEvent.click(screen.getByRole('button', { name: /logout/i }));
-    expect(mockLogout).toHaveBeenCalledTimes(1);
-    expect(mockPush).toHaveBeenCalledWith('/login');
+  it('sets aria-expanded=true on the mobile menu button when open', () => {
+    render(<Header {...defaultProps} isMenuOpen={true} />);
+    expect(screen.getByRole('button', { name: /apri menu/i })).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('sets aria-expanded=true on the menu button when menu is open', () => {
-    render(<Header onMenuClick={jest.fn()} isMenuOpen={true} />);
-    expect(screen.getByRole('button', { name: /toggle navigation menu/i })).toHaveAttribute('aria-expanded', 'true');
-  });
-
-  it('sets aria-expanded=false on the menu button when menu is closed', () => {
-    render(<Header onMenuClick={jest.fn()} isMenuOpen={false} />);
-    expect(screen.getByRole('button', { name: /toggle navigation menu/i })).toHaveAttribute('aria-expanded', 'false');
+  it('sets aria-expanded=false on the mobile menu button when closed', () => {
+    render(<Header {...defaultProps} isMenuOpen={false} />);
+    expect(screen.getByRole('button', { name: /apri menu/i })).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('renders the dark mode toggle button', () => {
-    render(<Header onMenuClick={jest.fn()} />);
+    render(<Header {...defaultProps} />);
     expect(
-      screen.getByRole('button', { name: /switch to (dark|light) mode/i })
+      screen.getByRole('button', { name: /modalità (chiara|scura)/i })
     ).toBeInTheDocument();
   });
 
   it('toggles dark class on html element when dark mode button is clicked', async () => {
-    render(<Header onMenuClick={jest.fn()} />);
-    const toggle = screen.getByRole('button', { name: /switch to (dark|light) mode/i });
+    render(<Header {...defaultProps} />);
+    const toggle = screen.getByRole('button', { name: /modalità (chiara|scura)/i });
     const initialDark = document.documentElement.classList.contains('dark');
     await userEvent.click(toggle);
     expect(document.documentElement.classList.contains('dark')).toBe(!initialDark);

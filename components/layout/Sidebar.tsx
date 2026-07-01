@@ -2,126 +2,212 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
+import { useAuth } from "@/hooks/useAuth";
+import { LogoMark } from "@/components/layout/Logo";
 import {
-  X,
   LayoutDashboard,
   FileText,
+  LayoutTemplate,
   TrendingUp,
   Tag,
   Building2,
   Users,
   User,
   Shield,
-  LayoutTemplate,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
 
-const navItems: { label: string; href: string; icon: LucideIcon; adminOnly?: boolean }[] = [
-  { label: "Dashboard",           href: "/dashboard",           icon: LayoutDashboard },
-  { label: "Contracts",           href: "/contracts",           icon: FileText },
-  { label: "Contract Templates",  href: "/contract-templates",  icon: LayoutTemplate },
-  { label: "Financial Values",    href: "/financial-values",    icon: TrendingUp },
-  { label: "Financial Types",     href: "/financial-types",     icon: Tag,            adminOnly: true },
-  { label: "Business Areas",      href: "/business-areas",      icon: Building2,      adminOnly: true },
-  { label: "Managers",            href: "/managers",            icon: Users,          adminOnly: true },
-  { label: "Users",               href: "/users",               icon: User,           adminOnly: true },
-  { label: "Audit Log",           href: "/audit-logs",          icon: Shield,         adminOnly: true },
+interface NavItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  adminOnly?: boolean;
+}
+
+const navGroups: { title: string; items: NavItem[] }[] = [
+  {
+    title: "GENERALE",
+    items: [
+      { label: "Dashboard",            href: "/dashboard",          icon: LayoutDashboard },
+      { label: "Contratti",            href: "/contracts",          icon: FileText },
+      { label: "Modelli di contratto", href: "/contract-templates", icon: LayoutTemplate },
+      { label: "Valori finanziari",    href: "/financial-values",   icon: TrendingUp },
+    ],
+  },
+  {
+    title: "AMMINISTRAZIONE",
+    items: [
+      { label: "Tipi finanziari",  href: "/financial-types", icon: Tag,      adminOnly: true },
+      { label: "Aree di business", href: "/business-areas",  icon: Building2,adminOnly: true },
+      { label: "Responsabili",     href: "/managers",         icon: Users,    adminOnly: true },
+      { label: "Utenti",           href: "/users",            icon: User,     adminOnly: true },
+      { label: "Registro attività",href: "/audit-logs",       icon: Shield,   adminOnly: true },
+    ],
+  },
 ];
 
 interface SidebarProps {
-  readonly isOpen: boolean;
-  readonly onClose: () => void;
+  readonly collapsed: boolean;
+  readonly onToggle?: () => void;
 }
 
 function NavLink({
   item,
   isActive,
-  onClick,
+  collapsed,
 }: {
-  readonly item: (typeof navItems)[number];
+  readonly item: NavItem;
   readonly isActive: boolean;
-  readonly onClick?: () => void;
+  readonly collapsed: boolean;
 }) {
   return (
     <Link
       href={item.href}
-      onClick={onClick}
       aria-current={isActive ? "page" : undefined}
+      title={collapsed ? item.label : undefined}
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+        "flex items-center gap-2.5 px-2.5 py-[9px] rounded-lg text-[13px] font-medium transition-colors duration-100",
         isActive
-          ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          ? "bg-[var(--sidebar-accent)] text-[var(--accent-foreground)] font-semibold"
+          : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-foreground",
+        collapsed && "justify-center px-2"
       )}
     >
       <item.icon
         aria-hidden="true"
         className={cn(
-          "h-5 w-5 shrink-0",
-          isActive ? "text-primary-foreground" : "text-muted-foreground"
+          "shrink-0",
+          collapsed ? "h-[18px] w-[18px]" : "h-[16px] w-[16px]",
+          isActive ? "text-[var(--accent-foreground)]" : "text-[var(--muted-foreground)]"
         )}
       />
-      <span>{item.label}</span>
+      {!collapsed && <span className="truncate">{item.label}</span>}
     </Link>
   );
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ collapsed }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const { logout } = useAuth();
   const isAdmin = user?.role === "ADMIN";
-  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
+
+  const orgInitials = user?.username
+    ? user.username.slice(0, 2).toUpperCase()
+    : "CE";
 
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-card border-r border-border fixed left-0 top-16 bottom-0 overflow-y-auto z-10">
-        <div className="flex-1 py-4">
-          <nav aria-label="Main navigation" className="p-3 space-y-1">
-            {visibleItems.map((item) => (
-              <NavLink
-                key={item.href}
-                item={item}
-                isActive={pathname === item.href}
-              />
-            ))}
-          </nav>
-        </div>
-      </aside>
-
-      {/* Mobile Sidebar */}
-      <aside
-        id="mobile-sidebar"
-        aria-label="Mobile navigation"
+    <aside
+      aria-label="Navigazione principale"
+      className={cn(
+        "hidden md:flex flex-col bg-[var(--sidebar)] border-r border-[var(--sidebar-border)] h-screen sticky top-0 shrink-0 z-20 overflow-hidden",
+        "transition-[width] duration-[160ms] ease-[ease]",
+        collapsed ? "w-[70px]" : "w-[252px]"
+      )}
+    >
+      {/* Brand header */}
+      <div
         className={cn(
-          "md:hidden fixed left-0 top-16 bottom-0 w-64 bg-card border-r border-border overflow-y-auto z-30 transition-transform duration-300",
-          isOpen ? "translate-x-0" : "-translate-x-full"
+          "flex items-center h-[60px] border-b border-[var(--sidebar-border)] shrink-0",
+          collapsed ? "justify-center px-0" : "px-4 gap-3"
         )}
       >
-        <div className="p-3 border-b border-border flex justify-end">
+        <LogoMark size={32} className="shrink-0" />
+        {!collapsed && (
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold text-foreground truncate leading-tight">
+              Business Contracts
+            </p>
+            <p className="text-[11px] text-[var(--muted-foreground)] truncate leading-tight">
+              Gestione contratti
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Org switcher */}
+      {!collapsed && (
+        <div className="px-3 py-2.5 border-b border-[var(--sidebar-border)] shrink-0">
           <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-accent transition-colors"
-            aria-label="Close menu"
+            type="button"
+            className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[var(--muted)] transition-colors group"
           >
-            <X className="h-5 w-5 text-muted-foreground" />
+            <span className="h-7 w-7 rounded-md bg-[var(--primary)] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+              {orgInitials}
+            </span>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-[12px] font-semibold text-foreground truncate">
+                Organizzazione
+              </p>
+              <p className="text-[11px] text-[var(--muted-foreground)] truncate">
+                Piano Pro
+              </p>
+            </div>
           </button>
         </div>
-        <div className="py-4">
-          <nav aria-label="Main navigation" className="px-3 space-y-1">
-            {visibleItems.map((item) => (
-              <NavLink
-                key={item.href}
-                item={item}
-                isActive={pathname === item.href}
-                onClick={onClose}
-              />
-            ))}
-          </nav>
-        </div>
-      </aside>
-    </>
+      )}
+
+      {/* Navigation */}
+      <nav
+        aria-label="Navigazione principale"
+        className="flex-1 overflow-y-auto py-3 space-y-1"
+      >
+        {navGroups.map((group) => {
+          const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin);
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div key={group.title}>
+              {!collapsed && (
+                <p className="px-4 pb-1 pt-2 text-[10.5px] font-semibold text-[var(--muted-foreground)] tracking-[0.07em] uppercase">
+                  {group.title}
+                </p>
+              )}
+              <div className={cn("space-y-0.5", collapsed ? "px-2" : "px-2")}>
+                {visibleItems.map((item) => (
+                  <NavLink
+                    key={item.href}
+                    item={item}
+                    isActive={pathname === item.href}
+                    collapsed={collapsed}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </nav>
+
+      {/* Footer */}
+      <div
+        className={cn(
+          "border-t border-[var(--sidebar-border)] shrink-0 py-3",
+          collapsed ? "px-2" : "px-2"
+        )}
+      >
+        <button
+          type="button"
+          onClick={handleLogout}
+          title={collapsed ? "Esci" : undefined}
+          className={cn(
+            "w-full flex items-center gap-2.5 px-2.5 py-[9px] rounded-lg text-[13px] font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-destructive transition-colors duration-100",
+            collapsed && "justify-center px-2"
+          )}
+        >
+          <LogOut className={cn("shrink-0", collapsed ? "h-[18px] w-[18px]" : "h-[16px] w-[16px]")} aria-hidden="true" />
+          {!collapsed && <span>Esci</span>}
+        </button>
+      </div>
+    </aside>
   );
 }

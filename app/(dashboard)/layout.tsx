@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { api } from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
+import MobileSidebar from "@/components/layout/MobileSidebar";
 
 export default function DashboardLayout({
   children,
@@ -18,23 +19,12 @@ export default function DashboardLayout({
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
-  // Mobile menu state
+  const [collapsed, setCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // `isAuthenticated` is read through zustand's React binding, which uses
-  // `useSyncExternalStore` under the hood. On a hard page load, Next.js
-  // server-renders this client component first; since there's no
-  // localStorage on the server, that render — and the *first* client render
-  // too, which React forces to match the server snapshot for hydration
-  // safety — both see the pre-hydration default (isAuthenticated: false).
-  // Only the render after mount picks up the real, persisted client state.
-  // Without this guard, the effect below would redirect to /login on that
-  // first render even for an already-authenticated user, and the redirect
-  // sticks even though the very next render corrects itself.
+  // See comment in original layout: needed to avoid SSR-hydration mismatch.
   const [hasMounted, setHasMounted] = useState(false);
   useEffect(() => {
-    // Canonical hasMounted/isClient idiom for bridging an SSR-forced first
-    // snapshot to the real client one; there's no external event to key off.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHasMounted(true);
   }, []);
@@ -56,23 +46,19 @@ export default function DashboardLayout({
     }
   }, [hasMounted, isAuthenticated, accessToken, router, setAccessToken, clearAuth]);
 
-  // The access token lives in memory only, so it's lost on a full page
-  // reload even though isAuthenticated (persisted) is still true. While
-  // that's the case, the effect above is restoring it via the HttpOnly
-  // refresh_token cookie — keep showing the loading state until it lands.
   const isRestoringSession = isAuthenticated && !accessToken;
 
   if (!hasMounted || !isAuthenticated || isRestoringSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Verifying authentication...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-muted-foreground text-sm">Verifica autenticazione…</p>
       </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
-      {/* Skip navigation — visually hidden until focused (WCAG 2.4.1) */}
+    <div className="flex h-screen overflow-hidden bg-background">
+      {/* Skip navigation */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-card focus:text-primary focus:rounded focus:shadow-lg focus:outline-none"
@@ -80,38 +66,43 @@ export default function DashboardLayout({
         Vai al contenuto principale
       </a>
 
-      <Header
-        onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        isMenuOpen={isMobileMenuOpen}
+      {/* Desktop sidebar */}
+      <Sidebar collapsed={collapsed} />
+
+      {/* Mobile sidebar */}
+      <MobileSidebar
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
       />
 
-      <div className="flex h-full pt-16">
-        <Sidebar
-          isOpen={isMobileMenuOpen}
-          onClose={() => setIsMobileMenuOpen(false)}
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 bg-black/50 z-20 md:hidden cursor-default"
+          onClick={() => setIsMobileMenuOpen(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" || e.key === "Enter") setIsMobileMenuOpen(false);
+          }}
+          aria-label="Chiudi menu"
+        />
+      )}
+
+      {/* Content area */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <Header
+          collapsed={collapsed}
+          onCollapseToggle={() => setCollapsed((c) => !c)}
+          onMenuClick={() => setIsMobileMenuOpen((o) => !o)}
+          isMenuOpen={isMobileMenuOpen}
         />
         <main
           id="main-content"
-          className="flex-1 min-w-0 md:ml-64 overflow-y-auto p-4 md:p-8"
+          className="flex-1 overflow-y-auto p-6 md:p-8 max-w-[1320px] mx-auto w-full"
         >
           {children}
         </main>
       </div>
-
-      {/* Overlay for mobile menu */}
-      {isMobileMenuOpen && (
-        <button
-          type="button"
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden cursor-default"
-          onClick={() => setIsMobileMenuOpen(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape' || e.key === 'Enter') {
-              setIsMobileMenuOpen(false);
-            }
-          }}
-          aria-label="Close menu"
-        />
-      )}
     </div>
   );
 }

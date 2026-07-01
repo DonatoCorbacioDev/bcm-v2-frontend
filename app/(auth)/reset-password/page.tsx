@@ -27,20 +27,24 @@ function ResetPasswordContent() {
 
   if (!token) {
     return (
-      <Card>
-        <CardHeader className="space-y-1">
-          <LogoMark className="h-12 w-12 mx-auto mb-2" />
-          <CardTitle className="text-2xl font-bold text-center">Invalid link</CardTitle>
-          <CardDescription className="text-center">
-            This password reset link is invalid or has expired.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-center">
-          <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-            Request a new link
-          </Link>
-        </CardContent>
-      </Card>
+      <main id="main-content" className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardHeader className="space-y-1">
+              <LogoMark className="h-12 w-12 mx-auto mb-2" />
+              <CardTitle className="text-2xl font-bold text-center">Link non valido</CardTitle>
+              <CardDescription className="text-center">
+                Il link per reimpostare la password non è valido o è scaduto.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                Richiedi un nuovo link
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     );
   }
 
@@ -69,28 +73,32 @@ function ResetPasswordContent() {
   };
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Reset password</CardTitle>
-        <CardDescription className="text-center">
-          Enter your new password below
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <PasswordFields
-            password={password}
-            confirm={confirm}
-            onPasswordChange={setPassword}
-            onConfirmChange={setConfirm}
-            error={error}
-          />
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Resetting..." : "Reset password"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <main id="main-content" className="flex-1 flex items-center justify-center p-8">
+      <div className="w-full max-w-md">
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">Reimposta password</CardTitle>
+            <CardDescription className="text-center">
+              Inserisci la nuova password
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <PasswordFields
+                password={password}
+                confirm={confirm}
+                onPasswordChange={setPassword}
+                onConfirmChange={setConfirm}
+                error={error}
+              />
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Reimpostazione…" : "Reimposta password"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
   );
 }
 

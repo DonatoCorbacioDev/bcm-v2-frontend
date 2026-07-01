@@ -27,6 +27,11 @@ jest.mock('@/components/layout/Sidebar', () => ({
   default: () => <div>Sidebar</div>,
 }));
 
+jest.mock('@/components/layout/MobileSidebar', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
 import { useAuthStore } from '@/store/authStore';
@@ -69,7 +74,7 @@ describe('DashboardLayout', () => {
   it('redirects to /login when not authenticated', () => {
     mockAuthState({ isAuthenticated: false, accessToken: null });
     render(<DashboardLayout>content</DashboardLayout>);
-    expect(screen.getByText(/verifying authentication/i)).toBeInTheDocument();
+    expect(screen.getByText(/verifica autenticazione/i)).toBeInTheDocument();
     expect(mockPush).toHaveBeenCalledWith('/login');
   });
 
@@ -85,7 +90,7 @@ describe('DashboardLayout', () => {
     mockApiPost.mockResolvedValue({ data: { token: 'restored-token' } });
 
     render(<DashboardLayout>content</DashboardLayout>);
-    expect(screen.getByText(/verifying authentication/i)).toBeInTheDocument();
+    expect(screen.getByText(/verifica autenticazione/i)).toBeInTheDocument();
 
     await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith('/auth/refresh'));
     await waitFor(() => expect(mockSetAccessToken).toHaveBeenCalledWith('restored-token'));

@@ -63,29 +63,33 @@ function CompleteInviteContent() {
   };
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Welcome to BCM</CardTitle>
-        <CardDescription className="text-center">
-          Set your password to activate your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <PasswordFields
-            password={password}
-            confirm={confirm}
-            onPasswordChange={setPassword}
-            onConfirmChange={setConfirm}
-            passwordLabel="Password"
-            error={error}
-          />
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Activating..." : "Activate account"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <main id="main-content" className="flex-1 flex items-center justify-center p-8">
+      <div className="w-full max-w-md">
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">Benvenuto in BCM</CardTitle>
+            <CardDescription className="text-center">
+              Scegli una password per attivare il tuo account
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <PasswordFields
+                password={password}
+                confirm={confirm}
+                onPasswordChange={setPassword}
+                onConfirmChange={setConfirm}
+                passwordLabel="Password"
+                error={error}
+              />
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Attivazione…" : "Attiva account"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </main>
   );
 }
 

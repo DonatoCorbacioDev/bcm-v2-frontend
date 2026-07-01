@@ -54,6 +54,7 @@ const template1: ContractTemplate = {
   notificationDays: 30,
   businessAreaId: null,
   defaultManagerId: null,
+  createdAt: '2024-01-01T00:00:00Z',
 };
 
 const template2: ContractTemplate = {
@@ -66,11 +67,12 @@ const template2: ContractTemplate = {
   notificationDays: null,
   businessAreaId: null,
   defaultManagerId: null,
+  createdAt: '2024-01-01T00:00:00Z',
 };
 
 function setup(role = 'ADMIN', templates: ContractTemplate[] = [template1, template2]) {
   (useContractTemplates as jest.Mock).mockReturnValue({ data: templates, isLoading: false, isError: false });
-  (useAuthStore as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role } });
+  (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role } });
   return render(<ContractTemplateTable onEditClick={jest.fn()} />, { wrapper: createWrapper() });
 }
 
@@ -81,14 +83,14 @@ beforeEach(() => jest.clearAllMocks());
 describe('ContractTemplateTable', () => {
   it('shows a skeleton while loading', () => {
     (useContractTemplates as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
-    (useAuthStore as jest.Mock).mockReturnValue({ user: null });
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: null });
     const { container } = render(<ContractTemplateTable onEditClick={jest.fn()} />, { wrapper: createWrapper() });
     expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
   });
 
   it('shows an error message when loading fails', () => {
     (useContractTemplates as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: true });
-    (useAuthStore as jest.Mock).mockReturnValue({ user: null });
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: null });
     render(<ContractTemplateTable onEditClick={jest.fn()} />, { wrapper: createWrapper() });
     expect(screen.getByText(/impossibile caricare i template/i)).toBeInTheDocument();
   });
@@ -151,7 +153,7 @@ describe('ContractTemplateTable', () => {
   it('calls onEditClick when Modifica is clicked', async () => {
     const onEditClick = jest.fn();
     (useContractTemplates as jest.Mock).mockReturnValue({ data: [template1], isLoading: false, isError: false });
-    (useAuthStore as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role: 'ADMIN' } });
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role: 'ADMIN' } });
     render(<ContractTemplateTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /modifica/i }));
     expect(onEditClick).toHaveBeenCalledWith(template1);

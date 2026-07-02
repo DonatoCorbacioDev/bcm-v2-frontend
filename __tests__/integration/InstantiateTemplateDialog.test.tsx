@@ -6,7 +6,8 @@ import { createWrapper } from '../mocks/wrapper';
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
-jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
 
 const mockInstantiate = jest.fn();
 jest.mock('@/services/contractTemplates.service', () => ({
@@ -79,7 +80,7 @@ const onOpenChange = jest.fn();
 beforeEach(() => {
   jest.clearAllMocks();
   (useBusinessAreas as jest.Mock).mockReturnValue({ data: [{ id: 1, name: 'Eng', description: '' }], isLoading: false, isError: false });
-  (useManagers as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false });
+  (useManagers as jest.Mock).mockReturnValue({ data: [{ id: 1, firstName: 'Marco', lastName: 'Rossi' }], isLoading: false, isError: false });
 });
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -156,6 +157,20 @@ describe('InstantiateTemplateDialog', () => {
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith('Contratto creato con successo!', expect.any(Object))
     );
+  });
+
+  it('navigates to the new contract when the success toast action is clicked', async () => {
+    const contract = { id: 99, customerName: 'Acme' };
+    mockInstantiate.mockResolvedValueOnce(contract);
+    render(
+      <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
+      { wrapper: createWrapper() }
+    );
+    fillAndSubmit();
+    await waitFor(() => expect(toast.success).toHaveBeenCalled());
+    const [, options] = (toast.success as jest.Mock).mock.calls[0];
+    options.action.onClick();
+    expect(mockPush).toHaveBeenCalledWith('/contracts/99');
   });
 
   it('shows error toast when instantiate fails', async () => {

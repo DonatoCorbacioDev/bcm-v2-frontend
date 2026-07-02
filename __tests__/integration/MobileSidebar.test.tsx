@@ -56,6 +56,14 @@ describe('MobileSidebar', () => {
     expect(screen.getByRole('link', { name: /responsabili/i })).toBeInTheDocument();
   });
 
+  it('hides admin-only links when user is not yet loaded', () => {
+    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
+      selector({ user: null, isAuthenticated: false })
+    );
+    render(<MobileSidebar isOpen={true} onClose={jest.fn()} />);
+    expect(screen.queryByRole('link', { name: /tipi finanziari/i })).not.toBeInTheDocument();
+  });
+
   it('hides admin-only links for MANAGER', () => {
     (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
       selector({ user: { id: 2, username: 'mgr', role: 'MANAGER' }, isAuthenticated: true })

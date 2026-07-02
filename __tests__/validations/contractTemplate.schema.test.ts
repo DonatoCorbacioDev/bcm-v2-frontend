@@ -104,4 +104,18 @@ describe("instantiateTemplateSchema", () => {
       expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, startDate: "2024-06-15" }).success).toBe(true);
     });
   });
+
+  describe("endDate", () => {
+    it("accepts an empty endDate", () => {
+      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, endDate: "" }).success).toBe(true);
+    });
+
+    it("accepts a valid YYYY-MM-DD endDate", () => {
+      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, endDate: "2024-12-31" }).success).toBe(true);
+    });
+
+    it("rejects a malformed endDate", () => {
+      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, endDate: "31/12/2024" }).success).toBe(false);
+    });
+  });
 });

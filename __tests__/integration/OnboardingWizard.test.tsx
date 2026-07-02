@@ -152,6 +152,16 @@ describe('OnboardingWizard', () => {
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
   });
 
+  it('"Crea primo contratto" from Done step navigates to /contracts', async () => {
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crea primo contratto/i }));
+
+    expect(mockPush).toHaveBeenCalledWith('/contracts');
+  });
+
   it('"Salta configurazione" sets localStorage flag and navigates to /dashboard', async () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /salta configurazione/i }));

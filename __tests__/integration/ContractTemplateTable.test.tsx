@@ -22,7 +22,10 @@ jest.mock('@/store/authStore', () => ({
 
 jest.mock('@/components/contract-templates/InstantiateTemplateDialog', () => ({
   __esModule: true,
-  default: () => null,
+  default: ({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) =>
+    open ? (
+      <button aria-label="mock-close-instantiate" onClick={() => onOpenChange(false)} />
+    ) : null,
 }));
 
 jest.mock('@/lib/api', () => ({
@@ -181,5 +184,27 @@ describe('ContractTemplateTable', () => {
     await userEvent.click(confirmBtn);
     await waitFor(() => expect(contractTemplatesService.delete).toHaveBeenCalledWith(template1.id));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template eliminato con successo!'));
+  });
+
+  it('shows error toast when delete fails', async () => {
+    (contractTemplatesService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
+    setup('ADMIN');
+    await userEvent.click(screen.getAllByRole('button', { name: /elimina/i })[0]);
+    const dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Eliminazione del template non riuscita'));
+  });
+
+  it('opens the instantiate dialog when Usa is clicked', async () => {
+    setup('ADMIN');
+    await userEvent.click(screen.getAllByRole('button', { name: /usa/i })[0]);
+    expect(screen.getByRole('button', { name: /mock-close-instantiate/i })).toBeInTheDocument();
+  });
+
+  it('closes the instantiate dialog via onOpenChange', async () => {
+    setup('ADMIN');
+    await userEvent.click(screen.getAllByRole('button', { name: /usa/i })[0]);
+    await userEvent.click(screen.getByRole('button', { name: /mock-close-instantiate/i }));
+    expect(screen.queryByRole('button', { name: /mock-close-instantiate/i })).not.toBeInTheDocument();
   });
 });

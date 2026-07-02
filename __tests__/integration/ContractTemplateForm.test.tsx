@@ -37,8 +37,8 @@ import { useManagers } from '@/hooks/useManagers';
 import ContractTemplateForm from '@/components/contract-templates/ContractTemplateForm';
 
 const onClose = jest.fn();
-const defaultBA = { data: [], isLoading: false, isError: false };
-const defaultMgr = { data: [], isLoading: false, isError: false };
+const defaultBA = { data: [{ id: 1, name: 'Engineering', description: '' }], isLoading: false, isError: false };
+const defaultMgr = { data: [{ id: 1, firstName: 'Marco', lastName: 'Rossi' }], isLoading: false, isError: false };
 
 beforeEach(() => {
   jest.clearAllMocks();

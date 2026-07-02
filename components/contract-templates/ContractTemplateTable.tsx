@@ -239,8 +239,7 @@ export default function ContractTemplateTable({ onEditClick }: ContractTemplateT
               }}
               disabled={deleteMutation.isPending}
             >
-              {/* istanbul ignore next */}
-              {deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
+              {/* istanbul ignore next */ deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -170,6 +170,25 @@ describe('OnboardingWizard', () => {
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
   });
 
+  it('"Salta configurazione" navigates to /dashboard without touching localStorage when there is no user', async () => {
+    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => selector({ user: null }));
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /salta configurazione/i }));
+
+    expect(localStorage.getItem('bcm-setup-skip-1')).toBeNull();
+    expect(mockPush).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('shows validation errors when the Manager form is submitted empty', async () => {
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
+
+    await waitFor(() => expect(screen.getAllByRole('alert').length).toBeGreaterThanOrEqual(5));
+    expect(mockMgrMutateAsync).not.toHaveBeenCalled();
+  });
+
   it('"Salta configurazione" is not shown on the Done step', async () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));

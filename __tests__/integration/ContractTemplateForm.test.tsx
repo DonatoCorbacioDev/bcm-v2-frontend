@@ -86,6 +86,33 @@ describe('ContractTemplateForm', () => {
     expect(screen.getByRole('button', { name: /aggiorna template/i })).toBeInTheDocument();
   });
 
+  it('pre-fills numeric and reference fields when editing a fully populated template', () => {
+    const template = {
+      id: 6,
+      name: 'Full Template',
+      autoRenew: true,
+      defaultStatus: 'ACTIVE',
+      defaultDurationDays: 90,
+      businessAreaId: 1,
+      defaultManagerId: 1,
+      notificationDays: 15,
+    } as never;
+    render(<ContractTemplateForm onClose={onClose} template={template} />, { wrapper: createWrapper() });
+    expect((screen.getByPlaceholderText('es. 365') as HTMLInputElement).value).toBe('90');
+    expect((screen.getByPlaceholderText('es. 30') as HTMLInputElement).value).toBe('15');
+  });
+
+  it('submits null for duration and notification days when left empty', async () => {
+    mockMutateAsync.mockResolvedValueOnce({ id: 2 });
+    const { container } = render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
+    fireEvent.change(screen.getByPlaceholderText('es. NDA Standard'), { target: { value: 'Senza durata' } });
+    fireEvent.submit(container.querySelector('form')!);
+    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalled());
+    const callArg = mockMutateAsync.mock.calls[0][0];
+    expect(callArg.payload.defaultDurationDays).toBeNull();
+    expect(callArg.payload.notificationDays).toBeNull();
+  });
+
   it('calls create mutation on submit and shows success toast', async () => {
     mockMutateAsync.mockResolvedValueOnce({ id: 1 });
     const { container } = render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
@@ -108,6 +135,22 @@ describe('ContractTemplateForm', () => {
     expect(callArg.mode).toBe('update');
     expect(callArg.id).toBe(5);
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template aggiornato con successo!'));
+  });
+
+  it('shows validation errors for description, duration and notification days', async () => {
+    const { container } = render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
+    fireEvent.change(screen.getByPlaceholderText('es. NDA Standard'), { target: { value: 'Nome valido' } });
+    fireEvent.change(screen.getByPlaceholderText('Descrizione opzionale del template...'), {
+      target: { value: 'A'.repeat(2001) },
+    });
+    fireEvent.change(screen.getByPlaceholderText('es. 365'), { target: { value: '-5' } });
+    fireEvent.change(screen.getByPlaceholderText('es. 30'), { target: { value: '-1' } });
+    fireEvent.submit(container.querySelector('form')!);
+
+    await waitFor(() => expect(screen.getByText(/non può superare i 2000 caratteri/i)).toBeInTheDocument());
+    expect(screen.getByText(/durata deve essere un numero positivo/i)).toBeInTheDocument();
+    expect(screen.getByText(/giorni di notifica devono essere un numero positivo/i)).toBeInTheDocument();
+    expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('shows validation error when name is too short', async () => {

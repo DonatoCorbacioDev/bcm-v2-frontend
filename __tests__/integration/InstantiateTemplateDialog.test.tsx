@@ -75,6 +75,15 @@ import { useManagers } from '@/hooks/useManagers';
 import InstantiateTemplateDialog from '@/components/contract-templates/InstantiateTemplateDialog';
 
 const baseTemplate = { id: 3, name: 'NDA Standard', autoRenew: false } as never;
+const fullTemplate = {
+  id: 4,
+  name: 'Full Template',
+  autoRenew: true,
+  defaultStatus: 'ACTIVE',
+  defaultDurationDays: 60,
+  businessAreaId: 1,
+  defaultManagerId: 1,
+} as never;
 const onOpenChange = jest.fn();
 
 beforeEach(() => {
@@ -120,6 +129,38 @@ describe('InstantiateTemplateDialog', () => {
       { wrapper: createWrapper() }
     );
     expect(screen.getByText('NDA Standard')).toBeInTheDocument();
+  });
+
+  it('renders without a template (template=null)', () => {
+    render(
+      <InstantiateTemplateDialog template={null} open={true} onOpenChange={onOpenChange} />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText(/area di business/i)).toBeInTheDocument();
+  });
+
+  it('shows the default duration hint and pre-fills overrides for a fully populated template', () => {
+    render(
+      <InstantiateTemplateDialog template={fullTemplate} open={true} onOpenChange={onOpenChange} />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByText(/durata predefinita 60 giorni/i)).toBeInTheDocument();
+    expect(screen.getByText(/calcolata se vuota/i)).toBeInTheDocument();
+    expect(screen.getAllByText('Eng').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Marco Rossi').length).toBeGreaterThan(0);
+  });
+
+  it('shows validation errors for customerName and startDate when submitted empty', async () => {
+    render(
+      <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
+      { wrapper: createWrapper() }
+    );
+    const form = document.querySelector('form');
+    fireEvent.submit(form!);
+    await waitFor(() => expect(screen.getByText(/il nome del cliente deve contenere almeno 2 caratteri/i)).toBeInTheDocument());
+    expect(screen.getByText(/la data di inizio è obbligatoria/i)).toBeInTheDocument();
+    expect(mockInstantiate).not.toHaveBeenCalled();
   });
 
   it('shows customerName and contractNumber inputs', () => {

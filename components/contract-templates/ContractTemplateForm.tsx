@@ -168,7 +168,7 @@ export default function ContractTemplateForm({
             id="defaultDurationDays"
             type="number"
             min={1}
-            {...register("defaultDurationDays", { valueAsNumber: true })}
+            {...register("defaultDurationDays", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
             placeholder="es. 365"
           />
           {errors.defaultDurationDays && (
@@ -236,7 +236,7 @@ export default function ContractTemplateForm({
           id="notificationDays"
           type="number"
           min={1}
-          {...register("notificationDays", { valueAsNumber: true })}
+          {...register("notificationDays", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
           placeholder="es. 30"
         />
         {errors.notificationDays && (

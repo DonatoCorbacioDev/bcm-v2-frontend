@@ -110,6 +110,17 @@ describe('ContractTemplateTable', () => {
     expect(screen.getByText('Bozza')).toBeInTheDocument();
   });
 
+  it('shows a dash placeholder when defaultStatus is absent', () => {
+    setup('ADMIN', [{ ...template1, defaultStatus: null }]);
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.queryByText('Attivo')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the raw status value for an unmapped defaultStatus', () => {
+    setup('ADMIN', [{ ...template1, defaultStatus: 'UNKNOWN' as ContractTemplate['defaultStatus'] }]);
+    expect(screen.getByText('UNKNOWN')).toBeInTheDocument();
+  });
+
   it('shows the template count', () => {
     setup();
     expect(screen.getByText('2 template')).toBeInTheDocument();

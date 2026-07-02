@@ -28,6 +28,39 @@ interface SpringPage<T> {
   size: number;
 }
 
+const ACTION_LABELS: Record<string, string> = {
+  CREATE: "Creazione",
+  UPDATE: "Modifica",
+  DELETE: "Eliminazione",
+};
+
+const ENTITY_TYPE_LABELS: Record<string, string> = {
+  Contract: "Contratto",
+  ContractTemplate: "Modello di contratto",
+  ContractDocument: "Documento contratto",
+  ElectronicInvoice: "Fattura elettronica",
+  BusinessArea: "Area di business",
+  Manager: "Responsabile",
+  FinancialType: "Tipo finanziario",
+  FinancialValue: "Valore finanziario",
+  Organization: "Organizzazione",
+  User: "Utente",
+  Role: "Ruolo",
+  Notification: "Notifica",
+  RefreshToken: "Token di accesso",
+  PasswordResetToken: "Reimpostazione password",
+  VerificationToken: "Verifica account",
+  LocalStorage: "File archiviato",
+};
+
+function actionLabel(action: string): string {
+  return ACTION_LABELS[action] ?? action;
+}
+
+function entityTypeLabel(entityType: string): string {
+  return ENTITY_TYPE_LABELS[entityType] ?? entityType;
+}
+
 function actionBadgeVariant(action: string): "default" | "secondary" | "destructive" | "outline" {
   if (action === "CREATE") return "default";
   if (action === "DELETE") return "destructive";
@@ -38,6 +71,12 @@ function actionBadgeClass(action: string): string {
   if (action === "CREATE") return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
   if (action === "DELETE") return "bg-destructive/10 text-destructive";
   return "bg-primary/10 text-primary";
+}
+
+function summaryText(log: AuditLogDTO): string {
+  const entity = entityTypeLabel(log.entityType);
+  const action = actionLabel(log.action).toLowerCase();
+  return log.entityId != null ? `${entity} #${log.entityId} — ${action}` : `${entity} — ${action}`;
 }
 
 const PAGE_SIZE = 20;
@@ -81,7 +120,7 @@ function AuditLogsContent({
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted">
               <tr>
-                {["Timestamp", "Action", "Entity Type", "Entity ID", "Username", "Details"].map((h) => (
+                {["Data e ora", "Azione", "Tipo entità", "ID entità", "Utente", "Dettagli"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
@@ -95,7 +134,7 @@ function AuditLogsContent({
               {data.content.map((log) => (
                 <tr key={log.id} className="hover:bg-accent">
                   <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                    {new Date(log.timestamp).toLocaleString("en-US", {
+                    {new Date(log.timestamp).toLocaleString("it-IT", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
@@ -109,11 +148,11 @@ function AuditLogsContent({
                       variant={actionBadgeVariant(log.action)}
                       className={actionBadgeClass(log.action)}
                     >
-                      {log.action}
+                      {actionLabel(log.action)}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
-                    {log.entityType}
+                    {entityTypeLabel(log.entityType)}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
                     {log.entityId}
@@ -122,15 +161,7 @@ function AuditLogsContent({
                     {log.username}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground max-w-[240px]">
-                    {log.details ? (
-                      <span title={log.details}>
-                        {log.details.length > 60
-                          ? `${log.details.slice(0, 60)}…`
-                          : log.details}
-                      </span>
-                    ) : (
-                      <span className="italic text-muted-foreground">—</span>
-                    )}
+                    <span title={log.details ?? undefined}>{summaryText(log)}</span>
                   </td>
                 </tr>
               ))}
@@ -141,7 +172,7 @@ function AuditLogsContent({
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            {data.totalElements} total entries
+            {data.totalElements} risultati totali
           </p>
           <div className="flex items-center gap-3">
             <Button
@@ -150,10 +181,10 @@ function AuditLogsContent({
               onClick={() => onPageChange(page - 1)}
               disabled={page === 0}
             >
-              Previous
+              Precedente
             </Button>
             <span className="text-sm text-muted-foreground">
-              Page {page + 1} of {data.totalPages}
+              Pagina {page + 1} di {data.totalPages}
             </span>
             <Button
               variant="outline"
@@ -161,7 +192,7 @@ function AuditLogsContent({
               onClick={() => onPageChange(page + 1)}
               disabled={page >= data.totalPages - 1}
             >
-              Next
+              Successiva
             </Button>
           </div>
         </div>
@@ -177,9 +208,9 @@ function AuditLogsContent({
           <Shield className="h-6 w-6 text-muted-foreground" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Audit Log</h1>
+          <h1 className="text-3xl font-bold text-foreground">Registro attività</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            System operations history
+            Cronologia delle operazioni di sistema
           </p>
         </div>
       </div>
@@ -212,10 +243,10 @@ function EmptyState() {
         </div>
       </div>
       <h3 className="text-lg font-semibold text-foreground mb-2">
-        No Audit Logs Yet
+        Nessuna attività registrata
       </h3>
       <p className="text-sm text-muted-foreground">
-        System operations will be tracked here.
+        Le operazioni di sistema verranno registrate qui.
       </p>
     </div>
   );

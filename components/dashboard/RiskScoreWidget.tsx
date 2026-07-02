@@ -12,6 +12,17 @@ const LEVEL_CONFIG = {
   LOW:    { color: "bg-green-500",  badge: "success" as const,     label: "Basso" },
 };
 
+const ANOMALY_LABELS: Record<string, string> = {
+  EXPIRED: "Scaduto",
+  EXPIRING_SOON: "In scadenza",
+  UNUSUAL_VALUE: "Valore anomalo",
+  NO_END_DATE: "Senza data di fine",
+};
+
+function anomalyLabel(code: string): string {
+  return ANOMALY_LABELS[code] ?? code.replaceAll("_", " ");
+}
+
 export function RiskScoreWidget() {
   const { data: riskScores, isLoading, isError } = useRiskScores();
 
@@ -85,7 +96,7 @@ export function RiskScoreWidget() {
                           key={a}
                           className="text-xs bg-muted text-muted-foreground rounded px-1.5 py-0.5"
                         >
-                          {a.replaceAll("_", " ")}
+                          {anomalyLabel(a)}
                         </span>
                       ))}
                     </div>

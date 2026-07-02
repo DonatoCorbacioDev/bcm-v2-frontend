@@ -49,6 +49,20 @@ describe('RiskScoreWidget', () => {
     expect(screen.getByText('minor delay')).toBeInTheDocument();
   });
 
+  it('translates the real backend anomaly codes to Italian', async () => {
+    const realCodes = [
+      { contractId: 4, customerName: 'Delta Srl', riskScore: 0.9, level: 'HIGH' as const,
+        anomalies: ['EXPIRED', 'EXPIRING_SOON', 'UNUSUAL_VALUE', 'NO_END_DATE'] },
+    ];
+    (api.get as jest.Mock).mockResolvedValue({ data: realCodes });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Delta Srl')).toBeInTheDocument());
+    expect(screen.getByText('Scaduto')).toBeInTheDocument();
+    expect(screen.getByText('In scadenza')).toBeInTheDocument();
+    expect(screen.getByText('Valore anomalo')).toBeInTheDocument();
+    expect(screen.getByText('Senza data di fine')).toBeInTheDocument();
+  });
+
   it('shows correct risk level badges', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });

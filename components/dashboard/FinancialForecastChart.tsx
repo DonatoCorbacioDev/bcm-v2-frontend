@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ComposedChart, Area, Line, XAxis, YAxis,
+  ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,8 @@ import { useFinancialValues } from "@/hooks/useFinancialValues";
 import type { ForecastResponse, ForecastPoint, FinancialValue } from "@/types";
 import {
   CHART_TICK_STYLE,
+  CHART_GRID_STROKE,
+  CHART_GRID_OPACITY,
   CHART_TOOLTIP_CONTENT_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
   CHART_TOOLTIP_ITEM_STYLE,
@@ -158,6 +160,12 @@ export function FinancialForecastChart() {
                   <stop offset="95%" stopColor={FORECAST_COLOR} stopOpacity={0} />
                 </linearGradient>
               </defs>
+              <CartesianGrid
+                horizontal
+                vertical={false}
+                stroke={CHART_GRID_STROKE}
+                strokeOpacity={CHART_GRID_OPACITY}
+              />
               <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
               <YAxis
                 tickFormatter={formatEur}

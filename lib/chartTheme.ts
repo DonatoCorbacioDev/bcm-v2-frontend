@@ -3,6 +3,11 @@ import type { CSSProperties } from "react";
 
 export const CHART_TICK_STYLE = { fontSize: 11, fill: "var(--muted-foreground)" };
 
+/** Faint horizontal-only reference lines, aligned to the Y-axis ticks —
+ * an anchor for reading values without the busy library-default grid box. */
+export const CHART_GRID_STROKE = "var(--border)";
+export const CHART_GRID_OPACITY = 0.6;
+
 export const CHART_TOOLTIP_CONTENT_STYLE: CSSProperties = {
   backgroundColor: "var(--card)",
   border: "1px solid var(--border)",

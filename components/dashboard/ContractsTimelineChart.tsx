@@ -1,10 +1,12 @@
 'use client';
 
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContractsTimeline } from '@/hooks/useContractsTimeline';
 import {
   CHART_TICK_STYLE,
+  CHART_GRID_STROKE,
+  CHART_GRID_OPACITY,
   CHART_TOOLTIP_CONTENT_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
   CHART_TOOLTIP_ITEM_STYLE,
@@ -72,6 +74,12 @@ export function ContractsTimelineChart() {
                 <stop offset="95%" stopColor={CHART_COLOR} stopOpacity={0} />
               </linearGradient>
             </defs>
+            <CartesianGrid
+              horizontal
+              vertical={false}
+              stroke={CHART_GRID_STROKE}
+              strokeOpacity={CHART_GRID_OPACITY}
+            />
             <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
             <YAxis allowDecimals={false} tick={CHART_TICK_STYLE} width={32} axisLine={false} tickLine={false} tickCount={4} />
             <Tooltip

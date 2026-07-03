@@ -1,7 +1,5 @@
-/** Shared recharts styling so tooltips/grids follow the app's design tokens (light + dark). */
+/** Shared recharts styling so tooltips follow the app's design tokens (light + dark). */
 import type { CSSProperties } from "react";
-
-export const CHART_GRID_STROKE = "var(--border)";
 
 export const CHART_TICK_STYLE = { fontSize: 11, fill: "var(--muted-foreground)" };
 
@@ -28,5 +26,3 @@ export const CHART_LEGEND_STYLE: CSSProperties = {
   color: "var(--muted-foreground)",
   fontSize: 12,
 };
-
-export const CHART_CURSOR_FILL = { fill: "var(--muted)", opacity: 0.5 };

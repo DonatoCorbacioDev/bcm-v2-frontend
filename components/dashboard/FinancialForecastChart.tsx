@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer, ReferenceLine,
+  ComposedChart, Area, Line, XAxis, YAxis,
+  Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,10 @@ import { api } from "@/lib/api";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
 import type { ForecastResponse, ForecastPoint, FinancialValue } from "@/types";
 import {
-  CHART_GRID_STROKE,
   CHART_TICK_STYLE,
   CHART_TOOLTIP_CONTENT_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
   CHART_TOOLTIP_ITEM_STYLE,
-  CHART_LEGEND_STYLE,
 } from "@/lib/chartTheme";
 
 const HISTORICAL_COLOR = "var(--chart-1)";
@@ -56,14 +54,12 @@ function buildChartData(
     lower: p.lower,
     upper: p.upper,
   }));
-  // Bridge historical <-> forecast at the junction point so both lines share
-  // one shared x/y anchor instead of the forecast line appearing to "jump in"
-  // out of nowhere at the first forecast month.
+  // Anchor the forecast line to the last historical point only (not the
+  // other way around) so the dashed line takes over from exactly where the
+  // solid line ends, instead of both series overlapping across that segment.
   if (histPoints.length > 0 && forePoints.length > 0) {
     const lastIndex = histPoints.length - 1;
-    const last = histPoints[lastIndex];
-    histPoints[lastIndex] = { ...last, forecast: last.historical };
-    forePoints[0] = { ...forePoints[0], historical: last.historical };
+    histPoints[lastIndex] = { ...histPoints[lastIndex], forecast: histPoints[lastIndex].historical };
   }
   return [...histPoints, ...forePoints];
 }
@@ -162,24 +158,21 @@ export function FinancialForecastChart() {
                   <stop offset="95%" stopColor={FORECAST_COLOR} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
-              <XAxis dataKey="month" tick={CHART_TICK_STYLE} />
-              <YAxis tickFormatter={formatEur} tick={CHART_TICK_STYLE} width={70} />
+              <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
+              <YAxis
+                tickFormatter={formatEur}
+                tick={CHART_TICK_STYLE}
+                width={70}
+                axisLine={false}
+                tickLine={false}
+                tickCount={4}
+              />
               <Tooltip
-                formatter={(value, name) => {
-                  const labels: Record<string, string> = {
-                    historical: "Storico",
-                    forecast: "Previsione",
-                    upper: "Limite superiore",
-                    lower: "Limite inferiore",
-                  };
-                  return [formatEur(value as number), labels[name as string] ?? name];
-                }}
+                formatter={(value, name) => [formatEur(value as number), name]}
                 contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
                 labelStyle={CHART_TOOLTIP_LABEL_STYLE}
                 itemStyle={CHART_TOOLTIP_ITEM_STYLE}
               />
-              <Legend wrapperStyle={CHART_LEGEND_STYLE} />
 
               {firstForecastMonth && (
                 <ReferenceLine
@@ -207,12 +200,12 @@ export function FinancialForecastChart() {
                 type="monotone"
                 dataKey="historical"
                 stroke={HISTORICAL_COLOR}
-                strokeWidth={2}
+                strokeWidth={1.5}
                 fill="url(#histGradient)"
                 connectNulls
                 dot={false}
                 activeDot={{ r: 4 }}
-                name="historical"
+                name="Storico"
               />
 
               {/* Forecast line */}
@@ -221,12 +214,12 @@ export function FinancialForecastChart() {
                   type="monotone"
                   dataKey="forecast"
                   stroke={FORECAST_COLOR}
-                  strokeWidth={2}
+                  strokeWidth={1.5}
                   strokeDasharray="6 3"
                   dot={false}
                   activeDot={{ r: 5 }}
                   connectNulls
-                  name="forecast"
+                  name="Previsione"
                 />
               )}
             </ComposedChart>

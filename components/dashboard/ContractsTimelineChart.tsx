@@ -1,10 +1,9 @@
 'use client';
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContractsTimeline } from '@/hooks/useContractsTimeline';
 import {
-  CHART_GRID_STROKE,
   CHART_TICK_STYLE,
   CHART_TOOLTIP_CONTENT_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
@@ -73,9 +72,8 @@ export function ContractsTimelineChart() {
                 <stop offset="95%" stopColor={CHART_COLOR} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
-            <XAxis dataKey="month" tick={CHART_TICK_STYLE} />
-            <YAxis allowDecimals={false} tick={CHART_TICK_STYLE} width={36} />
+            <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
+            <YAxis allowDecimals={false} tick={CHART_TICK_STYLE} width={32} axisLine={false} tickLine={false} tickCount={4} />
             <Tooltip
               formatter={(value) => [value as number, "Contratti"]}
               contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
@@ -87,7 +85,7 @@ export function ContractsTimelineChart() {
               dataKey="count"
               name="Contratti"
               stroke={CHART_COLOR}
-              strokeWidth={2}
+              strokeWidth={1.5}
               fill="url(#timelineGradient)"
               activeDot={{ r: 5 }}
             />

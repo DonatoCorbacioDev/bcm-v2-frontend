@@ -22,12 +22,12 @@ export function LandingNav() {
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        <Link href="/" aria-label="BCM home">
+        <Link href="/" aria-label="Home BCM">
           <Logo />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+        <nav className="hidden md:flex items-center gap-6" aria-label="Navigazione principale">
           {navLinks.map((link) => (
             <a
               key={link.href}
@@ -71,7 +71,7 @@ export function LandingNav() {
           <button
             className="md:hidden p-2 rounded-lg hover:bg-accent"
             onClick={() => setMenuOpen((o) => !o)}
-            aria-label="Toggle menu"
+            aria-label={menuOpen ? "Chiudi menu" : "Apri menu"}
             aria-expanded={menuOpen}
           >
             {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -83,7 +83,7 @@ export function LandingNav() {
       {menuOpen && (
         <nav
           className="md:hidden border-t border-border bg-background px-4 py-4 flex flex-col gap-4"
-          aria-label="Mobile navigation"
+          aria-label="Navigazione mobile"
         >
           {navLinks.map((link) => (
             <a

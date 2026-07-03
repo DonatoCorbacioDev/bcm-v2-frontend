@@ -72,7 +72,7 @@ function DashboardMockup() {
               <div className="h-1.5 bg-green-500 rounded-full" style={{ width: "62%" }} />
             </div>
           </div>
-          <span className="text-[11px] font-bold text-green-600 dark:text-green-400">LOW</span>
+          <span className="text-[11px] font-bold text-green-600 dark:text-green-400">Basso</span>
         </div>
       </div>
     </div>

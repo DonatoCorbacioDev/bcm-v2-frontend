@@ -26,7 +26,7 @@ const PLANS = [
     period: "/ mese",
     badge: "Presto disponibile",
     description: "Per team che gestiscono decine di contratti.",
-    cta: "Coming soon",
+    cta: "Presto disponibile",
     ctaHref: "#",
     ctaVariant: "default" as const,
     highlighted: true,
@@ -114,7 +114,7 @@ export function Pricing() {
                 asChild
                 variant={plan.ctaVariant}
                 className="w-full"
-                disabled={plan.cta === "Coming soon"}
+                disabled={plan.cta === "Presto disponibile"}
               >
                 <Link href={plan.ctaHref}>{plan.cta}</Link>
               </Button>

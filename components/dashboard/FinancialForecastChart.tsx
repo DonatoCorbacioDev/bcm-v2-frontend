@@ -12,6 +12,17 @@ import { WifiOff, Loader2, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
 import type { ForecastResponse, ForecastPoint, FinancialValue } from "@/types";
+import {
+  CHART_GRID_STROKE,
+  CHART_TICK_STYLE,
+  CHART_TOOLTIP_CONTENT_STYLE,
+  CHART_TOOLTIP_LABEL_STYLE,
+  CHART_TOOLTIP_ITEM_STYLE,
+  CHART_LEGEND_STYLE,
+} from "@/lib/chartTheme";
+
+const HISTORICAL_COLOR = "var(--chart-1)";
+const FORECAST_COLOR = "var(--chart-4)";
 
 type Horizon = 3 | 6;
 
@@ -45,9 +56,13 @@ function buildChartData(
     lower: p.lower,
     upper: p.upper,
   }));
-  // Join last historical point with first forecast for visual continuity
+  // Bridge historical <-> forecast at the junction point so both lines share
+  // one shared x/y anchor instead of the forecast line appearing to "jump in"
+  // out of nowhere at the first forecast month.
   if (histPoints.length > 0 && forePoints.length > 0) {
-    const last = histPoints.at(-1)!
+    const lastIndex = histPoints.length - 1;
+    const last = histPoints[lastIndex];
+    histPoints[lastIndex] = { ...last, forecast: last.historical };
     forePoints[0] = { ...forePoints[0], historical: last.historical };
   }
   return [...histPoints, ...forePoints];
@@ -139,17 +154,17 @@ export function FinancialForecastChart() {
             <ComposedChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
               <defs>
                 <linearGradient id="histGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  <stop offset="5%" stopColor={HISTORICAL_COLOR} stopOpacity={0.25} />
+                  <stop offset="95%" stopColor={HISTORICAL_COLOR} stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="ciGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#a855f7" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#a855f7" stopOpacity={0} />
+                  <stop offset="5%" stopColor={FORECAST_COLOR} stopOpacity={0.15} />
+                  <stop offset="95%" stopColor={FORECAST_COLOR} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tickFormatter={formatEur} tick={{ fontSize: 11 }} width={70} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
+              <XAxis dataKey="month" tick={CHART_TICK_STYLE} />
+              <YAxis tickFormatter={formatEur} tick={CHART_TICK_STYLE} width={70} />
               <Tooltip
                 formatter={(value, name) => {
                   const labels: Record<string, string> = {
@@ -160,15 +175,18 @@ export function FinancialForecastChart() {
                   };
                   return [formatEur(value as number), labels[name as string] ?? name];
                 }}
+                contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
+                labelStyle={CHART_TOOLTIP_LABEL_STYLE}
+                itemStyle={CHART_TOOLTIP_ITEM_STYLE}
               />
-              <Legend />
+              <Legend wrapperStyle={CHART_LEGEND_STYLE} />
 
               {firstForecastMonth && (
                 <ReferenceLine
                   x={firstForecastMonth}
-                  stroke="#a855f7"
+                  stroke={FORECAST_COLOR}
                   strokeDasharray="4 4"
-                  label={{ value: "Previsione →", position: "insideTopRight", fontSize: 11, fill: "#a855f7" }}
+                  label={{ value: "Previsione →", position: "insideTopRight", fontSize: 11, fill: FORECAST_COLOR }}
                 />
               )}
 
@@ -188,7 +206,7 @@ export function FinancialForecastChart() {
               <Area
                 type="monotone"
                 dataKey="historical"
-                stroke="#3b82f6"
+                stroke={HISTORICAL_COLOR}
                 strokeWidth={2}
                 fill="url(#histGradient)"
                 connectNulls
@@ -202,7 +220,7 @@ export function FinancialForecastChart() {
                 <Line
                   type="monotone"
                   dataKey="forecast"
-                  stroke="#a855f7"
+                  stroke={FORECAST_COLOR}
                   strokeWidth={2}
                   strokeDasharray="6 3"
                   dot={false}

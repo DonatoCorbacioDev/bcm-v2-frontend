@@ -3,8 +3,16 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useContractsByArea } from '@/hooks/useContractsByArea';
+import {
+  CHART_GRID_STROKE,
+  CHART_TICK_STYLE,
+  CHART_TOOLTIP_CONTENT_STYLE,
+  CHART_TOOLTIP_LABEL_STYLE,
+  CHART_TOOLTIP_ITEM_STYLE,
+  CHART_CURSOR_FILL,
+} from '@/lib/chartTheme';
 
-const CHART_COLOR = "#3b82f6";
+const CHART_COLOR = "var(--chart-1)";
 
 function truncate(str: string, max = 14): string {
   return str.length > max ? `${str.slice(0, max)}…` : str;
@@ -64,14 +72,20 @@ export function ContractsByAreaChart() {
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
             <XAxis
               dataKey="areaName"
-              tick={{ fontSize: 12 }}
+              tick={CHART_TICK_STYLE}
               tickFormatter={(v: string) => truncate(v)}
             />
-            <YAxis allowDecimals={false} tick={{ fontSize: 12 }} width={36} />
-            <Tooltip formatter={(value) => [value as number, "Contratti"]} />
+            <YAxis allowDecimals={false} tick={CHART_TICK_STYLE} width={36} />
+            <Tooltip
+              formatter={(value) => [value as number, "Contratti"]}
+              contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
+              labelStyle={CHART_TOOLTIP_LABEL_STYLE}
+              itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+              cursor={CHART_CURSOR_FILL}
+            />
             <Bar dataKey="count" name="Contratti" fill={CHART_COLOR} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

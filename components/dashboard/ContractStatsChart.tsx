@@ -2,6 +2,12 @@
 
 import { PieChart, Pie, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CHART_TOOLTIP_CONTENT_STYLE,
+  CHART_TOOLTIP_LABEL_STYLE,
+  CHART_TOOLTIP_ITEM_STYLE,
+  CHART_LEGEND_STYLE,
+} from "@/lib/chartTheme";
 
 interface ContractStatsChartProps {
   readonly total: number;
@@ -45,8 +51,13 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
                 dataKey="value"
                 stroke="none"
               />
-              <Tooltip formatter={(value) => [value as number, ""]} />
-              <Legend iconType="circle" iconSize={10} />
+              <Tooltip
+                formatter={(value) => [value as number, ""]}
+                contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
+                labelStyle={CHART_TOOLTIP_LABEL_STYLE}
+                itemStyle={CHART_TOOLTIP_ITEM_STYLE}
+              />
+              <Legend iconType="circle" iconSize={10} wrapperStyle={CHART_LEGEND_STYLE} />
             </PieChart>
           </ResponsiveContainer>
         )}

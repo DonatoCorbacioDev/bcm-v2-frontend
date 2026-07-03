@@ -67,7 +67,7 @@ function DashboardMockup() {
         <div className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2">
           <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
           <div className="flex-1">
-            <p className="text-[10px] text-muted-foreground">Risk score AI medio</p>
+            <p className="text-[10px] text-muted-foreground">Valutazione rischio</p>
             <div className="w-full h-1.5 bg-muted rounded-full mt-1">
               <div className="h-1.5 bg-green-500 rounded-full" style={{ width: "62%" }} />
             </div>
@@ -98,7 +98,7 @@ export function Hero() {
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-sm text-muted-foreground">
               <TrendingUp className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              Risk scoring con AI integrato
+              Risk scoring assistito da ML
             </div>
 
             <h1 className="text-4xl md:text-5xl font-bold leading-tight text-foreground">

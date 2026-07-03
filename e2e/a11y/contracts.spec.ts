@@ -18,7 +18,7 @@ test.describe("Accessibility: contracts table and form", () => {
 
   test("contract form dialog has no detectable axe violations", async ({ page }) => {
     await page.goto("/contracts");
-    await page.getByRole("button", { name: "+ New Contract" }).click();
+    await page.getByRole("button", { name: "+ Nuovo contratto" }).click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog.getByLabel("Nome cliente")).toBeVisible();

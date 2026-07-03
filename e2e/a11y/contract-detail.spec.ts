@@ -18,7 +18,7 @@ test.describe("Accessibility: contract detail page", () => {
 
   test("invoices tab has no detectable axe violations", async ({ page }) => {
     await page.goto("/contracts/1");
-    await page.getByRole("button", { name: "Invoices" }).click();
+    await page.getByRole("button", { name: "Fatture" }).click();
     await expect(page.getByRole("cell", { name: "FT-2024-001", exact: true })).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();

@@ -76,7 +76,7 @@ function actionBadgeClass(action: string): string {
 function summaryText(log: AuditLogDTO): string {
   const entity = entityTypeLabel(log.entityType);
   const action = actionLabel(log.action).toLowerCase();
-  return log.entityId != null ? `${entity} #${log.entityId} — ${action}` : `${entity} — ${action}`;
+  return log.entityId == null ? `${entity} — ${action}` : `${entity} #${log.entityId} — ${action}`;
 }
 
 const PAGE_SIZE = 20;

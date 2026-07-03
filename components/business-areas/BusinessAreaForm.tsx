@@ -44,16 +44,16 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
       });
 
       const message = isEditing
-        ? "Business area updated successfully!"
-        : "Business area created successfully!";
+        ? "Area di business aggiornata con successo!"
+        : "Area di business creata con successo!";
 
       toast.success(message);
       onSuccess();
       onClose();
     } catch (error) {
       const message = isEditing
-        ? "Failed to update business area"
-        : "Failed to create business area";
+        ? "Aggiornamento dell'area di business non riuscito"
+        : "Creazione dell'area di business non riuscita";
 
       toast.error(message);
       console.error("Upsert error:", error);
@@ -65,12 +65,12 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
       {/* Name Field */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium mb-2">
-          Name *
+          Nome *
         </label>
         <Input
           id="name"
           {...register("name")}
-          placeholder="e.g., IT Department"
+          placeholder="Es. Reparto IT"
           className={errors.name ? "border-destructive" : ""}
         />
         {errors.name && (
@@ -81,12 +81,12 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
       {/* Description Field */}
       <div>
         <label htmlFor="description" className="block text-sm font-medium mb-2">
-          Description *
+          Descrizione *
         </label>
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Describe the business area..."
+          placeholder="Descrivi l'area di business..."
           rows={4}
           className={errors.description ? "border-destructive" : ""}
         />
@@ -98,14 +98,14 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
       {/* Actions */}
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annulla
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {(() => {
             /* istanbul ignore next */
-            if (isSubmitting) return "Saving...";
-            if (isEditing) return "Update";
-            return "Create";
+            if (isSubmitting) return "Salvataggio...";
+            if (isEditing) return "Aggiorna";
+            return "Crea";
           })()}
         </Button>
       </div>

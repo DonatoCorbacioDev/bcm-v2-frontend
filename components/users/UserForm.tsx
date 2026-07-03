@@ -76,8 +76,8 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
 
       /* istanbul ignore next */
       const message = isEditing
-        ? "User updated successfully!"
-        : "User created successfully!";
+        ? "Utente aggiornato con successo!"
+        : "Utente creato con successo!";
 
       toast.success(message);
       onSuccess();
@@ -85,8 +85,8 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
     } catch (error) {
       /* istanbul ignore next */
       const message = isEditing
-        ? "Failed to update user"
-        : "Failed to create user";
+        ? "Aggiornamento dell'utente non riuscito"
+        : "Creazione dell'utente non riuscita";
 
       toast.error(message);
       console.error("Upsert error:", error);
@@ -98,12 +98,12 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
       {/* Username Field */}
       <div>
         <label htmlFor="username" className="block text-sm font-medium mb-2">
-          Username *
+          Nome utente *
         </label>
         <Input
           id="username"
           {...register("username")}
-          placeholder="e.g., john_doe"
+          placeholder="Es. mario_rossi"
           className={errors.username ? "border-destructive" : ""}
         />
         {errors.username && (
@@ -114,13 +114,13 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
       {/* Password Field */}
       <div>
         <label htmlFor="password" className="block text-sm font-medium mb-2">
-          Password {isEditing ? "(leave empty to keep current)" : "*"}
+          Password {isEditing ? "(lascia vuoto per mantenere quella attuale)" : "*"}
         </label>
         <Input
           id="password"
           type="password"
           {...register("password")}
-          placeholder={isEditing ? "Enter new password (optional)" : "Enter password"}
+          placeholder={isEditing ? "Inserisci la nuova password (opzionale)" : "Inserisci la password"}
           className={errors.password ? "border-destructive" : ""}
         />
         {errors.password && (
@@ -143,7 +143,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
               disabled={loadingManagers}
             >
               <SelectTrigger className={errors.managerId ? "border-destructive" : ""}>
-                <SelectValue placeholder="Select a manager" />
+                <SelectValue placeholder="Seleziona un manager" />
               </SelectTrigger>
               <SelectContent>
                 {managers.map((manager) => (
@@ -163,7 +163,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
       {/* Role Select */}
       <div>
         <label htmlFor="roleId" className="block text-sm font-medium mb-2">
-          Role *
+          Ruolo *
         </label>
         <Controller
           name="roleId"
@@ -175,7 +175,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
               disabled={loadingRoles}
             >
               <SelectTrigger className={errors.roleId ? "border-destructive" : ""}>
-                <SelectValue placeholder="Select a role" />
+                <SelectValue placeholder="Seleziona un ruolo" />
               </SelectTrigger>
               <SelectContent>
                 {roles.map((role) => (
@@ -209,21 +209,21 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           htmlFor="verified"
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
-          Verified Account
+          Account verificato
         </label>
       </div>
 
       {/* Actions */}
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annulla
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {(() => {
             /* istanbul ignore next */
-            if (isSubmitting) return "Saving...";
-            if (isEditing) return "Update";
-            return "Create";
+            if (isSubmitting) return "Salvataggio...";
+            if (isEditing) return "Aggiorna";
+            return "Crea";
           })()}
         </Button>
       </div>

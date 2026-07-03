@@ -74,11 +74,11 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.businessAreas });
-      toast.success("Business area deleted successfully!");
+      toast.success("Area di business eliminata con successo!");
       setDeleteDialog({ open: false, businessArea: null });
     },
     onError: () => {
-      toast.error("Failed to delete business area");
+      toast.error("Eliminazione dell'area di business non riuscita");
     },
   });
 
@@ -100,7 +100,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   if (isError) {
     return (
       <div className="text-center py-8 text-destructive">
-        Failed to load business areas. Please try again.
+        Impossibile caricare le aree di business. Riprova.
       </div>
     );
   }
@@ -108,7 +108,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   if (businessAreas.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No business areas found. Create your first one!
+        Nessuna area di business trovata. Creane una!
       </div>
     );
   }
@@ -119,8 +119,8 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            aria-label="Search business areas"
-            placeholder="Search areas..."
+            aria-label="Cerca aree di business"
+            placeholder="Cerca aree..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -134,19 +134,19 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
             onClick={() => setSearchQuery("")}
             className="hidden sm:inline-flex"
           >
-            Clear
+            Pulisci
           </Button>
         )}
 
         <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
-          {filteredBusinessAreas.length} / {businessAreas.length} areas
+          {filteredBusinessAreas.length} / {businessAreas.length} aree
         </div>
       </div>
 
       {/* Empty state after search */}
       {filteredBusinessAreas.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          No business areas match your search
+          Nessuna area di business corrisponde alla ricerca
         </div>
       )}
 
@@ -157,9 +157,9 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
             <TableHeader>
               <TableRow>
                 <TableHead className="hidden lg:table-cell">ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden md:table-cell">Description</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead className="hidden md:table-cell">Descrizione</TableHead>
+                <TableHead>Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -176,7 +176,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
                         onClick={() => onEditClick(area)}
                         className="text-primary hover:text-primary text-xs px-2"
                       >
-                        Edit
+                        Modifica
                       </Button>
                       <Button
                         variant="ghost"
@@ -184,7 +184,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
                         onClick={() => handleDeleteClick(area)}
                         className="text-destructive hover:text-destructive text-xs px-2"
                       >
-                        Delete
+                        Elimina
                       </Button>
                     </div>
                   </TableCell>
@@ -202,10 +202,10 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Business Area</DialogTitle>
+            <DialogTitle>Elimina area di business</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete{" "}
-              <span className="font-semibold">{deleteDialog.businessArea?.name}</span>? This action cannot be undone.
+              Sei sicuro di voler eliminare{" "}
+              <span className="font-semibold">{deleteDialog.businessArea?.name}</span>? L&apos;operazione non può essere annullata.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -213,14 +213,14 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
               variant="outline"
               onClick={() => setDeleteDialog({ open: false, businessArea: null })}
             >
-              Cancel
+              Annulla
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={deleteMutation.isPending}
             >
-              {/* istanbul ignore next */deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {/* istanbul ignore next */deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
             </Button>
           </DialogFooter>
         </DialogContent>

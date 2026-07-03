@@ -79,11 +79,11 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.managers });
-      toast.success("Manager deleted successfully!");
+      toast.success("Manager eliminato con successo!");
       setDeleteDialog({ open: false, manager: null });
     },
     onError: () => {
-      toast.error("Failed to delete manager");
+      toast.error("Eliminazione del manager non riuscita");
     },
   });
 
@@ -105,8 +105,8 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   if (isError) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-destructive">Failed to load managers</p>
-        <p className="text-sm text-muted-foreground mt-2">Check API / network</p>
+        <p className="text-destructive">Impossibile caricare i manager</p>
+        <p className="text-sm text-muted-foreground mt-2">Controlla API / rete</p>
       </div>
     );
   }
@@ -114,9 +114,9 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   if (managers.length === 0) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">No managers found</p>
+        <p className="text-muted-foreground">Nessun manager trovato</p>
         <p className="text-sm text-muted-foreground mt-2">
-          Create your first manager to get started
+          Crea il tuo primo manager per iniziare
         </p>
       </div>
     );
@@ -128,8 +128,8 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            aria-label="Search managers"
-            placeholder="Search managers..."
+            aria-label="Cerca manager"
+            placeholder="Cerca manager..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -143,19 +143,19 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
             onClick={() => setSearchQuery("")}
             className="hidden sm:inline-flex"
           >
-            Clear
+            Pulisci
           </Button>
         )}
 
         <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
-          {filteredManagers.length} / {managers.length} managers
+          {filteredManagers.length} / {managers.length} manager
         </div>
       </div>
 
       {/* Empty state after search */}
       {filteredManagers.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          No managers match your search
+          Nessun manager corrisponde alla ricerca
         </div>
       )}
 
@@ -165,11 +165,11 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Nome</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead className="hidden md:table-cell">Phone</TableHead>
-                <TableHead className="hidden md:table-cell">Department</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="hidden md:table-cell">Telefono</TableHead>
+                <TableHead className="hidden md:table-cell">Reparto</TableHead>
+                <TableHead>Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -189,7 +189,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
                         onClick={() => onEditClick(m)}
                         className="text-primary hover:text-primary text-xs px-1 sm:px-2"
                       >
-                        Edit
+                        Modifica
                       </Button>
                       <Button
                         variant="ghost"
@@ -197,7 +197,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
                         onClick={() => handleDeleteClick(m)}
                         className="text-destructive hover:text-destructive text-xs px-1 sm:px-2"
                       >
-                        Delete
+                        Elimina
                       </Button>
                     </div>
                   </TableCell>
@@ -218,13 +218,13 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Manager</DialogTitle>
+            <DialogTitle>Elimina manager</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete{" "}
+              Sei sicuro di voler eliminare{" "}
               <span className="font-semibold">
                 {deleteDialog.manager?.firstName}{" "}
                 {deleteDialog.manager?.lastName}
-              </span>? This action cannot be undone.
+              </span>? L&apos;operazione non può essere annullata.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -233,14 +233,14 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
               onClick={() => setDeleteDialog({ open: false, manager: null })}
               disabled={deleteMutation.isPending}
             >
-              Cancel
+              Annulla
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteConfirm}
               disabled={deleteMutation.isPending}
             >
-              {/* istanbul ignore next */deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {/* istanbul ignore next */deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
             </Button>
           </DialogFooter>
         </DialogContent>

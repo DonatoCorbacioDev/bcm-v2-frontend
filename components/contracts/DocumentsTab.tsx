@@ -45,11 +45,11 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
-      toast.success("Document uploaded successfully");
+      toast.success("Documento caricato con successo");
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    onError: () => toast.error("Failed to upload document"),
+    onError: () => toast.error("Caricamento del documento non riuscito"),
   });
 
   const deleteMutation = useMutation({
@@ -58,9 +58,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
-      toast.success("Document deleted");
+      toast.success("Documento eliminato");
     },
-    onError: () => toast.error("Failed to delete document"),
+    onError: () => toast.error("Eliminazione del documento non riuscita"),
   });
 
   const analyzeMutation = useMutation({
@@ -73,16 +73,16 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     onSuccess: ({ documentId, analysis }) => {
       setAnalysisMap((prev) => ({ ...prev, [documentId]: analysis }));
       setExpandedDoc(documentId);
-      toast.success("Analysis completed");
+      toast.success("Analisi completata");
     },
-    onError: () => toast.error("Analysis failed"),
+    onError: () => toast.error("Analisi non riuscita"),
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.type !== "application/pdf") {
-      toast.error("Only PDF files are allowed");
+      toast.error("Sono ammessi solo file PDF");
       return;
     }
     uploadMutation.mutate(file);
@@ -100,7 +100,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.error("Failed to download document");
+      toast.error("Download del documento non riuscito");
     }
   };
 
@@ -142,9 +142,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
           ) : (
             <Upload className="h-4 w-4 mr-2" />
           )}
-          {uploadMutation.isPending ? "Uploading..." : "Upload PDF"}
+          {uploadMutation.isPending ? "Caricamento..." : "Carica PDF"}
         </Button>
-        <span className="text-xs text-muted-foreground">PDF only · max 10 MB</span>
+        <span className="text-xs text-muted-foreground">Solo PDF · max 10 MB</span>
       </div>
 
       {/* Document list */}
@@ -156,10 +156,10 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
             </div>
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-2">
-            No Documents Yet
+            Nessun documento
           </h2>
           <p className="text-sm text-muted-foreground">
-            Upload a PDF to attach it to this contract.
+            Carica un PDF per allegarlo a questo contratto.
           </p>
         </div>
       ) : (
@@ -184,7 +184,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {formatBytes(doc.fileSize)} ·{" "}
-                        {new Date(doc.uploadedAt).toLocaleDateString("en-US", {
+                        {new Date(doc.uploadedAt).toLocaleDateString("it-IT", {
                           year: "numeric", month: "short", day: "numeric",
                         })}
                       </p>
@@ -256,25 +256,25 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                     <div className="flex items-center justify-between">
                       <h2 className="text-sm font-semibold text-primary flex items-center gap-2">
                         <Sparkles className="h-4 w-4" />
-                        AI Extraction Results
+                        Risultati estrazione AI
                       </h2>
                       <Button size="sm" onClick={() => handleApply(analysis)}>
-                        Apply to Contract
+                        Applica al contratto
                       </Button>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {[
-                        { label: "Customer Name", value: analysis.detectedCustomerName },
-                        { label: "Contract Number", value: analysis.detectedContractNumber },
-                        { label: "Start Date", value: analysis.detectedStartDate },
-                        { label: "End Date", value: analysis.detectedEndDate },
-                        { label: "Amount", value: analysis.detectedAmount },
+                        { label: "Nome cliente", value: analysis.detectedCustomerName },
+                        { label: "Numero contratto", value: analysis.detectedContractNumber },
+                        { label: "Data inizio", value: analysis.detectedStartDate },
+                        { label: "Data fine", value: analysis.detectedEndDate },
+                        { label: "Importo", value: analysis.detectedAmount },
                       ].map(({ label, value }) => (
                         <div key={label}>
                           <p className="text-xs text-primary font-medium">{label}</p>
                           <p className="text-sm text-foreground">
-                            {value ?? <span className="text-muted-foreground italic">Not detected</span>}
+                            {value ?? <span className="text-muted-foreground italic">Non rilevato</span>}
                           </p>
                         </div>
                       ))}
@@ -283,7 +283,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                     {analysis.rawText && (
                       <details className="mt-2">
                         <summary className="text-xs text-primary cursor-pointer hover:underline">
-                          Show extracted text
+                          Mostra testo estratto
                         </summary>
                         <pre className="mt-2 text-xs text-muted-foreground whitespace-pre-wrap bg-card rounded p-3 max-h-40 overflow-y-auto">
                           {analysis.rawText}

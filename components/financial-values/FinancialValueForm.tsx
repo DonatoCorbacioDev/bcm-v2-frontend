@@ -45,7 +45,7 @@ export default function FinancialValueForm({
   /* istanbul ignore next */
   const financialTypes = financialTypesQuery.data ?? [];
 
-  const submitLabel = financialValue?.id ? "Update" : "Create";
+  const submitLabel = financialValue?.id ? "Aggiorna" : "Crea";
 
   const {
     register,
@@ -78,13 +78,13 @@ export default function FinancialValueForm({
           id: financialValue.id,
           payload: data,
         });
-        toast.success("Financial value updated successfully!");
+        toast.success("Valore finanziario aggiornato con successo!");
       } else {
         await upsertMutation.mutateAsync({
           mode: "create",
           payload: data,
         });
-        toast.success("Financial value created successfully!");
+        toast.success("Valore finanziario creato con successo!");
       }
 
       /* istanbul ignore next */
@@ -94,8 +94,8 @@ export default function FinancialValueForm({
       toast.error(
         /* istanbul ignore next */
         financialValue?.id
-          ? "Failed to update financial value"
-          : "Failed to create financial value"
+          ? "Aggiornamento del valore finanziario non riuscito"
+          : "Creazione del valore finanziario non riuscita"
       );
       console.error(error);
     }
@@ -107,7 +107,7 @@ export default function FinancialValueForm({
   if (isReferenceLoading) {
     return (
       <div className="py-8 text-center text-sm text-muted-foreground">
-        Loading form data...
+        Caricamento dati del modulo...
       </div>
     );
   }
@@ -115,7 +115,7 @@ export default function FinancialValueForm({
   if (isReferenceError) {
     return (
       <div className="py-8 text-center text-sm text-destructive">
-        Failed to load reference data.
+        Impossibile caricare i dati di riferimento.
       </div>
     );
   }
@@ -130,19 +130,19 @@ export default function FinancialValueForm({
           render={({ field }) => (
             <div className="space-y-2">
               <Label htmlFor="month">
-                Month <span className="text-destructive">*</span>
+                Mese <span className="text-destructive">*</span>
               </Label>
               <Select
                 value={/* istanbul ignore next */field.value ? String(field.value) : ""}
                 onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select month" />
+                  <SelectValue placeholder="Seleziona mese" />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                     <SelectItem key={m} value={String(m)}>
-                      {new Date(2000, m - 1).toLocaleString("en", {
+                      {new Date(2000, m - 1).toLocaleString("it", {
                         month: "long",
                       })}
                     </SelectItem>
@@ -158,7 +158,7 @@ export default function FinancialValueForm({
 
         <div className="space-y-2">
           <Label htmlFor="year">
-            Year <span className="text-destructive">*</span>
+            Anno <span className="text-destructive">*</span>
           </Label>
           <Input
             id="year"
@@ -175,7 +175,7 @@ export default function FinancialValueForm({
       {/* Financial Amount */}
       <div className="space-y-2">
         <Label htmlFor="financialAmount">
-          Amount (€) <span className="text-destructive">*</span>
+          Importo (€) <span className="text-destructive">*</span>
         </Label>
         <Input
           id="financialAmount"
@@ -196,14 +196,14 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="contractId">
-              Contract <span className="text-destructive">*</span>
+              Contratto <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select contract" />
+                <SelectValue placeholder="Seleziona contratto" />
               </SelectTrigger>
               <SelectContent>
                 {contracts.map((c) => (
@@ -227,14 +227,14 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="financialTypeId">
-              Financial Type <span className="text-destructive">*</span>
+              Tipo finanziario <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder="Seleziona tipo" />
               </SelectTrigger>
               <SelectContent>
                 {financialTypes.map((ft) => (
@@ -260,14 +260,14 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="businessAreaId">
-              Business Area <span className="text-destructive">*</span>
+              Area di business <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select area" />
+                <SelectValue placeholder="Seleziona area" />
               </SelectTrigger>
               <SelectContent>
                 {businessAreas.map((area) => (
@@ -289,10 +289,10 @@ export default function FinancialValueForm({
       {/* Buttons */}
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annulla
         </Button>
         <Button type="submit" disabled={upsertMutation.isPending}>
-          {/* istanbul ignore next */upsertMutation.isPending ? "Saving..." : submitLabel}
+          {/* istanbul ignore next */upsertMutation.isPending ? "Salvataggio..." : submitLabel}
         </Button>
       </div>
     </form>

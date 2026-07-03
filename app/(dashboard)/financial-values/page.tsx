@@ -35,11 +35,11 @@ export default function FinancialValuesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Financial Values
+            Valori finanziari
           </h1>
-          <p className="text-muted-foreground mt-2">Track financial data per contract</p>
+          <p className="text-muted-foreground mt-2">Traccia i dati finanziari per contratto</p>
         </div>
-        <Button onClick={handleCreateClick}>+ New Financial Value</Button>
+        <Button onClick={handleCreateClick}>+ Nuovo valore finanziario</Button>
       </div>
 
       <FinancialValueTable onEditClick={handleEditClick} />
@@ -49,8 +49,8 @@ export default function FinancialValuesPage() {
           <DialogHeader>
             <DialogTitle>
               {formDialog.financialValue
-                ? "Edit Financial Value"
-                : "Create New Financial Value"}
+                ? "Modifica valore finanziario"
+                : "Crea nuovo valore finanziario"}
             </DialogTitle>
           </DialogHeader>
           <FinancialValueForm

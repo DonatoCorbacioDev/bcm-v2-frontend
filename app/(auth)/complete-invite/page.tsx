@@ -29,9 +29,9 @@ function CompleteInviteContent() {
       <Card>
         <CardHeader className="space-y-1">
           <LogoMark className="h-12 w-12 mx-auto mb-2" />
-          <CardTitle className="text-2xl font-bold text-center">Invalid invite</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Invito non valido</CardTitle>
           <CardDescription className="text-center">
-            This invitation link is invalid or has expired. Please contact your administrator.
+            Questo link di invito non è valido o è scaduto. Contatta il tuo amministratore.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -43,11 +43,11 @@ function CompleteInviteContent() {
     setError("");
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError("La password deve contenere almeno 8 caratteri.");
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError("Le password non coincidono.");
       return;
     }
 
@@ -56,7 +56,7 @@ function CompleteInviteContent() {
       await api.post("/auth/complete-invite", { token, password });
       router.push("/login?invite=success");
     } catch {
-      setError("This invitation link is invalid or has expired. Please contact your administrator.");
+      setError("Questo link di invito non è valido o è scaduto. Contatta il tuo amministratore.");
     } finally {
       setIsLoading(false);
     }

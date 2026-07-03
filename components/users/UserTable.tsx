@@ -100,11 +100,11 @@ export default function UserTable({ onEditClick }: UserTableProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
-      toast.success("User deleted successfully!");
+      toast.success("Utente eliminato con successo!");
       setDeleteDialog({ open: false, user: null });
     },
     onError: () => {
-      toast.error("Failed to delete user");
+      toast.error("Eliminazione dell'utente non riuscita");
     },
   });
 
@@ -126,7 +126,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   if (isError) {
     return (
       <div className="text-center py-8 text-destructive">
-        Failed to load users. Please try again.
+        Impossibile caricare gli utenti. Riprova.
       </div>
     );
   }
@@ -134,7 +134,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   if (users.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No users found. Create your first one!
+        Nessun utente trovato. Creane uno!
       </div>
     );
   }
@@ -145,8 +145,8 @@ export default function UserTable({ onEditClick }: UserTableProps) {
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-50">
           <Input
-            aria-label="Search users"
-            placeholder="Search users..."
+            aria-label="Cerca utenti"
+            placeholder="Cerca utenti..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -154,17 +154,17 @@ export default function UserTable({ onEditClick }: UserTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="verified-filter" className="text-sm text-muted-foreground hidden sm:inline">Status:</label>
+          <label htmlFor="verified-filter" className="text-sm text-muted-foreground hidden sm:inline">Stato:</label>
           <select
             id="verified-filter"
-            aria-label="Filter by verification status"
+            aria-label="Filtra per stato di verifica"
             value={verifiedFilter}
             onChange={(e) => setVerifiedFilter(e.target.value)}
             className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="ALL">All</option>
-            <option value="VERIFIED">Verified</option>
-            <option value="UNVERIFIED">Unverified</option>
+            <option value="ALL">Tutti</option>
+            <option value="VERIFIED">Verificato</option>
+            <option value="UNVERIFIED">Non verificato</option>
           </select>
 
           {(searchQuery || verifiedFilter !== "ALL") && (
@@ -177,20 +177,20 @@ export default function UserTable({ onEditClick }: UserTableProps) {
               }}
               className="hidden sm:inline-flex"
             >
-              Clear
+              Pulisci
             </Button>
           )}
         </div>
 
         <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
-          {filteredUsers.length} / {users.length} users
+          {filteredUsers.length} / {users.length} utenti
         </div>
       </div>
 
       {/* Empty state after filtering */}
       {filteredUsers.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          No users match your filters
+          Nessun utente corrisponde ai filtri
         </div>
       )}
 
@@ -201,12 +201,12 @@ export default function UserTable({ onEditClick }: UserTableProps) {
             <TableHeader>
               <TableRow>
                 <TableHead className="hidden lg:table-cell">ID</TableHead>
-                <TableHead>Username</TableHead>
+                <TableHead>Nome utente</TableHead>
                 <TableHead className="hidden md:table-cell">Manager</TableHead>
-                <TableHead className="hidden md:table-cell">Role</TableHead>
-                <TableHead>Verified</TableHead>
-                <TableHead className="hidden lg:table-cell">Created At</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="hidden md:table-cell">Ruolo</TableHead>
+                <TableHead>Verificato</TableHead>
+                <TableHead className="hidden lg:table-cell">Data creazione</TableHead>
+                <TableHead>Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -223,7 +223,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                           : "bg-muted text-muted-foreground"
                         }`}
                     >
-                      {user.verified ? "Yes" : "No"}
+                      {user.verified ? "Sì" : "No"}
                     </span>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">
@@ -237,7 +237,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                         onClick={() => onEditClick(user)}
                         className="text-primary hover:text-primary text-xs px-2"
                       >
-                        Edit
+                        Modifica
                       </Button>
                       <Button
                         variant="ghost"
@@ -245,7 +245,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                         onClick={() => handleDeleteClick(user)}
                         className="text-destructive hover:text-destructive text-xs px-2"
                       >
-                        Delete
+                        Elimina
                       </Button>
                     </div>
                   </TableCell>
@@ -263,10 +263,10 @@ export default function UserTable({ onEditClick }: UserTableProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
+            <DialogTitle>Elimina utente</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete user{" "}
-              <span className="font-semibold">{deleteDialog.user?.username}</span>? This action cannot be undone.
+              Sei sicuro di voler eliminare l&apos;utente{" "}
+              <span className="font-semibold">{deleteDialog.user?.username}</span>? L&apos;operazione non può essere annullata.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -274,14 +274,14 @@ export default function UserTable({ onEditClick }: UserTableProps) {
               variant="outline"
               onClick={() => setDeleteDialog({ open: false, user: null })}
             >
-              Cancel
+              Annulla
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={deleteMutation.isPending}
             >
-              {/* istanbul ignore next */deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {/* istanbul ignore next */deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
             </Button>
           </DialogFooter>
         </DialogContent>

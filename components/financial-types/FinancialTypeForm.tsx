@@ -33,11 +33,11 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
   const onSubmit = async (data: FinancialTypeFormData) => {
     try {
       await upsertMutation.mutateAsync({ id: financialType?.id, payload: data });
-      toast.success(isEditing ? "Financial type updated successfully!" : "Financial type created successfully!");
+      toast.success(isEditing ? "Tipo finanziario aggiornato con successo!" : "Tipo finanziario creato con successo!");
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error(isEditing ? "Failed to update financial type" : "Failed to create financial type");
+      toast.error(isEditing ? "Aggiornamento del tipo finanziario non riuscito" : "Creazione del tipo finanziario non riuscita");
       console.error("Upsert error:", error);
     }
   };
@@ -46,12 +46,12 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
         <label htmlFor="name" className="block text-sm font-medium mb-2">
-          Name *
+          Nome *
         </label>
         <Input
           id="name"
           {...register("name")}
-          placeholder="e.g., Revenue"
+          placeholder="Es. Ricavi"
           className={errors.name ? "border-destructive" : ""}
         />
         {errors.name && (
@@ -61,12 +61,12 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
 
       <div>
         <label htmlFor="description" className="block text-sm font-medium mb-2">
-          Description *
+          Descrizione *
         </label>
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Describe this financial type..."
+          placeholder="Descrivi questo tipo finanziario..."
           rows={4}
           className={errors.description ? "border-destructive" : ""}
         />
@@ -77,14 +77,14 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
 
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annulla
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {(() => {
             /* istanbul ignore next */
-            if (isSubmitting) return "Saving...";
-            if (isEditing) return "Update";
-            return "Create";
+            if (isSubmitting) return "Salvataggio...";
+            if (isEditing) return "Aggiorna";
+            return "Crea";
           })()}
         </Button>
       </div>

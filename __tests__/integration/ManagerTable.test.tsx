@@ -102,7 +102,7 @@ describe('ManagerTable', () => {
 
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/failed to load managers/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i manager/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no managers exist', () => {
@@ -114,8 +114,8 @@ describe('ManagerTable', () => {
 
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/no managers found/i)).toBeInTheDocument();
-    expect(screen.getByText(/create your first manager/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun manager trovato/i)).toBeInTheDocument();
+    expect(screen.getByText(/crea il tuo primo manager/i)).toBeInTheDocument();
   });
 
   // ── Data rendering ────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ describe('ManagerTable', () => {
   it('shows the manager count', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/2 \/ 2 managers/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 \/ 2 manager/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -140,13 +140,13 @@ describe('ManagerTable', () => {
   it('search input has an accessible label', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByRole('textbox', { name: /search managers/i })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /cerca manager/i })).toBeInTheDocument();
   });
 
   it('filters managers by name on search', async () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /search managers/i }), 'Alice');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca manager/i }), 'Alice');
 
     expect(screen.getByText('Alice Smith')).toBeInTheDocument();
     expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
@@ -155,9 +155,9 @@ describe('ManagerTable', () => {
   it('shows "no managers match" when search has no results', async () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /search managers/i }), 'xyz-no-match');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca manager/i }), 'xyz-no-match');
 
-    expect(screen.getByText(/no managers match your search/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun manager corrisponde alla ricerca/i)).toBeInTheDocument();
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -166,7 +166,7 @@ describe('ManagerTable', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /edit/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
 
     expect(onEditClick).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, firstName: 'Alice' })
@@ -177,11 +177,11 @@ describe('ManagerTable', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(dialog).toHaveTextContent(/are you sure/i);
+    expect(dialog).toHaveTextContent(/sei sicuro/i);
     expect(dialog).toHaveTextContent(/Alice Smith/i);
   });
 
@@ -189,10 +189,10 @@ describe('ManagerTable', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -203,12 +203,12 @@ describe('ManagerTable', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Manager deleted successfully!');
+      expect(toast.success).toHaveBeenCalledWith('Manager eliminato con successo!');
     });
   });
 
@@ -217,21 +217,21 @@ describe('ManagerTable', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete manager');
+      expect(toast.error).toHaveBeenCalledWith("Eliminazione del manager non riuscita");
     });
   });
 
   it('clears the search field when Clear is clicked', async () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /search managers/i }), 'Alice');
-    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca manager/i }), 'Alice');
+    await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
 
-    expect(screen.getByRole('textbox', { name: /search managers/i })).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: /cerca manager/i })).toHaveValue('');
   });
 });

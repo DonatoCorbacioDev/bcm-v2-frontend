@@ -130,7 +130,7 @@ describe('UserTable', () => {
 
     // alice (row 1) is verified, bob (row 2) is not
     const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).getByText('Yes')).toBeInTheDocument();
+    expect(within(rows[1]).getByText('Sì')).toBeInTheDocument();
     expect(within(rows[2]).getByText('No')).toBeInTheDocument();
   });
 
@@ -156,13 +156,13 @@ describe('UserTable', () => {
 
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/failed to load users/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare gli utenti/i)).toBeInTheDocument();
   });
 
   it('filters users when typing in the search input', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const searchInput = screen.getByPlaceholderText(/search users/i);
+    const searchInput = screen.getByPlaceholderText(/cerca utenti/i);
     await userEvent.type(searchInput, 'alice');
 
     expect(screen.getByText('alice@example.com')).toBeInTheDocument();
@@ -172,7 +172,7 @@ describe('UserTable', () => {
   it('restores all users after clearing the search input', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const searchInput = screen.getByPlaceholderText(/search users/i);
+    const searchInput = screen.getByPlaceholderText(/cerca utenti/i);
     await userEvent.type(searchInput, 'alice');
     expect(screen.queryByText('bob@example.com')).not.toBeInTheDocument();
 
@@ -183,17 +183,17 @@ describe('UserTable', () => {
   it('shows empty state message when search yields no results', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const searchInput = screen.getByPlaceholderText(/search users/i);
+    const searchInput = screen.getByPlaceholderText(/cerca utenti/i);
     await userEvent.type(searchInput, 'zzz-no-match');
 
-    expect(screen.getByText(/no users match/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun utente corrisponde/i)).toBeInTheDocument();
   });
 
   it('calls onEditClick with the correct user when Edit is clicked', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    const editButton = within(rows[1]).getByRole('button', { name: /edit/i });
+    const editButton = within(rows[1]).getByRole('button', { name: /modifica/i });
     await userEvent.click(editButton);
 
     expect(onEditClick).toHaveBeenCalledTimes(1);
@@ -206,12 +206,12 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    const deleteButton = within(rows[1]).getByRole('button', { name: /delete/i });
+    const deleteButton = within(rows[1]).getByRole('button', { name: /elimina/i });
     await userEvent.click(deleteButton);
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(within(dialog).getByText(/are you sure/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/sei sicuro/i)).toBeInTheDocument();
     // The dialog shows the username in its description
     expect(within(dialog).getByText('alice@example.com')).toBeInTheDocument();
   });
@@ -220,10 +220,10 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -237,19 +237,19 @@ describe('UserTable', () => {
       isError: false,
     });
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/no users found/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun utente trovato/i)).toBeInTheDocument();
   });
 
   it('confirms delete and shows success toast', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('User deleted successfully!');
+      expect(toast.success).toHaveBeenCalledWith('Utente eliminato con successo!');
     });
   });
 
@@ -258,29 +258,29 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete user');
+      expect(toast.error).toHaveBeenCalledWith("Eliminazione dell'utente non riuscita");
     });
   });
 
   it('shows Clear button when verified filter is set and clears on click', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.selectOptions(screen.getByLabelText(/filter by verification status/i), 'VERIFIED');
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByLabelText(/filtra per stato di verifica/i), 'VERIFIED');
+    expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
-    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
+    expect(screen.queryByRole('button', { name: /pulisci/i })).not.toBeInTheDocument();
   });
 
   it('filters to only unverified users when UNVERIFIED filter is selected', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.selectOptions(screen.getByLabelText(/filter by verification status/i), 'UNVERIFIED');
+    await userEvent.selectOptions(screen.getByLabelText(/filtra per stato di verifica/i), 'UNVERIFIED');
 
     expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument();
     expect(screen.getByText('bob@example.com')).toBeInTheDocument();

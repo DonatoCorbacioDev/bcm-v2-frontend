@@ -47,9 +47,9 @@ export default function ContractsPage() {
       link.click();
       link.remove();
       globalThis.URL.revokeObjectURL(url);
-      toast.success("Excel exported successfully!");
+      toast.success("Excel esportato con successo!");
     } catch (error) {
-      toast.error("Failed to export Excel file");
+      toast.error("Esportazione del file Excel non riuscita");
       console.error("Export Excel error:", error);
     } finally {
       setIsExporting(false);
@@ -68,9 +68,9 @@ export default function ContractsPage() {
       link.click();
       link.remove();
       globalThis.URL.revokeObjectURL(url);
-      toast.success("PDF exported successfully!");
+      toast.success("PDF esportato con successo!");
     } catch (error) {
-      toast.error("Failed to export PDF file");
+      toast.error("Esportazione del file PDF non riuscita");
       console.error("Export PDF error:", error);
     } finally {
       setIsExporting(false);
@@ -82,9 +82,9 @@ export default function ContractsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Contracts
+            Contratti
           </h1>
-          <p className="text-muted-foreground mt-2">Manage all business contracts</p>
+          <p className="text-muted-foreground mt-2">Gestisci tutti i contratti aziendali</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -94,7 +94,7 @@ export default function ContractsPage() {
             className="hidden sm:flex"
           >
             <FileSpreadsheet className="mr-2 h-4 w-4" />
-            {isExporting ? "Exporting..." : "Excel"}
+            {isExporting ? "Esportazione..." : "Excel"}
           </Button>
           <Button
             variant="outline"
@@ -103,9 +103,9 @@ export default function ContractsPage() {
             className="hidden sm:flex"
           >
             <FileText className="mr-2 h-4 w-4" />
-            {isExporting ? "Exporting..." : "PDF"}
+            {isExporting ? "Esportazione..." : "PDF"}
           </Button>
-          <Button onClick={handleCreateClick}>+ New Contract</Button>
+          <Button onClick={handleCreateClick}>+ Nuovo contratto</Button>
         </div>
       </div>
 
@@ -115,7 +115,7 @@ export default function ContractsPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
-              {formDialog.contract ? "Edit Contract" : "Create New Contract"}
+              {formDialog.contract ? "Modifica contratto" : "Crea nuovo contratto"}
             </DialogTitle>
           </DialogHeader>
           <ContractForm

@@ -53,11 +53,11 @@ function ResetPasswordContent() {
     setError("");
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError("La password deve contenere almeno 8 caratteri.");
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError("Le password non coincidono.");
       return;
     }
 
@@ -66,7 +66,7 @@ function ResetPasswordContent() {
       await api.post("/auth/reset-password", { token, newPassword: password });
       router.push("/login?reset=success");
     } catch {
-      setError("This link is invalid or has expired. Please request a new one.");
+      setError("Il link non è valido o è scaduto. Richiedine uno nuovo.");
     } finally {
       setIsLoading(false);
     }

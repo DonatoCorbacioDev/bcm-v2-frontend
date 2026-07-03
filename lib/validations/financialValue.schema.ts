@@ -6,35 +6,35 @@ import { z } from "zod";
  */
 export const financialValueSchema = z.object({
   month: z
-    .number({ message: "Month is required" })
-    .int("Month must be an integer")
-    .min(1, "Month must be between 1 and 12")
-    .max(12, "Month must be between 1 and 12"),
+    .number({ message: "Il mese è obbligatorio" })
+    .int("Il mese deve essere un numero intero")
+    .min(1, "Il mese deve essere compreso tra 1 e 12")
+    .max(12, "Il mese deve essere compreso tra 1 e 12"),
 
   year: z
-    .number({ message: "Year is required" })
-    .int("Year must be an integer")
-    .min(2000, "Year must be 2000 or later")
-    .max(2100, "Year must be 2100 or earlier"),
+    .number({ message: "L'anno è obbligatorio" })
+    .int("L'anno deve essere un numero intero")
+    .min(2000, "L'anno deve essere 2000 o successivo")
+    .max(2100, "L'anno deve essere 2100 o precedente"),
 
   financialAmount: z
-    .number({ message: "Amount is required" })
-    .positive("Amount must be positive"),
+    .number({ message: "L'importo è obbligatorio" })
+    .positive("L'importo deve essere positivo"),
 
   financialTypeId: z
-    .number({ message: "Financial type is required" })
-    .int("Financial type must be an integer")
-    .positive("Financial type must be a positive number"),
+    .number({ message: "Il tipo finanziario è obbligatorio" })
+    .int("Il tipo finanziario deve essere un numero intero")
+    .positive("Il tipo finanziario deve essere un numero positivo"),
 
   businessAreaId: z
-    .number({ message: "Business area is required" })
-    .int("Business area must be an integer")
-    .positive("Business area must be a positive number"),
+    .number({ message: "L'area di business è obbligatoria" })
+    .int("L'area di business deve essere un numero intero")
+    .positive("L'area di business deve essere un numero positivo"),
 
   contractId: z
-    .number({ message: "Contract is required" })
-    .int("Contract must be an integer")
-    .positive("Contract must be a positive number"),
+    .number({ message: "Il contratto è obbligatorio" })
+    .int("Il contratto deve essere un numero intero")
+    .positive("Il contratto deve essere un numero positivo"),
 });
 
 /**

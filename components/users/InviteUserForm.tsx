@@ -30,18 +30,18 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
     mutationFn: () => usersService.invite(form),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
-      toast.success("Invitation sent successfully!");
+      toast.success("Invito inviato con successo!");
       onClose();
     },
     onError: () => {
-      toast.error("Failed to send invitation.");
+      toast.error("Invio dell'invito non riuscito.");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.username || !form.role || !form.managerId) {
-      toast.error("Please fill in all fields.");
+      toast.error("Compila tutti i campi.");
       return;
     }
     mutation.mutate();
@@ -62,7 +62,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="invite-role">Role</Label>
+        <Label htmlFor="invite-role">Ruolo</Label>
         <select
           id="invite-role"
           value={form.role}
@@ -70,7 +70,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           required
         >
-          <option value="">Select a role</option>
+          <option value="">Seleziona un ruolo</option>
           {roles.map((r) => (
             <option key={r.id} value={r.role}>
               {r.role}
@@ -88,7 +88,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           required
         >
-          <option value="">Select a manager</option>
+          <option value="">Seleziona un manager</option>
           {managers.map((m) => (
             <option key={m.id} value={m.id}>
               {m.firstName} {m.lastName}
@@ -99,10 +99,10 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
 
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annulla
         </Button>
         <Button type="submit" disabled={mutation.isPending}>
-          {/* istanbul ignore next */mutation.isPending ? "Sending..." : "Send Invitation"}
+          {/* istanbul ignore next */mutation.isPending ? "Invio in corso..." : "Invia invito"}
         </Button>
       </div>
     </form>

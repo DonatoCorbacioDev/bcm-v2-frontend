@@ -83,7 +83,7 @@ describe('FinancialTypeTable', () => {
       isError: true,
     });
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/failed to load financial types/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i tipi finanziari/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no financial types exist', () => {
@@ -93,7 +93,7 @@ describe('FinancialTypeTable', () => {
       isError: false,
     });
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/no financial types found/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun tipo finanziario trovato/i)).toBeInTheDocument();
   });
 
   // ── Data rendering ────────────────────────────────────────────────────────
@@ -106,35 +106,35 @@ describe('FinancialTypeTable', () => {
 
   it('shows the type count', () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/2 \/ 2 types/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 \/ 2 tipi/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────
 
   it('filters types by name on search', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/search financial types/i), 'Revenue');
+    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue');
     expect(screen.getByText('Revenue')).toBeInTheDocument();
     expect(screen.queryByText('Expense')).not.toBeInTheDocument();
   });
 
   it('filters types by description on search', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/search financial types/i), 'Revenue type');
+    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue type');
     expect(screen.getByText('Revenue')).toBeInTheDocument();
     expect(screen.queryByText('Expense')).not.toBeInTheDocument();
   });
 
   it('shows no match message when search has no results', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/search financial types/i), 'xyz-no-match');
-    expect(screen.getByText(/no financial types match your search/i)).toBeInTheDocument();
+    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'xyz-no-match');
+    expect(screen.getByText(/nessun tipo finanziario corrisponde alla ricerca/i)).toBeInTheDocument();
   });
 
   it('shows Clear button when search is active', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/search financial types/i), 'Revenue');
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue');
+    expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ describe('FinancialTypeTable', () => {
   it('calls onEditClick with the correct type when Edit is clicked', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /edit/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
     expect(onEditClick).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, name: 'Revenue' })
     );
@@ -151,19 +151,19 @@ describe('FinancialTypeTable', () => {
   it('opens delete confirmation dialog when Delete is clicked', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(within(dialog).getByText(/are you sure/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/sei sicuro/i)).toBeInTheDocument();
     expect(within(dialog).getByText('Revenue')).toBeInTheDocument();
   });
 
   it('closes the delete dialog when Cancel is clicked', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
@@ -172,11 +172,11 @@ describe('FinancialTypeTable', () => {
   it('confirms delete and shows success toast', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Financial type deleted successfully!');
+      expect(toast.success).toHaveBeenCalledWith('Tipo finanziario eliminato con successo!');
     });
   });
 
@@ -184,18 +184,18 @@ describe('FinancialTypeTable', () => {
     (financialTypesService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete financial type');
+      expect(toast.error).toHaveBeenCalledWith("Eliminazione del tipo finanziario non riuscita");
     });
   });
 
   it('clears the search field when Clear is clicked', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/search financial types/i), 'Revenue');
-    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
-    expect(screen.getByPlaceholderText(/search financial types/i)).toHaveValue('');
+    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue');
+    await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
+    expect(screen.getByPlaceholderText(/cerca tipi finanziari/i)).toHaveValue('');
   });
 });

@@ -49,14 +49,14 @@ export default function UsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Users</h1>
-          <p className="text-muted-foreground mt-2">Manage system users</p>
+          <h1 className="text-3xl font-bold text-foreground">Utenti</h1>
+          <p className="text-muted-foreground mt-2">Gestisci gli utenti del sistema</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setInviteOpen(true)}>
-            Invite User
+            Invita utente
           </Button>
-          <Button onClick={handleCreateClick}>+ New User</Button>
+          <Button onClick={handleCreateClick}>+ Nuovo utente</Button>
         </div>
       </div>
 
@@ -67,7 +67,7 @@ export default function UsersPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
-              {formDialog.user ? "Edit User" : "Create New User"}
+              {formDialog.user ? "Modifica utente" : "Crea nuovo utente"}
             </DialogTitle>
           </DialogHeader>
           <UserForm
@@ -82,7 +82,7 @@ export default function UsersPage() {
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
         <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
-            <DialogTitle>Invite User</DialogTitle>
+            <DialogTitle>Invita utente</DialogTitle>
           </DialogHeader>
           <InviteUserForm onClose={() => setInviteOpen(false)} />
         </DialogContent>

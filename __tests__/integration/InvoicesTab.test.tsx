@@ -83,7 +83,7 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     renderTab();
     await waitFor(() =>
-      expect(screen.getByText(/no invoices yet/i)).toBeInTheDocument(),
+      expect(screen.getByText(/nessuna fattura/i)).toBeInTheDocument(),
     );
   });
 
@@ -91,7 +91,7 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: null });
     renderTab();
     await waitFor(() =>
-      expect(screen.getByText(/no invoices yet/i)).toBeInTheDocument(),
+      expect(screen.getByText(/nessuna fattura/i)).toBeInTheDocument(),
     );
   });
 
@@ -115,7 +115,7 @@ describe('InvoicesTab', () => {
     await waitFor(() => expect(screen.getByText('Fornitore SRL')).toBeInTheDocument());
     expect(screen.getByText('FT-2024-001')).toBeInTheDocument();
     // totalAmount + currency via formatAmount
-    expect(screen.getByText(/1,220\.00 EUR/)).toBeInTheDocument();
+    expect(screen.getByText(/1\.?220,00 EUR/)).toBeInTheDocument();
   });
 
   // ── admin guard ────────────────────────────────────────────────────────────
@@ -138,7 +138,7 @@ describe('InvoicesTab', () => {
   it('does nothing when file input fires with no file', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     renderTab();
-    await waitFor(() => expect(screen.getByText(/upload invoice/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: null } });
     expect(api.post).not.toHaveBeenCalled();
@@ -148,11 +148,11 @@ describe('InvoicesTab', () => {
   it('rejects non-XML files and shows error toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     renderTab();
-    await waitFor(() => expect(screen.getByText(/upload invoice/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['content'], 'document.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
-    expect(toast.error).toHaveBeenCalledWith('Only XML files are allowed');
+    expect(toast.error).toHaveBeenCalledWith('Sono ammessi solo file XML');
     expect(api.post).not.toHaveBeenCalled();
   });
 
@@ -160,7 +160,7 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockResolvedValue({ data: invoice });
     renderTab();
-    await waitFor(() => expect(screen.getByText(/upload invoice/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' });
     Object.defineProperty(file, 'name', { value: 'fattura.xml' });
@@ -170,19 +170,19 @@ describe('InvoicesTab', () => {
       expect.any(FormData),
       expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } }),
     ));
-    expect(toast.success).toHaveBeenCalledWith('Invoice uploaded successfully');
+    expect(toast.success).toHaveBeenCalledWith('Fattura caricata con successo');
   });
 
   it('shows error toast when upload fails', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
     renderTab();
-    await waitFor(() => expect(screen.getByText(/upload invoice/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' });
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Failed to upload invoice'),
+      expect(toast.error).toHaveBeenCalledWith('Caricamento della fattura non riuscito'),
     );
   });
 
@@ -190,12 +190,12 @@ describe('InvoicesTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
-    await waitFor(() => expect(screen.getByText(/upload invoice/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' });
     fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => expect(screen.getByText(/uploading\.\.\./i)).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: /uploading/i })).toBeDisabled();
+    await waitFor(() => expect(screen.getByText(/caricamento\.\.\./i)).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /caricamento/i })).toBeDisabled();
   });
 
   // ── delete ─────────────────────────────────────────────────────────────────
@@ -209,7 +209,7 @@ describe('InvoicesTab', () => {
     await waitFor(() =>
       expect(api.delete).toHaveBeenCalledWith('/contracts/1/invoices/1'),
     );
-    expect(toast.success).toHaveBeenCalledWith('Invoice deleted');
+    expect(toast.success).toHaveBeenCalledWith('Fattura eliminata');
   });
 
   it('shows error toast when delete fails', async () => {
@@ -219,7 +219,7 @@ describe('InvoicesTab', () => {
     await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Elimina fattura'));
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete invoice'),
+      expect(toast.error).toHaveBeenCalledWith('Eliminazione della fattura non riuscita'),
     );
   });
 
@@ -259,7 +259,7 @@ describe('InvoicesTab', () => {
     await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Scarica fattura'));
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Failed to download invoice'),
+      expect(toast.error).toHaveBeenCalledWith('Download della fattura non riuscito'),
     );
   });
 
@@ -290,7 +290,7 @@ describe('InvoicesTab', () => {
     expect(within(dialog).getByText('IT12345678901')).toBeInTheDocument();
     expect(within(dialog).getByText('TD01')).toBeInTheDocument();
     // Line items table
-    expect(within(dialog).getByText('Line Items')).toBeInTheDocument();
+    expect(within(dialog).getByText('Voci di dettaglio')).toBeInTheDocument();
     expect(within(dialog).getByText('Consulting services')).toBeInTheDocument();
     expect(within(dialog).getByText('HH')).toBeInTheDocument();
     expect(within(dialog).getByText('22%')).toBeInTheDocument();
@@ -305,7 +305,7 @@ describe('InvoicesTab', () => {
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     await userEvent.click(screen.getByText('fattura.xml'));
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
-    expect(screen.queryByText('Line Items')).not.toBeInTheDocument();
+    expect(screen.queryByText('Voci di dettaglio')).not.toBeInTheDocument();
   });
 
   it('shows error toast when row click detail fetch fails', async () => {
@@ -316,7 +316,7 @@ describe('InvoicesTab', () => {
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     await userEvent.click(screen.getByText('fattura.xml'));
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Failed to load invoice details'),
+      expect(toast.error).toHaveBeenCalledWith('Caricamento dei dettagli della fattura non riuscito'),
     );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });

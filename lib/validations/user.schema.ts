@@ -3,26 +3,26 @@ import { z } from "zod";
 // Schema for creating a new user (password required)
 export const userCreateSchema = z.object({
   username: z
-    .string({ message: "Username is required" })
-    .min(3, "Username must be at least 3 characters")
-    .max(50, "Username must not exceed 50 characters")
-    .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, underscores, and hyphens")
+    .string({ message: "Il nome utente è obbligatorio" })
+    .min(3, "Il nome utente deve contenere almeno 3 caratteri")
+    .max(50, "Il nome utente non può superare i 50 caratteri")
+    .regex(/^[a-zA-Z0-9_-]+$/, "Il nome utente può contenere solo lettere, numeri, underscore e trattini")
     .trim(),
 
   password: z
-    .string({ message: "Password is required" })
-    .min(8, "Password must be at least 8 characters")
-    .max(100, "Password must not exceed 100 characters"),
+    .string({ message: "La password è obbligatoria" })
+    .min(8, "La password deve contenere almeno 8 caratteri")
+    .max(100, "La password non può superare i 100 caratteri"),
 
   managerId: z
-    .number({ message: "Manager is required" })
+    .number({ message: "Il manager è obbligatorio" })
     .int()
-    .positive("Please select a valid manager"),
+    .positive("Seleziona un manager valido"),
 
   roleId: z
-    .number({ message: "Role is required" })
+    .number({ message: "Il ruolo è obbligatorio" })
     .int()
-    .positive("Please select a valid role"),
+    .positive("Seleziona un ruolo valido"),
 
   verified: z.boolean(),
 });
@@ -30,28 +30,28 @@ export const userCreateSchema = z.object({
 // Schema for updating a user (password optional)
 export const userUpdateSchema = z.object({
   username: z
-    .string({ message: "Username is required" })
-    .min(3, "Username must be at least 3 characters")
-    .max(50, "Username must not exceed 50 characters")
-    .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain letters, numbers, underscores, and hyphens")
+    .string({ message: "Il nome utente è obbligatorio" })
+    .min(3, "Il nome utente deve contenere almeno 3 caratteri")
+    .max(50, "Il nome utente non può superare i 50 caratteri")
+    .regex(/^[a-zA-Z0-9_-]+$/, "Il nome utente può contenere solo lettere, numeri, underscore e trattini")
     .trim(),
 
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(100, "Password must not exceed 100 characters")
+    .min(8, "La password deve contenere almeno 8 caratteri")
+    .max(100, "La password non può superare i 100 caratteri")
     .optional()
     .or(z.literal("")),
 
   managerId: z
-    .number({ message: "Manager is required" })
+    .number({ message: "Il manager è obbligatorio" })
     .int()
-    .positive("Please select a valid manager"),
+    .positive("Seleziona un manager valido"),
 
   roleId: z
-    .number({ message: "Role is required" })
+    .number({ message: "Il ruolo è obbligatorio" })
     .int()
-    .positive("Please select a valid role"),
+    .positive("Seleziona un ruolo valido"),
 
   verified: z.boolean(),
 });

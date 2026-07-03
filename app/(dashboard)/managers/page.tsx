@@ -47,11 +47,11 @@ export default function ManagersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Managers
+            Manager
           </h1>
-          <p className="text-muted-foreground mt-2">Manage team managers</p>
+          <p className="text-muted-foreground mt-2">Gestisci i manager del team</p>
         </div>
-        <Button onClick={handleCreateClick}>+ New Manager</Button>
+        <Button onClick={handleCreateClick}>+ Nuovo manager</Button>
       </div>
 
       <ManagerTable onEditClick={handleEditClick} />
@@ -60,7 +60,7 @@ export default function ManagersPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
-              {formDialog.manager ? "Edit Manager" : "Create New Manager"}
+              {formDialog.manager ? "Modifica manager" : "Crea nuovo manager"}
             </DialogTitle>
           </DialogHeader>
           <ManagerForm

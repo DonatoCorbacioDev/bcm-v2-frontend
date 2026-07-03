@@ -57,11 +57,11 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
     mutationFn: (id: number) => financialTypesService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.financialTypes });
-      toast.success("Financial type deleted successfully!");
+      toast.success("Tipo finanziario eliminato con successo!");
       setDeleteDialog({ open: false, financialType: null });
     },
     onError: () => {
-      toast.error("Failed to delete financial type");
+      toast.error("Eliminazione del tipo finanziario non riuscita");
     },
   });
 
@@ -70,7 +70,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
   if (isError) {
     return (
       <div className="text-center py-8 text-destructive">
-        Failed to load financial types. Please try again.
+        Impossibile caricare i tipi finanziari. Riprova.
       </div>
     );
   }
@@ -78,7 +78,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
   if (financialTypes.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No financial types found. Create your first one!
+        Nessun tipo finanziario trovato. Creane uno!
       </div>
     );
   }
@@ -88,7 +88,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Search financial types..."
+            placeholder="Cerca tipi finanziari..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -96,17 +96,17 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
         </div>
         {searchQuery && (
           <Button variant="outline" size="sm" onClick={() => setSearchQuery("")} className="hidden sm:inline-flex">
-            Clear
+            Pulisci
           </Button>
         )}
         <div className="text-xs md:text-sm text-muted-foreground">
-          {filtered.length} / {financialTypes.length} types
+          {filtered.length} / {financialTypes.length} tipi
         </div>
       </div>
 
       {filtered.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          No financial types match your search
+          Nessun tipo finanziario corrisponde alla ricerca
         </div>
       )}
 
@@ -116,9 +116,9 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
             <TableHeader>
               <TableRow>
                 <TableHead className="hidden lg:table-cell">ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="hidden md:table-cell">Description</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Nome</TableHead>
+                <TableHead className="hidden md:table-cell">Descrizione</TableHead>
+                <TableHead>Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -135,7 +135,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
                         onClick={() => onEditClick(ft)}
                         className="text-primary hover:text-primary text-xs px-2"
                       >
-                        Edit
+                        Modifica
                       </Button>
                       <Button
                         variant="ghost"
@@ -143,7 +143,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
                         onClick={() => setDeleteDialog({ open: true, financialType: ft })}
                         className="text-destructive hover:text-destructive text-xs px-2"
                       >
-                        Delete
+                        Elimina
                       </Button>
                     </div>
                   </TableCell>
@@ -160,10 +160,10 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Financial Type</DialogTitle>
+            <DialogTitle>Elimina tipo finanziario</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete{" "}
-              <span className="font-semibold">{deleteDialog.financialType?.name}</span>? This action cannot be undone.
+              Sei sicuro di voler eliminare{" "}
+              <span className="font-semibold">{deleteDialog.financialType?.name}</span>? L&apos;operazione non può essere annullata.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -172,14 +172,14 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
               onClick={() => setDeleteDialog({ open: false, financialType: null })}
               disabled={deleteMutation.isPending}
             >
-              Cancel
+              Annulla
             </Button>
             <Button
               variant="destructive"
               onClick={/* istanbul ignore next */ () => deleteDialog.financialType && deleteMutation.mutate(deleteDialog.financialType.id)}
               disabled={deleteMutation.isPending}
             >
-              {/* istanbul ignore next */deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {/* istanbul ignore next */deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
             </Button>
           </DialogFooter>
         </DialogContent>

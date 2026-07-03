@@ -97,7 +97,7 @@ describe('FinancialValueTable', () => {
       isError: false,
     });
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.queryByText('Jan/2024')).not.toBeInTheDocument();
+    expect(screen.queryByText('Gen/2024')).not.toBeInTheDocument();
   });
 
   it('shows error state when the API fails', () => {
@@ -107,7 +107,7 @@ describe('FinancialValueTable', () => {
       isError: true,
     });
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/failed to load financial values/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i valori finanziari/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no financial values exist', () => {
@@ -117,49 +117,49 @@ describe('FinancialValueTable', () => {
       isError: false,
     });
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/no financial values found/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun valore finanziario trovato/i)).toBeInTheDocument();
   });
 
   // ── Data rendering ────────────────────────────────────────────────────────
 
   it('renders financial value rows with period', () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText('Jan/2024')).toBeInTheDocument();
-    expect(screen.getByText('Jun/2024')).toBeInTheDocument();
+    expect(screen.getByText('Gen/2024')).toBeInTheDocument();
+    expect(screen.getByText('Giu/2024')).toBeInTheDocument();
   });
 
   it('shows the value count', () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/2 \/ 2 values/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 \/ 2 valori/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────
 
   it('filters values by year', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/search year\/amount/i), '2024');
-    expect(screen.getByText(/2 \/ 2 values/i)).toBeInTheDocument();
+    await userEvent.type(screen.getByPlaceholderText(/cerca per anno\/importo/i), '2024');
+    expect(screen.getByText(/2 \/ 2 valori/i)).toBeInTheDocument();
   });
 
   it('shows no match message when search has no results', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/search year\/amount/i), '9999');
-    expect(screen.getByText(/no financial values match your filters/i)).toBeInTheDocument();
+    await userEvent.type(screen.getByPlaceholderText(/cerca per anno\/importo/i), '9999');
+    expect(screen.getByText(/nessun valore finanziario corrisponde ai filtri/i)).toBeInTheDocument();
   });
 
   // ── Month filter ──────────────────────────────────────────────────────────
 
   it('filters by month', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.selectOptions(screen.getByDisplayValue('All'), '1');
-    expect(screen.getByText('Jan/2024')).toBeInTheDocument();
-    expect(screen.queryByText('Jun/2024')).not.toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByDisplayValue('Tutti'), '1');
+    expect(screen.getByText('Gen/2024')).toBeInTheDocument();
+    expect(screen.queryByText('Giu/2024')).not.toBeInTheDocument();
   });
 
   it('shows Clear button when a filter is active', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.selectOptions(screen.getByDisplayValue('All'), '1');
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByDisplayValue('Tutti'), '1');
+    expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -167,7 +167,7 @@ describe('FinancialValueTable', () => {
   it('calls onEditClick with the correct value when Edit is clicked', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /edit/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
     expect(onEditClick).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, year: 2024, month: 1 })
     );
@@ -176,18 +176,18 @@ describe('FinancialValueTable', () => {
   it('opens delete confirmation dialog when Delete is clicked', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(within(dialog).getByText(/are you sure/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/sei sicuro/i)).toBeInTheDocument();
   });
 
   it('closes the delete dialog when Cancel is clicked', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
@@ -196,11 +196,11 @@ describe('FinancialValueTable', () => {
   it('confirms delete and shows success toast', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Financial value deleted successfully!');
+      expect(toast.success).toHaveBeenCalledWith('Valore finanziario eliminato con successo!');
     });
   });
 
@@ -208,19 +208,19 @@ describe('FinancialValueTable', () => {
     (financialValuesService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /delete/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
-    await userEvent.click(within(dialog).getByRole('button', { name: /^delete$/i }));
+    await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith('Failed to delete financial value');
+      expect(toast.error).toHaveBeenCalledWith("Eliminazione del valore finanziario non riuscita");
     });
   });
 
   it('clears filters when Clear is clicked', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.selectOptions(screen.getByDisplayValue('All'), '1');
-    expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /clear/i }));
-    expect(screen.queryByRole('button', { name: /clear/i })).not.toBeInTheDocument();
+    await userEvent.selectOptions(screen.getByDisplayValue('Tutti'), '1');
+    expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
+    expect(screen.queryByRole('button', { name: /pulisci/i })).not.toBeInTheDocument();
   });
 });

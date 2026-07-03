@@ -53,7 +53,7 @@ function formatBytes(bytes: number) {
 }
 
 function formatAmount(amount: number, currency: string) {
-  return `${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+  return `${amount.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
 
 export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
@@ -81,11 +81,11 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
-      toast.success("Invoice uploaded successfully");
+      toast.success("Fattura caricata con successo");
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    onError: () => toast.error("Failed to upload invoice"),
+    onError: () => toast.error("Caricamento della fattura non riuscito"),
   });
 
   const deleteMutation = useMutation({
@@ -94,16 +94,16 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
-      toast.success("Invoice deleted");
+      toast.success("Fattura eliminata");
     },
-    onError: () => toast.error("Failed to delete invoice"),
+    onError: () => toast.error("Eliminazione della fattura non riuscita"),
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.name.endsWith(".xml")) {
-      toast.error("Only XML files are allowed");
+      toast.error("Sono ammessi solo file XML");
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
@@ -123,7 +123,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.error("Failed to download invoice");
+      toast.error("Download della fattura non riuscito");
     }
   };
 
@@ -133,7 +133,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       setSelectedInvoice(res.data);
       setDetailDialogOpen(true);
     } catch {
-      toast.error("Failed to load invoice details");
+      toast.error("Caricamento dei dettagli della fattura non riuscito");
     }
   };
 
@@ -169,9 +169,9 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           ) : (
             <Upload className="h-4 w-4 mr-2" />
           )}
-          {uploadMutation.isPending ? "Uploading..." : "Upload Invoice"}
+          {uploadMutation.isPending ? "Caricamento..." : "Carica fattura"}
         </Button>
-        <span className="text-xs text-muted-foreground">XML FatturaPA only</span>
+        <span className="text-xs text-muted-foreground">Solo XML FatturaPA</span>
       </div>
 
       {/* Invoice list */}
@@ -183,10 +183,10 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-2">
-            No Invoices Yet
+            Nessuna fattura
           </h2>
           <p className="text-sm text-muted-foreground">
-            Upload a FatturaPA XML to attach it to this contract.
+            Carica un XML FatturaPA per allegarlo a questo contratto.
           </p>
         </div>
       ) : (
@@ -194,7 +194,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted">
               <tr>
-                {["File", "Supplier", "Invoice #", "Date", "Total", "Actions"].map((h) => (
+                {["File", "Fornitore", "N. fattura", "Data", "Totale", "Azioni"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
@@ -229,7 +229,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                     {invoice.invoiceNumber}
                   </td>
                   <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                    {new Date(invoice.invoiceDate).toLocaleDateString("en-US", {
+                    {new Date(invoice.invoiceDate).toLocaleDateString("it-IT", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
@@ -278,7 +278,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Invoice Detail</DialogTitle>
+            <DialogTitle>Dettaglio fattura</DialogTitle>
             <DialogDescription>
               {selectedInvoice?.fileName}
             </DialogDescription>
@@ -289,20 +289,20 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
               {/* Supplier info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { label: "Supplier", value: selectedInvoice.supplierName },
-                  { label: "VAT Number", value: selectedInvoice.supplierVatNumber },
-                  { label: "Document Type", value: selectedInvoice.documentType },
-                  { label: "Invoice Number", value: selectedInvoice.invoiceNumber },
+                  { label: "Fornitore", value: selectedInvoice.supplierName },
+                  { label: "Partita IVA", value: selectedInvoice.supplierVatNumber },
+                  { label: "Tipo documento", value: selectedInvoice.documentType },
+                  { label: "Numero fattura", value: selectedInvoice.invoiceNumber },
                   {
-                    label: "Invoice Date",
-                    value: new Date(selectedInvoice.invoiceDate).toLocaleDateString("en-US", {
+                    label: "Data fattura",
+                    value: new Date(selectedInvoice.invoiceDate).toLocaleDateString("it-IT", {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
                     }),
                   },
                   {
-                    label: "Total Amount",
+                    label: "Importo totale",
                     value: formatAmount(selectedInvoice.totalAmount, selectedInvoice.currency),
                   },
                 ].map(({ label, value }) => (
@@ -321,13 +321,13 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
               {selectedInvoice.lineItems && selectedInvoice.lineItems.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3">
-                    Line Items
+                    Voci di dettaglio
                   </h3>
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-border text-sm">
                       <thead className="bg-muted">
                         <tr>
-                          {["#", "Description", "Qty", "UoM", "Unit Price", "Total", "VAT %"].map((h) => (
+                          {["#", "Descrizione", "Qtà", "UM", "Prezzo unitario", "Totale", "IVA %"].map((h) => (
                             <th
                               key={h}
                               className="px-3 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
@@ -353,13 +353,13 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                               {item.unitOfMeasure}
                             </td>
                             <td className="px-3 py-2 text-foreground whitespace-nowrap">
-                              {item.unitPrice.toLocaleString("en-US", {
+                              {item.unitPrice.toLocaleString("it-IT", {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })}
                             </td>
                             <td className="px-3 py-2 font-medium text-foreground whitespace-nowrap">
-                              {item.totalPrice.toLocaleString("en-US", {
+                              {item.totalPrice.toLocaleString("it-IT", {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
                               })}

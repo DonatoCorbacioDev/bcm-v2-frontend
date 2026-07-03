@@ -41,22 +41,22 @@ export default function ProfilePage() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 8) {
-      toast.error("Password must be at least 8 characters.");
+      toast.error("La password deve contenere almeno 8 caratteri.");
       return;
     }
     if (password !== confirm) {
-      toast.error("Passwords do not match.");
+      toast.error("Le password non coincidono.");
       return;
     }
 
     setIsSaving(true);
     try {
       await api.patch(`/users/${profile?.id ?? user?.id}`, { password });
-      toast.success("Password updated successfully!");
+      toast.success("Password aggiornata con successo!");
       setPassword("");
       setConfirm("");
     } catch {
-      toast.error("Failed to update password.");
+      toast.error("Aggiornamento della password non riuscito.");
     } finally {
       setIsSaving(false);
     }
@@ -67,35 +67,35 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
-        <p className="text-muted-foreground mt-2">Your account information</p>
+        <h1 className="text-3xl font-bold text-foreground">Il mio profilo</h1>
+        <p className="text-muted-foreground mt-2">Le informazioni del tuo account</p>
       </div>
 
       {/* Account Info */}
       <Card>
         <CardHeader>
-          <CardTitle>Account Details</CardTitle>
-          <CardDescription>Your current account information</CardDescription>
+          <CardTitle>Dettagli account</CardTitle>
+          <CardDescription>Le informazioni attuali del tuo account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <p className="text-sm text-muted-foreground">Caricamento...</p>
           ) : (
             <>
               <div className="flex items-center justify-between py-2 border-b border-border">
-                <span className="text-sm text-muted-foreground">Username</span>
+                <span className="text-sm text-muted-foreground">Nome utente</span>
                 <span className="text-sm font-medium">{displayProfile?.username}</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-border">
-                <span className="text-sm text-muted-foreground">Role</span>
+                <span className="text-sm text-muted-foreground">Ruolo</span>
                 <Badge variant="secondary">{displayProfile?.role}</Badge>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-muted-foreground">Account status</span>
+                <span className="text-sm text-muted-foreground">Stato account</span>
                 {displayProfile?.verified ? (
-                  <Badge variant="success">Verified</Badge>
+                  <Badge variant="success">Verificato</Badge>
                 ) : (
-                  <Badge variant="destructive">Not verified</Badge>
+                  <Badge variant="destructive">Non verificato</Badge>
                 )}
               </div>
             </>
@@ -106,8 +106,8 @@ export default function ProfilePage() {
       {/* Change Password */}
       <Card>
         <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>Set a new password for your account</CardDescription>
+          <CardTitle>Cambia password</CardTitle>
+          <CardDescription>Imposta una nuova password per il tuo account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -119,7 +119,7 @@ export default function ProfilePage() {
             />
             <div className="flex justify-end">
               <Button type="submit" disabled={isSaving}>
-                {isSaving ? "Saving..." : "Update password"}
+                {isSaving ? "Salvataggio..." : "Aggiorna password"}
               </Button>
             </div>
           </form>

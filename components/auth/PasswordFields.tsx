@@ -17,7 +17,7 @@ export function PasswordFields({
   confirm,
   onPasswordChange,
   onConfirmChange,
-  passwordLabel = "New password",
+  passwordLabel = "Nuova password",
   error,
 }: Readonly<PasswordFieldsProps>) {
   return (
@@ -34,7 +34,7 @@ export function PasswordFields({
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirm">Confirm password</Label>
+        <Label htmlFor="confirm">Conferma password</Label>
         <Input
           id="confirm"
           type="password"

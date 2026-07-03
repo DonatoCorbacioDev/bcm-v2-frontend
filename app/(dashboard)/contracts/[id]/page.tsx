@@ -67,11 +67,11 @@ export default function ContractDetailPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contractsQueryKeys.all });
-      toast.success("Contract deleted successfully!");
+      toast.success("Contratto eliminato con successo!");
       router.push("/contracts");
     },
     onError: () => {
-      toast.error("Failed to delete contract");
+      toast.error("Eliminazione del contratto non riuscita");
       setDeleteDialogOpen(false);
     },
   });
@@ -94,10 +94,10 @@ export default function ContractDetailPage() {
   };
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: "documents", label: "Documents", icon: <FileText className="h-4 w-4" /> },
-    { id: "financials", label: "Financial Values", icon: <DollarSign className="h-4 w-4" /> },
-    { id: "history", label: "Change History", icon: <History className="h-4 w-4" /> },
-    { id: "invoices", label: "Invoices", icon: <Receipt className="h-4 w-4" /> },
+    { id: "documents", label: "Documenti", icon: <FileText className="h-4 w-4" /> },
+    { id: "financials", label: "Valori finanziari", icon: <DollarSign className="h-4 w-4" /> },
+    { id: "history", label: "Cronologia modifiche", icon: <History className="h-4 w-4" /> },
+    { id: "invoices", label: "Fatture", icon: <Receipt className="h-4 w-4" /> },
   ];
 
   const renderFinancialValues = () => {
@@ -117,10 +117,10 @@ export default function ContractDetailPage() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-2">
-            No Financial Values Yet
+            Nessun valore finanziario
           </h2>
           <p className="text-sm text-muted-foreground">
-            Financial data will appear here once added to this contract.
+            I dati finanziari appariranno qui una volta aggiunti a questo contratto.
           </p>
         </div>
       );
@@ -130,7 +130,7 @@ export default function ContractDetailPage() {
         <table className="min-w-full divide-y divide-border">
           <thead className="bg-muted">
             <tr>
-              {["Type", "Business Area", "Amount", "Month/Year"].map((h) => (
+              {["Tipo", "Area di business", "Importo", "Mese/Anno"].map((h) => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {h}
                 </th>
@@ -140,10 +140,10 @@ export default function ContractDetailPage() {
           <tbody className="bg-card divide-y divide-border">
             {financialValues.map((fv: FinancialValue) => (
               <tr key={fv.id} className="hover:bg-accent">
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.typeName || "N/A"}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.areaName || "N/A"}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.typeName || "N/D"}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.areaName || "N/D"}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-foreground">
-                  €{fv.financialAmount?.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  €{fv.financialAmount?.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                   {fv.month}/{fv.year}
@@ -151,10 +151,10 @@ export default function ContractDetailPage() {
               </tr>
             ))}
             <tr className="bg-muted font-bold">
-              <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Total</td>
+              <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale</td>
               <td className="px-4 py-3 text-sm text-foreground">
                 €{financialValues.reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0)
-                  .toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  .toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </td>
               <td />
             </tr>
@@ -180,8 +180,8 @@ export default function ContractDetailPage() {
               <History className="h-8 w-8 text-muted-foreground" />
             </div>
           </div>
-          <h2 className="text-lg font-semibold text-foreground mb-2">No Change History</h2>
-          <p className="text-sm text-muted-foreground">Status changes and modifications will be tracked here.</p>
+          <h2 className="text-lg font-semibold text-foreground mb-2">Nessuna modifica registrata</h2>
+          <p className="text-sm text-muted-foreground">Le modifiche di stato verranno tracciate qui.</p>
         </div>
       );
     }
@@ -198,19 +198,19 @@ export default function ContractDetailPage() {
             <div className="flex-1">
               <div className="flex items-start justify-between gap-4 mb-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground flex-wrap">
-                  <span>Status Changed:</span>
+                  <span>Stato modificato:</span>
                   <Badge variant={getContractStatusVariant(history.previousStatus)}>{history.previousStatus}</Badge>
                   <span>→</span>
                   <Badge variant={getContractStatusVariant(history.newStatus)}>{history.newStatus}</Badge>
                 </div>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {new Date(history.modificationDate).toLocaleDateString("en-US", {
+                  {new Date(history.modificationDate).toLocaleDateString("it-IT", {
                     year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
                   })}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Modified by User ID: {history.modifiedById}
+                Modificato da utente ID: {history.modifiedById}
               </p>
             </div>
           </div>
@@ -232,10 +232,10 @@ export default function ContractDetailPage() {
       <div className="space-y-6">
         <Button variant="ghost" onClick={() => router.push("/contracts")} className="mb-4">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Contracts
+          Torna ai contratti
         </Button>
         <div className="text-center py-12 bg-destructive/10 rounded-lg border border-destructive/30">
-          <p className="text-destructive">Contract not found or error loading data</p>
+          <p className="text-destructive">Contratto non trovato o errore nel caricamento dei dati</p>
         </div>
       </div>
     );
@@ -248,16 +248,16 @@ export default function ContractDetailPage() {
         <div>
           <Button variant="ghost" onClick={() => router.push("/contracts")} className="mb-2">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Contracts
+            Torna ai contratti
           </Button>
-          <h1 className="text-3xl font-bold text-foreground">Contract Details</h1>
+          <h1 className="text-3xl font-bold text-foreground">Dettagli contratto</h1>
           <p className="text-muted-foreground mt-1">{contract.customerName}</p>
         </div>
         <div className="flex gap-2">
           {isAdmin && (
             <Button variant="outline" size="sm" onClick={() => { setPrefilledContract(null); setEditDialogOpen(true); }}>
               <Pencil className="h-4 w-4 mr-2" />
-              Edit
+              Modifica
             </Button>
           )}
           {isAdmin && (
@@ -268,7 +268,7 @@ export default function ContractDetailPage() {
               disabled={deleteMutation.isPending}
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              Elimina
             </Button>
           )}
         </div>
@@ -276,15 +276,15 @@ export default function ContractDetailPage() {
 
       {/* General Information */}
       <div className="bg-card rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">General Information</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-4">Informazioni generali</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { label: "Customer Name", value: contract.customerName },
-            { label: "Contract Number", value: contract.contractNumber },
-            { label: "Project Name", value: contract.projectName },
-            { label: "WBS Code", value: contract.wbsCode },
-            { label: "Start Date", value: new Date(contract.startDate).toLocaleDateString() },
-            { label: "End Date", value: new Date(contract.endDate).toLocaleDateString() },
+            { label: "Nome cliente", value: contract.customerName },
+            { label: "Numero contratto", value: contract.contractNumber },
+            { label: "Nome progetto", value: contract.projectName },
+            { label: "Codice WBS", value: contract.wbsCode },
+            { label: "Data inizio", value: new Date(contract.startDate).toLocaleDateString() },
+            { label: "Data fine", value: new Date(contract.endDate).toLocaleDateString() },
           ].map(({ label, value }) => (
             <div key={label}>
               <p className="text-sm text-muted-foreground">{label}</p>
@@ -292,19 +292,19 @@ export default function ContractDetailPage() {
             </div>
           ))}
           <div>
-            <p className="text-sm text-muted-foreground">Status</p>
+            <p className="text-sm text-muted-foreground">Stato</p>
             <Badge variant={getContractStatusVariant(contract.status)}>{contract.status}</Badge>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Manager</p>
             <p className="text-base font-medium text-foreground">
-              {contract.manager ? `${contract.manager.firstName} ${contract.manager.lastName}` : "Not assigned"}
+              {contract.manager ? `${contract.manager.firstName} ${contract.manager.lastName}` : "Non assegnato"}
             </p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Business Area</p>
+            <p className="text-sm text-muted-foreground">Area di business</p>
             <p className="text-base font-medium text-foreground">
-              {contract.area?.name || "Not assigned"}
+              {contract.area?.name || "Non assegnato"}
             </p>
           </div>
         </div>
@@ -353,8 +353,8 @@ export default function ContractDetailPage() {
         <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) { setPrefilledContract(null); } setEditDialogOpen(open); }}>
           <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
             <DialogHeader>
-              <DialogTitle>Edit Contract</DialogTitle>
-              <DialogDescription>Update the contract information below</DialogDescription>
+              <DialogTitle>Modifica contratto</DialogTitle>
+              <DialogDescription>Aggiorna le informazioni del contratto qui sotto</DialogDescription>
             </DialogHeader>
             <ContractForm
               contract={prefilledContract ?? contract}
@@ -373,19 +373,19 @@ export default function ContractDetailPage() {
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Delete Contract</DialogTitle>
+              <DialogTitle>Elimina contratto</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete contract{" "}
+                Sei sicuro di voler eliminare il contratto{" "}
                 <span className="font-semibold">{contract.contractNumber}</span>{" "}
-                ({contract.customerName})? This action cannot be undone.
+                ({contract.customerName})? L&apos;operazione non può essere annullata.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleteMutation.isPending}>
-                Cancel
+                Annulla
               </Button>
               <Button variant="destructive" onClick={handleDeleteConfirm} disabled={deleteMutation.isPending}>
-                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                {deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
               </Button>
             </DialogFooter>
           </DialogContent>

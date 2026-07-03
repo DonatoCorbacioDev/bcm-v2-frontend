@@ -86,11 +86,11 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: financialValuesQueryKeys.all });
-      toast.success("Financial value deleted successfully!");
+      toast.success("Valore finanziario eliminato con successo!");
       setDeleteDialog({ open: false, financialValue: null });
     },
     onError: () => {
-      toast.error("Failed to delete financial value");
+      toast.error("Eliminazione del valore finanziario non riuscita");
     },
   });
 
@@ -107,8 +107,8 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
 
   const getMonthName = (month: number) => {
     const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      "Gen", "Feb", "Mar", "Apr", "Mag", "Giu",
+      "Lug", "Ago", "Set", "Ott", "Nov", "Dic"
     ];
     return /* istanbul ignore next */months[month - 1] || month;
   };
@@ -120,7 +120,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
   if (isError) {
     return (
       <div className="text-center py-8 text-destructive">
-        Failed to load financial values. Please try again.
+        Impossibile caricare i valori finanziari. Riprova.
       </div>
     );
   }
@@ -128,7 +128,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
   if (financialValues.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        No financial values found. Create your first one!
+        Nessun valore finanziario trovato. Creane uno!
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Search year/amount..."
+            placeholder="Cerca per anno/importo..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -147,25 +147,25 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-sm text-muted-foreground hidden sm:inline">Month:</span>
+          <span className="text-sm text-muted-foreground hidden sm:inline">Mese:</span>
           <select
             value={monthFilter}
             onChange={(e) => setMonthFilter(e.target.value)}
             className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="ALL">All</option>
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
+            <option value="ALL">Tutti</option>
+            <option value="1">Gennaio</option>
+            <option value="2">Febbraio</option>
+            <option value="3">Marzo</option>
+            <option value="4">Aprile</option>
+            <option value="5">Maggio</option>
+            <option value="6">Giugno</option>
+            <option value="7">Luglio</option>
+            <option value="8">Agosto</option>
+            <option value="9">Settembre</option>
+            <option value="10">Ottobre</option>
+            <option value="11">Novembre</option>
+            <option value="12">Dicembre</option>
           </select>
 
           {(searchQuery || monthFilter !== "ALL") && (
@@ -178,20 +178,20 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
               }}
               className="hidden sm:inline-flex"
             >
-              Clear
+              Pulisci
             </Button>
           )}
         </div>
 
         <div className="text-xs md:text-sm text-muted-foreground">
-          {filteredFinancialValues.length} / {financialValues.length} values
+          {filteredFinancialValues.length} / {financialValues.length} valori
         </div>
       </div>
 
       {/* Empty state after filtering */}
       {filteredFinancialValues.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          No financial values match your filters
+          Nessun valore finanziario corrisponde ai filtri
         </div>
       )}
 
@@ -201,12 +201,12 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Period</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead className="hidden md:table-cell">Customer</TableHead>
-                <TableHead className="hidden lg:table-cell">Type</TableHead>
-                <TableHead className="hidden lg:table-cell">Business Area</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Periodo</TableHead>
+                <TableHead>Importo</TableHead>
+                <TableHead className="hidden md:table-cell">Cliente</TableHead>
+                <TableHead className="hidden lg:table-cell">Tipo</TableHead>
+                <TableHead className="hidden lg:table-cell">Area di business</TableHead>
+                <TableHead>Azioni</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -216,9 +216,9 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                     {getMonthName(fv.month)}/{fv.year}
                   </TableCell>
                   <TableCell className="font-semibold text-sm">€{fv.financialAmount.toLocaleString()}</TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */fv.customerName || 'N/A'}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.typeName || 'N/A'}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.areaName || 'N/A'}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */fv.customerName || 'N/D'}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.typeName || 'N/D'}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.areaName || 'N/D'}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       <Button
@@ -227,7 +227,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                         onClick={() => onEditClick(fv)}
                         className="text-primary hover:text-primary text-xs px-2"
                       >
-                        Edit
+                        Modifica
                       </Button>
                       <Button
                         variant="ghost"
@@ -235,7 +235,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                         onClick={() => handleDeleteClick(fv)}
                         className="text-destructive hover:text-destructive text-xs px-2"
                       >
-                        Delete
+                        Elimina
                       </Button>
                     </div>
                   </TableCell>
@@ -253,9 +253,9 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Financial Value</DialogTitle>
+            <DialogTitle>Elimina valore finanziario</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this financial value? This action cannot be undone.
+              Sei sicuro di voler eliminare questo valore finanziario? L&apos;operazione non può essere annullata.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -263,14 +263,14 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
               variant="outline"
               onClick={() => setDeleteDialog({ open: false, financialValue: null })}
             >
-              Cancel
+              Annulla
             </Button>
             <Button
               variant="destructive"
               onClick={confirmDelete}
               disabled={deleteMutation.isPending}
             >
-              {/* istanbul ignore next */deleteMutation.isPending ? "Deleting..." : "Delete"}
+              {/* istanbul ignore next */deleteMutation.isPending ? "Eliminazione..." : "Elimina"}
             </Button>
           </DialogFooter>
         </DialogContent>

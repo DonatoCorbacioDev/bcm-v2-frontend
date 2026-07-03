@@ -14,8 +14,8 @@ describe("PasswordFields", () => {
 
   it("renders password and confirm fields with default label", () => {
     render(<PasswordFields {...defaultProps} />);
-    expect(screen.getByLabelText("New password")).toBeInTheDocument();
-    expect(screen.getByLabelText("Confirm password")).toBeInTheDocument();
+    expect(screen.getByLabelText("Nuova password")).toBeInTheDocument();
+    expect(screen.getByLabelText("Conferma password")).toBeInTheDocument();
   });
 
   it("renders custom passwordLabel", () => {
@@ -25,13 +25,13 @@ describe("PasswordFields", () => {
 
   it("calls onPasswordChange when password input changes", async () => {
     render(<PasswordFields {...defaultProps} />);
-    await userEvent.type(screen.getByLabelText("New password"), "abc");
+    await userEvent.type(screen.getByLabelText("Nuova password"), "abc");
     expect(defaultProps.onPasswordChange).toHaveBeenCalled();
   });
 
   it("calls onConfirmChange when confirm input changes", async () => {
     render(<PasswordFields {...defaultProps} />);
-    await userEvent.type(screen.getByLabelText("Confirm password"), "abc");
+    await userEvent.type(screen.getByLabelText("Conferma password"), "abc");
     expect(defaultProps.onConfirmChange).toHaveBeenCalled();
   });
 

@@ -53,7 +53,7 @@ describe('DocumentsTab', () => {
   it('shows empty state when there are no documents', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/no documents yet/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/nessun documento/i)).toBeInTheDocument());
   });
 
   it('renders document list with formatted file sizes', async () => {
@@ -88,17 +88,17 @@ describe('DocumentsTab', () => {
     await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Elimina documento'));
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/contracts/1/documents/1'));
-    expect(toast.success).toHaveBeenCalledWith('Document deleted');
+    expect(toast.success).toHaveBeenCalledWith('Documento eliminato');
   });
 
   it('rejects non-PDF files and shows error toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/upload pdf/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['content'], 'doc.txt', { type: 'text/plain' });
     fireEvent.change(input, { target: { files: [file] } });
-    expect(toast.error).toHaveBeenCalledWith('Only PDF files are allowed');
+    expect(toast.error).toHaveBeenCalledWith('Sono ammessi solo file PDF');
     expect(api.post).not.toHaveBeenCalled();
   });
 
@@ -106,12 +106,12 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockResolvedValue({ data: doc });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/upload pdf/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF-1.4'], 'valid.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(api.post).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Document uploaded successfully');
+    expect(toast.success).toHaveBeenCalledWith('Documento caricato con successo');
   });
 
   it('shows analysis results after clicking analyze button', async () => {
@@ -120,11 +120,11 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Analizza con AI'));
-    await waitFor(() => expect(screen.getByText(/ai extraction results/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/risultati estrazione ai/i)).toBeInTheDocument());
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
     expect(screen.getByText('CNT-001')).toBeInTheDocument();
     expect(screen.getByText('50000')).toBeInTheDocument();
-    expect(toast.success).toHaveBeenCalledWith('Analysis completed');
+    expect(toast.success).toHaveBeenCalledWith('Analisi completata');
   });
 
   it('shows "Not detected" for null analysis fields', async () => {
@@ -133,7 +133,7 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Analizza con AI'));
-    await waitFor(() => expect(screen.getAllByText('Not detected').length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByText('Non rilevato').length).toBeGreaterThan(0));
   });
 
   it('calls onApply with detected values when Apply button is clicked', async () => {
@@ -142,8 +142,8 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Analizza con AI'));
-    await waitFor(() => expect(screen.getByText(/apply to contract/i)).toBeInTheDocument());
-    await userEvent.click(screen.getByText(/apply to contract/i));
+    await waitFor(() => expect(screen.getByText(/applica al contratto/i)).toBeInTheDocument());
+    await userEvent.click(screen.getByText(/applica al contratto/i));
     expect(onApply).toHaveBeenCalledWith(expect.objectContaining({
       customerName: 'Acme Corp',
       contractNumber: 'CNT-001',
@@ -158,10 +158,10 @@ describe('DocumentsTab', () => {
     await userEvent.click(screen.getByTitle('Analizza con AI'));
     await waitFor(() => expect(screen.getByTitle('Comprimi analisi')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Comprimi analisi'));
-    expect(screen.queryByText(/ai extraction results/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/risultati estrazione ai/i)).not.toBeInTheDocument();
     // Re-expand
     await userEvent.click(screen.getByTitle('Espandi analisi'));
-    expect(screen.getByText(/ai extraction results/i)).toBeInTheDocument();
+    expect(screen.getByText(/risultati estrazione ai/i)).toBeInTheDocument();
   });
 
   it('calls download API when download button is clicked', async () => {
@@ -183,8 +183,8 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Analizza con AI'));
-    await waitFor(() => expect(screen.getByText(/ai extraction results/i)).toBeInTheDocument());
-    expect(screen.queryByText(/show extracted text/i)).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/risultati estrazione ai/i)).toBeInTheDocument());
+    expect(screen.queryByText(/mostra testo estratto/i)).not.toBeInTheDocument();
   });
 
   it('apply skips null detected fields', async () => {
@@ -194,15 +194,15 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Analizza con AI'));
-    await waitFor(() => expect(screen.getByText(/apply to contract/i)).toBeInTheDocument());
-    await userEvent.click(screen.getByText(/apply to contract/i));
+    await waitFor(() => expect(screen.getByText(/applica al contratto/i)).toBeInTheDocument());
+    await userEvent.click(screen.getByText(/applica al contratto/i));
     expect(onApply).toHaveBeenCalledWith({});
   });
 
   it('does nothing when file input fires with no file selected', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/upload pdf/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: null } });
     expect(api.post).not.toHaveBeenCalled();
@@ -213,12 +213,12 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/upload pdf/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'loading.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => expect(screen.getByText(/uploading.../i)).toBeInTheDocument());
-    expect(screen.getByRole('button', { name: /uploading/i })).toBeDisabled();
+    await waitFor(() => expect(screen.getByText(/caricamento\.\.\./i)).toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /caricamento/i })).toBeDisabled();
   });
 
   it('shows analyzing spinner while analyze mutation is pending', async () => {
@@ -237,18 +237,18 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Scarica documento')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Scarica documento'));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to download document'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Download del documento non riuscito'));
   });
 
   it('shows error toast when upload fails', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/upload pdf/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'test.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to upload document'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Caricamento del documento non riuscito'));
   });
 
   it('shows error toast when delete fails', async () => {
@@ -257,16 +257,16 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Elimina documento'));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Failed to delete document'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Eliminazione del documento non riuscita'));
   });
 
   it('clicks the hidden file input when upload button is clicked', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByRole('button', { name: /upload pdf/i })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('button', { name: /carica pdf/i })).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const clickSpy = jest.spyOn(input, 'click').mockImplementation(() => {});
-    await userEvent.click(screen.getByRole('button', { name: /upload pdf/i }));
+    await userEvent.click(screen.getByRole('button', { name: /carica pdf/i }));
     expect(clickSpy).toHaveBeenCalled();
   });
 
@@ -276,6 +276,6 @@ describe('DocumentsTab', () => {
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     await waitFor(() => expect(screen.getByTitle('Analizza con AI')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Analizza con AI'));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Analysis failed'), { timeout: 3000 });
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Analisi non riuscita'), { timeout: 3000 });
   });
 });

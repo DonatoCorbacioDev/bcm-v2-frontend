@@ -38,11 +38,11 @@ export default function FinancialTypesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Financial Types</h1>
-          <p className="text-muted-foreground mt-2">Manage financial value categories</p>
+          <h1 className="text-3xl font-bold text-foreground">Tipi finanziari</h1>
+          <p className="text-muted-foreground mt-2">Gestisci le categorie dei valori finanziari</p>
         </div>
         <Button onClick={() => setFormDialog({ open: true, financialType: null })}>
-          + New Financial Type
+          + Nuovo tipo finanziario
         </Button>
       </div>
 
@@ -54,7 +54,7 @@ export default function FinancialTypesPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
-              {formDialog.financialType ? "Edit Financial Type" : "Create New Financial Type"}
+              {formDialog.financialType ? "Modifica tipo finanziario" : "Crea nuovo tipo finanziario"}
             </DialogTitle>
           </DialogHeader>
           <FinancialTypeForm

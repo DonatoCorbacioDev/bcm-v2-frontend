@@ -25,7 +25,7 @@ export default function ManagerForm({
 }: ManagerFormProps) {
   const upsertMutation = useUpsertManager();
 
-  const submitLabel = manager?.id ? "Update Manager" : "Create Manager";
+  const submitLabel = manager?.id ? "Aggiorna manager" : "Crea manager";
 
   const {
     register,
@@ -52,20 +52,20 @@ export default function ManagerForm({
           id: manager.id,
           payload: data,
         });
-        toast.success("Manager updated successfully!");
+        toast.success("Manager aggiornato con successo!");
       } else {
         await upsertMutation.mutateAsync({
           mode: "create",
           payload: data,
         });
-        toast.success("Manager created successfully!");
+        toast.success("Manager creato con successo!");
       }
 
       onSuccess?.();
       onClose();
     } catch (error) {
       toast.error(
-        manager?.id ? "Failed to update manager" : "Failed to create manager"
+        manager?.id ? "Aggiornamento del manager non riuscito" : "Creazione del manager non riuscita"
       );
       console.error(error);
     }
@@ -76,12 +76,12 @@ export default function ManagerForm({
       {/* First Name */}
       <div className="space-y-2">
         <Label htmlFor="firstName">
-          First Name <span className="text-destructive">*</span>
+          Nome <span className="text-destructive">*</span>
         </Label>
         <Input
           id="firstName"
           {...register("firstName")}
-          placeholder="Enter first name"
+          placeholder="Inserisci il nome"
         />
         {errors.firstName && (
           <p className="text-sm text-destructive">{errors.firstName.message}</p>
@@ -91,12 +91,12 @@ export default function ManagerForm({
       {/* Last Name */}
       <div className="space-y-2">
         <Label htmlFor="lastName">
-          Last Name <span className="text-destructive">*</span>
+          Cognome <span className="text-destructive">*</span>
         </Label>
         <Input
           id="lastName"
           {...register("lastName")}
-          placeholder="Enter last name"
+          placeholder="Inserisci il cognome"
         />
         {errors.lastName && (
           <p className="text-sm text-destructive">{errors.lastName.message}</p>
@@ -122,7 +122,7 @@ export default function ManagerForm({
       {/* Phone Number */}
       <div className="space-y-2">
         <Label htmlFor="phoneNumber">
-          Phone Number <span className="text-destructive">*</span>
+          Numero di telefono <span className="text-destructive">*</span>
         </Label>
         <Input
           id="phoneNumber"
@@ -137,12 +137,12 @@ export default function ManagerForm({
       {/* Department */}
       <div className="space-y-2">
         <Label htmlFor="department">
-          Department <span className="text-destructive">*</span>
+          Reparto <span className="text-destructive">*</span>
         </Label>
         <Input
           id="department"
           {...register("department")}
-          placeholder="e.g., Sales, IT, HR"
+          placeholder="Es. Vendite, IT, Risorse Umane"
         />
         {errors.department && (
           <p className="text-sm text-destructive">{errors.department.message}</p>
@@ -152,10 +152,10 @@ export default function ManagerForm({
       {/* Buttons */}
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          Annulla
         </Button>
         <Button type="submit" disabled={upsertMutation.isPending}>
-          {/* istanbul ignore next */upsertMutation.isPending ? "Saving..." : submitLabel}
+          {/* istanbul ignore next */upsertMutation.isPending ? "Salvataggio..." : submitLabel}
         </Button>
       </div>
     </form>

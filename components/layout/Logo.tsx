@@ -68,7 +68,7 @@ export default function Logo({ className, size = 32, showWordmark = true }: Logo
       <LogoMark size={size} />
       {showWordmark && (
         <span className="text-[15px] font-bold text-foreground tracking-tight leading-tight">
-          Business Contracts
+          Business Contracts Manager
         </span>
       )}
     </span>

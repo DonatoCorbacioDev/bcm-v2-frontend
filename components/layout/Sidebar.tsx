@@ -84,7 +84,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         {!collapsed && (
           <div className="min-w-0">
             <p className="text-[14px] font-bold text-foreground truncate leading-tight">
-              Business Contracts
+              Business Contracts Manager
             </p>
             <p className="text-[11px] text-[var(--muted-foreground)] truncate leading-tight">
               Gestione contratti

@@ -51,28 +51,16 @@ describe('AnomalyWidget', () => {
     );
   });
 
-  it('renders anomaly rows with customer names', async () => {
+  it.each([
+    ['customer names', 'Acme Corp', 'Beta Ltd', 'Gamma Inc'],
+    ['month and year', 'Giu 2025', 'Nov 2025', 'Mar 2025'],
+    ['severity badges', 'Alta', 'Media', 'Bassa'],
+  ])('renders %s in the anomaly rows', async (_label, first, second, third) => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
-    expect(screen.getByText('Beta Ltd')).toBeInTheDocument();
-    expect(screen.getByText('Gamma Inc')).toBeInTheDocument();
-  });
-
-  it('renders month and year correctly', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
-    render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Giu 2025')).toBeInTheDocument());
-    expect(screen.getByText('Nov 2025')).toBeInTheDocument();
-    expect(screen.getByText('Mar 2025')).toBeInTheDocument();
-  });
-
-  it('renders severity badges with correct labels', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
-    render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Alta')).toBeInTheDocument());
-    expect(screen.getByText('Media')).toBeInTheDocument();
-    expect(screen.getByText('Bassa')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(first)).toBeInTheDocument());
+    expect(screen.getByText(second)).toBeInTheDocument();
+    expect(screen.getByText(third)).toBeInTheDocument();
   });
 
   it('renders links to contract detail pages', async () => {

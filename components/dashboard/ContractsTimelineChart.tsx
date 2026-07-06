@@ -14,6 +14,25 @@ import {
 
 const CHART_COLOR = "var(--chart-1)";
 
+interface TimelineLastPointDotProps {
+  readonly cx?: number;
+  readonly cy?: number;
+  readonly index?: number;
+  readonly lastIndex?: number;
+  readonly color?: string;
+}
+
+/** Recharts clones this element per data point, injecting cx/cy/index — only the last point renders. */
+function TimelineLastPointDot({ cx, cy, index, lastIndex, color }: TimelineLastPointDotProps) {
+  if (index !== lastIndex) return <></>;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={8} fill={color} opacity={0.16} />
+      <circle cx={cx} cy={cy} r={4.5} fill={color} stroke="var(--card)" strokeWidth={2} />
+    </g>
+  );
+}
+
 export function ContractsTimelineChart() {
   const { data, isLoading, isError } = useContractsTimeline();
 
@@ -59,8 +78,9 @@ export function ContractsTimelineChart() {
     );
   }
 
-  const last = data[data.length - 1];
-  const prev = data.length > 1 ? data[data.length - 2] : undefined;
+  const last = data.at(-1);
+  if (!last) return null;
+  const prev = data.length > 1 ? data.at(-2) : undefined;
   const delta = prev ? last.count - prev.count : null;
   const isUp = (delta ?? 0) >= 0;
 
@@ -119,15 +139,7 @@ export function ContractsTimelineChart() {
               strokeWidth={2}
               fill="url(#timelineGradient)"
               activeDot={{ r: 5 }}
-              dot={(dotProps: { cx?: number; cy?: number; index?: number }) => {
-                if (dotProps.index !== data.length - 1) return <></>;
-                return (
-                  <g key="timeline-last-point">
-                    <circle cx={dotProps.cx} cy={dotProps.cy} r={8} fill={CHART_COLOR} opacity={0.16} />
-                    <circle cx={dotProps.cx} cy={dotProps.cy} r={4.5} fill={CHART_COLOR} stroke="var(--card)" strokeWidth={2} />
-                  </g>
-                );
-              }}
+              dot={<TimelineLastPointDot lastIndex={data.length - 1} color={CHART_COLOR} />}
             />
           </AreaChart>
         </ResponsiveContainer>

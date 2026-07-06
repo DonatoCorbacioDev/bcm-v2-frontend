@@ -152,6 +152,39 @@ describe('ContractsTimelineChart', () => {
     render(<ContractsTimelineChart />);
     expect(screen.getByText(/andamento contratti/i)).toBeInTheDocument();
   });
+
+  it('shows the latest count without a delta badge when there is only one data point', () => {
+    (useContractsTimeline as jest.Mock).mockReturnValue({
+      data: [{ month: '2024-01', count: 7 }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractsTimelineChart />);
+    expect(screen.getByText('7')).toBeInTheDocument();
+    expect(screen.queryByText(/vs mese scorso/i)).not.toBeInTheDocument();
+  });
+
+  it('shows an upward delta badge when the latest month grew', () => {
+    (useContractsTimeline as jest.Mock).mockReturnValue({
+      data: [{ month: '2024-01', count: 3 }, { month: '2024-02', count: 5 }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractsTimelineChart />);
+    expect(screen.getByText('5')).toBeInTheDocument();
+    expect(screen.getByText(/▲ 2 vs mese scorso/)).toBeInTheDocument();
+  });
+
+  it('shows a downward delta badge when the latest month shrank', () => {
+    (useContractsTimeline as jest.Mock).mockReturnValue({
+      data: [{ month: '2024-01', count: 5 }, { month: '2024-02', count: 2 }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractsTimelineChart />);
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText(/▼ 3 vs mese scorso/)).toBeInTheDocument();
+  });
 });
 
 // ─── TopManagersChart ─────────────────────────────────────────────────────────

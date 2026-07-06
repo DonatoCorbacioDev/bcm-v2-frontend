@@ -99,30 +99,20 @@ describe('UserTable', () => {
     });
   });
 
-  it('renders all user rows', () => {
+  it.each([
+    ['user rows', 'alice@example.com', 'bob@example.com'],
+    ['role names resolved from roleId via roleMap', 'ADMIN', 'VIEWER'],
+    ['manager names resolved instead of raw IDs', 'John Doe', 'Jane Smith'],
+  ])('renders %s', (_label, first, second) => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-
-    expect(screen.getByText('alice@example.com')).toBeInTheDocument();
-    expect(screen.getByText('bob@example.com')).toBeInTheDocument();
-  });
-
-  it('displays role names resolved from roleId via roleMap', () => {
-    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText('ADMIN')).toBeInTheDocument();
-    expect(screen.getByText('VIEWER')).toBeInTheDocument();
+    expect(screen.getByText(first)).toBeInTheDocument();
+    expect(screen.getByText(second)).toBeInTheDocument();
   });
 
   it('shows "—" when roleId has no matching role', () => {
     (useRoles as jest.Mock).mockReturnValue({ data: [] });
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
-  });
-
-  it('displays resolved manager names instead of raw IDs', () => {
-    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   });
 
   it('shows verified badge for each user', () => {

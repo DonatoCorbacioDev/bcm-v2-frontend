@@ -15,13 +15,12 @@ describe("financialValueSchema", () => {
   });
 
   describe("month", () => {
-    it("rejects month 0 (below minimum)", () => {
-      const result = financialValueSchema.safeParse({ ...validData, month: 0 });
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects month 13 (above maximum)", () => {
-      const result = financialValueSchema.safeParse({ ...validData, month: 13 });
+    it.each([
+      ["below minimum", 0],
+      ["above maximum", 13],
+      ["non-integer", 6.5],
+    ])("rejects invalid month (%s: %p)", (_label, month) => {
+      const result = financialValueSchema.safeParse({ ...validData, month });
       expect(result.success).toBe(false);
     });
 
@@ -29,32 +28,21 @@ describe("financialValueSchema", () => {
       expect(financialValueSchema.safeParse({ ...validData, month: 1 }).success).toBe(true);
       expect(financialValueSchema.safeParse({ ...validData, month: 12 }).success).toBe(true);
     });
-
-    it("rejects non-integer month", () => {
-      const result = financialValueSchema.safeParse({ ...validData, month: 6.5 });
-      expect(result.success).toBe(false);
-    });
   });
 
   describe("year", () => {
-    it("rejects year before 2000", () => {
-      const result = financialValueSchema.safeParse({ ...validData, year: 1999 });
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects year after 2100", () => {
-      const result = financialValueSchema.safeParse({ ...validData, year: 2101 });
+    it.each([
+      ["before 2000", 1999],
+      ["after 2100", 2101],
+      ["non-integer", 2025.5],
+    ])("rejects invalid year (%s: %p)", (_label, year) => {
+      const result = financialValueSchema.safeParse({ ...validData, year });
       expect(result.success).toBe(false);
     });
 
     it("accepts boundary years 2000 and 2100", () => {
       expect(financialValueSchema.safeParse({ ...validData, year: 2000 }).success).toBe(true);
       expect(financialValueSchema.safeParse({ ...validData, year: 2100 }).success).toBe(true);
-    });
-
-    it("rejects non-integer year", () => {
-      const result = financialValueSchema.safeParse({ ...validData, year: 2025.5 });
-      expect(result.success).toBe(false);
     });
   });
 

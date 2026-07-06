@@ -202,6 +202,17 @@ describe('ContractTable', () => {
     expect(screen.getAllByText('Scaduto').length).toBeGreaterThanOrEqual(2);
   });
 
+  it('falls back to the raw status value when it is not a known status', () => {
+    const unknownStatusContract = { ...activeContract, status: 'ON_HOLD' as Contract['status'] };
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([unknownStatusContract]),
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    expect(screen.getByText('ON_HOLD')).toBeInTheDocument();
+  });
+
   it('shows total contract count in the toolbar', () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 

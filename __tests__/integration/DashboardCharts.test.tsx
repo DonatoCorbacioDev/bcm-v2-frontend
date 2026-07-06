@@ -84,6 +84,12 @@ describe('ContractStatsChart', () => {
     render(<ContractStatsChart total={5} active={3} expiring={0} expired={2} />);
     expect(screen.queryByText('Annullati')).not.toBeInTheDocument();
   });
+
+  it('renders a single segment without padding between arcs when only one status is present', () => {
+    render(<ContractStatsChart total={5} active={5} expiring={0} expired={0} />);
+    expect(screen.getByText('Attivi')).toBeInTheDocument();
+    expect(screen.getByText('100%')).toBeInTheDocument();
+  });
 });
 
 // ─── ContractsByAreaChart ────────────────────────────────────────────────────

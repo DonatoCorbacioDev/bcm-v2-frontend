@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('@/lib/api', () => ({
@@ -84,5 +85,34 @@ describe('RiskScoreWidget', () => {
     await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
     const links = screen.getAllByRole('link');
     expect(links[0]).toHaveAttribute('href', '/contracts/1');
+  });
+
+  it('shows only the first 5 scores with a toggle when there are more', async () => {
+    const manyScores = Array.from({ length: 8 }, (_, i) => ({
+      contractId: i + 1,
+      customerName: `Cliente ${i + 1}`,
+      riskScore: 0.9 - i * 0.05,
+      level: 'MEDIUM' as const,
+      anomalies: [],
+    }));
+    (api.get as jest.Mock).mockResolvedValue({ data: manyScores });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Cliente 1')).toBeInTheDocument());
+
+    expect(screen.getByText('Cliente 5')).toBeInTheDocument();
+    expect(screen.queryByText('Cliente 6')).not.toBeInTheDocument();
+
+    const toggle = screen.getByRole('button', { name: 'Mostra tutti (8)' });
+    await userEvent.click(toggle);
+
+    expect(screen.getByText('Cliente 8')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mostra meno' })).toBeInTheDocument();
+  });
+
+  it('does not show the toggle when there are 5 or fewer scores', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(screen.queryByText(/mostra tutti/i)).not.toBeInTheDocument();
   });
 });

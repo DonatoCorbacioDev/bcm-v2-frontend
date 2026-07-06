@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ShieldAlert, WifiOff, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRiskScores } from "@/hooks/useRiskScores";
+
+const VISIBLE_COUNT = 5;
 
 const LEVEL_CONFIG = {
   HIGH:   { color: "bg-red-500",    badge: "destructive" as const, label: "Alto" },
@@ -25,6 +28,8 @@ function anomalyLabel(code: string): string {
 
 export function RiskScoreWidget() {
   const { data: riskScores, isLoading, isError } = useRiskScores();
+  const [showAll, setShowAll] = useState(false);
+  const visibleScores = showAll ? riskScores : riskScores?.slice(0, VISIBLE_COUNT);
 
   return (
     <Card>
@@ -63,7 +68,7 @@ export function RiskScoreWidget() {
 
         {!isLoading && !isError && riskScores && riskScores.length > 0 && (
           <div className="space-y-3">
-            {riskScores.map((item) => {
+            {visibleScores?.map((item) => {
               const cfg = LEVEL_CONFIG[item.level] ?? LEVEL_CONFIG.LOW;
               const pct = Math.round(item.riskScore * 100);
 
@@ -104,6 +109,15 @@ export function RiskScoreWidget() {
                 </Link>
               );
             })}
+            {riskScores.length > VISIBLE_COUNT && (
+              <button
+                type="button"
+                onClick={() => setShowAll((prev) => !prev)}
+                className="w-full text-center text-sm font-medium text-primary hover:underline"
+              >
+                {showAll ? "Mostra meno" : `Mostra tutti (${riskScores.length})`}
+              </button>
+            )}
           </div>
         )}
       </CardContent>

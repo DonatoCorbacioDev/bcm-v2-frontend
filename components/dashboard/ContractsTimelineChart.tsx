@@ -59,18 +59,41 @@ export function ContractsTimelineChart() {
     );
   }
 
+  const last = data[data.length - 1];
+  const prev = data.length > 1 ? data[data.length - 2] : undefined;
+  const delta = prev ? last.count - prev.count : null;
+  const isUp = (delta ?? 0) >= 0;
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Andamento contratti</CardTitle>
-        <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+      <CardContent className="pt-6">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[14.5px] font-semibold">Andamento contratti</p>
+            <p className="mt-0.5 text-[12.5px] text-muted-foreground">Contratti creati negli ultimi 12 mesi</p>
+          </div>
+          <div className="flex-none text-right">
+            <div className="font-mono text-[26px] font-bold leading-none tracking-tight tabular-nums">
+              {last.count}
+            </div>
+            {delta !== null && (
+              <span
+                className="mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{
+                  color: isUp ? "var(--status-green-fg)" : "var(--status-red-fg)",
+                  backgroundColor: isUp ? "var(--status-green-bg)" : "var(--status-red-bg)",
+                }}
+              >
+                {isUp ? "▲" : "▼"} {Math.abs(delta)} vs mese scorso
+              </span>
+            )}
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
             <defs>
               <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor={CHART_COLOR} stopOpacity={0.25} />
+                <stop offset="5%"  stopColor={CHART_COLOR} stopOpacity={0.28} />
                 <stop offset="95%" stopColor={CHART_COLOR} stopOpacity={0} />
               </linearGradient>
             </defs>
@@ -93,9 +116,18 @@ export function ContractsTimelineChart() {
               dataKey="count"
               name="Contratti"
               stroke={CHART_COLOR}
-              strokeWidth={1.5}
+              strokeWidth={2}
               fill="url(#timelineGradient)"
               activeDot={{ r: 5 }}
+              dot={(dotProps: { cx?: number; cy?: number; index?: number }) => {
+                if (dotProps.index !== data.length - 1) return <></>;
+                return (
+                  <g key="timeline-last-point">
+                    <circle cx={dotProps.cx} cy={dotProps.cy} r={8} fill={CHART_COLOR} opacity={0.16} />
+                    <circle cx={dotProps.cx} cy={dotProps.cy} r={4.5} fill={CHART_COLOR} stroke="var(--card)" strokeWidth={2} />
+                  </g>
+                );
+              }}
             />
           </AreaChart>
         </ResponsiveContainer>

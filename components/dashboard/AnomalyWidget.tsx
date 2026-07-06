@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { AlertOctagon, CheckCircle2, Loader2, WifiOff } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAnomalies } from "@/hooks/useAnomalies";
 
+const VISIBLE_COUNT = 5;
 const MONTHS_IT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
 
 const SEVERITY_CONFIG = {
@@ -20,6 +22,8 @@ function formatAmount(n: number): string {
 
 export function AnomalyWidget() {
   const { data: anomalies, isLoading, isError } = useAnomalies();
+  const [showAll, setShowAll] = useState(false);
+  const visibleAnomalies = showAll ? anomalies : anomalies?.slice(0, VISIBLE_COUNT);
 
   return (
     <Card>
@@ -71,7 +75,7 @@ export function AnomalyWidget() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {anomalies.map((item) => {
+                {visibleAnomalies?.map((item) => {
                   const cfg = SEVERITY_CONFIG[item.severity] ?? SEVERITY_CONFIG.LOW;
                   const monthLabel = MONTHS_IT[(item.month - 1) % 12];
                   return (
@@ -98,6 +102,15 @@ export function AnomalyWidget() {
                 })}
               </tbody>
             </table>
+            {anomalies.length > VISIBLE_COUNT && (
+              <button
+                type="button"
+                onClick={() => setShowAll((prev) => !prev)}
+                className="mt-3 w-full text-center text-sm font-medium text-primary hover:underline"
+              >
+                {showAll ? "Mostra meno" : `Mostra tutti (${anomalies.length})`}
+              </button>
+            )}
           </div>
         )}
       </CardContent>

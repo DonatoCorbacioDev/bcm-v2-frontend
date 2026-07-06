@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('@/lib/api', () => ({
@@ -102,5 +103,37 @@ describe('AnomalyWidget', () => {
     expect(screen.getByText('Periodo')).toBeInTheDocument();
     expect(screen.getByText('Importo')).toBeInTheDocument();
     expect(screen.getByText('Gravità')).toBeInTheDocument();
+  });
+
+  it('shows only the first 5 anomalies with a toggle when there are more', async () => {
+    const manyAnomalies = Array.from({ length: 7 }, (_, i) => ({
+      financialValueId: i + 1,
+      contractId: i + 100,
+      customerName: `Cliente ${i + 1}`,
+      month: 1,
+      year: 2025,
+      financialAmount: 1000 * (i + 1),
+      anomalyScore: -0.1,
+      severity: 'MEDIUM' as const,
+    }));
+    (api.get as jest.Mock).mockResolvedValue({ data: manyAnomalies });
+    render(<AnomalyWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Cliente 1')).toBeInTheDocument());
+
+    expect(screen.getByText('Cliente 5')).toBeInTheDocument();
+    expect(screen.queryByText('Cliente 6')).not.toBeInTheDocument();
+
+    const toggle = screen.getByRole('button', { name: 'Mostra tutti (7)' });
+    await userEvent.click(toggle);
+
+    expect(screen.getByText('Cliente 7')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mostra meno' })).toBeInTheDocument();
+  });
+
+  it('does not show the toggle when there are 5 or fewer anomalies', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
+    render(<AnomalyWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(screen.queryByText(/mostra tutti/i)).not.toBeInTheDocument();
   });
 });

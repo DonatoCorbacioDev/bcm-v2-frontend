@@ -9,6 +9,7 @@ import { useContractsPaged } from "@/hooks/useContractsPaged";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { contractsService } from "@/services/contracts.service";
 import { useAuthStore } from "@/store/authStore";
+import { CONTRACT_STATUS_LABELS, getContractStatusVariant } from "@/lib/utils";
 import type { Contract } from "@/types";
 
 import {
@@ -312,18 +313,6 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
     }
   };
 
-  const getStatusBadge = (status: Contract["status"]) => {
-    const variants: Record<
-      Contract["status"],
-      "success" | "secondary" | "destructive"
-    > = {
-      ACTIVE: "success",
-      EXPIRED: "destructive",
-      CANCELLED: "secondary",
-    };
-    return variants[status];
-  };
-
   // Handle filter changes (reset to page 0)
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -404,9 +393,9 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
             className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="ALL">Tutti</option>
-            <option value="ACTIVE">Attivo</option>
-            <option value="EXPIRED">Scaduto</option>
-            <option value="CANCELLED">Annullato</option>
+            {Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
           </select>
 
           {(searchQuery || statusFilter !== "ALL") && (
@@ -545,8 +534,8 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                 <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode}</TableCell>
                 <TableCell className="hidden lg:table-cell text-sm">{c.managerName}</TableCell>
                 <TableCell>
-                  <Badge variant={getStatusBadge(c.status)} className="text-xs">
-                    {c.status}
+                  <Badge variant={getContractStatusVariant(c.status)} className="text-xs">
+                    {CONTRACT_STATUS_LABELS[c.status] ?? c.status}
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm">{c.startDate}</TableCell>

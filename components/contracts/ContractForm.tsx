@@ -9,6 +9,7 @@ import type { Contract } from "@/types";
 import { useUpsertContract } from "@/hooks/useUpsertContract";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
+import { CONTRACT_STATUS_LABELS } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -226,9 +227,9 @@ export default function ContractForm({
                 <SelectValue placeholder="Seleziona lo stato" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ACTIVE">Attivo</SelectItem>
-                <SelectItem value="EXPIRED">Scaduto</SelectItem>
-                <SelectItem value="CANCELLED">Annullato</SelectItem>
+                {Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {/* istanbul ignore next */errors.status && (

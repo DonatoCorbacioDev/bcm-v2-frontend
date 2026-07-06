@@ -193,11 +193,13 @@ describe('ContractTable', () => {
 
     expect(screen.getByText('CNT-001')).toBeInTheDocument();
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
-    expect(screen.getByText('ACTIVE')).toBeInTheDocument();
+    // "Attivo"/"Scaduto" also appear as options in the status filter select,
+    // so the row badge is one of two matches rather than the only one.
+    expect(screen.getAllByText('Attivo').length).toBeGreaterThanOrEqual(2);
 
     expect(screen.getByText('CNT-002')).toBeInTheDocument();
     expect(screen.getByText('Beta Ltd')).toBeInTheDocument();
-    expect(screen.getByText('EXPIRED')).toBeInTheDocument();
+    expect(screen.getAllByText('Scaduto').length).toBeGreaterThanOrEqual(2);
   });
 
   it('shows total contract count in the toolbar', () => {

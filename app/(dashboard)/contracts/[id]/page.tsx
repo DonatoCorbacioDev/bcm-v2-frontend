@@ -23,7 +23,7 @@ import ContractForm from "@/components/contracts/ContractForm";
 import DocumentsTab from "@/components/contracts/DocumentsTab";
 import InvoicesTab from "@/components/contracts/InvoicesTab";
 import api from "@/lib/api";
-import { getContractStatusVariant } from "@/lib/utils";
+import { CONTRACT_STATUS_LABELS, getContractStatusVariant } from "@/lib/utils";
 import type { Contract, FinancialValue, ContractHistory } from "@/types";
 
 type Tab = "documents" | "financials" | "history" | "invoices";
@@ -199,9 +199,9 @@ export default function ContractDetailPage() {
               <div className="flex items-start justify-between gap-4 mb-1">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground flex-wrap">
                   <span>Stato modificato:</span>
-                  <Badge variant={getContractStatusVariant(history.previousStatus)}>{history.previousStatus}</Badge>
+                  <Badge variant={getContractStatusVariant(history.previousStatus)}>{CONTRACT_STATUS_LABELS[history.previousStatus] ?? history.previousStatus}</Badge>
                   <span>→</span>
-                  <Badge variant={getContractStatusVariant(history.newStatus)}>{history.newStatus}</Badge>
+                  <Badge variant={getContractStatusVariant(history.newStatus)}>{CONTRACT_STATUS_LABELS[history.newStatus] ?? history.newStatus}</Badge>
                 </div>
                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                   {new Date(history.modificationDate).toLocaleDateString("it-IT", {
@@ -293,7 +293,7 @@ export default function ContractDetailPage() {
           ))}
           <div>
             <p className="text-sm text-muted-foreground">Stato</p>
-            <Badge variant={getContractStatusVariant(contract.status)}>{contract.status}</Badge>
+            <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Manager</p>

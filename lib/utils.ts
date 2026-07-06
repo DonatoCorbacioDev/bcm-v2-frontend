@@ -5,6 +5,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/** Single source of truth for the Italian label of each contract status. */
+export const CONTRACT_STATUS_LABELS: Record<string, string> = {
+  ACTIVE: "Attivo",
+  EXPIRED: "Scaduto",
+  CANCELLED: "Annullato",
+};
+
 /**
  * Maps contract status to Badge component variant
  * @param status - Contract status (ACTIVE, EXPIRED, CANCELLED)

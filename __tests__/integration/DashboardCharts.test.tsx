@@ -68,6 +68,22 @@ describe('ContractStatsChart', () => {
     render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} />);
     expect(screen.getByText(/distribuzione contratti/i)).toBeInTheDocument();
   });
+
+  it('shows the total in the center and splits out cancelled contracts so percentages sum to 100', () => {
+    // active=5 includes the 2 "expiring", so the shown "Attivi" segment is 5-2=3;
+    // the remaining 10-5-3=2 contracts are neither active nor expired, i.e. cancelled.
+    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} />);
+    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByText('Annullati')).toBeInTheDocument();
+    // Attivi=3 (30%), In scadenza=2 (20%), Scaduti=3 (30%), Annullati=2 (20%) — sums to 10 / 100%.
+    expect(screen.getAllByText('30%')).toHaveLength(2);
+    expect(screen.getAllByText('20%')).toHaveLength(2);
+  });
+
+  it('does not show a cancelled segment when active + expired already account for the total', () => {
+    render(<ContractStatsChart total={5} active={3} expiring={0} expired={2} />);
+    expect(screen.queryByText('Annullati')).not.toBeInTheDocument();
+  });
 });
 
 // ─── ContractsByAreaChart ────────────────────────────────────────────────────

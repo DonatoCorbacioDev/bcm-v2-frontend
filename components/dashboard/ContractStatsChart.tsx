@@ -16,13 +16,18 @@ interface ContractStatsChartProps {
 }
 
 const SEGMENTS = [
-  { key: "active",   name: "Attivi",      fill: "var(--status-green-fg)" },
-  { key: "expiring", name: "In scadenza", fill: "var(--status-amber-fg)" },
-  { key: "expired",  name: "Scaduti",     fill: "var(--status-red-fg)" },
+  { key: "active",    name: "Attivi",      fill: "var(--status-green-fg)" },
+  { key: "expiring",  name: "In scadenza", fill: "var(--status-amber-fg)" },
+  { key: "expired",   name: "Scaduti",     fill: "var(--status-red-fg)" },
+  { key: "cancelled", name: "Annullati",   fill: "var(--status-slate-fg)" },
 ] as const;
 
 export default function ContractStatsChart({ total, active, expiring, expired }: ContractStatsChartProps) {
-  const values = { active, expiring, expired };
+  // "expiring" is a subset of "active" (an active contract nearing its end date),
+  // not a distinct status — subtract it so segments don't double-count and sum to `total`.
+  const activeOnly = Math.max(0, active - expiring);
+  const cancelled = Math.max(0, total - active - expired);
+  const values = { active: activeOnly, expiring, expired, cancelled };
   const data = SEGMENTS
     .map((s) => ({ name: s.name, value: values[s.key], fill: s.fill }))
     .filter((d) => d.value > 0);

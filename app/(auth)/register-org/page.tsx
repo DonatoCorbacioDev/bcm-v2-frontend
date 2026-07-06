@@ -79,7 +79,7 @@ export default function RegisterOrgPage() {
       const message =
         axiosError.userMessage ||
         axiosError.response?.data?.message ||
-        "Registration failed. Please try again.";
+        "Registrazione non riuscita. Riprova.";
       setError(message);
     } finally {
       setIsLoading(false);
@@ -96,18 +96,18 @@ export default function RegisterOrgPage() {
           Registra Organizzazione
         </CardTitle>
         <CardDescription className="text-center">
-          Create your organization and admin account
+          Crea la tua organizzazione e l&apos;account amministratore
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="organizationName">Organization Name</Label>
+            <Label htmlFor="organizationName">Nome organizzazione</Label>
             <Input
               id="organizationName"
               name="organizationName"
               type="text"
-              placeholder="Acme Corp"
+              placeholder="Acme S.p.A."
               value={form.organizationName}
               onChange={handleChange}
               required
@@ -116,7 +116,7 @@ export default function RegisterOrgPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label htmlFor="adminFirstName">First Name</Label>
+              <Label htmlFor="adminFirstName">Nome</Label>
               <Input
                 id="adminFirstName"
                 name="adminFirstName"
@@ -128,7 +128,7 @@ export default function RegisterOrgPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="adminLastName">Last Name</Label>
+              <Label htmlFor="adminLastName">Cognome</Label>
               <Input
                 id="adminLastName"
                 name="adminLastName"
@@ -155,7 +155,7 @@ export default function RegisterOrgPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="adminUsername">Username</Label>
+            <Label htmlFor="adminUsername">Nome utente</Label>
             <Input
               id="adminUsername"
               name="adminUsername"
@@ -187,13 +187,13 @@ export default function RegisterOrgPage() {
           )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Creating organization..." : "Create Organization"}
+            {isLoading ? "Creazione in corso…" : "Crea organizzazione"}
           </Button>
 
           <div className="text-center">
-            <span className="text-sm text-muted-foreground">Already have an account? </span>
+            <span className="text-sm text-muted-foreground">Hai già un account? </span>
             <Link href="/login" className="text-sm text-primary hover:underline">
-              Sign in
+              Accedi
             </Link>
           </div>
         </form>

@@ -227,7 +227,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                     </span>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                    {new Date(user.createdAt).toLocaleDateString("it-IT")}
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">

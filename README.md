@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwind-css)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-509%20passing-brightgreen)](./\_\_tests\_\_)
+[![Tests](https://img.shields.io/badge/Tests-676%20passing-brightgreen)](./\_\_tests\_\_)
 [![License](https://img.shields.io/badge/License-Custom-blue)](./LICENSE)
 
 ## 🎯 Overview
@@ -42,7 +42,7 @@ BCM v2.0 Frontend is the client application for the Business Contracts Manager s
 - **Toast Notifications** for all operations
 - **Form Validation** with detailed error messages
 - **Responsive Design** for all screen sizes
-- **Dark Mode Ready** (prepared for future implementation)
+- **Dark Mode** with a toggle in the header and login screen
 
 ### Security & Authentication
 - JWT-based authentication with HTTP-only cookies
@@ -279,7 +279,7 @@ graph LR
 | **Skeleton Loaders**   | ✅     | Smooth loading animations                      |
 | **Form Validation**    | ✅     | Comprehensive Zod schemas                      |
 | **Toast Notifications**| ✅     | Real-time user feedback                        |
-| **Dark Mode**          | ⏳     | Prepared (future implementation)               |
+| **Dark Mode**          | ✅     | Toggle in header/login, persisted preference   |
 | **Pagination**         | ✅     | Server-side, all paginated tables              |
 | **Column Sorting**     | ✅     | Contracts table, client-side on current page   |
 | **Bulk Actions**       | ✅     | Multi-select + bulk delete on contracts table  |
@@ -570,7 +570,7 @@ npm run lint
 npm run test:e2e
 ```
 
-**528 tests** across 32 test suites as of the last run (2026-06-26) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
+**676 tests** across 42 test suites as of the last run (2026-07-06) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
 
 `lib/validations` has **100% coverage** across all 6 schemas.
 
@@ -655,20 +655,18 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com bcm-front
 
 - Column sorting and bulk delete only exist on the contracts table, not the other CRUD tables (managers, users, business areas, financial values/types)
 - No real-time updates (WebSocket)
-- Dark-mode color tokens exist in `globals.css` (`.dark` class) but nothing toggles that class yet — there's no theme switcher wired up
 - Automated accessibility coverage (`npm run test:e2e`) only checks login, dashboard, and the contracts/contract-detail pages — managers, users, business areas, financial values/types aren't covered yet
 
 ### Planned Improvements
 
 - [ ] Extend column sorting/bulk actions to the other CRUD tables
-- [ ] Wire up a dark mode toggle (the color tokens already exist)
 - [ ] Real-time notifications (WebSocket)
 - [ ] Offline support (PWA)
 - [ ] Extend the Playwright + axe suite to the remaining CRUD pages
 - [ ] Manual WCAG 2.1 review (screen reader, keyboard-only pass)
 - [ ] Performance optimization (Lighthouse 95+)
 
-Already done, despite older notes in this README suggesting otherwise: server-side pagination (`ContractTable`), CSV/Excel/PDF export (`contractsService.exportExcel`/`exportPdf`), and 509 unit/integration tests (Jest + React Testing Library).
+Already done, despite older notes in this README suggesting otherwise: server-side pagination (`ContractTable`), CSV/Excel/PDF export (`contractsService.exportExcel`/`exportPdf`), a wired-up dark mode toggle, and 676 unit/integration tests (Jest + React Testing Library).
 
 ---
 

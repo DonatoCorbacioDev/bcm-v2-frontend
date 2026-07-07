@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('@/lib/api', () => ({
-  api: { get: jest.fn() },
+  api: { get: jest.fn(), post: jest.fn() },
 }));
 
 import { api } from '@/lib/api';
@@ -17,6 +17,12 @@ const mockScores = [
 ];
 
 beforeEach(() => jest.clearAllMocks());
+
+function mockGetByUrl(responses: Record<string, unknown>) {
+  (api.get as jest.Mock).mockImplementation(async (url: string) => ({
+    data: responses[url] ?? [],
+  }));
+}
 
 describe('RiskScoreWidget', () => {
   it('shows loading state initially', () => {
@@ -142,5 +148,80 @@ describe('RiskScoreWidget', () => {
     await waitFor(() => expect(screen.getByText(/nessun dato sul rischio disponibile/i)).toBeInTheDocument());
     expect(screen.queryByText('Solo regole euristiche')).not.toBeInTheDocument();
     expect(screen.queryByText('ML attivo')).not.toBeInTheDocument();
+  });
+
+  describe('risk feedback', () => {
+    it('shows the feedback prompt with thumbs up/down when no feedback exists yet', async () => {
+      mockGetByUrl({ '/risk-scores': mockScores, '/risk-feedback': [] });
+      render(<RiskScoreWidget />, { wrapper: createWrapper() });
+
+      await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+      expect(screen.getAllByText('Il punteggio è corretto?')).toHaveLength(mockScores.length);
+      expect(screen.getAllByRole('button', { name: 'Punteggio corretto' })).toHaveLength(mockScores.length);
+      expect(screen.getAllByRole('button', { name: 'Punteggio errato' })).toHaveLength(mockScores.length);
+    });
+
+    it('submits agree feedback with the score/level shown for that contract', async () => {
+      mockGetByUrl({ '/risk-scores': mockScores, '/risk-feedback': [] });
+      (api.post as jest.Mock).mockResolvedValue({
+        data: { id: 1, contractId: 1, riskScore: 0.85, riskLevel: 'HIGH', mlScore: null, mlLevel: null, agree: true, createdAt: '2027-01-01T00:00:00' },
+      });
+      render(<RiskScoreWidget />, { wrapper: createWrapper() });
+
+      await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+      const [firstThumbsUp] = screen.getAllByRole('button', { name: 'Punteggio corretto' });
+      await userEvent.click(firstThumbsUp);
+
+      await waitFor(() => expect(api.post).toHaveBeenCalledWith('/risk-feedback/contracts/1', {
+        riskScore: 0.85,
+        level: 'HIGH',
+        mlScore: undefined,
+        mlLevel: undefined,
+        agree: true,
+      }));
+    });
+
+    it('submits disagree feedback for the clicked contract', async () => {
+      mockGetByUrl({ '/risk-scores': mockScores, '/risk-feedback': [] });
+      (api.post as jest.Mock).mockResolvedValue({
+        data: { id: 2, contractId: 2, riskScore: 0.45, riskLevel: 'MEDIUM', mlScore: null, mlLevel: null, agree: false, createdAt: '2027-01-01T00:00:00' },
+      });
+      render(<RiskScoreWidget />, { wrapper: createWrapper() });
+
+      await waitFor(() => expect(screen.getByText('Beta Ltd')).toBeInTheDocument());
+      const thumbsDownButtons = screen.getAllByRole('button', { name: 'Punteggio errato' });
+      await userEvent.click(thumbsDownButtons[1]);
+
+      await waitFor(() => expect(api.post).toHaveBeenCalledWith('/risk-feedback/contracts/2', {
+        riskScore: 0.45,
+        level: 'MEDIUM',
+        mlScore: undefined,
+        mlLevel: undefined,
+        agree: false,
+      }));
+    });
+
+    it('shows a confirmed state instead of buttons when feedback already exists', async () => {
+      mockGetByUrl({
+        '/risk-scores': mockScores,
+        '/risk-feedback': [{ id: 1, contractId: 1, riskScore: 0.85, riskLevel: 'HIGH', mlScore: null, mlLevel: null, agree: true, createdAt: '2027-01-01T00:00:00' }],
+      });
+      render(<RiskScoreWidget />, { wrapper: createWrapper() });
+
+      await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+      expect(screen.getByText('Confermato corretto')).toBeInTheDocument();
+      expect(screen.getAllByText('Il punteggio è corretto?')).toHaveLength(mockScores.length - 1);
+    });
+
+    it('shows a disputed state when feedback disagreed with the score', async () => {
+      mockGetByUrl({
+        '/risk-scores': mockScores,
+        '/risk-feedback': [{ id: 2, contractId: 2, riskScore: 0.45, riskLevel: 'MEDIUM', mlScore: null, mlLevel: null, agree: false, createdAt: '2027-01-01T00:00:00' }],
+      });
+      render(<RiskScoreWidget />, { wrapper: createWrapper() });
+
+      await waitFor(() => expect(screen.getByText('Beta Ltd')).toBeInTheDocument());
+      expect(screen.getByText('Segnalato come errato')).toBeInTheDocument();
+    });
   });
 });

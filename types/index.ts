@@ -109,6 +109,25 @@ export interface RiskScore {
   mlLevel?: "LOW" | "MEDIUM" | "HIGH";
 }
 
+export interface RiskFeedback {
+  id: number;
+  contractId: number;
+  riskScore: number;
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  mlScore: number | null;
+  mlLevel: "LOW" | "MEDIUM" | "HIGH" | null;
+  agree: boolean;
+  createdAt: string;
+}
+
+export interface RiskFeedbackRequest {
+  riskScore: number;
+  level: "LOW" | "MEDIUM" | "HIGH";
+  mlScore?: number;
+  mlLevel?: "LOW" | "MEDIUM" | "HIGH";
+  agree: boolean;
+}
+
 export interface ContractDocument {
   id: number;
   contractId: number;

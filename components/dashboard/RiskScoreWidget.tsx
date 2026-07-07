@@ -122,20 +122,6 @@ export function RiskScoreWidget() {
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-
-                    {/* Anomalies */}
-                    {item.anomalies.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {item.anomalies.map((a) => (
-                          <span
-                            key={a}
-                            className="text-xs bg-muted text-muted-foreground rounded px-1.5 py-0.5"
-                          >
-                            {anomalyLabel(a)}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </Link>
 
                   {/* ML feedback loop: builds a labeled dataset from human-confirmed outcomes */}
@@ -174,6 +160,20 @@ export function RiskScoreWidget() {
                       >
                         <ThumbsDown className="h-3.5 w-3.5" />
                       </button>
+                    </div>
+                  )}
+
+                  {/* Anomalies */}
+                  {item.anomalies.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {item.anomalies.map((a) => (
+                        <span
+                          key={a}
+                          className="text-xs bg-muted text-muted-foreground rounded px-1.5 py-0.5"
+                        >
+                          {anomalyLabel(a)}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </div>

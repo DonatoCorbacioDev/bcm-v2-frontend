@@ -115,4 +115,32 @@ describe('RiskScoreWidget', () => {
     await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
     expect(screen.queryByText(/mostra tutti/i)).not.toBeInTheDocument();
   });
+
+  it('shows a "solo regole euristiche" badge when no score has an ML level', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(screen.getByText('Solo regole euristiche')).toBeInTheDocument();
+    expect(screen.queryByText('ML attivo')).not.toBeInTheDocument();
+  });
+
+  it('shows an "ML attivo" badge when at least one score has an ML level', async () => {
+    const withMl = [
+      { ...mockScores[0], mlScore: 0.8, mlLevel: 'HIGH' as const },
+      mockScores[1],
+    ];
+    (api.get as jest.Mock).mockResolvedValue({ data: withMl });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(screen.getByText('ML attivo')).toBeInTheDocument();
+    expect(screen.queryByText('Solo regole euristiche')).not.toBeInTheDocument();
+  });
+
+  it('does not show the ML badge when there are no risk scores', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    await waitFor(() => expect(screen.getByText(/nessun dato sul rischio disponibile/i)).toBeInTheDocument());
+    expect(screen.queryByText('Solo regole euristiche')).not.toBeInTheDocument();
+    expect(screen.queryByText('ML attivo')).not.toBeInTheDocument();
+  });
 });

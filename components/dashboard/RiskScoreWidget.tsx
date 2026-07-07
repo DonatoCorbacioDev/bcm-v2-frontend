@@ -30,15 +30,27 @@ export function RiskScoreWidget() {
   const { data: riskScores, isLoading, isError } = useRiskScores();
   const [showAll, setShowAll] = useState(false);
   const visibleScores = showAll ? riskScores : riskScores?.slice(0, VISIBLE_COUNT);
+  const hasMlScores = riskScores?.some((s) => s.mlLevel != null) ?? false;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ShieldAlert className="h-5 w-5 text-amber-500" />
-          Rischi e anomalie
-        </CardTitle>
-        <CardDescription>Punteggio di rischio per contratto, calcolato dal modello</CardDescription>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-amber-500" />
+              Rischi e anomalie
+            </CardTitle>
+            <CardDescription>
+              Punteggio euristico (scadenza + valore anomalo) — non validato su esiti reali
+            </CardDescription>
+          </div>
+          {riskScores && riskScores.length > 0 && (
+            <Badge variant={hasMlScores ? "secondary" : "outline"}>
+              {hasMlScores ? "ML attivo" : "Solo regole euristiche"}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
 
       <CardContent>

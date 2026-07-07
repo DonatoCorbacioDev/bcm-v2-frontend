@@ -105,6 +105,8 @@ export interface RiskScore {
   riskScore: number;
   level: "LOW" | "MEDIUM" | "HIGH";
   anomalies: string[];
+  mlScore?: number;
+  mlLevel?: "LOW" | "MEDIUM" | "HIGH";
 }
 
 export interface ContractDocument {

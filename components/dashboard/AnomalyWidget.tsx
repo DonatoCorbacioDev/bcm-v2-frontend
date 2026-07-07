@@ -33,7 +33,8 @@ export function AnomalyWidget() {
           Anomalie finanziarie
         </CardTitle>
         <CardDescription>
-          Importi insoliti rilevati da Isolation Forest — soglia 10%
+          Importi insoliti rilevati da Isolation Forest — soglia 10%, segnalazione
+          statistica non verificata come errore o frode reale
         </CardDescription>
       </CardHeader>
 

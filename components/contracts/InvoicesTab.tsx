@@ -302,7 +302,9 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 w-10" />
+                <th className="px-4 py-3 w-10">
+                  <span className="sr-only">Seleziona</span>
+                </th>
                 {["File", "Fornitore", "N. fattura", "Data", "Totale", "Pagamento", "Azioni"].map((h) => (
                   <th
                     key={h}
@@ -432,12 +434,12 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
             <table className="min-w-full divide-y divide-border text-sm">
               <thead className="bg-muted">
                 <tr>
-                  {["File", "Data esecuzione", "Importo", "N. fatture", "Generato il", ""].map((h) => (
+                  {["File", "Data esecuzione", "Importo", "N. fatture", "Generato il", "Azioni"].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
                     >
-                      {h}
+                      {h === "Azioni" ? <span className="sr-only">{h}</span> : h}
                     </th>
                   ))}
                 </tr>

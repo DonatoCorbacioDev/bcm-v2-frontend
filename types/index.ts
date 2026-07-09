@@ -99,32 +99,34 @@ export interface ForecastResponse {
   reliable?: boolean;
 }
 
+export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
+
 export interface RiskScore {
   contractId: number;
   customerName: string;
   riskScore: number;
-  level: "LOW" | "MEDIUM" | "HIGH";
+  level: RiskLevel;
   anomalies: string[];
   mlScore?: number;
-  mlLevel?: "LOW" | "MEDIUM" | "HIGH";
+  mlLevel?: RiskLevel;
 }
 
 export interface RiskFeedback {
   id: number;
   contractId: number;
   riskScore: number;
-  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  riskLevel: RiskLevel;
   mlScore: number | null;
-  mlLevel: "LOW" | "MEDIUM" | "HIGH" | null;
+  mlLevel: RiskLevel | null;
   agree: boolean;
   createdAt: string;
 }
 
 export interface RiskFeedbackRequest {
   riskScore: number;
-  level: "LOW" | "MEDIUM" | "HIGH";
+  level: RiskLevel;
   mlScore?: number;
-  mlLevel?: "LOW" | "MEDIUM" | "HIGH";
+  mlLevel?: RiskLevel;
   agree: boolean;
 }
 

@@ -22,6 +22,9 @@ import { contractsService } from '@/services/contracts.service';
 import { dashboardService } from '@/services/dashboard.service';
 import { rolesService } from '@/services/roles.service';
 import { contractTemplatesService } from '@/services/contractTemplates.service';
+import { calendarFeedService } from '@/services/calendarFeed.service';
+import { organizationService } from '@/services/organization.service';
+import { twoFactorAuthService } from '@/services/twoFactorAuth.service';
 
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
@@ -393,5 +396,81 @@ describe('contractTemplatesService', () => {
     const result = await contractTemplatesService.instantiate(1, instantiatePayload);
     expect(mockPost).toHaveBeenCalledWith('/contract-templates/1/instantiate', instantiatePayload);
     expect(result).toEqual(contract);
+  });
+});
+
+// ─── calendarFeedService ─────────────────────────────────────────────────────
+
+describe('calendarFeedService', () => {
+  it('getUrl() calls GET /users/me/calendar-feed and returns the url', async () => {
+    mockGet.mockResolvedValue({ data: { url: 'https://api.example.com/feed/abc.ics' } });
+    const result = await calendarFeedService.getUrl();
+    expect(mockGet).toHaveBeenCalledWith('/users/me/calendar-feed');
+    expect(result).toBe('https://api.example.com/feed/abc.ics');
+  });
+
+  it('regenerate() calls POST /users/me/calendar-feed/regenerate and returns the new url', async () => {
+    mockPost.mockResolvedValue({ data: { url: 'https://api.example.com/feed/def.ics' } });
+    const result = await calendarFeedService.regenerate();
+    expect(mockPost).toHaveBeenCalledWith('/users/me/calendar-feed/regenerate');
+    expect(result).toBe('https://api.example.com/feed/def.ics');
+  });
+});
+
+// ─── organizationService ─────────────────────────────────────────────────────
+
+describe('organizationService', () => {
+  const organization = {
+    id: 1, name: 'Acme', slug: 'acme', subscriptionTier: 'FREE',
+    iban: null, bic: null, createdAt: '2024-01-01',
+  };
+
+  it('getMine() calls GET /organizations/me', async () => {
+    mockGet.mockResolvedValue({ data: organization });
+    const result = await organizationService.getMine();
+    expect(mockGet).toHaveBeenCalledWith('/organizations/me');
+    expect(result).toEqual(organization);
+  });
+
+  it('update() calls PUT /organizations/me with payload', async () => {
+    const payload = { name: 'Acme Corp', iban: 'IT60X0542811101000000123456' };
+    const updated = { ...organization, ...payload };
+    mockPut.mockResolvedValue({ data: updated });
+    const result = await organizationService.update(payload);
+    expect(mockPut).toHaveBeenCalledWith('/organizations/me', payload);
+    expect(result).toEqual(updated);
+  });
+});
+
+// ─── twoFactorAuthService ────────────────────────────────────────────────────
+
+describe('twoFactorAuthService', () => {
+  it('getStatus() calls GET /users/me/2fa/status and returns enabled flag', async () => {
+    mockGet.mockResolvedValue({ data: { enabled: true } });
+    const result = await twoFactorAuthService.getStatus();
+    expect(mockGet).toHaveBeenCalledWith('/users/me/2fa/status');
+    expect(result).toBe(true);
+  });
+
+  it('setup() calls POST /users/me/2fa/setup and returns secret + otpAuthUri', async () => {
+    const setup = { secret: 'ABC123', otpAuthUri: 'otpauth://totp/BCM:user?secret=ABC123' };
+    mockPost.mockResolvedValue({ data: setup });
+    const result = await twoFactorAuthService.setup();
+    expect(mockPost).toHaveBeenCalledWith('/users/me/2fa/setup');
+    expect(result).toEqual(setup);
+  });
+
+  it('confirm() calls POST /users/me/2fa/confirm with code and returns recovery codes', async () => {
+    const recoveryCodes = ['code1', 'code2'];
+    mockPost.mockResolvedValue({ data: { recoveryCodes } });
+    const result = await twoFactorAuthService.confirm('123456');
+    expect(mockPost).toHaveBeenCalledWith('/users/me/2fa/confirm', { code: '123456' });
+    expect(result).toEqual(recoveryCodes);
+  });
+
+  it('disable() calls POST /users/me/2fa/disable with code', async () => {
+    mockPost.mockResolvedValue({});
+    await twoFactorAuthService.disable('123456');
+    expect(mockPost).toHaveBeenCalledWith('/users/me/2fa/disable', { code: '123456' });
   });
 });

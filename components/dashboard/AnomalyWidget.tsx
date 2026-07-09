@@ -76,7 +76,8 @@ export function AnomalyWidget() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {visibleAnomalies?.map((item) => {
+                {/* visibleAnomalies is always an array here since anomalies is truthy in this branch */}
+                {visibleAnomalies!.map((item) => {
                   const cfg = SEVERITY_CONFIG[item.severity] ?? SEVERITY_CONFIG.LOW;
                   const monthLabel = MONTHS_IT[(item.month - 1) % 12];
                   return (

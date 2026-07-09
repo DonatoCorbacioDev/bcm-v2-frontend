@@ -181,6 +181,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   };
 
   const handleSavePaymentDetails = () => {
+    /* istanbul ignore next -- Save button only renders while paymentDetailsInvoice is set */
     if (!paymentDetailsInvoice) return;
     if (!ibanInput.trim()) {
       toast.error("L'IBAN è obbligatorio");
@@ -587,7 +588,10 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       {/* Payment details edit Dialog */}
       <Dialog
         open={paymentDetailsInvoice !== null}
-        onOpenChange={(open) => { if (!open) setPaymentDetailsInvoice(null); }}
+        onOpenChange={
+          /* istanbul ignore next -- Radix only invokes this to request a close (open=false) since there is no DialogTrigger */
+          (open) => { if (!open) setPaymentDetailsInvoice(null); }
+        }
       >
         <DialogContent>
           <DialogHeader>

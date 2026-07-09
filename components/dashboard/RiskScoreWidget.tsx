@@ -97,7 +97,8 @@ export function RiskScoreWidget() {
 
         {!isLoading && !isError && riskScores && riskScores.length > 0 && (
           <div className="space-y-3">
-            {visibleScores?.map((item) => {
+            {/* visibleScores is always an array here since riskScores is truthy in this branch */}
+            {visibleScores!.map((item) => {
               const cfg = LEVEL_CONFIG[item.level] ?? LEVEL_CONFIG.LOW;
               const pct = Math.round(item.riskScore * 100);
               const feedback = feedbackByContract.get(item.contractId);

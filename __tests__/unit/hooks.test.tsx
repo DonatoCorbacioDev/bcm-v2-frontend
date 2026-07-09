@@ -463,6 +463,32 @@ describe('useAuth', () => {
     expect(result.current.error).toBe('Accesso non riuscito. Riprova.');
   });
 
+  it('login fails with fallback message when the error has no response at all', async () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue(new Error('Network Error'));
+    const { result } = renderHook(() => useAuth());
+    let loginResult: LoginResult | undefined;
+    await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
+    expect(loginResult?.success).toBe(false);
+    expect(result.current.error).toBe('Accesso non riuscito. Riprova.');
+  });
+
+  it('login fails with fallback message when response has no data', async () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue({ response: {} });
+    const { result } = renderHook(() => useAuth());
+    let loginResult: LoginResult | undefined;
+    await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
+    expect(loginResult?.success).toBe(false);
+    expect(result.current.error).toBe('Accesso non riuscito. Riprova.');
+  });
+
   it('login returns mfaRequired with the pending token when 2FA is enabled', async () => {
     (useAuthStore as unknown as jest.Mock).mockReturnValue({
       setAuth: jest.fn(), clearAuth: jest.fn(),
@@ -505,6 +531,32 @@ describe('useAuth', () => {
     await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '000000'); });
     expect(success).toBe(false);
     expect(result.current.error).toBe('Invalid verification code');
+  });
+
+  it('verifyTwoFactor sets a fallback error message when the error has no response at all', async () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue(new Error('Network Error'));
+    const { result } = renderHook(() => useAuth());
+    let success: boolean | undefined;
+    await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '000000'); });
+    expect(success).toBe(false);
+    expect(result.current.error).toBe('Codice non valido. Riprova.');
+  });
+
+  it('verifyTwoFactor sets a fallback error message when response has no data', async () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue({ response: {} });
+    const { result } = renderHook(() => useAuth());
+    let success: boolean | undefined;
+    await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '000000'); });
+    expect(success).toBe(false);
+    expect(result.current.error).toBe('Codice non valido. Riprova.');
   });
 });
 

@@ -58,6 +58,10 @@ const invoiceKB   = { ...invoice, id: 2, fileName: 'piccola.xml', fileSize: 512 
 const invoiceMed  = { ...invoice, id: 3, fileName: 'media.xml',   fileSize: 102400 }; // 100 KB
 const invoiceNoIban = { ...invoice, id: 4, fileName: 'no-iban.xml', supplierIban: null, supplierBic: null };
 const invoicePaid = { ...invoice, id: 5, fileName: 'pagata.xml', sepaBatchId: 99 };
+const invoiceNoPaymentDetails = {
+  ...invoice, id: 6, fileName: 'no-payment-details.xml',
+  supplierIban: null, supplierBic: null, paymentDueDate: null,
+};
 
 const sepaBatch = {
   id: 99,
@@ -398,6 +402,17 @@ describe('InvoicesTab', () => {
     expect(screen.getByRole('button', { name: /genera pagamento sepa \(1\)/i })).toBeInTheDocument();
   });
 
+  it('deselects an invoice and hides the generate button again', async () => {
+    mockApiGet({ invoices: [invoice] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    const checkbox = screen.getByRole('checkbox', { name: /seleziona fattura/i });
+    await userEvent.click(checkbox);
+    expect(screen.getByRole('button', { name: /genera pagamento sepa/i })).toBeInTheDocument();
+    await userEvent.click(checkbox);
+    expect(screen.queryByRole('button', { name: /genera pagamento sepa/i })).not.toBeInTheDocument();
+  });
+
   // ── SEPA: generate payment ─────────────────────────────────────────────────
 
   it('generates a SEPA payment for the selected invoice and triggers a download', async () => {
@@ -427,6 +442,18 @@ describe('InvoicesTab', () => {
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Generazione del pagamento SEPA non riuscita'),
     );
+  });
+
+  it('shows a spinner on the generate button while SEPA generation is pending', async () => {
+    mockApiGet({ invoices: [invoice] });
+    (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
+    const generateButton = screen.getByRole('button', { name: /genera pagamento sepa/i });
+    await userEvent.click(generateButton);
+    await waitFor(() => expect(generateButton).toBeDisabled());
+    expect(generateButton.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   // ── SEPA: payment details dialog ──────────────────────────────────────────
@@ -465,6 +492,107 @@ describe('InvoicesTab', () => {
     expect(api.patch).not.toHaveBeenCalled();
   });
 
+  it('opens the payment details dialog from the actions column, prefilled with existing data, and updates the BIC and due date', async () => {
+    mockApiGet({ invoices: [invoice] });
+    (api.patch as jest.Mock).mockResolvedValue({ data: invoice });
+    renderTab();
+    await waitFor(() => expect(screen.getByTitle('Modifica dati di pagamento')).toBeInTheDocument());
+    await userEvent.click(screen.getByTitle('Modifica dati di pagamento'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    expect(screen.getByLabelText(/IBAN \*/i)).toHaveValue(invoice.supplierIban);
+    expect(screen.getByLabelText(/BIC \/ SWIFT/i)).toHaveValue(invoice.supplierBic);
+    expect(screen.getByLabelText(/Scadenza pagamento/i)).toHaveValue('2024-04-01');
+
+    const bicField = screen.getByLabelText(/BIC \/ SWIFT/i);
+    await userEvent.clear(bicField);
+    await userEvent.type(bicField, 'BCITITMM');
+    const dueDateField = screen.getByLabelText(/Scadenza pagamento/i);
+    fireEvent.change(dueDateField, { target: { value: '2024-05-01' } });
+
+    await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
+
+    await waitFor(() =>
+      expect(api.patch).toHaveBeenCalledWith(
+        '/contracts/1/invoices/1/payment-details',
+        expect.objectContaining({ supplierBic: 'BCITITMM', paymentDueDate: '2024-05-01' }),
+      ),
+    );
+  });
+
+  it('shows an error toast when saving payment details fails', async () => {
+    mockApiGet({ invoices: [invoiceNoIban] });
+    (api.patch as jest.Mock).mockRejectedValue(new Error('save failed'));
+    renderTab();
+    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('IBAN mancante'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await userEvent.type(screen.getByLabelText(/IBAN \*/i), 'IT60X0542811101000000123456');
+    await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Aggiornamento dei dati di pagamento non riuscito'),
+    );
+  });
+
+  it('closes the payment details dialog when cancelled', async () => {
+    mockApiGet({ invoices: [invoiceNoIban] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('IBAN mancante'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await userEvent.click(screen.getByRole('button', { name: /^annulla$/i }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('closes the payment details dialog on escape', async () => {
+    mockApiGet({ invoices: [invoiceNoIban] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('IBAN mancante'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('prefills an empty due date field when the invoice has none, and saves with a null due date', async () => {
+    mockApiGet({ invoices: [invoiceNoPaymentDetails] });
+    (api.patch as jest.Mock).mockResolvedValue({ data: invoiceNoPaymentDetails });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('IBAN mancante'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    expect(screen.getByLabelText(/Scadenza pagamento/i)).toHaveValue('');
+
+    await userEvent.type(screen.getByLabelText(/IBAN \*/i), 'IT60X0542811101000000123456');
+    await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
+
+    await waitFor(() =>
+      expect(api.patch).toHaveBeenCalledWith(
+        '/contracts/1/invoices/6/payment-details',
+        expect.objectContaining({ supplierBic: null, paymentDueDate: null }),
+      ),
+    );
+  });
+
+  it('shows a "Salvataggio..." label on the save button while the payment details mutation is pending', async () => {
+    mockApiGet({ invoices: [invoiceNoIban] });
+    (api.patch as jest.Mock).mockReturnValue(new Promise(() => {}));
+    renderTab();
+    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('IBAN mancante'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await userEvent.type(screen.getByLabelText(/IBAN \*/i), 'IT60X0542811101000000123456');
+    await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
+
+    expect(await screen.findByRole('button', { name: /salvataggio/i })).toBeDisabled();
+  });
+
   // ── SEPA: payment history ──────────────────────────────────────────────────
 
   it('renders the SEPA payment history and re-downloads a generated file', async () => {
@@ -487,5 +615,23 @@ describe('InvoicesTab', () => {
     renderTab();
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     expect(screen.queryByText('Pagamenti SEPA generati')).not.toBeInTheDocument();
+  });
+
+  it('shows an error toast when re-downloading a generated SEPA payment fails', async () => {
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes('/sepa-payments') && url.endsWith('/download')) {
+        return Promise.reject(new Error('network error'));
+      }
+      if (url.includes('/sepa-payments')) return Promise.resolve({ data: [sepaBatch] });
+      if (url.endsWith('/invoices')) return Promise.resolve({ data: [invoice] });
+      return Promise.reject(new Error(`Unhandled GET ${url} in test mock`));
+    });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Pagamenti SEPA generati')).toBeInTheDocument());
+
+    await userEvent.click(screen.getByTitle('Scarica di nuovo'));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Download del pagamento SEPA non riuscito'),
+    );
   });
 });

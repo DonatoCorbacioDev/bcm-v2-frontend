@@ -11,7 +11,18 @@ jest.mock('recharts', () => ({
   LineChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Pie: () => null,
   Bar: () => null,
-  Area: () => null,
+  // Clone the `dot` element at a non-last and the last index to cover both
+  // branches of ContractsTimelineChart's TimelineLastPointDot.
+  Area: ({ dot }: { dot?: React.ReactElement<{ index?: number; lastIndex?: number }> }) => {
+    if (!dot) return null;
+    const { lastIndex } = dot.props;
+    return (
+      <>
+        {React.cloneElement(dot, { index: 0, lastIndex })}
+        {React.cloneElement(dot, { index: lastIndex, lastIndex })}
+      </>
+    );
+  },
   Line: () => null,
   Cell: () => null,
   // Call tickFormatter with a short and a long string to cover both branches of truncate()
@@ -190,6 +201,16 @@ describe('ContractsTimelineChart', () => {
     render(<ContractsTimelineChart />);
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText(/▼ 3 vs mese scorso/)).toBeInTheDocument();
+  });
+
+  it('renders nothing when the last data point is falsy', () => {
+    (useContractsTimeline as jest.Mock).mockReturnValue({
+      data: [undefined],
+      isLoading: false,
+      isError: false,
+    });
+    const { container } = render(<ContractsTimelineChart />);
+    expect(container).toBeEmptyDOMElement();
   });
 });
 

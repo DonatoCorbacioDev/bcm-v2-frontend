@@ -3,16 +3,21 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Upload, Download, Trash2, Receipt, Loader2 } from "lucide-react";
+import { Upload, Download, Trash2, Receipt, Loader2, Landmark, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import api from "@/lib/api";
+import { sepaPaymentsService, type SepaPaymentBatch } from "@/services/sepaPayments.service";
 
 interface LineItem {
   lineNumber: number;
@@ -39,6 +44,10 @@ interface ElectronicInvoice {
   totalAmount: number;
   currency: string;
   lineItems: LineItem[];
+  supplierIban: string | null;
+  supplierBic: string | null;
+  paymentDueDate: string | null;
+  sepaBatchId: number | null;
 }
 
 interface InvoicesTabProps {
@@ -61,6 +70,11 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<ElectronicInvoice | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [paymentDetailsInvoice, setPaymentDetailsInvoice] = useState<ElectronicInvoice | null>(null);
+  const [ibanInput, setIbanInput] = useState("");
+  const [bicInput, setBicInput] = useState("");
+  const [dueDateInput, setDueDateInput] = useState("");
 
   const { data: invoices, isLoading } = useQuery<ElectronicInvoice[]>({
     queryKey: ["invoices", contractId],
@@ -68,6 +82,11 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       const res = await api.get(`/contracts/${contractId}/invoices`);
       return res.data;
     },
+  });
+
+  const { data: sepaPayments } = useQuery<SepaPaymentBatch[]>({
+    queryKey: ["sepa-payments", contractId],
+    queryFn: () => sepaPaymentsService.list(contractId),
   });
 
   const uploadMutation = useMutation({
@@ -98,6 +117,82 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
     },
     onError: () => toast.error("Eliminazione della fattura non riuscita"),
   });
+
+  const paymentDetailsMutation = useMutation({
+    mutationFn: async (params: { invoiceId: number; supplierIban: string; supplierBic: string | null; paymentDueDate: string | null }) => {
+      await api.patch(`/contracts/${contractId}/invoices/${params.invoiceId}/payment-details`, {
+        supplierIban: params.supplierIban,
+        supplierBic: params.supplierBic || null,
+        paymentDueDate: params.paymentDueDate || null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      toast.success("Dati di pagamento aggiornati");
+      setPaymentDetailsInvoice(null);
+    },
+    onError: () => toast.error("Aggiornamento dei dati di pagamento non riuscito"),
+  });
+
+  const generateSepaMutation = useMutation({
+    mutationFn: async (invoiceIds: number[]) => {
+      return sepaPaymentsService.create(contractId, { invoiceIds });
+    },
+    onSuccess: (blob) => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `sepa-${contractId}.xml`;
+      a.click();
+      URL.revokeObjectURL(url);
+      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      queryClient.invalidateQueries({ queryKey: ["sepa-payments", contractId] });
+      setSelectedIds([]);
+      toast.success("Pagamento SEPA generato con successo");
+    },
+    onError: () => toast.error("Generazione del pagamento SEPA non riuscita"),
+  });
+
+  const handleDownloadSepaPayment = async (batch: SepaPaymentBatch) => {
+    try {
+      const blob = await sepaPaymentsService.download(contractId, batch.id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = batch.fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Download del pagamento SEPA non riuscito");
+    }
+  };
+
+  const toggleSelected = (invoice: ElectronicInvoice) => {
+    setSelectedIds((prev) =>
+      prev.includes(invoice.id) ? prev.filter((id) => id !== invoice.id) : [...prev, invoice.id]
+    );
+  };
+
+  const openPaymentDetailsDialog = (invoice: ElectronicInvoice) => {
+    setPaymentDetailsInvoice(invoice);
+    setIbanInput(invoice.supplierIban ?? "");
+    setBicInput(invoice.supplierBic ?? "");
+    setDueDateInput(invoice.paymentDueDate ? invoice.paymentDueDate.slice(0, 10) : "");
+  };
+
+  const handleSavePaymentDetails = () => {
+    if (!paymentDetailsInvoice) return;
+    if (!ibanInput.trim()) {
+      toast.error("L'IBAN è obbligatorio");
+      return;
+    }
+    paymentDetailsMutation.mutate({
+      invoiceId: paymentDetailsInvoice.id,
+      supplierIban: ibanInput.trim(),
+      supplierBic: bicInput.trim() || null,
+      paymentDueDate: dueDateInput || null,
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -172,6 +267,19 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           {uploadMutation.isPending ? "Caricamento..." : "Carica fattura"}
         </Button>
         <span className="text-xs text-muted-foreground">Solo XML FatturaPA</span>
+        {selectedIds.length > 0 && (
+          <Button
+            onClick={() => generateSepaMutation.mutate(selectedIds)}
+            disabled={generateSepaMutation.isPending}
+          >
+            {generateSepaMutation.isPending ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Landmark className="h-4 w-4 mr-2" />
+            )}
+            Genera pagamento SEPA ({selectedIds.length})
+          </Button>
+        )}
       </div>
 
       {/* Invoice list */}
@@ -194,7 +302,8 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted">
               <tr>
-                {["File", "Fornitore", "N. fattura", "Data", "Totale", "Azioni"].map((h) => (
+                <th className="px-4 py-3 w-10" />
+                {["File", "Fornitore", "N. fattura", "Data", "Totale", "Pagamento", "Azioni"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
@@ -211,6 +320,14 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   className="hover:bg-accent cursor-pointer"
                   onClick={() => handleRowClick(invoice)}
                 >
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selectedIds.includes(invoice.id)}
+                      disabled={!invoice.supplierIban || invoice.sepaBatchId != null}
+                      onCheckedChange={() => toggleSelected(invoice)}
+                      aria-label={`Seleziona fattura ${invoice.fileName}`}
+                    />
+                  </td>
                   <td className="px-4 py-3 text-sm text-foreground">
                     <div className="flex items-center gap-2">
                       <Receipt className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -238,6 +355,26 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   <td className="px-4 py-3 text-sm font-bold text-foreground whitespace-nowrap">
                     {formatAmount(invoice.totalAmount, invoice.currency)}
                   </td>
+                  <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                    {(() => {
+                      if (invoice.sepaBatchId != null) {
+                        return <Badge variant="success">Pagata</Badge>;
+                      }
+                      if (invoice.supplierIban) {
+                        return <Badge variant="secondary">Pronta per SEPA</Badge>;
+                      }
+                      return (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openPaymentDetailsDialog(invoice)}
+                        >
+                          <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                          IBAN mancante
+                        </Button>
+                      );
+                    })()}
+                  </td>
                   <td
                     className="px-4 py-3 whitespace-nowrap"
                     onClick={(e) => e.stopPropagation()}
@@ -252,6 +389,17 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                       >
                         <Download className="h-4 w-4" />
                       </Button>
+                      {invoice.sepaBatchId == null && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openPaymentDetailsDialog(invoice)}
+                          title="Modifica dati di pagamento"
+                          aria-label="Modifica dati di pagamento"
+                        >
+                          <Landmark className="h-4 w-4" />
+                        </Button>
+                      )}
                       {isAdmin && (
                         <Button
                           variant="ghost"
@@ -271,6 +419,61 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* SEPA payments history */}
+      {sepaPayments && sepaPayments.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold text-foreground mb-3">
+            Pagamenti SEPA generati
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-border text-sm">
+              <thead className="bg-muted">
+                <tr>
+                  {["File", "Data esecuzione", "Importo", "N. fatture", "Generato il", ""].map((h) => (
+                    <th
+                      key={h}
+                      className="px-4 py-2 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-card divide-y divide-border">
+                {sepaPayments.map((batch) => (
+                  <tr key={batch.id} className="hover:bg-accent">
+                    <td className="px-4 py-2 text-foreground whitespace-nowrap">{batch.fileName}</td>
+                    <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
+                      {new Date(batch.executionDate).toLocaleDateString("it-IT")}
+                    </td>
+                    <td className="px-4 py-2 font-medium text-foreground whitespace-nowrap">
+                      {formatAmount(batch.totalAmount, batch.currency)}
+                    </td>
+                    <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
+                      {batch.numberOfTransactions}
+                    </td>
+                    <td className="px-4 py-2 text-muted-foreground whitespace-nowrap">
+                      {new Date(batch.createdAt).toLocaleDateString("it-IT")}
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDownloadSepaPayment(batch)}
+                        title="Scarica di nuovo"
+                        aria-label="Scarica di nuovo"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -376,6 +579,66 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment details edit Dialog */}
+      <Dialog
+        open={paymentDetailsInvoice !== null}
+        onOpenChange={(open) => { if (!open) setPaymentDetailsInvoice(null); }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dati di pagamento fornitore</DialogTitle>
+            <DialogDescription>
+              IBAN, BIC e scadenza da usare per generare un pagamento SEPA per questa fattura.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="supplier-iban" className="block text-sm font-medium mb-2">
+                IBAN *
+              </label>
+              <Input
+                id="supplier-iban"
+                value={ibanInput}
+                onChange={(e) => setIbanInput(e.target.value)}
+                placeholder="IT60X0542811101000000123456"
+              />
+            </div>
+            <div>
+              <label htmlFor="supplier-bic" className="block text-sm font-medium mb-2">
+                BIC / SWIFT
+              </label>
+              <Input
+                id="supplier-bic"
+                value={bicInput}
+                onChange={(e) => setBicInput(e.target.value)}
+                placeholder="UNCRITMMXXX"
+              />
+            </div>
+            <div>
+              <label htmlFor="payment-due-date" className="block text-sm font-medium mb-2">
+                Scadenza pagamento
+              </label>
+              <Input
+                id="payment-due-date"
+                type="date"
+                value={dueDateInput}
+                onChange={(e) => setDueDateInput(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPaymentDetailsInvoice(null)}>
+              Annulla
+            </Button>
+            <Button onClick={handleSavePaymentDetails} disabled={paymentDetailsMutation.isPending}>
+              {paymentDetailsMutation.isPending ? "Salvataggio..." : "Salva"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

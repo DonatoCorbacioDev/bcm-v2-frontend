@@ -8,6 +8,7 @@ import {
   Users,
   User,
   Shield,
+  Landmark,
   type LucideIcon,
 } from "lucide-react";
 
@@ -35,6 +36,7 @@ export const navGroups: { title: string; items: NavItem[] }[] = [
       { label: "Aree di business",  href: "/business-areas",  icon: Building2, adminOnly: true },
       { label: "Responsabili",      href: "/managers",         icon: Users,     adminOnly: true },
       { label: "Utenti",            href: "/users",            icon: User,      adminOnly: true },
+      { label: "Organizzazione",    href: "/organization",     icon: Landmark,  adminOnly: true },
       { label: "Registro attività", href: "/audit-logs",       icon: Shield,    adminOnly: true },
     ],
   },

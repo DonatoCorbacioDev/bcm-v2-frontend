@@ -10,6 +10,7 @@ jest.mock('@/lib/api', () => ({
   default: {
     get:    jest.fn(),
     post:   jest.fn(),
+    patch:  jest.fn(),
     delete: jest.fn(),
     interceptors: { request: { use: jest.fn() }, response: { use: jest.fn() } },
     defaults: { headers: { common: {} } },
@@ -47,10 +48,27 @@ const invoice = {
   totalAmount: 1220,
   currency: 'EUR',
   lineItems: [lineItem],
+  supplierIban: 'IT60X0542811101000000123456',
+  supplierBic: 'UNCRITMMXXX',
+  paymentDueDate: '2024-04-01',
+  sepaBatchId: null,
 };
 
 const invoiceKB   = { ...invoice, id: 2, fileName: 'piccola.xml', fileSize: 512    }; // 512 B
 const invoiceMed  = { ...invoice, id: 3, fileName: 'media.xml',   fileSize: 102400 }; // 100 KB
+const invoiceNoIban = { ...invoice, id: 4, fileName: 'no-iban.xml', supplierIban: null, supplierBic: null };
+const invoicePaid = { ...invoice, id: 5, fileName: 'pagata.xml', sepaBatchId: 99 };
+
+const sepaBatch = {
+  id: 99,
+  contractId: 1,
+  executionDate: '2024-04-05',
+  totalAmount: 1220,
+  currency: 'EUR',
+  numberOfTransactions: 1,
+  fileName: 'sepa-1-2024-04-05.xml',
+  createdAt: '2024-04-04T09:00:00Z',
+};
 
 global.URL.createObjectURL = jest.fn(() => 'blob:mock');
 global.URL.revokeObjectURL = jest.fn();
@@ -64,6 +82,44 @@ function renderTab(isAdmin = true) {
     <InvoicesTab contractId={1} isAdmin={isAdmin} />,
     { wrapper: createWrapper() },
   );
+}
+
+type MockConfig = {
+  invoices?: unknown[];
+  invoicesError?: Error;
+  detail?: unknown;
+  detailError?: Error;
+  download?: Blob;
+  downloadError?: Error;
+  sepaPayments?: unknown[];
+  sepaPaymentsError?: Error;
+};
+
+/** URL-based GET mock so concurrent queries (invoices + sepa-payments) don't fight over a positional queue. */
+function mockApiGet(config: MockConfig) {
+  (api.get as jest.Mock).mockImplementation((url: string) => {
+    if (url.includes('/sepa-payments') && !url.includes('/download')) {
+      return config.sepaPaymentsError
+        ? Promise.reject(config.sepaPaymentsError)
+        : Promise.resolve({ data: config.sepaPayments ?? [] });
+    }
+    if (url.endsWith('/download')) {
+      return config.downloadError
+        ? Promise.reject(config.downloadError)
+        : Promise.resolve({ data: config.download ?? new Blob(['<xml/>']) });
+    }
+    if (/\/invoices\/\d+$/.test(url)) {
+      return config.detailError
+        ? Promise.reject(config.detailError)
+        : Promise.resolve({ data: config.detail });
+    }
+    if (url.endsWith('/invoices')) {
+      return config.invoicesError
+        ? Promise.reject(config.invoicesError)
+        : Promise.resolve({ data: config.invoices ?? [] });
+    }
+    return Promise.reject(new Error(`Unhandled GET ${url} in test mock`));
+  });
 }
 
 // ── tests ─────────────────────────────────────────────────────────────────────
@@ -80,7 +136,7 @@ describe('InvoicesTab', () => {
   // ── empty state ────────────────────────────────────────────────────────────
 
   it('shows empty state when invoice list is empty', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    mockApiGet({ invoices: [] });
     renderTab();
     await waitFor(() =>
       expect(screen.getByText(/nessuna fattura/i)).toBeInTheDocument(),
@@ -88,7 +144,10 @@ describe('InvoicesTab', () => {
   });
 
   it('shows empty state when data is undefined/null', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: null });
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes('/sepa-payments')) return Promise.resolve({ data: [] });
+      return Promise.resolve({ data: null });
+    });
     renderTab();
     await waitFor(() =>
       expect(screen.getByText(/nessuna fattura/i)).toBeInTheDocument(),
@@ -98,7 +157,7 @@ describe('InvoicesTab', () => {
   // ── list rendering ─────────────────────────────────────────────────────────
 
   it('renders invoice table with formatted file sizes', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice, invoiceKB, invoiceMed] });
+    mockApiGet({ invoices: [invoice, invoiceKB, invoiceMed] });
     renderTab();
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     // 2 MB
@@ -110,7 +169,7 @@ describe('InvoicesTab', () => {
   });
 
   it('renders supplier name and invoice number in the table', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
+    mockApiGet({ invoices: [invoice] });
     renderTab();
     await waitFor(() => expect(screen.getByText('Fornitore SRL')).toBeInTheDocument());
     expect(screen.getByText('FT-2024-001')).toBeInTheDocument();
@@ -121,14 +180,14 @@ describe('InvoicesTab', () => {
   // ── admin guard ────────────────────────────────────────────────────────────
 
   it('hides delete button for non-admin users', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
+    mockApiGet({ invoices: [invoice] });
     renderTab(false);
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     expect(screen.queryByTitle('Elimina fattura')).not.toBeInTheDocument();
   });
 
   it('shows delete button for admin users', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
+    mockApiGet({ invoices: [invoice] });
     renderTab(true);
     await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
   });
@@ -136,7 +195,7 @@ describe('InvoicesTab', () => {
   // ── upload ─────────────────────────────────────────────────────────────────
 
   it('does nothing when file input fires with no file', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    mockApiGet({ invoices: [] });
     renderTab();
     await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -146,7 +205,7 @@ describe('InvoicesTab', () => {
   });
 
   it('rejects non-XML files and shows error toast', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    mockApiGet({ invoices: [] });
     renderTab();
     await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
@@ -157,7 +216,7 @@ describe('InvoicesTab', () => {
   });
 
   it('uploads a valid XML file and shows success toast', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockResolvedValue({ data: invoice });
     renderTab();
     await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
@@ -174,7 +233,7 @@ describe('InvoicesTab', () => {
   });
 
   it('shows error toast when upload fails', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
     renderTab();
     await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
@@ -187,7 +246,7 @@ describe('InvoicesTab', () => {
   });
 
   it('shows uploading state while mutation is pending', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
     await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
@@ -201,7 +260,7 @@ describe('InvoicesTab', () => {
   // ── delete ─────────────────────────────────────────────────────────────────
 
   it('calls delete API and shows success toast', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
+    mockApiGet({ invoices: [invoice] });
     (api.delete as jest.Mock).mockResolvedValue({});
     renderTab();
     await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
@@ -213,7 +272,7 @@ describe('InvoicesTab', () => {
   });
 
   it('shows error toast when delete fails', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
+    mockApiGet({ invoices: [invoice] });
     (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));
     renderTab();
     await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
@@ -224,7 +283,7 @@ describe('InvoicesTab', () => {
   });
 
   it('delete button is disabled while mutation is pending', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
+    mockApiGet({ invoices: [invoice] });
     (api.delete as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
     await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
@@ -235,9 +294,7 @@ describe('InvoicesTab', () => {
   // ── download ───────────────────────────────────────────────────────────────
 
   it('downloads invoice file when download button is clicked', async () => {
-    (api.get as jest.Mock)
-      .mockResolvedValueOnce({ data: [invoice] })
-      .mockResolvedValueOnce({ data: new Blob(['<xml/>']) });
+    mockApiGet({ invoices: [invoice], download: new Blob(['<xml/>']) });
     renderTab();
     await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Scarica fattura'));
@@ -252,9 +309,7 @@ describe('InvoicesTab', () => {
   });
 
   it('shows error toast when download fails', async () => {
-    (api.get as jest.Mock)
-      .mockResolvedValueOnce({ data: [invoice] })
-      .mockRejectedValueOnce(new Error('network error'));
+    mockApiGet({ invoices: [invoice], downloadError: new Error('network error') });
     renderTab();
     await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
     await userEvent.click(screen.getByTitle('Scarica fattura'));
@@ -266,7 +321,7 @@ describe('InvoicesTab', () => {
   // ── stopPropagation on actions cell ───────────────────────────────────────
 
   it('clicking the actions cell does not open the detail dialog', async () => {
-    (api.get as jest.Mock).mockResolvedValue({ data: [invoice] });
+    mockApiGet({ invoices: [invoice] });
     renderTab();
     await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
     // Click the actions <td> directly — propagation should be stopped
@@ -278,9 +333,7 @@ describe('InvoicesTab', () => {
   // ── row click → detail dialog ──────────────────────────────────────────────
 
   it('opens detail dialog with full invoice info on row click', async () => {
-    (api.get as jest.Mock)
-      .mockResolvedValueOnce({ data: [invoice] })
-      .mockResolvedValueOnce({ data: invoice });
+    mockApiGet({ invoices: [invoice], detail: invoice });
     renderTab();
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     await userEvent.click(screen.getByText('fattura.xml'));
@@ -298,9 +351,7 @@ describe('InvoicesTab', () => {
 
   it('does not render line items section when lineItems is empty', async () => {
     const invoiceNoItems = { ...invoice, lineItems: [] };
-    (api.get as jest.Mock)
-      .mockResolvedValueOnce({ data: [invoiceNoItems] })
-      .mockResolvedValueOnce({ data: invoiceNoItems });
+    mockApiGet({ invoices: [invoiceNoItems], detail: invoiceNoItems });
     renderTab();
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     await userEvent.click(screen.getByText('fattura.xml'));
@@ -309,9 +360,7 @@ describe('InvoicesTab', () => {
   });
 
   it('shows error toast when row click detail fetch fails', async () => {
-    (api.get as jest.Mock)
-      .mockResolvedValueOnce({ data: [invoice] })
-      .mockRejectedValueOnce(new Error('fetch failed'));
+    mockApiGet({ invoices: [invoice], detailError: new Error('fetch failed') });
     renderTab();
     await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
     await userEvent.click(screen.getByText('fattura.xml'));
@@ -319,5 +368,124 @@ describe('InvoicesTab', () => {
       expect(toast.error).toHaveBeenCalledWith('Caricamento dei dettagli della fattura non riuscito'),
     );
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  // ── SEPA: selection state ──────────────────────────────────────────────────
+
+  it('disables the selection checkbox when the supplier IBAN is missing', async () => {
+    mockApiGet({ invoices: [invoiceNoIban] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('no-iban.xml')).toBeInTheDocument());
+    expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
+    expect(screen.getByText('IBAN mancante')).toBeInTheDocument();
+  });
+
+  it('disables the selection checkbox and shows "Pagata" once the invoice is already batched', async () => {
+    mockApiGet({ invoices: [invoicePaid] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('pagata.xml')).toBeInTheDocument());
+    expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
+    expect(screen.getByText('Pagata')).toBeInTheDocument();
+  });
+
+  it('allows selecting an eligible invoice and shows the generate button with the count', async () => {
+    mockApiGet({ invoices: [invoice] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    const checkbox = screen.getByRole('checkbox', { name: /seleziona fattura/i });
+    expect(checkbox).not.toBeDisabled();
+    await userEvent.click(checkbox);
+    expect(screen.getByRole('button', { name: /genera pagamento sepa \(1\)/i })).toBeInTheDocument();
+  });
+
+  // ── SEPA: generate payment ─────────────────────────────────────────────────
+
+  it('generates a SEPA payment for the selected invoice and triggers a download', async () => {
+    mockApiGet({ invoices: [invoice] });
+    (api.post as jest.Mock).mockResolvedValue({ data: new Blob(['<Document/>']) });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
+    await userEvent.click(screen.getByRole('button', { name: /genera pagamento sepa/i }));
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        '/contracts/1/sepa-payments',
+        { invoiceIds: [1] },
+        expect.objectContaining({ responseType: 'blob' }),
+      ),
+    );
+    expect(toast.success).toHaveBeenCalledWith('Pagamento SEPA generato con successo');
+  });
+
+  it('shows error toast when SEPA generation fails', async () => {
+    mockApiGet({ invoices: [invoice] });
+    (api.post as jest.Mock).mockRejectedValue(new Error('generation failed'));
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
+    await userEvent.click(screen.getByRole('button', { name: /genera pagamento sepa/i }));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Generazione del pagamento SEPA non riuscita'),
+    );
+  });
+
+  // ── SEPA: payment details dialog ──────────────────────────────────────────
+
+  it('opens the payment details dialog and saves a new IBAN', async () => {
+    mockApiGet({ invoices: [invoiceNoIban] });
+    (api.patch as jest.Mock).mockResolvedValue({ data: { ...invoiceNoIban, supplierIban: 'IT60X0542811101000000123456' } });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('IBAN mancante'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    const ibanField = screen.getByLabelText(/IBAN \*/i);
+    await userEvent.type(ibanField, 'IT60X0542811101000000123456');
+    await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
+
+    await waitFor(() =>
+      expect(api.patch).toHaveBeenCalledWith(
+        '/contracts/1/invoices/4/payment-details',
+        expect.objectContaining({ supplierIban: 'IT60X0542811101000000123456' }),
+      ),
+    );
+    expect(toast.success).toHaveBeenCalledWith('Dati di pagamento aggiornati');
+  });
+
+  it('shows a validation error when saving payment details without an IBAN', async () => {
+    mockApiGet({ invoices: [invoiceNoIban] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    await userEvent.click(screen.getByText('IBAN mancante'));
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+
+    await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
+
+    expect(toast.error).toHaveBeenCalledWith("L'IBAN è obbligatorio");
+    expect(api.patch).not.toHaveBeenCalled();
+  });
+
+  // ── SEPA: payment history ──────────────────────────────────────────────────
+
+  it('renders the SEPA payment history and re-downloads a generated file', async () => {
+    mockApiGet({ invoices: [invoice], sepaPayments: [sepaBatch] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('Pagamenti SEPA generati')).toBeInTheDocument());
+    expect(screen.getByText('sepa-1-2024-04-05.xml')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTitle('Scarica di nuovo'));
+    await waitFor(() =>
+      expect(api.get).toHaveBeenCalledWith(
+        '/contracts/1/sepa-payments/99/download',
+        { responseType: 'blob' },
+      ),
+    );
+  });
+
+  it('does not render the SEPA payment history section when there are no batches yet', async () => {
+    mockApiGet({ invoices: [invoice], sepaPayments: [] });
+    renderTab();
+    await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
+    expect(screen.queryByText('Pagamenti SEPA generati')).not.toBeInTheDocument();
   });
 });

@@ -118,4 +118,78 @@ describe('LoginPage', () => {
       });
     });
   });
+
+  it('shows the MFA code step when the account has 2FA enabled, and completes login with a valid code', async () => {
+    mockPost.mockResolvedValueOnce({
+      data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
+    });
+
+    render(<LoginPage />);
+
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'totp@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/codice di verifica/i)).toBeInTheDocument();
+    });
+
+    mockPost.mockResolvedValueOnce({ data: { token: 'real-token', mfaRequired: false, mfaToken: null } });
+    mockGet.mockResolvedValueOnce({
+      data: { id: 1, username: 'totp@example.com', managerId: 1, role: 'ADMIN', roleId: 1, verified: true, createdAt: '2024-01-01T00:00:00Z' },
+    });
+
+    await userEvent.type(screen.getByLabelText(/codice di verifica/i), '123456');
+    await userEvent.click(screen.getByRole('button', { name: /^verifica$/i }));
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalledWith('/auth/2fa/verify', { mfaToken: 'pending-token-123', code: '123456' });
+    });
+  });
+
+  it('shows an error and stays on the MFA step when the code is wrong', async () => {
+    mockPost.mockResolvedValueOnce({
+      data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
+    });
+
+    render(<LoginPage />);
+
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'totp@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/codice di verifica/i)).toBeInTheDocument();
+    });
+
+    mockPost.mockRejectedValueOnce({ response: { data: { message: 'Invalid verification code' } } });
+
+    await userEvent.type(screen.getByLabelText(/codice di verifica/i), '000000');
+    await userEvent.click(screen.getByRole('button', { name: /^verifica$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Invalid verification code')).toBeInTheDocument();
+    });
+    expect(screen.getByLabelText(/codice di verifica/i)).toBeInTheDocument();
+  });
+
+  it('"Torna al login" goes back to the username/password form', async () => {
+    mockPost.mockResolvedValueOnce({
+      data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
+    });
+
+    render(<LoginPage />);
+
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'totp@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/codice di verifica/i)).toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: /torna al login/i }));
+
+    expect(screen.getByLabelText(/nome utente/i)).toBeInTheDocument();
+  });
 });

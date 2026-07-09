@@ -14,16 +14,29 @@ import { ArrowRight, Lock, Moon, Sun } from "lucide-react";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isLoading, error } = useAuth();
+  const { login, verifyTwoFactor, isLoading, error } = useAuth();
   const { isDark, toggle: toggleDark } = useDarkMode();
   const [credentials, setCredentials] = useState({ username: "", password: "" });
+  const [mfaToken, setMfaToken] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   const resetSuccess = searchParams.get("reset") === "success";
   const inviteSuccess = searchParams.get("invite") === "success";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(credentials);
+    const result = await login(credentials);
+    if (result.success) {
+      router.push("/dashboard");
+    } else if (result.mfaRequired) {
+      setMfaToken(result.mfaToken);
+    }
+  };
+
+  const handleMfaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mfaToken) return;
+    const success = await verifyTwoFactor(mfaToken, mfaCode);
     if (success) router.push("/dashboard");
   };
 
@@ -137,87 +150,136 @@ function LoginContent() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="username" className="text-[13px] font-medium">
-                Nome utente
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="nome.utente"
-                value={credentials.username}
-                onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
-                required
-                className="h-[42px] text-[13px]"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-[13px] font-medium">
-                  Password
+          {mfaToken ? (
+            <form onSubmit={handleMfaSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="mfa-code" className="text-[13px] font-medium">
+                  Codice di verifica
                 </Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-[12px] text-primary hover:underline"
-                >
-                  Password dimenticata?
-                </Link>
+                <Input
+                  id="mfa-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="123456 oppure un codice di recupero"
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                  required
+                  autoFocus
+                  className="h-[42px] text-[13px]"
+                />
+                <p className="text-[12px] text-muted-foreground">
+                  Inserisci il codice a 6 cifre della tua app di autenticazione, oppure uno dei
+                  tuoi codici di recupero.
+                </p>
               </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={credentials.password}
-                onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                required
-                className="h-[42px] text-[13px]"
-              />
-            </div>
 
-            {error && (
-              <div role="alert" className="text-[13px] text-destructive text-center">
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="w-full h-[44px] text-[14px] font-semibold gap-2 mt-2"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                "Accesso in corso…"
-              ) : (
-                <>
-                  Accedi
-                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                </>
+              {error && (
+                <div role="alert" className="text-[13px] text-destructive text-center">
+                  {error}
+                </div>
               )}
-            </Button>
 
-            <div className="relative my-5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center">
-                <span className="px-3 bg-card text-[12px] text-muted-foreground">oppure</span>
-              </div>
-            </div>
+              <Button
+                type="submit"
+                className="w-full h-[44px] text-[14px] font-semibold gap-2 mt-2"
+                disabled={isLoading}
+              >
+                {isLoading ? "Verifica in corso…" : "Verifica"}
+              </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-[42px] text-[13px] gap-2"
-              disabled
-            >
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-primary text-white text-[10px] font-bold shrink-0">
-                ID
-              </span>{" "}
-              Entra con SPID / CIE
-            </Button>
-          </form>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full h-[38px] text-[13px]"
+                onClick={() => { setMfaToken(null); setMfaCode(""); }}
+              >
+                Torna al login
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="username" className="text-[13px] font-medium">
+                  Nome utente
+                </Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="nome.utente"
+                  value={credentials.username}
+                  onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                  required
+                  className="h-[42px] text-[13px]"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-[13px] font-medium">
+                    Password
+                  </Label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-[12px] text-primary hover:underline"
+                  >
+                    Password dimenticata?
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={credentials.password}
+                  onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                  required
+                  className="h-[42px] text-[13px]"
+                />
+              </div>
+
+              {error && (
+                <div role="alert" className="text-[13px] text-destructive text-center">
+                  {error}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full h-[44px] text-[14px] font-semibold gap-2 mt-2"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  "Accesso in corso…"
+                ) : (
+                  <>
+                    Accedi
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </>
+                )}
+              </Button>
+
+              <div className="relative my-5">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="px-3 bg-card text-[12px] text-muted-foreground">oppure</span>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-[42px] text-[13px] gap-2"
+                disabled
+              >
+                <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-primary text-white text-[10px] font-bold shrink-0">
+                  ID
+                </span>{" "}
+                Entra con SPID / CIE
+              </Button>
+            </form>
+          )}
 
           <p className="mt-6 text-center text-[12px] text-muted-foreground">
             Non hai un account?{" "}

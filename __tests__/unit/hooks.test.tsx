@@ -91,7 +91,7 @@ import { useUpsertFinancialValue } from '@/hooks/useUpsertFinancialValue';
 import { useUpsertManager } from '@/hooks/useUpsertManager';
 import { useUpsertUser } from '@/hooks/useUpsertUser';
 import { useUpsertContract } from '@/hooks/useUpsertContract';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, type LoginResult } from '@/hooks/useAuth';
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -423,12 +423,12 @@ describe('useAuth', () => {
       setAuth: mockSetAuth, clearAuth: jest.fn(),
       user: null, isAuthenticated: false,
     });
-    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123' } });
+    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123', mfaRequired: false, mfaToken: null } });
     (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
     const { result } = renderHook(() => useAuth());
-    let success: boolean | undefined;
-    await act(async () => { success = await result.current.login({ username: 'alice', password: 'pw' }); });
-    expect(success).toBe(true);
+    let loginResult: LoginResult | undefined;
+    await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'pw' }); });
+    expect(loginResult?.success).toBe(true);
     expect(mockSetAuth).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, username: 'alice' }),
       'abc123'
@@ -444,9 +444,9 @@ describe('useAuth', () => {
       response: { data: { message: 'Invalid credentials' } },
     });
     const { result } = renderHook(() => useAuth());
-    let success: boolean | undefined;
-    await act(async () => { success = await result.current.login({ username: 'alice', password: 'wrong' }); });
-    expect(success).toBe(false);
+    let loginResult: LoginResult | undefined;
+    await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
+    expect(loginResult?.success).toBe(false);
     expect(result.current.error).toBe('Invalid credentials');
   });
 
@@ -457,10 +457,54 @@ describe('useAuth', () => {
     });
     (api.post as jest.Mock).mockRejectedValue({ response: { data: {} } });
     const { result } = renderHook(() => useAuth());
-    let success: boolean | undefined;
-    await act(async () => { success = await result.current.login({ username: 'alice', password: 'wrong' }); });
-    expect(success).toBe(false);
+    let loginResult: LoginResult | undefined;
+    await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
+    expect(loginResult?.success).toBe(false);
     expect(result.current.error).toBe('Accesso non riuscito. Riprova.');
+  });
+
+  it('login returns mfaRequired with the pending token when 2FA is enabled', async () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockResolvedValue({
+      data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
+    });
+    const { result } = renderHook(() => useAuth());
+    let loginResult: LoginResult | undefined;
+    await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'pw' }); });
+    expect(loginResult).toEqual({ success: false, mfaRequired: true, mfaToken: 'pending-token-123' });
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
+  it('verifyTwoFactor completes the login with a valid code', async () => {
+    const mockSetAuth = jest.fn();
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: mockSetAuth, clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'real-token', mfaRequired: false, mfaToken: null } });
+    (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
+    const { result } = renderHook(() => useAuth());
+    let success: boolean | undefined;
+    await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '123456'); });
+    expect(success).toBe(true);
+    expect(api.post).toHaveBeenCalledWith('/auth/2fa/verify', { mfaToken: 'pending-token-123', code: '123456' });
+    expect(mockSetAuth).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }), 'real-token');
+  });
+
+  it('verifyTwoFactor sets an error message on an invalid code', async () => {
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockRejectedValue({ response: { data: { message: 'Invalid verification code' } } });
+    const { result } = renderHook(() => useAuth());
+    let success: boolean | undefined;
+    await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '000000'); });
+    expect(success).toBe(false);
+    expect(result.current.error).toBe('Invalid verification code');
   });
 });
 

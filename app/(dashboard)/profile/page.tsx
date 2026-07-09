@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { PasswordFields } from "@/components/auth/PasswordFields";
 import { calendarFeedService } from "@/services/calendarFeed.service";
+import TwoFactorAuthCard from "@/components/profile/TwoFactorAuthCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -153,6 +154,8 @@ export default function ProfilePage() {
           </form>
         </CardContent>
       </Card>
+
+      <TwoFactorAuthCard />
 
       {/* Calendar feed */}
       <Card>

@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Copy, RefreshCw } from "lucide-react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { PasswordFields } from "@/components/auth/PasswordFields";
+import { calendarFeedService } from "@/services/calendarFeed.service";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -25,6 +28,7 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const { user } = useAuthStore();
+  const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ["auth", "me"],
@@ -33,6 +37,30 @@ export default function ProfilePage() {
       return res.data;
     },
   });
+
+  const { data: calendarFeedUrl, isLoading: isLoadingFeedUrl } = useQuery({
+    queryKey: ["calendar-feed-url"],
+    queryFn: calendarFeedService.getUrl,
+  });
+
+  const regenerateFeedMutation = useMutation({
+    mutationFn: calendarFeedService.regenerate,
+    onSuccess: (url) => {
+      queryClient.setQueryData(["calendar-feed-url"], url);
+      toast.success("Link del calendario rigenerato: quello precedente non funziona più");
+    },
+    onError: () => toast.error("Rigenerazione del link non riuscita"),
+  });
+
+  const handleCopyFeedUrl = async () => {
+    if (!calendarFeedUrl) return;
+    try {
+      await navigator.clipboard.writeText(calendarFeedUrl);
+      toast.success("Link copiato negli appunti");
+    } catch {
+      toast.error("Copia negli appunti non riuscita");
+    }
+  };
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -123,6 +151,46 @@ export default function ProfilePage() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Calendar feed */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Calendario scadenze</CardTitle>
+          <CardDescription>
+            Iscriviti a questo link da Google Calendar, Outlook o Apple Calendar per vedere le
+            scadenze dei tuoi contratti direttamente nel tuo calendario
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {isLoadingFeedUrl ? (
+            <p className="text-sm text-muted-foreground">Caricamento...</p>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <Input readOnly value={calendarFeedUrl ?? ""} className="font-mono text-xs" />
+                <Button variant="outline" size="sm" onClick={handleCopyFeedUrl} aria-label="Copia link">
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => regenerateFeedMutation.mutate()}
+                  disabled={regenerateFeedMutation.isPending}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {regenerateFeedMutation.isPending ? "Rigenerazione..." : "Rigenera link"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Chiunque abbia questo link può vedere le scadenze dei tuoi contratti: rigeneralo se
+                pensi che sia stato condiviso per errore.
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

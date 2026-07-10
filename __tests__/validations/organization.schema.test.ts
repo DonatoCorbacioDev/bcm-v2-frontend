@@ -44,18 +44,12 @@ describe("organizationBankDetailsSchema", () => {
   });
 
   describe("bic", () => {
-    it("accepts an empty BIC (optional field)", () => {
-      const result = organizationBankDetailsSchema.safeParse({ ...validData, bic: "" });
-      expect(result.success).toBe(true);
-    });
-
-    it("accepts an 8-character BIC", () => {
-      const result = organizationBankDetailsSchema.safeParse({ ...validData, bic: "BCITITMM" });
-      expect(result.success).toBe(true);
-    });
-
-    it("accepts an 11-character BIC", () => {
-      const result = organizationBankDetailsSchema.safeParse({ ...validData, bic: "BCITITMMXXX" });
+    it.each([
+      ["empty BIC (optional field)", ""],
+      ["8-character BIC", "BCITITMM"],
+      ["11-character BIC", "BCITITMMXXX"],
+    ])("accepts an %s", (_description, bic) => {
+      const result = organizationBankDetailsSchema.safeParse({ ...validData, bic });
       expect(result.success).toBe(true);
     });
 

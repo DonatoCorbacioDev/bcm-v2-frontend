@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { Contract, ContractsByArea, ContractsTimeline, TopManager } from "@/types";
+import type { Contract, ContractImportResult, ContractsByArea, ContractsTimeline, TopManager } from "@/types";
 
 export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED";
 
@@ -82,6 +82,23 @@ export const contractsService = {
   exportPdf: async (): Promise<Blob> => {
     const res = await api.get("/contracts/export/pdf", {
       responseType: "blob",
+    });
+    return res.data;
+  },
+
+  // Bulk import
+  downloadImportTemplate: async (): Promise<Blob> => {
+    const res = await api.get("/contracts/import/template", {
+      responseType: "blob",
+    });
+    return res.data;
+  },
+
+  importExcel: async (file: File): Promise<ContractImportResult> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await api.post<ContractImportResult>("/contracts/import/excel", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },

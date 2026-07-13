@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ContractTable from "@/components/contracts/ContractTable";
 import ContractForm from "@/components/contracts/ContractForm";
+import ContractImportDialog from "@/components/contracts/ContractImportDialog";
 import {
   Dialog,
   DialogContent,
@@ -12,14 +13,20 @@ import {
 } from "@/components/ui/dialog";
 import type { Contract } from "@/types";
 import { contractsService } from "@/services/contracts.service";
+import { useAuthStore } from "@/store/authStore";
 import { toast } from "sonner";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileSpreadsheet, FileText, Upload } from "lucide-react";
 
 export default function ContractsPage() {
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === "ADMIN";
+
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
     contract: Contract | null;
   }>({ open: false, contract: null });
+
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const [isExporting, setIsExporting] = useState(false);
 
@@ -105,11 +112,25 @@ export default function ContractsPage() {
             <FileText className="mr-2 h-4 w-4" />
             {isExporting ? "Esportazione..." : "PDF"}
           </Button>
+          {isAdmin && (
+            <Button
+              variant="outline"
+              onClick={() => setImportDialogOpen(true)}
+              className="hidden sm:flex"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Importa
+            </Button>
+          )}
           <Button onClick={handleCreateClick}>+ Nuovo contratto</Button>
         </div>
       </div>
 
       <ContractTable onEditClick={handleEditClick} />
+
+      {isAdmin && (
+        <ContractImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+      )}
 
       <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>

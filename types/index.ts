@@ -75,6 +75,18 @@ export interface ContractHistory {
   newStatus: string;
 }
 
+export interface ContractImportRowError {
+  rowNumber: number;
+  message: string;
+}
+
+export interface ContractImportResult {
+  totalRows: number;
+  importedCount: number;
+  errorCount: number;
+  errors: ContractImportRowError[];
+}
+
 // Notifications
 export interface Notification {
   id: number;

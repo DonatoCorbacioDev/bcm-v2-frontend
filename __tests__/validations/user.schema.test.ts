@@ -6,6 +6,7 @@ const validCreateData = {
   managerId: 1,
   roleId: 2,
   verified: false,
+  canApproveContracts: false,
 };
 
 describe("userCreateSchema", () => {
@@ -57,6 +58,7 @@ describe("userUpdateSchema", () => {
     managerId: 1,
     roleId: 2,
     verified: true,
+    canApproveContracts: false,
   };
 
   it("accepts data without password (password is optional on update)", () => {

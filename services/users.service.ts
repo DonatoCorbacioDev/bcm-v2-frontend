@@ -7,6 +7,7 @@ export type UserUpsertPayload = {
   managerId: number;
   roleId: number;
   verified: boolean;
+  canApproveContracts: boolean;
 };
 
 export type InviteUserPayload = {

@@ -7,6 +7,7 @@ export interface User {
   roleId: number;
   verified: boolean;
   createdAt: string;
+  canApproveContracts?: boolean;
 }
 
 export interface Manager {
@@ -51,6 +52,17 @@ export interface Contract {
   manager?: Manager;
   area?: BusinessArea;
   daysUntilExpiry?: number;
+  workflowStage?: "DRAFT" | "IN_REVIEW" | "APPROVED" | null;
+}
+
+export interface ContractWorkflowEvent {
+  id: number;
+  fromStage: "DRAFT" | "IN_REVIEW" | "APPROVED" | null;
+  toStage: "DRAFT" | "IN_REVIEW" | "APPROVED";
+  action: "SUBMIT" | "APPROVE" | "REJECT";
+  actorUsername: string;
+  comment: string | null;
+  createdAt: string;
 }
 
 export interface FinancialValue {

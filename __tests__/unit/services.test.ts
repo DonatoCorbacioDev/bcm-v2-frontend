@@ -180,7 +180,7 @@ describe('managersService', () => {
 // ─── usersService ────────────────────────────────────────────────────────────
 
 describe('usersService', () => {
-  const payload = { username: 'user1', managerId: 1, roleId: 1, verified: true };
+  const payload = { username: 'user1', managerId: 1, roleId: 1, verified: true, canApproveContracts: false };
 
   it('list() calls GET /users', async () => {
     const data = [{ id: 1, username: 'user1' }];

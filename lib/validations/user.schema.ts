@@ -25,6 +25,8 @@ export const userCreateSchema = z.object({
     .positive("Seleziona un ruolo valido"),
 
   verified: z.boolean(),
+
+  canApproveContracts: z.boolean(),
 });
 
 // Schema for updating a user (password optional)
@@ -54,6 +56,8 @@ export const userUpdateSchema = z.object({
     .positive("Seleziona un ruolo valido"),
 
   verified: z.boolean(),
+
+  canApproveContracts: z.boolean(),
 });
 
 export type UserCreateFormData = z.infer<typeof userCreateSchema>;

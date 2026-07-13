@@ -205,6 +205,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                 <TableHead className="hidden md:table-cell">Manager</TableHead>
                 <TableHead className="hidden md:table-cell">Ruolo</TableHead>
                 <TableHead>Verificato</TableHead>
+                <TableHead className="hidden md:table-cell">Approvatore</TableHead>
                 <TableHead className="hidden lg:table-cell">Data creazione</TableHead>
                 <TableHead>Azioni</TableHead>
               </TableRow>
@@ -224,6 +225,16 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                         }`}
                     >
                       {user.verified ? "Sì" : "No"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-semibold ${user.canApproveContracts
+                          ? "bg-green-100 text-green-800"
+                          : "bg-muted text-muted-foreground"
+                        }`}
+                    >
+                      {user.canApproveContracts ? "Sì" : "No"}
                     </span>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">

@@ -23,6 +23,7 @@ interface UserProfile {
   roleId: number;
   verified: boolean;
   createdAt: string;
+  canApproveContracts: boolean;
 }
 
 interface ApiError extends AxiosError<{ message?: string }> {

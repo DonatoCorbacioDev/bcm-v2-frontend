@@ -118,10 +118,14 @@ describe('UserTable', () => {
   it('shows verified badge for each user', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    // alice (row 1) is verified, bob (row 2) is not
+    // alice (row 1) is verified, bob (row 2) is not; the "Verificato" badge
+    // is the 5th cell (index 4) — "Approvatore" also renders Sì/No, so this
+    // targets the column by position rather than an ambiguous text match.
     const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).getByText('Sì')).toBeInTheDocument();
-    expect(within(rows[2]).getByText('No')).toBeInTheDocument();
+    const aliceCells = within(rows[1]).getAllByRole('cell');
+    const bobCells = within(rows[2]).getAllByRole('cell');
+    expect(aliceCells[4]).toHaveTextContent('Sì');
+    expect(bobCells[4]).toHaveTextContent('No');
   });
 
   it('shows skeleton while loading', () => {

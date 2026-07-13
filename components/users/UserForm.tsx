@@ -52,6 +52,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
         managerId: user.managerId,
         roleId: user.roleId,
         verified: user.verified,
+        canApproveContracts: user.canApproveContracts ?? false,
       }
       : {
         username: "",
@@ -59,6 +60,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
         managerId: 0,
         roleId: 0,
         verified: false,
+        canApproveContracts: false,
       },
   });
 
@@ -210,6 +212,27 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           Account verificato
+        </label>
+      </div>
+
+      {/* Can approve contracts checkbox */}
+      <div className="flex items-center space-x-2">
+        <Controller
+          name="canApproveContracts"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              id="canApproveContracts"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+        <label
+          htmlFor="canApproveContracts"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Può approvare contratti
         </label>
       </div>
 

@@ -505,6 +505,32 @@ describe('UserForm', () => {
     render(<UserForm onClose={onClose} onSuccess={onSuccess} user={validUser} />, { wrapper: createWrapper() });
     expect(screen.getByText(/mantenere quella attuale/i)).toBeInTheDocument();
   });
+
+  it('defaults the "can approve contracts" checkbox to unchecked in create mode', () => {
+    render(<UserForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    expect(screen.getByRole('checkbox', { name: /può approvare contratti/i })).not.toBeChecked();
+  });
+
+  it('pre-checks the "can approve contracts" checkbox when editing a user who has it', () => {
+    render(
+      <UserForm onClose={onClose} onSuccess={onSuccess} user={{ ...validUser, canApproveContracts: true }} />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByRole('checkbox', { name: /può approvare contratti/i })).toBeChecked();
+  });
+
+  it('submits canApproveContracts=true after toggling the checkbox', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertUser as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<UserForm onClose={onClose} onSuccess={onSuccess} user={validUser} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('checkbox', { name: /può approvare contratti/i }));
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    const call = mutateAsync.mock.calls[0][0];
+    expect(call.payload.canApproveContracts).toBe(true);
+  });
 });
 
 // ─── ContractForm ─────────────────────────────────────────────────────────────

@@ -340,7 +340,7 @@ describe('useUpsertManager', () => {
 });
 
 describe('useUpsertUser', () => {
-  const payload = { username: 'user1', managerId: 1, roleId: 1, verified: true };
+  const payload = { username: 'user1', managerId: 1, roleId: 1, verified: true, canApproveContracts: false };
 
   it('calls create when no id is provided', async () => {
     (usersService.create as jest.Mock).mockResolvedValue({ id: 1, ...payload });

@@ -7,10 +7,12 @@ import { toast } from "sonner";
 import { useContract } from "@/hooks/useContract";
 import { useAuthStore } from "@/store/authStore";
 import { contractsService } from "@/services/contracts.service";
+import { contractWorkflowService } from "@/services/contractWorkflow.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
-import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText, Receipt } from "lucide-react";
+import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText, Receipt, Send, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +26,19 @@ import DocumentsTab from "@/components/contracts/DocumentsTab";
 import InvoicesTab from "@/components/contracts/InvoicesTab";
 import api from "@/lib/api";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant } from "@/lib/utils";
-import type { Contract, FinancialValue, ContractHistory } from "@/types";
+import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent } from "@/types";
+
+const WORKFLOW_STAGE_LABELS: Record<string, string> = {
+  DRAFT: "Bozza",
+  IN_REVIEW: "In revisione",
+  APPROVED: "Approvato",
+};
+
+const WORKFLOW_ACTION_LABELS: Record<string, string> = {
+  SUBMIT: "Inviato in revisione",
+  APPROVE: "Approvato",
+  REJECT: "Rifiutato",
+};
 
 type Tab = "documents" | "financials" | "history" | "invoices";
 
@@ -42,6 +56,55 @@ export default function ContractDetailPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [prefilledContract, setPrefilledContract] = useState<Contract | null>(null);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectComment, setRejectComment] = useState("");
+
+  const canApprove = isAdmin || Boolean(user?.canApproveContracts);
+  const isOwnContract = isAdmin || (contract && user?.managerId === contract.managerId);
+
+  const { data: workflowEvents } = useQuery<ContractWorkflowEvent[]>({
+    queryKey: ["contract-workflow-events", contractId],
+    queryFn: () => contractWorkflowService.getEvents(contractId),
+    enabled: !!contractId,
+  });
+
+  const invalidateWorkflow = () => {
+    queryClient.invalidateQueries({ queryKey: contractsQueryKeys.detail(contractId) });
+    queryClient.invalidateQueries({ queryKey: ["contract-workflow-events", contractId] });
+  };
+
+  const submitMutation = useMutation({
+    mutationFn: () => contractWorkflowService.submit(contractId),
+    onSuccess: () => {
+      toast.success("Contratto inviato in revisione");
+      invalidateWorkflow();
+    },
+    onError: () => toast.error("Invio in revisione non riuscito"),
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: () => contractWorkflowService.approve(contractId),
+    onSuccess: () => {
+      toast.success("Contratto approvato e attivato");
+      invalidateWorkflow();
+    },
+    onError: () => toast.error("Approvazione non riuscita"),
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (comment: string) => contractWorkflowService.reject(contractId, comment),
+    onSuccess: () => {
+      toast.success("Contratto rifiutato e rimandato in bozza");
+      setRejectDialogOpen(false);
+      setRejectComment("");
+      invalidateWorkflow();
+    },
+    onError: () => toast.error("Rifiuto non riuscito"),
+  });
+
+  const handleRejectConfirm = () => {
+    if (rejectComment.trim()) rejectMutation.mutate(rejectComment.trim());
+  };
 
   const { data: financialValues, isLoading: isLoadingFinancials } = useQuery<FinancialValue[]>({
     queryKey: ["financial-values", "by-contract", contractId],
@@ -164,6 +227,43 @@ export default function ContractDetailPage() {
     );
   };
 
+  const renderWorkflowEvents = () => {
+    if (!workflowEvents || workflowEvents.length === 0) return null;
+    return (
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-foreground mb-3">Workflow di approvazione</h3>
+        <div className="space-y-4">
+          {workflowEvents.map((event, index) => (
+            <div key={event.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
+              <div className="flex flex-col items-center">
+                <div className="w-3 h-3 rounded-full bg-primary mt-1.5" />
+                {index < workflowEvents.length - 1 && (
+                  <div className="w-0.5 flex-1 bg-border mt-2" />
+                )}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-4 mb-1">
+                  <span className="text-sm font-medium text-foreground">
+                    {WORKFLOW_ACTION_LABELS[event.action] ?? event.action}
+                  </span>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(event.createdAt).toLocaleDateString("it-IT", {
+                      year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">Da: {event.actorUsername}</p>
+                {event.comment && (
+                  <p className="text-xs text-muted-foreground mt-1 italic">&quot;{event.comment}&quot;</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderHistory = () => {
     if (isLoadingHistory) {
       return (
@@ -174,47 +274,53 @@ export default function ContractDetailPage() {
     }
     if (!contractHistory || contractHistory.length === 0) {
       return (
-        <div className="text-center py-12">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 rounded-full bg-muted">
-              <History className="h-8 w-8 text-muted-foreground" />
+        <div>
+          {renderWorkflowEvents()}
+          <div className="text-center py-12">
+            <div className="flex justify-center mb-4">
+              <div className="p-4 rounded-full bg-muted">
+                <History className="h-8 w-8 text-muted-foreground" />
+              </div>
             </div>
+            <h2 className="text-lg font-semibold text-foreground mb-2">Nessuna modifica registrata</h2>
+            <p className="text-sm text-muted-foreground">Le modifiche di stato verranno tracciate qui.</p>
           </div>
-          <h2 className="text-lg font-semibold text-foreground mb-2">Nessuna modifica registrata</h2>
-          <p className="text-sm text-muted-foreground">Le modifiche di stato verranno tracciate qui.</p>
         </div>
       );
     }
     return (
-      <div className="space-y-4">
-        {contractHistory.map((history, index) => (
-          <div key={history.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
-            <div className="flex flex-col items-center">
-              <div className="w-3 h-3 rounded-full bg-primary mt-1.5" />
-              {index < contractHistory.length - 1 && (
-                <div className="w-0.5 flex-1 bg-border mt-2" />
-              )}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-start justify-between gap-4 mb-1">
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground flex-wrap">
-                  <span>Stato modificato:</span>
-                  <Badge variant={getContractStatusVariant(history.previousStatus)}>{CONTRACT_STATUS_LABELS[history.previousStatus] ?? history.previousStatus}</Badge>
-                  <span>→</span>
-                  <Badge variant={getContractStatusVariant(history.newStatus)}>{CONTRACT_STATUS_LABELS[history.newStatus] ?? history.newStatus}</Badge>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  {new Date(history.modificationDate).toLocaleDateString("it-IT", {
-                    year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                  })}
-                </span>
+      <div>
+        {renderWorkflowEvents()}
+        <div className="space-y-4">
+          {contractHistory.map((history, index) => (
+            <div key={history.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
+              <div className="flex flex-col items-center">
+                <div className="w-3 h-3 rounded-full bg-primary mt-1.5" />
+                {index < contractHistory.length - 1 && (
+                  <div className="w-0.5 flex-1 bg-border mt-2" />
+                )}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Modificato da utente ID: {history.modifiedById}
-              </p>
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-4 mb-1">
+                  <div className="flex items-center gap-2 text-sm font-medium text-foreground flex-wrap">
+                    <span>Stato modificato:</span>
+                    <Badge variant={getContractStatusVariant(history.previousStatus)}>{CONTRACT_STATUS_LABELS[history.previousStatus] ?? history.previousStatus}</Badge>
+                    <span>→</span>
+                    <Badge variant={getContractStatusVariant(history.newStatus)}>{CONTRACT_STATUS_LABELS[history.newStatus] ?? history.newStatus}</Badge>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(history.modificationDate).toLocaleDateString("it-IT", {
+                      year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+                    })}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Modificato da utente ID: {history.modifiedById}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   };
@@ -253,7 +359,41 @@ export default function ContractDetailPage() {
           <h1 className="text-3xl font-bold text-foreground">Dettagli contratto</h1>
           <p className="text-muted-foreground mt-1">{contract.customerName}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {contract.workflowStage === "DRAFT" && isOwnContract && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => submitMutation.mutate()}
+              disabled={submitMutation.isPending}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {submitMutation.isPending ? "Invio..." : "Invia in revisione"}
+            </Button>
+          )}
+          {contract.workflowStage === "IN_REVIEW" && canApprove && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-green-800 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
+                onClick={() => approveMutation.mutate()}
+                disabled={approveMutation.isPending}
+              >
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                {approveMutation.isPending ? "Approvazione..." : "Approva"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setRejectDialogOpen(true)}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Rifiuta
+              </Button>
+            </>
+          )}
           {isAdmin && (
             <Button variant="outline" size="sm" onClick={() => { setPrefilledContract(null); setEditDialogOpen(true); }}>
               <Pencil className="h-4 w-4 mr-2" />
@@ -293,7 +433,12 @@ export default function ContractDetailPage() {
           ))}
           <div>
             <p className="text-sm text-muted-foreground">Stato</p>
-            <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
+              {contract.workflowStage && (
+                <Badge variant="outline">{WORKFLOW_STAGE_LABELS[contract.workflowStage] ?? contract.workflowStage}</Badge>
+              )}
+            </div>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Manager</p>
@@ -364,6 +509,45 @@ export default function ContractDetailPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Reject Dialog */}
+      <Dialog
+        open={rejectDialogOpen}
+        onOpenChange={(open) => !rejectMutation.isPending && setRejectDialogOpen(open)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rifiuta contratto</DialogTitle>
+            <DialogDescription>
+              Il contratto tornerà in bozza. Spiega il motivo del rifiuto: il commento sarà visibile
+              a chi lo ha inviato in revisione.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            aria-label="Motivo del rifiuto"
+            placeholder="Es. Manca l'allegato firmato dal cliente"
+            value={rejectComment}
+            onChange={(e) => setRejectComment(e.target.value)}
+            rows={4}
+          />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRejectDialogOpen(false)}
+              disabled={rejectMutation.isPending}
+            >
+              Annulla
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectConfirm}
+              disabled={!rejectComment.trim() || rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? "Rifiuto..." : "Rifiuta"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Dialog */}
       {isAdmin && (

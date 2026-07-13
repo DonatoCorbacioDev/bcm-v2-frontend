@@ -47,7 +47,7 @@ export interface Contract {
   managerName: string;
   startDate: string;
   endDate: string;
-  status: "ACTIVE" | "EXPIRED" | "CANCELLED";
+  status: "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT";
   createdAt: string;
   manager?: Manager;
   area?: BusinessArea;

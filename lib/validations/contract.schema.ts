@@ -56,8 +56,8 @@ export const contractSchema = z.object({
     ),
 
   // Contract status
-  status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED"], {
-    message: "Lo stato deve essere ACTIVE, EXPIRED o CANCELLED",
+  status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED", "DRAFT"], {
+    message: "Lo stato deve essere ACTIVE, EXPIRED, CANCELLED o DRAFT",
   }),
 
   // Business area ID (foreign key)

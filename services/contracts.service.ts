@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import type { Contract, ContractImportResult, ContractsByArea, ContractsTimeline, TopManager } from "@/types";
 
-export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED";
+export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT";
 
 export type ContractUpsertPayload = {
   customerName: string;

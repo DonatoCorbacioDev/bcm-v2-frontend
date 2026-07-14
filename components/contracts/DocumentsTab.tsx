@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  Upload, Download, Trash2, FileText, Loader2, Sparkles, ChevronDown, ChevronUp,
+  Upload, Download, Trash2, FileText, Loader2, FileSearch, ChevronDown, ChevronUp,
   ShieldAlert, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -85,9 +85,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     onSuccess: ({ documentId, analysis }) => {
       setAnalysisMap((prev) => ({ ...prev, [documentId]: analysis }));
       setExpandedDoc(documentId);
-      toast.success("Analisi completata");
+      toast.success("Estrazione completata");
     },
-    onError: () => toast.error("Analisi non riuscita"),
+    onError: () => toast.error("Estrazione non riuscita"),
   });
 
   const clauseRiskMutation = useMutation({
@@ -241,13 +241,13 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       size="sm"
                       onClick={() => analyzeMutation.mutate(doc.id)}
                       disabled={isAnalyzing}
-                      title="Analizza con AI"
-                      aria-label="Analizza documento con AI"
+                      title="Estrai campi"
+                      aria-label="Estrai campi dal documento"
                     >
                       {isAnalyzing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Sparkles className="h-4 w-4 text-primary" />
+                        <FileSearch className="h-4 w-4 text-primary" />
                       )}
                     </Button>
 
@@ -321,8 +321,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                   <div className="border-t border-border p-4 bg-primary/10 space-y-3">
                     <div className="flex items-center justify-between">
                       <h2 className="text-sm font-semibold text-primary flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" />
-                        Risultati estrazione AI
+                        <FileSearch className="h-4 w-4" />
+                        Campi estratti
                       </h2>
                       <Button size="sm" onClick={() => handleApply(analysis)}>
                         Applica al contratto

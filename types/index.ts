@@ -174,6 +174,18 @@ export interface DocumentAnalysis {
   detectedAmount: string | null;
 }
 
+export interface RiskyClause {
+  category: string;
+  excerpt: string;
+  riskLevel: "HIGH" | "MEDIUM" | "LOW";
+  reasoning: string;
+}
+
+export interface ClauseRiskAnalysis {
+  clauses: RiskyClause[];
+  error: string | null;
+}
+
 // Contract Templates
 export interface ContractTemplate {
   id: number;

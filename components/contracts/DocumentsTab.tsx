@@ -3,10 +3,20 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Upload, Download, Trash2, FileText, Loader2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Upload, Download, Trash2, FileText, Loader2, Sparkles, ChevronDown, ChevronUp,
+  ShieldAlert, CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import api from "@/lib/api";
-import type { Contract, ContractDocument, DocumentAnalysis } from "@/types";
+import type { Contract, ContractDocument, DocumentAnalysis, ClauseRiskAnalysis } from "@/types";
+
+const RISK_LEVEL_CONFIG = {
+  HIGH: { badge: "destructive" as const, label: "Alto" },
+  MEDIUM: { badge: "warning" as const, label: "Medio" },
+  LOW: { badge: "success" as const, label: "Basso" },
+};
 
 interface DocumentsTabProps {
   readonly contractId: number;
@@ -25,6 +35,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [analysisMap, setAnalysisMap] = useState<Record<number, DocumentAnalysis>>({});
   const [expandedDoc, setExpandedDoc] = useState<number | null>(null);
+  const [clauseRiskMap, setClauseRiskMap] = useState<Record<number, ClauseRiskAnalysis>>({});
+  const [expandedRiskDoc, setExpandedRiskDoc] = useState<number | null>(null);
 
   const { data: documents, isLoading } = useQuery<ContractDocument[]>({
     queryKey: ["documents", contractId],
@@ -76,6 +88,25 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       toast.success("Analisi completata");
     },
     onError: () => toast.error("Analisi non riuscita"),
+  });
+
+  const clauseRiskMutation = useMutation({
+    mutationFn: async (documentId: number) => {
+      const res = await api.post<ClauseRiskAnalysis>(
+        `/contracts/${contractId}/documents/${documentId}/analyze-clause-risk`
+      );
+      return { documentId, analysis: res.data };
+    },
+    onSuccess: ({ documentId, analysis }) => {
+      setClauseRiskMap((prev) => ({ ...prev, [documentId]: analysis }));
+      setExpandedRiskDoc(documentId);
+      if (analysis.error) {
+        toast.error("Analisi delle clausole non disponibile");
+      } else {
+        toast.success("Analisi clausole completata");
+      }
+    },
+    onError: () => toast.error("Analisi delle clausole non riuscita"),
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,6 +199,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
             const analysis = analysisMap[doc.id];
             const isExpanded = expandedDoc === doc.id;
             const isAnalyzing = analyzeMutation.isPending && analyzeMutation.variables === doc.id;
+            const riskAnalysis = clauseRiskMap[doc.id];
+            const isRiskExpanded = expandedRiskDoc === doc.id;
+            const isAnalyzingRisk = clauseRiskMutation.isPending && clauseRiskMutation.variables === doc.id;
 
             return (
               <div
@@ -234,6 +268,38 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       </Button>
                     )}
 
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => clauseRiskMutation.mutate(doc.id)}
+                      disabled={isAnalyzingRisk}
+                      title="Rileva clausole a rischio"
+                      aria-label="Rileva clausole a rischio nel documento"
+                    >
+                      {isAnalyzingRisk ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <ShieldAlert className="h-4 w-4 text-amber-500" />
+                      )}
+                    </Button>
+
+                    {riskAnalysis && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedRiskDoc(isRiskExpanded ? null : doc.id)}
+                        title={isRiskExpanded ? "Comprimi clausole a rischio" : "Espandi clausole a rischio"}
+                        aria-label={isRiskExpanded ? "Comprimi clausole a rischio" : "Espandi clausole a rischio"}
+                        aria-expanded={isRiskExpanded}
+                      >
+                        {isRiskExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+
                     {isAdmin && (
                       <Button
                         variant="ghost"
@@ -289,6 +355,54 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                           {analysis.rawText}
                         </pre>
                       </details>
+                    )}
+                  </div>
+                )}
+
+                {/* Clause risk panel */}
+                {riskAnalysis && isRiskExpanded && (
+                  <div className="border-t border-border p-4 bg-amber-500/10 space-y-3">
+                    <div>
+                      <h2 className="text-sm font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                        <ShieldAlert className="h-4 w-4" />
+                        Clausole a rischio
+                      </h2>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Analisi generata da un modello linguistico locale — non è un parere
+                        legale, verificare sempre con un professionista.
+                      </p>
+                    </div>
+
+                    {riskAnalysis.error ? (
+                      <p className="text-sm text-muted-foreground">{riskAnalysis.error}</p>
+                    ) : riskAnalysis.clauses.length === 0 ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        Nessuna clausola a rischio rilevata
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {riskAnalysis.clauses.map((clause, idx) => {
+                          const cfg = RISK_LEVEL_CONFIG[clause.riskLevel] ?? RISK_LEVEL_CONFIG.LOW;
+                          return (
+                            <div
+                              key={`${clause.category}-${idx}`}
+                              className="rounded-lg border border-border p-3 bg-card"
+                            >
+                              <div className="flex items-center justify-between gap-2 mb-1.5">
+                                <span className="text-sm font-medium text-foreground">
+                                  {clause.category}
+                                </span>
+                                <Badge variant={cfg.badge}>{cfg.label}</Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground italic mb-1.5">
+                                &ldquo;{clause.excerpt}&rdquo;
+                              </p>
+                              <p className="text-sm text-foreground">{clause.reasoning}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
                 )}

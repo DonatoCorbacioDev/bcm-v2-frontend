@@ -278,4 +278,82 @@ describe('DocumentsTab', () => {
     await userEvent.click(screen.getByTitle('Analizza con AI'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Analisi non riuscita'), { timeout: 3000 });
   });
+
+  describe('clause risk analysis', () => {
+    const riskyClauses = {
+      clauses: [
+        {
+          category: 'Rinnovo automatico',
+          excerpt: 'Il contratto si rinnova automaticamente',
+          riskLevel: 'HIGH' as const,
+          reasoning: 'Rinnovo tacito senza preavviso adeguato.',
+        },
+      ],
+      error: null,
+    };
+
+    it('shows detected risky clauses after clicking the button', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockResolvedValue({ data: riskyClauses });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
+      expect(api.post).toHaveBeenCalledWith('/contracts/1/documents/1/analyze-clause-risk');
+      await waitFor(() => expect(screen.getByText('Rinnovo automatico')).toBeInTheDocument());
+      expect(screen.getByText(/rinnovo tacito senza preavviso/i)).toBeInTheDocument();
+      expect(toast.success).toHaveBeenCalledWith('Analisi clausole completata');
+    });
+
+    it('shows a positive message when no risky clauses are found', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockResolvedValue({ data: { clauses: [], error: null } });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
+      await waitFor(() => expect(screen.getByText(/nessuna clausola a rischio rilevata/i)).toBeInTheDocument());
+    });
+
+    it('shows the error message when the ML analysis returns an error', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockResolvedValue({
+        data: { clauses: [], error: 'Ollama service unavailable' },
+      });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
+      await waitFor(() => expect(screen.getByText('Ollama service unavailable')).toBeInTheDocument());
+      expect(toast.error).toHaveBeenCalledWith('Analisi delle clausole non disponibile');
+    });
+
+    it('shows error toast when the clause risk request fails', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockRejectedValue(new Error('network error'));
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
+      await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Analisi delle clausole non riuscita'));
+    });
+
+    it('collapses the clause risk panel when toggle button is clicked', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockResolvedValue({ data: riskyClauses });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
+      await waitFor(() => expect(screen.getByTitle('Comprimi clausole a rischio')).toBeInTheDocument());
+      await userEvent.click(screen.getByTitle('Comprimi clausole a rischio'));
+      expect(screen.queryByText('Rinnovo automatico')).not.toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Espandi clausole a rischio'));
+      expect(screen.getByText('Rinnovo automatico')).toBeInTheDocument();
+    });
+
+    it('shows analyzing spinner while clause risk mutation is pending', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
+      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeDisabled());
+    });
+  });
 });

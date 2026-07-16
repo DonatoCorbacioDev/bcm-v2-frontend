@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface LogoMarkProps {
   readonly className?: string;
   /** Size in pixels for width/height (square tile). Default 32. */
@@ -5,53 +7,39 @@ interface LogoMarkProps {
 }
 
 /**
- * BCM logo mark: white document page with folded corner, "BCM" lettering,
- * and a signature flourish, on a primary-blue rounded tile.
+ * BCM logo mark: a solid seal with a checkmark cut through it — the
+ * checkmark's long stroke breaks past the seal's own edge instead of
+ * staying contained, so the silhouette itself is distinctive, not just
+ * the checkmark inside it.
  */
 export function LogoMark({ className, size = 32 }: LogoMarkProps) {
+  // Desktop and mobile sidebars can both be mounted at once (one hidden via
+  // CSS, not unmounted) — a fixed mask id would collide and silently break
+  // the second instance's mask.
+  const maskId = `bcm-seal-mask-${useId()}`;
+
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
       className={className}
     >
-      <rect width="32" height="32" rx="8" fill="#2563eb" />
-      {/* Document body */}
-      <path
-        d="M10 4h9l6 6v15a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"
-        fill="white"
-      />
-      {/* Folded corner */}
-      <path
-        d="M19 4v5a2 2 0 0 0 2 2h5z"
-        fill="#2563eb"
-        opacity="0.22"
-      />
-      {/* BCM text */}
-      <text
-        x="14"
-        y="20"
-        fontSize="5"
-        fontWeight="800"
-        fill="#2563eb"
-        textAnchor="middle"
-        fontFamily="system-ui, sans-serif"
-        letterSpacing="0.4"
-      >
-        BCM
-      </text>
-      {/* Signature flourish */}
-      <path
-        d="M8.5 25c1.5-1.5 2.5-1.5 3.5-.3.7.8 1.4.9 2 .2.5-.5 1.2-.6 2-.2"
-        fill="none"
-        stroke="#2563eb"
-        strokeWidth="1.2"
-        strokeLinecap="round"
-      />
+      <mask id={maskId}>
+        <circle cx="50" cy="50" r="40" fill="white" />
+        <path
+          d="M28 52 L43 67 L82 20"
+          stroke="black"
+          strokeWidth="12"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      </mask>
+      <circle cx="50" cy="50" r="40" fill="#2563eb" mask={`url(#${maskId})`} />
     </svg>
   );
 }

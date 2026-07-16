@@ -16,7 +16,14 @@ export default defineConfig({
     // Port 3000 is routinely occupied by the bcm-v2-docker frontend
     // container during local dev — use 3001 so this never collides with it
     // or silently tests that stale build instead of the current source.
-    command: "npm run dev -- -p 3001",
+    //
+    // --webpack: Turbopack (Next.js 16's default dev bundler) hangs forever
+    // compiling /dashboard in this project — reproduced directly (curl
+    // against a manually-started `next dev` never returned, log stuck on
+    // "Compiling /dashboard ..." with no CPU/memory movement past ~70s).
+    // Webpack compiles the same route in ~8s. Revisit removing this once
+    // upstream Turbopack fixes whatever it's tripping on here.
+    command: "npx next dev -p 3001 --webpack",
     url: "http://localhost:3001",
     reuseExistingServer: false,
     timeout: 120_000,

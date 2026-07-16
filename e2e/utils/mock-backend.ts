@@ -72,6 +72,15 @@ export async function mockApi(
     "**/api/v1/risk-scores*": [
       { contractId: 1, customerName: "Acme Corp", riskScore: 0.82, level: "HIGH", anomalies: ["EXPIRING_SOON"] },
     ],
+    "**/api/v1/organizations/me": {
+      id: 1,
+      name: "Acme Corp",
+      slug: "acme-corp",
+      subscriptionTier: "FREE",
+      iban: null,
+      bic: null,
+      createdAt: "2024-01-01T00:00:00Z",
+    },
     "**/api/v1/business-areas": businessAreas,
     "**/api/v1/managers": managers,
     "**/api/v1/contracts/search*": {

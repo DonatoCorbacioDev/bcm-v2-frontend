@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
+import { organizationService } from "@/services/organization.service";
 import { LogoMark } from "@/components/layout/Logo";
 import { LogOut } from "lucide-react";
 import { navGroups, type NavItem } from "@/components/layout/sidebarNavConfig";
+
+const TIER_LABELS: Record<string, string> = {
+  FREE: "Free",
+  PRO: "Pro",
+  ENTERPRISE: "Enterprise",
+};
 
 interface SidebarProps {
   readonly collapsed: boolean;
@@ -54,6 +62,12 @@ export default function Sidebar({ collapsed }: SidebarProps) {
   const user = useAuthStore((state) => state.user);
   const { logout } = useAuth();
   const isAdmin = user?.role === "ADMIN";
+
+  const { data: organization } = useQuery({
+    queryKey: ["organization", "me"],
+    queryFn: organizationService.getMine,
+    enabled: isAdmin,
+  });
 
   const handleLogout = () => {
     logout();
@@ -105,11 +119,13 @@ export default function Sidebar({ collapsed }: SidebarProps) {
             </span>
             <div className="flex-1 min-w-0 text-left">
               <p className="text-[12px] font-semibold text-foreground truncate">
-                Organizzazione
+                {organization?.name ?? "Organizzazione"}
               </p>
-              <p className="text-[11px] text-[var(--muted-foreground)] truncate">
-                Piano Pro
-              </p>
+              {organization && (
+                <p className="text-[11px] text-[var(--muted-foreground)] truncate">
+                  Piano {TIER_LABELS[organization.subscriptionTier] ?? organization.subscriptionTier}
+                </p>
+              )}
             </div>
           </button>
         </div>

@@ -34,7 +34,6 @@ jest.mock('@/lib/api', () => ({
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 
-import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';

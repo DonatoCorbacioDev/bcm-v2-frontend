@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { headers } from "next/headers";
+import Script from "next/script";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import "./globals.css";
@@ -31,7 +32,7 @@ export default async function RootLayout({
   return (
     <html lang="it" suppressHydrationWarning>
       <head>
-        <script src="/theme-init.js" nonce={nonce} />
+        <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReactQueryProvider>

@@ -34,20 +34,20 @@ describe('RiskScoreWidget', () => {
   it('shows offline message when FastAPI is unavailable', async () => {
     (api.get as jest.Mock).mockRejectedValue(new Error('Network Error'));
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/analisi del rischio non disponibile/i)).toBeInTheDocument());
+    expect(await screen.findByText(/analisi del rischio non disponibile/i)).toBeInTheDocument();
     expect(screen.getByText(/verifica che il backend e il servizio di previsione/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no risk scores', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/nessun dato sul rischio disponibile/i)).toBeInTheDocument());
+    expect(await screen.findByText(/nessun dato sul rischio disponibile/i)).toBeInTheDocument();
   });
 
   it('renders risk scores with levels and anomalies', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     expect(screen.getByText('Beta Ltd')).toBeInTheDocument();
     expect(screen.getByText('Gamma Inc')).toBeInTheDocument();
     // Anomalies with replaceAll
@@ -63,7 +63,7 @@ describe('RiskScoreWidget', () => {
     ];
     (api.get as jest.Mock).mockResolvedValue({ data: realCodes });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Delta Srl')).toBeInTheDocument());
+    expect(await screen.findByText('Delta Srl')).toBeInTheDocument();
     expect(screen.getByText('Scaduto')).toBeInTheDocument();
     expect(screen.getByText('In scadenza')).toBeInTheDocument();
     expect(screen.getByText('Valore anomalo')).toBeInTheDocument();
@@ -73,7 +73,7 @@ describe('RiskScoreWidget', () => {
   it('shows correct risk level badges', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/alto · 85%/i)).toBeInTheDocument());
+    expect(await screen.findByText(/alto · 85%/i)).toBeInTheDocument();
     expect(screen.getByText(/medio · 45%/i)).toBeInTheDocument();
     expect(screen.getByText(/basso · 10%/i)).toBeInTheDocument();
   });
@@ -82,13 +82,13 @@ describe('RiskScoreWidget', () => {
     const unknownLevel = [{ contractId: 9, customerName: 'Unknown Corp', riskScore: 0.5, level: 'UNKNOWN' as 'LOW', anomalies: [] }];
     (api.get as jest.Mock).mockResolvedValue({ data: unknownLevel });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Unknown Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Unknown Corp')).toBeInTheDocument();
   });
 
   it('renders links to contract detail pages', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     const links = screen.getAllByRole('link');
     expect(links[0]).toHaveAttribute('href', '/contracts/1');
   });
@@ -103,7 +103,7 @@ describe('RiskScoreWidget', () => {
     }));
     (api.get as jest.Mock).mockResolvedValue({ data: manyScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Cliente 1')).toBeInTheDocument());
+    expect(await screen.findByText('Cliente 1')).toBeInTheDocument();
 
     expect(screen.getByText('Cliente 5')).toBeInTheDocument();
     expect(screen.queryByText('Cliente 6')).not.toBeInTheDocument();
@@ -118,14 +118,14 @@ describe('RiskScoreWidget', () => {
   it('does not show the toggle when there are 5 or fewer scores', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     expect(screen.queryByText(/mostra tutti/i)).not.toBeInTheDocument();
   });
 
   it('shows a "solo regole euristiche" badge when no score has an ML level', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockScores });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     expect(screen.getByText('Solo regole euristiche')).toBeInTheDocument();
     expect(screen.queryByText('ML attivo')).not.toBeInTheDocument();
   });
@@ -137,7 +137,7 @@ describe('RiskScoreWidget', () => {
     ];
     (api.get as jest.Mock).mockResolvedValue({ data: withMl });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     expect(screen.getByText('ML attivo')).toBeInTheDocument();
     expect(screen.queryByText('Solo regole euristiche')).not.toBeInTheDocument();
   });
@@ -145,7 +145,7 @@ describe('RiskScoreWidget', () => {
   it('does not show the ML badge when there are no risk scores', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/nessun dato sul rischio disponibile/i)).toBeInTheDocument());
+    expect(await screen.findByText(/nessun dato sul rischio disponibile/i)).toBeInTheDocument();
     expect(screen.queryByText('Solo regole euristiche')).not.toBeInTheDocument();
     expect(screen.queryByText('ML attivo')).not.toBeInTheDocument();
   });
@@ -155,7 +155,7 @@ describe('RiskScoreWidget', () => {
       mockGetByUrl({ '/risk-scores': mockScores, '/risk-feedback': [] });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
-      await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+      expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
       expect(screen.getAllByText('Il punteggio è corretto?')).toHaveLength(mockScores.length);
       expect(screen.getAllByRole('button', { name: 'Punteggio corretto' })).toHaveLength(mockScores.length);
       expect(screen.getAllByRole('button', { name: 'Punteggio errato' })).toHaveLength(mockScores.length);
@@ -168,7 +168,7 @@ describe('RiskScoreWidget', () => {
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
-      await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+      expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
       const [firstThumbsUp] = screen.getAllByRole('button', { name: 'Punteggio corretto' });
       await userEvent.click(firstThumbsUp);
 
@@ -188,7 +188,7 @@ describe('RiskScoreWidget', () => {
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
-      await waitFor(() => expect(screen.getByText('Beta Ltd')).toBeInTheDocument());
+      expect(await screen.findByText('Beta Ltd')).toBeInTheDocument();
       const thumbsDownButtons = screen.getAllByRole('button', { name: 'Punteggio errato' });
       await userEvent.click(thumbsDownButtons[1]);
 
@@ -208,7 +208,7 @@ describe('RiskScoreWidget', () => {
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
-      await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+      expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
       expect(screen.getByText('Confermato corretto')).toBeInTheDocument();
       expect(screen.getAllByText('Il punteggio è corretto?')).toHaveLength(mockScores.length - 1);
     });
@@ -220,7 +220,7 @@ describe('RiskScoreWidget', () => {
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
-      await waitFor(() => expect(screen.getByText('Beta Ltd')).toBeInTheDocument());
+      expect(await screen.findByText('Beta Ltd')).toBeInTheDocument();
       expect(screen.getByText('Segnalato come errato')).toBeInTheDocument();
     });
   });

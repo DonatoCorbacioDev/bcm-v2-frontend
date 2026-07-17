@@ -53,13 +53,13 @@ describe('DocumentsTab', () => {
   it('shows empty state when there are no documents', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/nessun documento/i)).toBeInTheDocument());
+    expect(await screen.findByText(/nessun documento/i)).toBeInTheDocument();
   });
 
   it('renders document list with formatted file sizes', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc, smallDoc, mediumDoc] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('contract.pdf')).toBeInTheDocument());
+    expect(await screen.findByText('contract.pdf')).toBeInTheDocument();
     expect(screen.getByText('tiny.pdf')).toBeInTheDocument();
     expect(screen.getByText('medium.pdf')).toBeInTheDocument();
     // formatBytes: B, KB, MB
@@ -71,21 +71,21 @@ describe('DocumentsTab', () => {
   it('hides delete button for non-admin users', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     render(<DocumentsTab contractId={1} isAdmin={false} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('contract.pdf')).toBeInTheDocument());
+    expect(await screen.findByText('contract.pdf')).toBeInTheDocument();
     expect(screen.queryByTitle('Elimina documento')).not.toBeInTheDocument();
   });
 
   it('shows delete button for admin users', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
+    expect(await screen.findByTitle('Elimina documento')).toBeInTheDocument();
   });
 
   it('calls delete mutation and shows success toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.delete as jest.Mock).mockResolvedValue({});
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
+    expect(await screen.findByTitle('Elimina documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina documento'));
     await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/contracts/1/documents/1'));
     expect(toast.success).toHaveBeenCalledWith('Documento eliminato');
@@ -94,7 +94,7 @@ describe('DocumentsTab', () => {
   it('rejects non-PDF files and shows error toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['content'], 'doc.txt', { type: 'text/plain' });
     fireEvent.change(input, { target: { files: [file] } });
@@ -106,7 +106,7 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockResolvedValue({ data: doc });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF-1.4'], 'valid.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
@@ -118,9 +118,9 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: analysis });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
-    await waitFor(() => expect(screen.getByText(/campi estratti/i)).toBeInTheDocument());
+    expect(await screen.findByText(/campi estratti/i)).toBeInTheDocument();
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
     expect(screen.getByText('CNT-001')).toBeInTheDocument();
     expect(screen.getByText('50000')).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: { ...analysis, detectedAmount: null, detectedContractNumber: null } });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     await waitFor(() => expect(screen.getAllByText('Non rilevato').length).toBeGreaterThan(0));
   });
@@ -140,9 +140,9 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: analysis });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
-    await waitFor(() => expect(screen.getByText(/applica al contratto/i)).toBeInTheDocument());
+    expect(await screen.findByText(/applica al contratto/i)).toBeInTheDocument();
     await userEvent.click(screen.getByText(/applica al contratto/i));
     expect(onApply).toHaveBeenCalledWith(expect.objectContaining({
       customerName: 'Acme Corp',
@@ -154,9 +154,9 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: analysis });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
-    await waitFor(() => expect(screen.getByTitle('Comprimi analisi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Comprimi analisi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Comprimi analisi'));
     expect(screen.queryByText(/campi estratti/i)).not.toBeInTheDocument();
     // Re-expand
@@ -169,7 +169,7 @@ describe('DocumentsTab', () => {
       .mockResolvedValueOnce({ data: [doc] })
       .mockResolvedValueOnce({ data: new Blob(['%PDF']) });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Scarica documento')).toBeInTheDocument());
+    expect(await screen.findByTitle('Scarica documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Scarica documento'));
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(
       '/contracts/1/documents/1/download',
@@ -181,9 +181,9 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: { ...analysis, rawText: '' } });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
-    await waitFor(() => expect(screen.getByText(/campi estratti/i)).toBeInTheDocument());
+    expect(await screen.findByText(/campi estratti/i)).toBeInTheDocument();
     expect(screen.queryByText(/mostra testo estratto/i)).not.toBeInTheDocument();
   });
 
@@ -192,9 +192,9 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: nullAnalysis });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
-    await waitFor(() => expect(screen.getByText(/applica al contratto/i)).toBeInTheDocument());
+    expect(await screen.findByText(/applica al contratto/i)).toBeInTheDocument();
     await userEvent.click(screen.getByText(/applica al contratto/i));
     expect(onApply).toHaveBeenCalledWith({});
   });
@@ -202,7 +202,7 @@ describe('DocumentsTab', () => {
   it('does nothing when file input fires with no file selected', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: null } });
     expect(api.post).not.toHaveBeenCalled();
@@ -213,11 +213,11 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'loading.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => expect(screen.getByText(/caricamento\.\.\./i)).toBeInTheDocument());
+    expect(await screen.findByText(/caricamento\.\.\./i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /caricamento/i })).toBeDisabled();
   });
 
@@ -225,9 +225,9 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeDisabled());
+    expect(await screen.findByTitle('Estrai campi')).toBeDisabled();
   });
 
   it('shows error toast when download fails', async () => {
@@ -235,7 +235,7 @@ describe('DocumentsTab', () => {
       .mockResolvedValueOnce({ data: [doc] })
       .mockRejectedValueOnce(new Error('download failed'));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Scarica documento')).toBeInTheDocument());
+    expect(await screen.findByTitle('Scarica documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Scarica documento'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Download del documento non riuscito'));
   });
@@ -244,7 +244,7 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(/carica pdf/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'test.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
@@ -255,7 +255,7 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Elimina documento')).toBeInTheDocument());
+    expect(await screen.findByTitle('Elimina documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina documento'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Eliminazione del documento non riuscita'));
   });
@@ -263,7 +263,7 @@ describe('DocumentsTab', () => {
   it('clicks the hidden file input when upload button is clicked', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByRole('button', { name: /carica pdf/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /carica pdf/i })).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const clickSpy = jest.spyOn(input, 'click').mockImplementation(() => {});
     await userEvent.click(screen.getByRole('button', { name: /carica pdf/i }));
@@ -274,7 +274,7 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockRejectedValue(new Error('analysis failed'));
     render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByTitle('Estrai campi')).toBeInTheDocument());
+    expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Estrazione non riuscita'), { timeout: 3000 });
   });
@@ -296,10 +296,10 @@ describe('DocumentsTab', () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: riskyClauses });
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       expect(api.post).toHaveBeenCalledWith('/contracts/1/documents/1/analyze-clause-risk');
-      await waitFor(() => expect(screen.getByText('Rinnovo automatico')).toBeInTheDocument());
+      expect(await screen.findByText('Rinnovo automatico')).toBeInTheDocument();
       expect(screen.getByText(/rinnovo tacito senza preavviso/i)).toBeInTheDocument();
       expect(toast.success).toHaveBeenCalledWith('Analisi clausole completata');
     });
@@ -308,9 +308,9 @@ describe('DocumentsTab', () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: { clauses: [], error: null } });
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
-      await waitFor(() => expect(screen.getByText(/nessuna clausola a rischio rilevata/i)).toBeInTheDocument());
+      expect(await screen.findByText(/nessuna clausola a rischio rilevata/i)).toBeInTheDocument();
     });
 
     it('shows the error message when the ML analysis returns an error', async () => {
@@ -319,9 +319,9 @@ describe('DocumentsTab', () => {
         data: { clauses: [], error: 'Ollama service unavailable' },
       });
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
-      await waitFor(() => expect(screen.getByText('Ollama service unavailable')).toBeInTheDocument());
+      expect(await screen.findByText('Ollama service unavailable')).toBeInTheDocument();
       expect(toast.error).toHaveBeenCalledWith('Analisi delle clausole non disponibile');
     });
 
@@ -329,7 +329,7 @@ describe('DocumentsTab', () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockRejectedValue(new Error('network error'));
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Analisi delle clausole non riuscita'));
     });
@@ -338,9 +338,9 @@ describe('DocumentsTab', () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: riskyClauses });
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
-      await waitFor(() => expect(screen.getByTitle('Comprimi clausole a rischio')).toBeInTheDocument());
+      expect(await screen.findByTitle('Comprimi clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Comprimi clausole a rischio'));
       expect(screen.queryByText('Rinnovo automatico')).not.toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Espandi clausole a rischio'));
@@ -351,9 +351,9 @@ describe('DocumentsTab', () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
-      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeInTheDocument());
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
-      await waitFor(() => expect(screen.getByTitle('Rileva clausole a rischio')).toBeDisabled());
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeDisabled();
     });
   });
 });

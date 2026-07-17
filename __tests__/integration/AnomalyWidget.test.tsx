@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
@@ -37,18 +37,14 @@ describe('AnomalyWidget', () => {
   it('shows offline message when ML service is unavailable', async () => {
     (api.get as jest.Mock).mockRejectedValue(new Error('Network Error'));
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() =>
-      expect(screen.getByText(/rilevamento anomalie non disponibile/i)).toBeInTheDocument()
-    );
+    expect(await screen.findByText(/rilevamento anomalie non disponibile/i)).toBeInTheDocument();
     expect(screen.getByText(/verifica che il servizio ml sia attivo/i)).toBeInTheDocument();
   });
 
   it('shows green empty state when no anomalies', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() =>
-      expect(screen.getByText(/nessuna anomalia finanziaria rilevata/i)).toBeInTheDocument()
-    );
+    expect(await screen.findByText(/nessuna anomalia finanziaria rilevata/i)).toBeInTheDocument();
   });
 
   it.each([
@@ -58,7 +54,7 @@ describe('AnomalyWidget', () => {
   ])('renders %s in the anomaly rows', async (_label, first, second, third) => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText(first)).toBeInTheDocument());
+    expect(await screen.findByText(first)).toBeInTheDocument();
     expect(screen.getByText(second)).toBeInTheDocument();
     expect(screen.getByText(third)).toBeInTheDocument();
   });
@@ -66,7 +62,7 @@ describe('AnomalyWidget', () => {
   it('renders links to contract detail pages', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     const links = screen.getAllByRole('link');
     const hrefs = links.map((l) => l.getAttribute('href'));
     expect(hrefs).toContain('/contracts/10');
@@ -81,13 +77,13 @@ describe('AnomalyWidget', () => {
     }];
     (api.get as jest.Mock).mockResolvedValue({ data: unknown });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Unknown Ltd')).toBeInTheDocument());
+    expect(await screen.findByText('Unknown Ltd')).toBeInTheDocument();
   });
 
   it('renders the table header columns', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Cliente')).toBeInTheDocument());
+    expect(await screen.findByText('Cliente')).toBeInTheDocument();
     expect(screen.getByText('Periodo')).toBeInTheDocument();
     expect(screen.getByText('Importo')).toBeInTheDocument();
     expect(screen.getByText('Gravità')).toBeInTheDocument();
@@ -106,7 +102,7 @@ describe('AnomalyWidget', () => {
     }));
     (api.get as jest.Mock).mockResolvedValue({ data: manyAnomalies });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Cliente 1')).toBeInTheDocument());
+    expect(await screen.findByText('Cliente 1')).toBeInTheDocument();
 
     expect(screen.getByText('Cliente 5')).toBeInTheDocument();
     expect(screen.queryByText('Cliente 6')).not.toBeInTheDocument();
@@ -121,7 +117,7 @@ describe('AnomalyWidget', () => {
   it('does not show the toggle when there are 5 or fewer anomalies', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: mockAnomalies });
     render(<AnomalyWidget />, { wrapper: createWrapper() });
-    await waitFor(() => expect(screen.getByText('Acme Corp')).toBeInTheDocument());
+    expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     expect(screen.queryByText(/mostra tutti/i)).not.toBeInTheDocument();
   });
 });

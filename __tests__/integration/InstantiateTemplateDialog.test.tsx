@@ -158,7 +158,7 @@ describe('InstantiateTemplateDialog', () => {
     );
     const form = document.querySelector('form');
     fireEvent.submit(form!);
-    await waitFor(() => expect(screen.getByText(/il nome del cliente deve contenere almeno 2 caratteri/i)).toBeInTheDocument());
+    expect(await screen.findByText(/il nome del cliente deve contenere almeno 2 caratteri/i)).toBeInTheDocument();
     expect(screen.getByText(/la data di inizio è obbligatoria/i)).toBeInTheDocument();
     expect(mockInstantiate).not.toHaveBeenCalled();
   });
@@ -237,7 +237,7 @@ describe('InstantiateTemplateDialog', () => {
     if (startDate) fireEvent.change(startDate, { target: { value: '2024-01-01' } });
     const form = document.querySelector('form');
     if (form) fireEvent.submit(form);
-    await waitFor(() => expect(screen.getByText(/solo lettere maiuscole/i)).toBeInTheDocument());
+    expect(await screen.findByText(/solo lettere maiuscole/i)).toBeInTheDocument();
     expect(mockInstantiate).not.toHaveBeenCalled();
   });
 });

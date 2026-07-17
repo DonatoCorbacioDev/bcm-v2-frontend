@@ -45,7 +45,7 @@ describe('TwoFactorAuthCard', () => {
     mockGetStatus.mockResolvedValue(false);
     renderCard();
 
-    await waitFor(() => expect(screen.getByText(/non attiva/i)).toBeInTheDocument());
+    expect(await screen.findByText(/non attiva/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
   });
 
@@ -53,7 +53,7 @@ describe('TwoFactorAuthCard', () => {
     mockGetStatus.mockResolvedValue(true);
     renderCard();
 
-    await waitFor(() => expect(screen.getByText(/^attiva$/i)).toBeInTheDocument());
+    expect(await screen.findByText(/^attiva$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /disattiva/i })).toBeInTheDocument();
   });
 
@@ -63,10 +63,10 @@ describe('TwoFactorAuthCard', () => {
     mockConfirm.mockResolvedValue(['AAAA-1111', 'BBBB-2222', 'CCCC-3333']);
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
 
-    await waitFor(() => expect(screen.getByText('ABCD1234')).toBeInTheDocument());
+    expect(await screen.findByText('ABCD1234')).toBeInTheDocument();
     expect(await screen.findByAltText(/qr code/i)).toBeInTheDocument();
 
     await userEvent.type(screen.getByLabelText(/codice di verifica/i), '123456');
@@ -87,10 +87,10 @@ describe('TwoFactorAuthCard', () => {
     mockConfirm.mockRejectedValue(new Error('invalid code'));
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
 
-    await waitFor(() => expect(screen.getByLabelText(/codice di verifica/i)).toBeInTheDocument());
+    expect(await screen.findByLabelText(/codice di verifica/i)).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText(/codice di verifica/i), '000000');
     await userEvent.click(screen.getByRole('button', { name: /conferma e attiva/i }));
 
@@ -102,7 +102,7 @@ describe('TwoFactorAuthCard', () => {
     mockDisable.mockResolvedValue(undefined);
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /disattiva/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
 
     const input = screen.getByPlaceholderText('123456');
@@ -118,7 +118,7 @@ describe('TwoFactorAuthCard', () => {
     mockSetup.mockRejectedValue(new Error('network error'));
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
 
     await waitFor(() =>
@@ -131,7 +131,7 @@ describe('TwoFactorAuthCard', () => {
     mockDisable.mockRejectedValue(new Error('invalid code'));
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /disattiva/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
 
     await userEvent.type(screen.getByPlaceholderText('123456'), '000000');
@@ -144,7 +144,7 @@ describe('TwoFactorAuthCard', () => {
     mockGetStatus.mockResolvedValue(true);
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /disattiva/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
 
     await userEvent.type(screen.getByPlaceholderText('123456'), '000000');
@@ -160,7 +160,7 @@ describe('TwoFactorAuthCard', () => {
     mockConfirm.mockResolvedValue(['AAAA-1111', 'BBBB-2222']);
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
 
     await userEvent.type(screen.getByLabelText(/codice di verifica/i), '123456');
@@ -181,7 +181,7 @@ describe('TwoFactorAuthCard', () => {
     (navigator.clipboard.writeText as jest.Mock).mockRejectedValueOnce(new Error('denied'));
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
 
     await userEvent.type(screen.getByLabelText(/codice di verifica/i), '123456');
@@ -198,12 +198,12 @@ describe('TwoFactorAuthCard', () => {
     mockSetup.mockReturnValue(new Promise((resolve) => { resolveSetup = resolve; }));
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
 
     expect(await screen.findByRole('button', { name: /preparazione/i })).toBeInTheDocument();
     resolveSetup!({ secret: 'ABCD1234', otpAuthUri: 'otpauth://totp/BCM:admin?secret=ABCD1234' });
-    await waitFor(() => expect(screen.getByText('ABCD1234')).toBeInTheDocument());
+    expect(await screen.findByText('ABCD1234')).toBeInTheDocument();
   });
 
   it('shows a "Verifica..." label while confirming a code is pending', async () => {
@@ -213,14 +213,14 @@ describe('TwoFactorAuthCard', () => {
     mockConfirm.mockReturnValue(new Promise((resolve) => { resolveConfirm = resolve; }));
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
     await userEvent.type(await screen.findByLabelText(/codice di verifica/i), '123456');
     await userEvent.click(screen.getByRole('button', { name: /conferma e attiva/i }));
 
     expect(await screen.findByRole('button', { name: /verifica\.\.\./i })).toBeInTheDocument();
     resolveConfirm!(['AAAA-1111']);
-    await waitFor(() => expect(screen.getByText('AAAA-1111')).toBeInTheDocument());
+    expect(await screen.findByText('AAAA-1111')).toBeInTheDocument();
   });
 
   it('shows a "Disattivazione..." label while disabling is pending', async () => {
@@ -229,7 +229,7 @@ describe('TwoFactorAuthCard', () => {
     mockDisable.mockReturnValue(new Promise((resolve) => { resolveDisable = resolve; }));
 
     renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /disattiva/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
     await userEvent.type(screen.getByPlaceholderText('123456'), '654321');
     await userEvent.click(screen.getByRole('button', { name: /conferma disattivazione/i }));
@@ -246,9 +246,9 @@ describe('TwoFactorAuthCard', () => {
     (QRCode.toDataURL as jest.Mock).mockReturnValue(new Promise((resolve) => { resolveQr = resolve; }));
 
     const { unmount } = renderCard();
-    await waitFor(() => expect(screen.getByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument());
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
-    await waitFor(() => expect(screen.getByText('ABCD1234')).toBeInTheDocument());
+    expect(await screen.findByText('ABCD1234')).toBeInTheDocument();
 
     unmount();
     resolveQr!('data:image/png;base64,fake');

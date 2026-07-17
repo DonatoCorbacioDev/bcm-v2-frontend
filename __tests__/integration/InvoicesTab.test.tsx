@@ -142,9 +142,7 @@ describe('InvoicesTab', () => {
   it('shows empty state when invoice list is empty', async () => {
     mockApiGet({ invoices: [] });
     renderTab();
-    await waitFor(() =>
-      expect(screen.getByText(/nessuna fattura/i)).toBeInTheDocument(),
-    );
+    expect(await screen.findByText(/nessuna fattura/i)).toBeInTheDocument();
   });
 
   it('shows empty state when data is undefined/null', async () => {
@@ -153,9 +151,7 @@ describe('InvoicesTab', () => {
       return Promise.resolve({ data: null });
     });
     renderTab();
-    await waitFor(() =>
-      expect(screen.getByText(/nessuna fattura/i)).toBeInTheDocument(),
-    );
+    expect(await screen.findByText(/nessuna fattura/i)).toBeInTheDocument();
   });
 
   // ── list rendering ─────────────────────────────────────────────────────────
@@ -163,7 +159,7 @@ describe('InvoicesTab', () => {
   it('renders invoice table with formatted file sizes', async () => {
     mockApiGet({ invoices: [invoice, invoiceKB, invoiceMed] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
+    expect(await screen.findByText('fattura.xml')).toBeInTheDocument();
     // 2 MB
     expect(screen.getByText(/2\.0 MB/)).toBeInTheDocument();
     // 512 B
@@ -175,7 +171,7 @@ describe('InvoicesTab', () => {
   it('renders supplier name and invoice number in the table', async () => {
     mockApiGet({ invoices: [invoice] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('Fornitore SRL')).toBeInTheDocument());
+    expect(await screen.findByText('Fornitore SRL')).toBeInTheDocument();
     expect(screen.getByText('FT-2024-001')).toBeInTheDocument();
     // totalAmount + currency via formatAmount
     expect(screen.getByText(/1\.?220,00 EUR/)).toBeInTheDocument();
@@ -186,14 +182,14 @@ describe('InvoicesTab', () => {
   it('hides delete button for non-admin users', async () => {
     mockApiGet({ invoices: [invoice] });
     renderTab(false);
-    await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
+    expect(await screen.findByText('fattura.xml')).toBeInTheDocument();
     expect(screen.queryByTitle('Elimina fattura')).not.toBeInTheDocument();
   });
 
   it('shows delete button for admin users', async () => {
     mockApiGet({ invoices: [invoice] });
     renderTab(true);
-    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
+    expect(await screen.findByTitle('Elimina fattura')).toBeInTheDocument();
   });
 
   // ── upload ─────────────────────────────────────────────────────────────────
@@ -201,7 +197,7 @@ describe('InvoicesTab', () => {
   it('does nothing when file input fires with no file', async () => {
     mockApiGet({ invoices: [] });
     renderTab();
-    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica fattura/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: null } });
     expect(api.post).not.toHaveBeenCalled();
@@ -211,7 +207,7 @@ describe('InvoicesTab', () => {
   it('rejects non-XML files and shows error toast', async () => {
     mockApiGet({ invoices: [] });
     renderTab();
-    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica fattura/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['content'], 'document.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
@@ -223,7 +219,7 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockResolvedValue({ data: invoice });
     renderTab();
-    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica fattura/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' });
     Object.defineProperty(file, 'name', { value: 'fattura.xml' });
@@ -240,7 +236,7 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
     renderTab();
-    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica fattura/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' });
     fireEvent.change(input, { target: { files: [file] } });
@@ -253,11 +249,11 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
-    await waitFor(() => expect(screen.getByText(/carica fattura/i)).toBeInTheDocument());
+    expect(await screen.findByText(/carica fattura/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' });
     fireEvent.change(input, { target: { files: [file] } });
-    await waitFor(() => expect(screen.getByText(/caricamento\.\.\./i)).toBeInTheDocument());
+    expect(await screen.findByText(/caricamento\.\.\./i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /caricamento/i })).toBeDisabled();
   });
 
@@ -267,7 +263,7 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoice] });
     (api.delete as jest.Mock).mockResolvedValue({});
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
+    expect(await screen.findByTitle('Elimina fattura')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina fattura'));
     await waitFor(() =>
       expect(api.delete).toHaveBeenCalledWith('/contracts/1/invoices/1'),
@@ -279,7 +275,7 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoice] });
     (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
+    expect(await screen.findByTitle('Elimina fattura')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina fattura'));
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Eliminazione della fattura non riuscita'),
@@ -290,9 +286,9 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoice] });
     (api.delete as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeInTheDocument());
+    expect(await screen.findByTitle('Elimina fattura')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina fattura'));
-    await waitFor(() => expect(screen.getByTitle('Elimina fattura')).toBeDisabled());
+    expect(await screen.findByTitle('Elimina fattura')).toBeDisabled();
   });
 
   // ── download ───────────────────────────────────────────────────────────────
@@ -300,7 +296,7 @@ describe('InvoicesTab', () => {
   it('downloads invoice file when download button is clicked', async () => {
     mockApiGet({ invoices: [invoice], download: new Blob(['<xml/>']) });
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
+    expect(await screen.findByTitle('Scarica fattura')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Scarica fattura'));
     await waitFor(() =>
       expect(api.get).toHaveBeenCalledWith(
@@ -315,7 +311,7 @@ describe('InvoicesTab', () => {
   it('shows error toast when download fails', async () => {
     mockApiGet({ invoices: [invoice], downloadError: new Error('network error') });
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
+    expect(await screen.findByTitle('Scarica fattura')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Scarica fattura'));
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Download della fattura non riuscito'),
@@ -327,7 +323,7 @@ describe('InvoicesTab', () => {
   it('clicking the actions cell does not open the detail dialog', async () => {
     mockApiGet({ invoices: [invoice] });
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Scarica fattura')).toBeInTheDocument());
+    expect(await screen.findByTitle('Scarica fattura')).toBeInTheDocument();
     // Click the actions <td> directly — propagation should be stopped
     const actionsTd = screen.getByTitle('Scarica fattura').closest('td')!;
     fireEvent.click(actionsTd);
@@ -339,9 +335,9 @@ describe('InvoicesTab', () => {
   it('opens detail dialog with full invoice info on row click', async () => {
     mockApiGet({ invoices: [invoice], detail: invoice });
     renderTab();
-    await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
+    expect(await screen.findByText('fattura.xml')).toBeInTheDocument();
     await userEvent.click(screen.getByText('fattura.xml'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
     const dialog = screen.getByRole('dialog');
     // Unique-to-dialog fields (not in the table)
     expect(within(dialog).getByText('IT12345678901')).toBeInTheDocument();
@@ -357,16 +353,16 @@ describe('InvoicesTab', () => {
     const invoiceNoItems = { ...invoice, lineItems: [] };
     mockApiGet({ invoices: [invoiceNoItems], detail: invoiceNoItems });
     renderTab();
-    await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
+    expect(await screen.findByText('fattura.xml')).toBeInTheDocument();
     await userEvent.click(screen.getByText('fattura.xml'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(screen.queryByText('Voci di dettaglio')).not.toBeInTheDocument();
   });
 
   it('shows error toast when row click detail fetch fails', async () => {
     mockApiGet({ invoices: [invoice], detailError: new Error('fetch failed') });
     renderTab();
-    await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
+    expect(await screen.findByText('fattura.xml')).toBeInTheDocument();
     await userEvent.click(screen.getByText('fattura.xml'));
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Caricamento dei dettagli della fattura non riuscito'),
@@ -379,7 +375,7 @@ describe('InvoicesTab', () => {
   it('disables the selection checkbox when the supplier IBAN is missing', async () => {
     mockApiGet({ invoices: [invoiceNoIban] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('no-iban.xml')).toBeInTheDocument());
+    expect(await screen.findByText('no-iban.xml')).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
     expect(screen.getByText('IBAN mancante')).toBeInTheDocument();
   });
@@ -387,7 +383,7 @@ describe('InvoicesTab', () => {
   it('disables the selection checkbox and shows "Pagata" once the invoice is already batched', async () => {
     mockApiGet({ invoices: [invoicePaid] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('pagata.xml')).toBeInTheDocument());
+    expect(await screen.findByText('pagata.xml')).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
     expect(screen.getByText('Pagata')).toBeInTheDocument();
   });
@@ -395,7 +391,7 @@ describe('InvoicesTab', () => {
   it('allows selecting an eligible invoice and shows the generate button with the count', async () => {
     mockApiGet({ invoices: [invoice] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
     const checkbox = screen.getByRole('checkbox', { name: /seleziona fattura/i });
     expect(checkbox).not.toBeDisabled();
     await userEvent.click(checkbox);
@@ -405,7 +401,7 @@ describe('InvoicesTab', () => {
   it('deselects an invoice and hides the generate button again', async () => {
     mockApiGet({ invoices: [invoice] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
     const checkbox = screen.getByRole('checkbox', { name: /seleziona fattura/i });
     await userEvent.click(checkbox);
     expect(screen.getByRole('button', { name: /genera pagamento sepa/i })).toBeInTheDocument();
@@ -419,7 +415,7 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoice] });
     (api.post as jest.Mock).mockResolvedValue({ data: new Blob(['<Document/>']) });
     renderTab();
-    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
     await userEvent.click(screen.getByRole('button', { name: /genera pagamento sepa/i }));
     await waitFor(() =>
@@ -436,7 +432,7 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoice] });
     (api.post as jest.Mock).mockRejectedValue(new Error('generation failed'));
     renderTab();
-    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
     await userEvent.click(screen.getByRole('button', { name: /genera pagamento sepa/i }));
     await waitFor(() =>
@@ -448,7 +444,7 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoice] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
-    await waitFor(() => expect(screen.getByText('Pronta per SEPA')).toBeInTheDocument());
+    expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
     const generateButton = screen.getByRole('button', { name: /genera pagamento sepa/i });
     await userEvent.click(generateButton);
@@ -462,9 +458,9 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoiceNoIban] });
     (api.patch as jest.Mock).mockResolvedValue({ data: { ...invoiceNoIban, supplierIban: 'IT60X0542811101000000123456' } });
     renderTab();
-    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    expect(await screen.findByText('IBAN mancante')).toBeInTheDocument();
     await userEvent.click(screen.getByText('IBAN mancante'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     const ibanField = screen.getByLabelText(/IBAN \*/i);
     await userEvent.type(ibanField, 'IT60X0542811101000000123456');
@@ -482,9 +478,9 @@ describe('InvoicesTab', () => {
   it('shows a validation error when saving payment details without an IBAN', async () => {
     mockApiGet({ invoices: [invoiceNoIban] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    expect(await screen.findByText('IBAN mancante')).toBeInTheDocument();
     await userEvent.click(screen.getByText('IBAN mancante'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
 
@@ -496,9 +492,9 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoice] });
     (api.patch as jest.Mock).mockResolvedValue({ data: invoice });
     renderTab();
-    await waitFor(() => expect(screen.getByTitle('Modifica dati di pagamento')).toBeInTheDocument());
+    expect(await screen.findByTitle('Modifica dati di pagamento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Modifica dati di pagamento'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     expect(screen.getByLabelText(/IBAN \*/i)).toHaveValue(invoice.supplierIban);
     expect(screen.getByLabelText(/BIC \/ SWIFT/i)).toHaveValue(invoice.supplierBic);
@@ -524,9 +520,9 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoiceNoIban] });
     (api.patch as jest.Mock).mockRejectedValue(new Error('save failed'));
     renderTab();
-    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    expect(await screen.findByText('IBAN mancante')).toBeInTheDocument();
     await userEvent.click(screen.getByText('IBAN mancante'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     await userEvent.type(screen.getByLabelText(/IBAN \*/i), 'IT60X0542811101000000123456');
     await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
@@ -539,9 +535,9 @@ describe('InvoicesTab', () => {
   it('closes the payment details dialog when cancelled', async () => {
     mockApiGet({ invoices: [invoiceNoIban] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    expect(await screen.findByText('IBAN mancante')).toBeInTheDocument();
     await userEvent.click(screen.getByText('IBAN mancante'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /^annulla$/i }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -550,9 +546,9 @@ describe('InvoicesTab', () => {
   it('closes the payment details dialog on escape', async () => {
     mockApiGet({ invoices: [invoiceNoIban] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    expect(await screen.findByText('IBAN mancante')).toBeInTheDocument();
     await userEvent.click(screen.getByText('IBAN mancante'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     await userEvent.keyboard('{Escape}');
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
@@ -562,9 +558,9 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoiceNoPaymentDetails] });
     (api.patch as jest.Mock).mockResolvedValue({ data: invoiceNoPaymentDetails });
     renderTab();
-    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    expect(await screen.findByText('IBAN mancante')).toBeInTheDocument();
     await userEvent.click(screen.getByText('IBAN mancante'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     expect(screen.getByLabelText(/Scadenza pagamento/i)).toHaveValue('');
 
@@ -583,9 +579,9 @@ describe('InvoicesTab', () => {
     mockApiGet({ invoices: [invoiceNoIban] });
     (api.patch as jest.Mock).mockReturnValue(new Promise(() => {}));
     renderTab();
-    await waitFor(() => expect(screen.getByText('IBAN mancante')).toBeInTheDocument());
+    expect(await screen.findByText('IBAN mancante')).toBeInTheDocument();
     await userEvent.click(screen.getByText('IBAN mancante'));
-    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument());
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
     await userEvent.type(screen.getByLabelText(/IBAN \*/i), 'IT60X0542811101000000123456');
     await userEvent.click(screen.getByRole('button', { name: /^salva$/i }));
@@ -598,7 +594,7 @@ describe('InvoicesTab', () => {
   it('renders the SEPA payment history and re-downloads a generated file', async () => {
     mockApiGet({ invoices: [invoice], sepaPayments: [sepaBatch] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('Pagamenti SEPA generati')).toBeInTheDocument());
+    expect(await screen.findByText('Pagamenti SEPA generati')).toBeInTheDocument();
     expect(screen.getByText('sepa-1-2024-04-05.xml')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTitle('Scarica di nuovo'));
@@ -613,7 +609,7 @@ describe('InvoicesTab', () => {
   it('does not render the SEPA payment history section when there are no batches yet', async () => {
     mockApiGet({ invoices: [invoice], sepaPayments: [] });
     renderTab();
-    await waitFor(() => expect(screen.getByText('fattura.xml')).toBeInTheDocument());
+    expect(await screen.findByText('fattura.xml')).toBeInTheDocument();
     expect(screen.queryByText('Pagamenti SEPA generati')).not.toBeInTheDocument();
   });
 
@@ -627,7 +623,7 @@ describe('InvoicesTab', () => {
       return Promise.reject(new Error(`Unhandled GET ${url} in test mock`));
     });
     renderTab();
-    await waitFor(() => expect(screen.getByText('Pagamenti SEPA generati')).toBeInTheDocument());
+    expect(await screen.findByText('Pagamenti SEPA generati')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTitle('Scarica di nuovo'));
     await waitFor(() =>

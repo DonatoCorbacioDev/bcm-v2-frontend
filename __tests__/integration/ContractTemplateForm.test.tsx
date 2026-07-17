@@ -147,7 +147,7 @@ describe('ContractTemplateForm', () => {
     fireEvent.change(screen.getByPlaceholderText('es. 30'), { target: { value: '-1' } });
     fireEvent.submit(container.querySelector('form')!);
 
-    await waitFor(() => expect(screen.getByText(/non può superare i 2000 caratteri/i)).toBeInTheDocument());
+    expect(await screen.findByText(/non può superare i 2000 caratteri/i)).toBeInTheDocument();
     expect(screen.getByText(/durata deve essere un numero positivo/i)).toBeInTheDocument();
     expect(screen.getByText(/giorni di notifica devono essere un numero positivo/i)).toBeInTheDocument();
     expect(mockMutateAsync).not.toHaveBeenCalled();
@@ -156,9 +156,7 @@ describe('ContractTemplateForm', () => {
   it('shows validation error when name is too short', async () => {
     const { container } = render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
     fillAndSubmit(container, 'A');
-    await waitFor(() =>
-      expect(screen.getByText(/almeno 2 caratteri/i)).toBeInTheDocument()
-    );
+    expect(await screen.findByText(/almeno 2 caratteri/i)).toBeInTheDocument();
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 

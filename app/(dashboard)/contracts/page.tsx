@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import ContractTable from "@/components/contracts/ContractTable";
 import ContractForm from "@/components/contracts/ContractForm";
 import ContractImportDialog from "@/components/contracts/ContractImportDialog";
+import { SemanticSearchBar } from "@/components/contracts/SemanticSearchBar";
 import {
   Dialog,
   DialogContent,
@@ -125,6 +126,8 @@ export default function ContractsPage() {
           <Button onClick={handleCreateClick}>+ Nuovo contratto</Button>
         </div>
       </div>
+
+      <SemanticSearchBar />
 
       <ContractTable onEditClick={handleEditClick} />
 

@@ -123,6 +123,15 @@ export interface ForecastResponse {
   reliable?: boolean;
 }
 
+export interface SemanticSearchResult {
+  contractId: number;
+  contractNumber: string;
+  customerName: string;
+  documentId: number;
+  fileName: string;
+  score: number;
+}
+
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
 
 export interface RiskScore {

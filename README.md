@@ -21,6 +21,31 @@ BCM v2.0 Frontend is the client application for the Business Contracts Manager s
 
 ---
 
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/dashboard-light.png" alt="Dashboard, light mode" width="420"></td>
+    <td><img src="docs/screenshots/dashboard-dark.png" alt="Dashboard, dark mode" width="420"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Dashboard — light mode</sub></td>
+    <td align="center"><sub>Dashboard — dark mode</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/login.png" alt="Login page" width="420"></td>
+    <td><img src="docs/screenshots/contracts-table.png" alt="Contracts table" width="420"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Login — split-screen layout</sub></td>
+    <td align="center"><sub>Contracts table</sub></td>
+  </tr>
+</table>
+
+All data shown is synthetic demo data (Faker, `it_IT` locale) — see [Related Projects](#-related-projects) for the ML service that calibrates it against real public statistics.
+
+---
+
 ## ✨ Key Features
 
 ### Contract Management UI
@@ -746,7 +771,11 @@ Special thanks to all library maintainers and contributors.
 
 ## 🔗 Related Projects
 
-- **BCM Backend v2.0**: Spring Boot 3.5.10 + Java 21 REST API, ~99% instruction/branch test coverage
+BCM v2.0 is split across 4 repositories:
+
+- **[bcm-v2-backend](https://github.com/DonatoCorbacioDev/bcm-v2-backend)** — Spring Boot 3.5.10 + Java 21 REST API
+- **[bcm-v2-ml](https://github.com/DonatoCorbacioDev/bcm-v2-ml)** — FastAPI service for risk scoring, forecasting, anomaly detection and LLM-based clause analysis
+- **[bcm-v2-docker](https://github.com/DonatoCorbacioDev/bcm-v2-docker)** — Docker Compose setup to run the full stack with one command
 - **BCM v1.0** (Thesis Project): Angular-based original version
 
 ---

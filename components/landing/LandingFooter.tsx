@@ -1,13 +1,22 @@
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 
-export function LandingFooter() {
+interface LandingFooterProps {
+  /** The homepage's last heading before the footer is h3 (Pricing plan
+   * cards), so h4 is correct there (default). Standalone pages like the
+   * legal pages top out at h2, so they pass "h3" to keep heading levels
+   * sequential instead of skipping one. */
+  readonly headingLevel?: "h3" | "h4";
+}
+
+export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
   const year = new Date().getFullYear();
+  const HeadingTag = headingLevel;
 
   return (
     <footer className="border-t border-border bg-muted/30 py-12">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="grid sm:grid-cols-3 gap-8 mb-8">
+        <div className="grid sm:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div className="space-y-3">
             <Logo />
@@ -18,7 +27,7 @@ export function LandingFooter() {
 
           {/* Product links */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Prodotto</h4>
+            <HeadingTag className="text-sm font-semibold text-foreground mb-3">Prodotto</HeadingTag>
             <ul className="space-y-2">
               {[
                 { href: "#features", label: "Funzionalità" },
@@ -39,12 +48,32 @@ export function LandingFooter() {
 
           {/* Account links */}
           <div>
-            <h4 className="text-sm font-semibold text-foreground mb-3">Account</h4>
+            <HeadingTag className="text-sm font-semibold text-foreground mb-3">Account</HeadingTag>
             <ul className="space-y-2">
               {[
                 { href: "/register-org", label: "Registrati" },
                 { href: "/login", label: "Accedi" },
                 { href: "/dashboard", label: "Dashboard" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal links */}
+          <div>
+            <HeadingTag className="text-sm font-semibold text-foreground mb-3">Legale</HeadingTag>
+            <ul className="space-y-2">
+              {[
+                { href: "/privacy", label: "Informativa Privacy" },
+                { href: "/trasparenza-ai", label: "Trasparenza sull'AI" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link

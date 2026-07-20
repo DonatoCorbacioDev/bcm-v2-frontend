@@ -89,7 +89,13 @@ function LoginContent() {
         <div className="flex items-center gap-2 relative z-10 opacity-60">
           <Lock className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span className="text-[12px]">
-            Conforme GDPR · AgID · ISO&nbsp;27001 — dati ospitati in Italia
+            <Link
+              href="/privacy"
+              className="underline underline-offset-2 decoration-white/40 hover:decoration-white hover:opacity-80"
+            >
+              Conforme GDPR
+            </Link>{" "}
+            · AgID · ISO&nbsp;27001 — dati ospitati in Italia
           </span>
         </div>
       </aside>

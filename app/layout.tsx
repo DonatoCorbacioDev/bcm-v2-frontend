@@ -32,6 +32,14 @@ export default async function RootLayout({
   return (
     <html lang="it" suppressHydrationWarning>
       <head>
+        {/* The dev console shows a "didn't match" hydration warning on this
+            script's nonce attribute — that's expected, not a bug here.
+            Browsers clear the nonce attribute from the DOM after reading it
+            (so page-inspecting scripts/extensions can't steal and reuse it),
+            and React's hydration diff doesn't yet special-case that browser
+            behavior for next/script. Our nonce generation (proxy.ts) is
+            correct and the script does run. Upstream, unfixed as of this
+            writing: https://github.com/vercel/next.js/issues/77952 */}
         <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>

@@ -31,3 +31,16 @@ export const CHART_LEGEND_STYLE: CSSProperties = {
   color: "var(--muted-foreground)",
   fontSize: 12,
 };
+
+const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat("it-IT", {
+  month: "short",
+  year: "2-digit",
+});
+
+/** API month keys are raw "YYYY-MM" strings — format them for display
+ * (e.g. "2026-07" -> "lug '26") instead of rendering them verbatim. */
+export function formatMonthLabel(monthKey: string): string {
+  const [year, month] = monthKey.split("-").map(Number);
+  if (!year || !month) return monthKey;
+  return MONTH_LABEL_FORMATTER.format(new Date(year, month - 1, 1));
+}

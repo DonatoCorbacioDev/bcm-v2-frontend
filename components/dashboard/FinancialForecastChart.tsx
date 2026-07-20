@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, ReferenceLine,
+  Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import {
   CHART_TOOLTIP_CONTENT_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
   CHART_TOOLTIP_ITEM_STYLE,
+  CHART_LEGEND_STYLE,
+  formatMonthLabel,
 } from "@/lib/chartTheme";
 
 const HISTORICAL_COLOR = "var(--chart-1)";
@@ -66,8 +68,13 @@ function buildChartData(
   return [...histPoints, ...forePoints];
 }
 
-const formatEur = (v: number) =>
-  `€${v.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+const EUR_FORMATTER = new Intl.NumberFormat("it-IT", {
+  style: "currency",
+  currency: "EUR",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+const formatEur = (v: number) => EUR_FORMATTER.format(v);
 
 export function FinancialForecastChart() {
   const [horizon, setHorizon] = useState<Horizon>(3);
@@ -166,7 +173,13 @@ export function FinancialForecastChart() {
                 stroke={CHART_GRID_STROKE}
                 strokeOpacity={CHART_GRID_OPACITY}
               />
-              <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="month"
+                tickFormatter={formatMonthLabel}
+                tick={CHART_TICK_STYLE}
+                axisLine={false}
+                tickLine={false}
+              />
               <YAxis
                 tickFormatter={formatEur}
                 tick={CHART_TICK_STYLE}
@@ -177,10 +190,12 @@ export function FinancialForecastChart() {
               />
               <Tooltip
                 formatter={(value, name) => [formatEur(value as number), name]}
+                labelFormatter={(label) => formatMonthLabel(String(label))}
                 contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
                 labelStyle={CHART_TOOLTIP_LABEL_STYLE}
                 itemStyle={CHART_TOOLTIP_ITEM_STYLE}
               />
+              <Legend wrapperStyle={CHART_LEGEND_STYLE} iconType="plainline" iconSize={14} />
 
               {firstForecastMonth && (
                 <ReferenceLine

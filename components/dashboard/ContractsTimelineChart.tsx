@@ -10,6 +10,7 @@ import {
   CHART_TOOLTIP_CONTENT_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
   CHART_TOOLTIP_ITEM_STYLE,
+  formatMonthLabel,
 } from '@/lib/chartTheme';
 
 const CHART_COLOR = "var(--chart-1)";
@@ -123,10 +124,17 @@ export function ContractsTimelineChart() {
               stroke={CHART_GRID_STROKE}
               strokeOpacity={CHART_GRID_OPACITY}
             />
-            <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
+            <XAxis
+              dataKey="month"
+              tickFormatter={formatMonthLabel}
+              tick={CHART_TICK_STYLE}
+              axisLine={false}
+              tickLine={false}
+            />
             <YAxis allowDecimals={false} tick={CHART_TICK_STYLE} width={32} axisLine={false} tickLine={false} tickCount={4} />
             <Tooltip
               formatter={(value) => [value as number, "Contratti"]}
+              labelFormatter={(label) => formatMonthLabel(String(label))}
               contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
               labelStyle={CHART_TOOLTIP_LABEL_STYLE}
               itemStyle={CHART_TOOLTIP_ITEM_STYLE}

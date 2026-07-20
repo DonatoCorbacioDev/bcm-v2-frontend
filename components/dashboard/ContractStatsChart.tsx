@@ -15,6 +15,23 @@ interface ContractStatsChartProps {
   readonly expired: number;
 }
 
+/** Largest-remainder rounding so displayed percentages always sum to 100,
+ * instead of each segment rounding independently (which can drift with 3+
+ * segments — e.g. 33/33/33 rounding to 99). */
+function distributePercentages(values: number[], total: number): number[] {
+  const raw = values.map((v) => (v / total) * 100);
+  const floors = raw.map(Math.floor);
+  const remainder = 100 - floors.reduce((sum, f) => sum + f, 0);
+  const byFraction = raw
+    .map((r, i) => ({ i, frac: r - Math.floor(r) }))
+    .sort((a, b) => b.frac - a.frac);
+  const result = [...floors];
+  for (let k = 0; k < remainder && k < byFraction.length; k++) {
+    result[byFraction[k].i] += 1;
+  }
+  return result;
+}
+
 const SEGMENTS = [
   { key: "active",    name: "Attivi",      fill: "var(--status-green-fg)" },
   { key: "expiring",  name: "In scadenza", fill: "var(--status-amber-fg)" },
@@ -31,6 +48,7 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
   const data = SEGMENTS
     .map((s) => ({ name: s.name, value: values[s.key], fill: s.fill }))
     .filter((d) => d.value > 0);
+  const percentages = distributePercentages(data.map((d) => d.value), total);
 
   return (
     <Card>
@@ -73,7 +91,7 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
               </div>
             </div>
             <div className="flex flex-1 flex-col gap-3 min-w-0">
-              {data.map((d) => (
+              {data.map((d, i) => (
                 <div key={d.name} className="flex items-center gap-2.5">
                   <span
                     className="h-2.5 w-2.5 flex-none rounded-full"
@@ -83,7 +101,7 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
                   <span className="flex-1 truncate text-sm font-medium">{d.name}</span>
                   <span className="font-mono text-sm font-semibold tabular-nums">{d.value}</span>
                   <span className="w-10 flex-none text-right font-mono text-[11.5px] text-muted-foreground tabular-nums">
-                    {Math.round((d.value / total) * 100)}%
+                    {percentages[i]}%
                   </span>
                 </div>
               ))}

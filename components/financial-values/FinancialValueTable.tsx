@@ -28,6 +28,8 @@ import {
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
+const EUR_FORMATTER = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
+
 interface FinancialValueTableProps {
   readonly onEditClick: (financialValue: FinancialValue) => void;
 }
@@ -215,7 +217,9 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                   <TableCell className="font-medium text-sm">
                     {getMonthName(fv.month)}/{fv.year}
                   </TableCell>
-                  <TableCell className="font-semibold text-sm">€{fv.financialAmount.toLocaleString()}</TableCell>
+                  <TableCell className="font-semibold text-sm">
+                    {EUR_FORMATTER.format(fv.financialAmount)}
+                  </TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */fv.customerName || 'N/D'}</TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.typeName || 'N/D'}</TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.areaName || 'N/D'}</TableCell>

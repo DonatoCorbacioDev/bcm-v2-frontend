@@ -538,8 +538,12 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                     {CONTRACT_STATUS_LABELS[c.status] ?? c.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="hidden md:table-cell text-sm">{c.startDate}</TableCell>
-                <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */c.endDate || "N/D"}</TableCell>
+                <TableCell className="hidden md:table-cell text-sm">
+                  {new Date(c.startDate).toLocaleDateString("it-IT")}
+                </TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">
+                  {/* istanbul ignore next */c.endDate ? new Date(c.endDate).toLocaleDateString("it-IT") : "N/D"}
+                </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button

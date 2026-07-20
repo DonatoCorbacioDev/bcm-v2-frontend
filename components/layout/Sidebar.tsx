@@ -164,6 +164,17 @@ export default function Sidebar({ collapsed }: SidebarProps) {
 
       {/* Footer */}
       <div className="border-t border-[var(--sidebar-border)] shrink-0 py-3 px-2">
+        {!collapsed && (
+          <div className="flex items-center gap-2 px-2.5 pb-2 text-[10.5px] text-[var(--muted-foreground)]">
+            <Link href="/privacy" className="hover:text-foreground hover:underline">
+              Privacy
+            </Link>
+            <span aria-hidden="true">·</span>
+            <Link href="/trasparenza-ai" className="hover:text-foreground hover:underline">
+              Trasparenza AI
+            </Link>
+          </div>
+        )}
         <button
           type="button"
           onClick={handleLogout}

@@ -1,9 +1,10 @@
 import api from "@/lib/api";
-import type { FinancialType } from "@/types";
+import type { FinancialCategory, FinancialType } from "@/types";
 
 export type FinancialTypeUpsertPayload = {
   name: string;
   description: string;
+  category: FinancialCategory;
 };
 
 export const financialTypesService = {

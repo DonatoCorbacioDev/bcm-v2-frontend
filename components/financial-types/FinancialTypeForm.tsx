@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { financialTypeSchema, type FinancialTypeFormData } from "@/lib/validations/financialType.schema";
@@ -7,7 +7,15 @@ import type { FinancialType } from "@/types";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface FinancialTypeFormProps {
   readonly onClose: () => void;
@@ -21,13 +29,14 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FinancialTypeFormData>({
     resolver: zodResolver(financialTypeSchema),
     defaultValues: financialType
-      ? { name: financialType.name, description: financialType.description }
-      : { name: "", description: "" },
+      ? { name: financialType.name, description: financialType.description, category: financialType.category }
+      : { name: "", description: "", category: "COST" },
   });
 
   const onSubmit = async (data: FinancialTypeFormData) => {
@@ -74,6 +83,30 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
           <p className="text-destructive text-sm mt-1">{errors.description.message}</p>
         )}
       </div>
+
+      <Controller
+        control={control}
+        name="category"
+        render={({ field }) => (
+          <div>
+            <Label htmlFor="category" className="block text-sm font-medium mb-2">
+              Categoria *
+            </Label>
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger id="category" aria-label="Categoria">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="REVENUE">Ricavo</SelectItem>
+                <SelectItem value="COST">Costo</SelectItem>
+              </SelectContent>
+            </Select>
+            {/* istanbul ignore next */errors.category && (
+              <p className="text-destructive text-sm mt-1">{errors.category.message}</p>
+            )}
+          </div>
+        )}
+      />
 
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onClose}>

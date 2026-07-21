@@ -3,6 +3,7 @@ import { financialTypeSchema } from "@/lib/validations/financialType.schema";
 const validData = {
   name: "Revenue",
   description: "Tracks all incoming revenue streams",
+  category: "REVENUE" as const,
 };
 
 describe("financialTypeSchema", () => {
@@ -52,6 +53,24 @@ describe("financialTypeSchema", () => {
     it("rejects missing description", () => {
       const { description: _, ...withoutDesc } = validData;
       const result = financialTypeSchema.safeParse(withoutDesc);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("category", () => {
+    it("accepts COST", () => {
+      const result = financialTypeSchema.safeParse({ ...validData, category: "COST" });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects an unknown category value", () => {
+      const result = financialTypeSchema.safeParse({ ...validData, category: "OTHER" });
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects missing category", () => {
+      const { category: _, ...withoutCategory } = validData;
+      const result = financialTypeSchema.safeParse(withoutCategory);
       expect(result.success).toBe(false);
     });
   });

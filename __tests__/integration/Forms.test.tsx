@@ -27,6 +27,9 @@ jest.mock('@/hooks/useUpsertContract', () => ({
 jest.mock('@/hooks/useUpsertFinancialValue', () => ({
   useUpsertFinancialValue: jest.fn(),
 }));
+jest.mock('@/hooks/useUpsertBudget', () => ({
+  useUpsertBudget: jest.fn(),
+}));
 
 jest.mock('@/hooks/useManagers', () => ({
   useManagers: jest.fn(),
@@ -72,6 +75,7 @@ import { useUpsertManager } from '@/hooks/useUpsertManager';
 import { useUpsertUser } from '@/hooks/useUpsertUser';
 import { useUpsertContract } from '@/hooks/useUpsertContract';
 import { useUpsertFinancialValue } from '@/hooks/useUpsertFinancialValue';
+import { useUpsertBudget } from '@/hooks/useUpsertBudget';
 import { useManagers } from '@/hooks/useManagers';
 import { useRoles } from '@/hooks/useRoles';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
@@ -86,6 +90,7 @@ import InviteUserForm from '@/components/users/InviteUserForm';
 import UserForm from '@/components/users/UserForm';
 import ContractForm from '@/components/contracts/ContractForm';
 import FinancialValueForm from '@/components/financial-values/FinancialValueForm';
+import BudgetForm from '@/components/budgets/BudgetForm';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,7 +103,7 @@ const managers = [{ id: 1, firstName: 'John', lastName: 'Doe', email: 'j@d.com',
 const roles = [{ id: 1, role: 'ADMIN' }];
 const businessAreas = [{ id: 1, name: 'Engineering', description: 'Eng' }];
 const contracts = [{ id: 1, contractNumber: 'CNT-001', customerName: 'Acme', projectName: 'P', wbsCode: 'W', areaId: 1, managerId: 1, startDate: '2024-01-01', endDate: '2024-12-31', status: 'ACTIVE', createdAt: '2024-01-01' }];
-const financialTypes = [{ id: 1, name: 'Revenue', description: 'Rev' }];
+const financialTypes = [{ id: 1, name: 'Revenue', description: 'Rev', category: 'REVENUE' as const }];
 
 // ─── BusinessAreaForm ─────────────────────────────────────────────────────────
 
@@ -212,7 +217,7 @@ describe('FinancialTypeForm', () => {
 
   it('renders Update button in edit mode', () => {
     render(
-      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type' }} />,
+      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
       { wrapper: createWrapper() }
     );
     expect(screen.getByRole('button', { name: /aggiorna/i })).toBeInTheDocument();
@@ -222,7 +227,7 @@ describe('FinancialTypeForm', () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertFinancialType as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type' }} />,
+      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -245,7 +250,7 @@ describe('FinancialTypeForm', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
     (useUpsertFinancialType as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type' }} />,
+      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -696,6 +701,76 @@ describe('FinancialValueForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /^crea$/i }));
     await waitFor(() => {
       expect(screen.getAllByText(/obbligator|almeno|non valid/i).length).toBeGreaterThan(0);
+    });
+  });
+});
+
+// ─── BudgetForm ───────────────────────────────────────────────────────────────
+
+describe('BudgetForm', () => {
+  const onClose = jest.fn();
+  const onSuccess = jest.fn();
+  const validBudget = {
+    id: 1, businessAreaId: 1, areaName: 'Engineering', category: 'COST' as const,
+    year: 2025, targetAmount: 50000, actualAmount: 20000, percentUsed: 40,
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useUpsertBudget as jest.Mock).mockReturnValue(mockMutation());
+    (useBusinessAreas as jest.Mock).mockReturnValue({ data: businessAreas, isLoading: false, isError: false });
+  });
+
+  it('shows loading state when reference data is loading', () => {
+    (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: true, isError: false });
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/caricamento dati del modulo/i)).toBeInTheDocument();
+  });
+
+  it('shows error state when reference data fails', () => {
+    (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: true });
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/impossibile caricare i dati di riferimento/i)).toBeInTheDocument();
+  });
+
+  it('renders Create button in create mode', () => {
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    expect(screen.getByRole('button', { name: /^crea$/i })).toBeInTheDocument();
+  });
+
+  it('renders Update button in edit mode', () => {
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} budget={validBudget} />, { wrapper: createWrapper() });
+    expect(screen.getByRole('button', { name: /^aggiorna$/i })).toBeInTheDocument();
+  });
+
+  it('calls mutateAsync on successful submit in edit mode', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertBudget as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} budget={validBudget} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /^aggiorna$/i }));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(toast.success).toHaveBeenCalledWith('Budget aggiornato con successo!');
+  });
+
+  it('shows error toast when mutation throws', async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
+    (useUpsertBudget as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} budget={validBudget} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /^aggiorna$/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento del budget non riuscito'));
+  });
+
+  it('calls onClose when Cancel is clicked', async () => {
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('shows validation errors when submitting empty form', async () => {
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /^crea$/i }));
+    await waitFor(() => {
+      expect(screen.getAllByText(/obbligator/i).length).toBeGreaterThan(0);
     });
   });
 });

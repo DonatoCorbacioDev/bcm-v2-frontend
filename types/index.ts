@@ -30,10 +30,24 @@ export interface BusinessArea {
   description: string;
 }
 
+export type FinancialCategory = "REVENUE" | "COST";
+
 export interface FinancialType {
   id: number;
   name: string;
   description: string;
+  category: FinancialCategory;
+}
+
+export interface Budget {
+  id: number;
+  businessAreaId: number;
+  areaName: string;
+  category: FinancialCategory;
+  year: number;
+  targetAmount: number;
+  actualAmount: number;
+  percentUsed: number;
 }
 
 export interface Contract {

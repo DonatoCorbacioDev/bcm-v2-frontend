@@ -3,4 +3,5 @@ export const referenceQueryKeys = {
   managers: ["reference", "managers"] as const,
   roles: ["reference", "roles"] as const,
   financialTypes: ["reference", "financial-types"] as const,
+  budgets: ["reference", "budgets"] as const,
 };

@@ -12,6 +12,9 @@ jest.mock('@/services/financialTypes.service', () => ({
 jest.mock('@/services/financialValues.service', () => ({
   financialValuesService: { list: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
 }));
+jest.mock('@/services/budgets.service', () => ({
+  budgetsService: { list: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
+}));
 jest.mock('@/services/managers.service', () => ({
   managersService: { list: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
 }));
@@ -59,6 +62,7 @@ jest.mock('@/lib/api', () => {
 import { businessAreasService } from '@/services/businessAreas.service';
 import { financialTypesService } from '@/services/financialTypes.service';
 import { financialValuesService } from '@/services/financialValues.service';
+import { budgetsService } from '@/services/budgets.service';
 import { managersService } from '@/services/managers.service';
 import { usersService } from '@/services/users.service';
 import { rolesService } from '@/services/roles.service';
@@ -84,6 +88,8 @@ import { useContract } from '@/hooks/useContract';
 import { useExpiringContracts } from '@/hooks/useExpiringContracts';
 import { useUpsertBusinessArea } from '@/hooks/useUpsertBusinessArea';
 import { useUpsertFinancialType } from '@/hooks/useUpsertFinancialType';
+import { useBudgets } from '@/hooks/useBudgets';
+import { useUpsertBudget } from '@/hooks/useUpsertBudget';
 import { useContractTemplates } from '@/hooks/useContractTemplates';
 import { useUpsertContractTemplate } from '@/hooks/useUpsertContractTemplate';
 import { contractTemplatesQueryKeys } from '@/hooks/queries/contractTemplates.queryKeys';
@@ -122,6 +128,16 @@ describe('useFinancialValues', () => {
     const data = [{ id: 1, month: 1, year: 2024, financialAmount: 1000, financialTypeId: 1, businessAreaId: 1, contractId: 1 }];
     (financialValuesService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useFinancialValues(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(data);
+  });
+});
+
+describe('useBudgets', () => {
+  it('fetches and returns data', async () => {
+    const data = [{ id: 1, businessAreaId: 1, areaName: 'IT', category: 'COST', year: 2025, targetAmount: 1000, actualAmount: 400, percentUsed: 40 }];
+    (budgetsService.list as jest.Mock).mockResolvedValue(data);
+    const { result } = renderHook(() => useBudgets(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
   });
@@ -280,7 +296,7 @@ describe('useUpsertFinancialType', () => {
     (financialTypesService.create as jest.Mock).mockResolvedValue({ id: 1, name: 'Rev', description: 'Rev' });
     const { result } = renderHook(() => useUpsertFinancialType(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ payload: { name: 'Rev', description: 'Rev' } });
+      await result.current.mutateAsync({ payload: { name: 'Rev', description: 'Rev', category: 'REVENUE' } });
     });
     expect(financialTypesService.create).toHaveBeenCalled();
   });
@@ -289,9 +305,29 @@ describe('useUpsertFinancialType', () => {
     (financialTypesService.update as jest.Mock).mockResolvedValue({ id: 1, name: 'Rev', description: 'Rev' });
     const { result } = renderHook(() => useUpsertFinancialType(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ id: 1, payload: { name: 'Rev', description: 'Rev' } });
+      await result.current.mutateAsync({ id: 1, payload: { name: 'Rev', description: 'Rev', category: 'REVENUE' } });
     });
-    expect(financialTypesService.update).toHaveBeenCalledWith(1, { name: 'Rev', description: 'Rev' });
+    expect(financialTypesService.update).toHaveBeenCalledWith(1, { name: 'Rev', description: 'Rev', category: 'REVENUE' });
+  });
+});
+
+describe('useUpsertBudget', () => {
+  it('calls create when no id is provided', async () => {
+    (budgetsService.create as jest.Mock).mockResolvedValue({ id: 1, businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 });
+    const { result } = renderHook(() => useUpsertBudget(), { wrapper: createWrapper() });
+    await act(async () => {
+      await result.current.mutateAsync({ payload: { businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 } });
+    });
+    expect(budgetsService.create).toHaveBeenCalled();
+  });
+
+  it('calls update when id is provided', async () => {
+    (budgetsService.update as jest.Mock).mockResolvedValue({ id: 1, businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 });
+    const { result } = renderHook(() => useUpsertBudget(), { wrapper: createWrapper() });
+    await act(async () => {
+      await result.current.mutateAsync({ id: 1, payload: { businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 } });
+    });
+    expect(budgetsService.update).toHaveBeenCalledWith(1, { businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 });
   });
 });
 

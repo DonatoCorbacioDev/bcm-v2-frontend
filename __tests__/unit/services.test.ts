@@ -25,6 +25,7 @@ import { contractTemplatesService } from '@/services/contractTemplates.service';
 import { calendarFeedService } from '@/services/calendarFeed.service';
 import { organizationService } from '@/services/organization.service';
 import { twoFactorAuthService } from '@/services/twoFactorAuth.service';
+import { budgetsService } from '@/services/budgets.service';
 
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
@@ -81,7 +82,7 @@ describe('financialTypesService', () => {
   });
 
   it('create() calls POST /financial-types', async () => {
-    const payload = { name: 'Revenue', description: 'Revenue' };
+    const payload = { name: 'Revenue', description: 'Revenue', category: 'REVENUE' as const };
     const data = { id: 1, ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await financialTypesService.create(payload);
@@ -90,7 +91,7 @@ describe('financialTypesService', () => {
   });
 
   it('update() calls PUT /financial-types/:id', async () => {
-    const payload = { name: 'Revenue', description: 'Revenue' };
+    const payload = { name: 'Revenue', description: 'Revenue', category: 'REVENUE' as const };
     const data = { id: 1, ...payload };
     mockPut.mockResolvedValue({ data });
     const result = await financialTypesService.update(1, payload);
@@ -102,6 +103,42 @@ describe('financialTypesService', () => {
     mockDelete.mockResolvedValue({});
     await financialTypesService.delete(1);
     expect(mockDelete).toHaveBeenCalledWith('/financial-types/1');
+  });
+});
+
+// ─── budgetsService ───────────────────────────────────────────────────────────
+
+describe('budgetsService', () => {
+  it('list() calls GET /budgets', async () => {
+    const data = [{ id: 1, businessAreaId: 1, areaName: 'IT', category: 'COST', year: 2025, targetAmount: 1000, actualAmount: 400, percentUsed: 40 }];
+    mockGet.mockResolvedValue({ data });
+    const result = await budgetsService.list();
+    expect(mockGet).toHaveBeenCalledWith('/budgets');
+    expect(result).toEqual(data);
+  });
+
+  it('create() calls POST /budgets', async () => {
+    const payload = { businessAreaId: 1, category: 'COST' as const, year: 2025, targetAmount: 1000 };
+    const data = { id: 1, ...payload };
+    mockPost.mockResolvedValue({ data });
+    const result = await budgetsService.create(payload);
+    expect(mockPost).toHaveBeenCalledWith('/budgets', payload);
+    expect(result).toEqual(data);
+  });
+
+  it('update() calls PUT /budgets/:id', async () => {
+    const payload = { businessAreaId: 1, category: 'REVENUE' as const, year: 2025, targetAmount: 2000 };
+    const data = { id: 1, ...payload };
+    mockPut.mockResolvedValue({ data });
+    const result = await budgetsService.update(1, payload);
+    expect(mockPut).toHaveBeenCalledWith('/budgets/1', payload);
+    expect(result).toEqual(data);
+  });
+
+  it('delete() calls DELETE /budgets/:id', async () => {
+    mockDelete.mockResolvedValue({});
+    await budgetsService.delete(1);
+    expect(mockDelete).toHaveBeenCalledWith('/budgets/1');
   });
 });
 

@@ -47,8 +47,8 @@ import FinancialTypeTable from '@/components/financial-types/FinancialTypeTable'
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
-const type1: FinancialType = { id: 1, name: 'Revenue', description: 'Revenue type' };
-const type2: FinancialType = { id: 2, name: 'Expense', description: 'Expense type' };
+const type1: FinancialType = { id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' };
+const type2: FinancialType = { id: 2, name: 'Expense', description: 'Expense type', category: 'COST' };
 
 // ─── Test suite ──────────────────────────────────────────────────────────────
 
@@ -107,6 +107,12 @@ describe('FinancialTypeTable', () => {
   it('shows the type count', () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     expect(screen.getByText(/2 \/ 2 tipi/i)).toBeInTheDocument();
+  });
+
+  it('shows the category badge for each type', () => {
+    render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    expect(screen.getByText('Ricavo')).toBeInTheDocument();
+    expect(screen.getByText('Costo')).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────

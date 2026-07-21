@@ -4,7 +4,15 @@ import { render, screen } from '@testing-library/react';
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
 jest.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  // Exposes height/width so tests can assert ContractStatsChart passes a
+  // fixed number (not "100%") to avoid Recharts' first-render -1/-1 warning.
+  ResponsiveContainer: ({ children, height, width }: {
+    children: React.ReactNode; height?: number | string; width?: number | string;
+  }) => (
+    <div data-testid="responsive-container" data-height={String(height)} data-width={String(width)}>
+      {children}
+    </div>
+  ),
   PieChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   AreaChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -100,6 +108,11 @@ describe('ContractStatsChart', () => {
     render(<ContractStatsChart total={5} active={5} expiring={0} expired={0} />);
     expect(screen.getByText('Attivi')).toBeInTheDocument();
     expect(screen.getByText('100%')).toBeInTheDocument();
+  });
+
+  it('passes a fixed numeric height to ResponsiveContainer instead of a percentage, to avoid the Recharts -1/-1 first-render warning', () => {
+    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} />);
+    expect(screen.getByTestId('responsive-container')).toHaveAttribute('data-height', '172');
   });
 });
 

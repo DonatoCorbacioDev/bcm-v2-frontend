@@ -64,7 +64,12 @@ export default function ContractStatsChart({ total, active, expiring, expired }:
         ) : (
           <div className="flex items-center gap-6">
             <div className="relative h-[172px] w-[172px] flex-none">
-              <ResponsiveContainer width="100%" height="100%">
+              {/* height as a fixed number (matching the wrapper's fixed
+                  h-[172px]) instead of "100%" avoids Recharts having to
+                  measure the DOM before it can compute a positive height,
+                  which otherwise emits "width(-1) and height(-1)" on the
+                  first render before its ResizeObserver corrects it. */}
+              <ResponsiveContainer width="100%" height={172}>
                 <PieChart>
                   <Pie
                     data={data}

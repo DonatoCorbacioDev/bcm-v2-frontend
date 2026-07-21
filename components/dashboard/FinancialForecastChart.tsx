@@ -43,8 +43,40 @@ interface ChartPoint {
   month: string;
   historical?: number;
   forecast?: number;
-  lower?: number;
-  upper?: number;
+  /** Invisible stack base for the confidence band (= lower bound). */
+  ciBase?: number;
+  /** Visible stack thickness for the confidence band (= upper - ciBase). */
+  ciRange?: number;
+}
+
+/**
+ * Computes the invisible-base + thickness pair Recharts needs to stack a
+ * confidence band between `lower` and `upper`. Returns an empty object
+ * (no band drawn for that point, leaving a visible gap) when the interval
+ * is missing or inverted, instead of silently clamping to a misleading
+ * flat band.
+ */
+function computeConfidenceBand(
+  lower: number,
+  upper: number,
+  month: string,
+): Pick<ChartPoint, "ciBase" | "ciRange"> {
+  if (!Number.isFinite(lower) || !Number.isFinite(upper)) {
+    return {};
+  }
+  const safeLower = lower < 0 ? 0 : lower;
+  if (lower < 0) {
+    console.warn(
+      `FinancialForecastChart: clamping negative confidence lower bound to 0 for ${month} (was ${lower}).`,
+    );
+  }
+  if (upper < safeLower) {
+    console.warn(
+      `FinancialForecastChart: skipping confidence band for ${month} — inverted interval (lower=${lower}, upper=${upper}).`,
+    );
+    return {};
+  }
+  return { ciBase: safeLower, ciRange: upper - safeLower };
 }
 
 function buildChartData(
@@ -55,8 +87,9 @@ function buildChartData(
   const forePoints: ChartPoint[] = forecast.map((p) => ({
     month: p.month,
     forecast: p.amount,
-    lower: p.lower,
-    upper: p.upper,
+    ...(p.lower !== undefined && p.upper !== undefined
+      ? computeConfidenceBand(p.lower, p.upper, p.month)
+      : {}),
   }));
   // Anchor the forecast line to the last historical point only (not the
   // other way around) so the dashed line takes over from exactly where the
@@ -208,16 +241,32 @@ export function FinancialForecastChart() {
                 />
               )}
 
-              {/* Confidence interval band */}
-              {forecast.length > 0 && forecast[0].upper !== undefined && (
-                <Area
-                  type="monotone"
-                  dataKey="upper"
-                  stroke="none"
-                  fill="url(#ciGradient)"
-                  legendType="none"
-                  connectNulls
-                />
+              {/* Confidence interval band: invisible base (lower) + stacked
+                  visible thickness (upper - lower), so the fill occupies
+                  exactly the lower→upper range instead of 0→upper. */}
+              {chartData.some((d) => d.ciRange !== undefined) && (
+                <>
+                  <Area
+                    type="monotone"
+                    dataKey="ciBase"
+                    stackId="ci"
+                    stroke="none"
+                    fill="transparent"
+                    legendType="none"
+                    tooltipType="none"
+                    connectNulls={false}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="ciRange"
+                    stackId="ci"
+                    stroke="none"
+                    fill="url(#ciGradient)"
+                    legendType="none"
+                    tooltipType="none"
+                    connectNulls={false}
+                  />
+                </>
               )}
 
               {/* Historical area */}

@@ -22,3 +22,17 @@ Object.defineProperty(globalThis, "matchMedia", {
     dispatchEvent: jest.fn(),
   }),
 });
+
+// Polyfill pointer-capture APIs and scrollIntoView — not implemented in jsdom,
+// but required by Radix UI's Select (and other popover-based primitives) to
+// open/position themselves. Without these, clicking a Select trigger in a
+// test silently fails to open the listbox.
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false;
+}
+if (!Element.prototype.releasePointerCapture) {
+  Element.prototype.releasePointerCapture = () => {};
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}

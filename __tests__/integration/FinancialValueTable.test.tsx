@@ -151,14 +151,16 @@ describe('FinancialValueTable', () => {
 
   it('filters by month', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.selectOptions(screen.getByDisplayValue('Tutti'), '1');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per mese/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^gennaio$/i }));
     expect(screen.getByText('Gen/2024')).toBeInTheDocument();
     expect(screen.queryByText('Giu/2024')).not.toBeInTheDocument();
   });
 
   it('shows Clear button when a filter is active', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.selectOptions(screen.getByDisplayValue('Tutti'), '1');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per mese/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^gennaio$/i }));
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
@@ -218,7 +220,8 @@ describe('FinancialValueTable', () => {
 
   it('clears filters when Clear is clicked', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.selectOptions(screen.getByDisplayValue('Tutti'), '1');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per mese/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^gennaio$/i }));
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
     expect(screen.queryByRole('button', { name: /pulisci/i })).not.toBeInTheDocument();

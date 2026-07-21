@@ -25,6 +25,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
@@ -149,26 +156,27 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
         </div>
 
         <div className="flex gap-2 items-center">
-          <span className="text-sm text-muted-foreground hidden sm:inline">Mese:</span>
-          <select
-            value={monthFilter}
-            onChange={(e) => setMonthFilter(e.target.value)}
-            className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="ALL">Tutti</option>
-            <option value="1">Gennaio</option>
-            <option value="2">Febbraio</option>
-            <option value="3">Marzo</option>
-            <option value="4">Aprile</option>
-            <option value="5">Maggio</option>
-            <option value="6">Giugno</option>
-            <option value="7">Luglio</option>
-            <option value="8">Agosto</option>
-            <option value="9">Settembre</option>
-            <option value="10">Ottobre</option>
-            <option value="11">Novembre</option>
-            <option value="12">Dicembre</option>
-          </select>
+          <label htmlFor="month-filter" className="text-sm text-muted-foreground hidden sm:inline">Mese:</label>
+          <Select value={monthFilter} onValueChange={setMonthFilter}>
+            <SelectTrigger id="month-filter" aria-label="Filtra per mese" className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tutti</SelectItem>
+              <SelectItem value="1">Gennaio</SelectItem>
+              <SelectItem value="2">Febbraio</SelectItem>
+              <SelectItem value="3">Marzo</SelectItem>
+              <SelectItem value="4">Aprile</SelectItem>
+              <SelectItem value="5">Maggio</SelectItem>
+              <SelectItem value="6">Giugno</SelectItem>
+              <SelectItem value="7">Luglio</SelectItem>
+              <SelectItem value="8">Agosto</SelectItem>
+              <SelectItem value="9">Settembre</SelectItem>
+              <SelectItem value="10">Ottobre</SelectItem>
+              <SelectItem value="11">Novembre</SelectItem>
+              <SelectItem value="12">Dicembre</SelectItem>
+            </SelectContent>
+          </Select>
 
           {(searchQuery || monthFilter !== "ALL") && (
             <Button

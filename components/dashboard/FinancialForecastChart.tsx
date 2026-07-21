@@ -153,13 +153,13 @@ export function FinancialForecastChart() {
           </div>
           <div className="flex items-center gap-2">
             {isForecastOffline && (
-              <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">
+              <span className="flex items-center gap-1.5 text-xs text-[var(--status-amber-fg)] bg-[var(--status-amber-bg)] px-2 py-1 rounded-full">
                 <WifiOff className="h-3 w-3" />
                 Previsione non disponibile
               </span>
             )}
             {!isForecastOffline && !isReliable && forecast.length > 0 && (
-              <span className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-full">
+              <span className="flex items-center gap-1.5 text-xs text-[var(--status-amber-fg)] bg-[var(--status-amber-bg)] px-2 py-1 rounded-full">
                 <AlertTriangle className="h-3 w-3" />
                 Dati insufficienti (&lt;12 mesi)
               </span>

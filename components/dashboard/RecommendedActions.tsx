@@ -33,7 +33,7 @@ export function RecommendedActions({ criticalRenewals }: RecommendedActionsProps
 
       {!hasActions && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-          <CheckCircle2 className="h-5 w-5 text-green-600" aria-hidden="true" />
+          <CheckCircle2 className="h-5 w-5 text-[var(--status-green-fg)]" aria-hidden="true" />
           Nessuna azione urgente al momento
         </div>
       )}

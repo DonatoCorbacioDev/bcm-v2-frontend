@@ -12,9 +12,9 @@ import type { RiskScore } from "@/types";
 const VISIBLE_COUNT = 5;
 
 const LEVEL_CONFIG = {
-  HIGH:   { color: "bg-red-500",    badge: "destructive" as const, label: "Alto" },
-  MEDIUM: { color: "bg-yellow-400", badge: "warning" as const,     label: "Medio" },
-  LOW:    { color: "bg-green-500",  badge: "success" as const,     label: "Basso" },
+  HIGH:   { color: "bg-[var(--status-red-fg)]",   badge: "destructive" as const, label: "Alto" },
+  MEDIUM: { color: "bg-[var(--status-amber-fg)]",  badge: "warning" as const,     label: "Medio" },
+  LOW:    { color: "bg-[var(--status-green-fg)]",  badge: "success" as const,     label: "Basso" },
 };
 
 const ANOMALY_LABELS: Record<string, string> = {
@@ -55,7 +55,7 @@ export function RiskScoreWidget() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5 text-amber-500" />
+              <ShieldAlert className="h-5 w-5 text-[var(--status-amber-fg)]" />
               Rischi e anomalie
             </CardTitle>
             <CardDescription>
@@ -79,7 +79,7 @@ export function RiskScoreWidget() {
 
         {isError && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
-            <WifiOff className="h-6 w-6 text-amber-500" />
+            <WifiOff className="h-6 w-6 text-[var(--status-amber-fg)]" />
             <p className="text-sm font-medium text-foreground">
               Analisi del rischio non disponibile
             </p>
@@ -130,12 +130,12 @@ export function RiskScoreWidget() {
                     <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                       {feedback.agree ? (
                         <>
-                          <ThumbsUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                          <ThumbsUp className="h-3.5 w-3.5 text-[var(--status-green-fg)]" />
                           <span>Confermato corretto</span>
                         </>
                       ) : (
                         <>
-                          <ThumbsDown className="h-3.5 w-3.5 text-red-500" />
+                          <ThumbsDown className="h-3.5 w-3.5 text-[var(--status-red-fg)]" />
                           <span>Segnalato come errato</span>
                         </>
                       )}
@@ -148,7 +148,7 @@ export function RiskScoreWidget() {
                         aria-label="Punteggio corretto"
                         disabled={submitFeedback.isPending}
                         onClick={() => handleFeedback(item, true)}
-                        className="rounded p-1 hover:bg-muted hover:text-green-600 dark:hover:text-green-400 disabled:opacity-50"
+                        className="rounded p-1 hover:bg-muted hover:text-[var(--status-green-fg)] disabled:opacity-50"
                       >
                         <ThumbsUp className="h-3.5 w-3.5" />
                       </button>
@@ -157,7 +157,7 @@ export function RiskScoreWidget() {
                         aria-label="Punteggio errato"
                         disabled={submitFeedback.isPending}
                         onClick={() => handleFeedback(item, false)}
-                        className="rounded p-1 hover:bg-muted hover:text-red-500 disabled:opacity-50"
+                        className="rounded p-1 hover:bg-muted hover:text-[var(--status-red-fg)] disabled:opacity-50"
                       >
                         <ThumbsDown className="h-3.5 w-3.5" />
                       </button>

@@ -27,6 +27,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 
@@ -155,17 +163,16 @@ export default function UserTable({ onEditClick }: UserTableProps) {
 
         <div className="flex gap-2 items-center">
           <label htmlFor="verified-filter" className="text-sm text-muted-foreground hidden sm:inline">Stato:</label>
-          <select
-            id="verified-filter"
-            aria-label="Filtra per stato di verifica"
-            value={verifiedFilter}
-            onChange={(e) => setVerifiedFilter(e.target.value)}
-            className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="ALL">Tutti</option>
-            <option value="VERIFIED">Verificato</option>
-            <option value="UNVERIFIED">Non verificato</option>
-          </select>
+          <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
+            <SelectTrigger id="verified-filter" aria-label="Filtra per stato di verifica" className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tutti</SelectItem>
+              <SelectItem value="VERIFIED">Verificato</SelectItem>
+              <SelectItem value="UNVERIFIED">Non verificato</SelectItem>
+            </SelectContent>
+          </Select>
 
           {(searchQuery || verifiedFilter !== "ALL") && (
             <Button
@@ -218,24 +225,14 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                   <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */managerMap.get(user.managerId) ?? "—"}</TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{roleMap.get(user.roleId) ?? "—"}</TableCell>
                   <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${user.verified
-                          ? "bg-green-100 text-green-800"
-                          : "bg-muted text-muted-foreground"
-                        }`}
-                    >
+                    <Badge variant={user.verified ? "success" : "secondary"}>
                       {user.verified ? "Sì" : "No"}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-semibold ${user.canApproveContracts
-                          ? "bg-green-100 text-green-800"
-                          : "bg-muted text-muted-foreground"
-                        }`}
-                    >
+                    <Badge variant={user.canApproveContracts ? "success" : "secondary"}>
                       {user.canApproveContracts ? "Sì" : "No"}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">
                     {new Date(user.createdAt).toLocaleDateString("it-IT")}

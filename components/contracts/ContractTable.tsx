@@ -385,18 +385,17 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
 
         <div className="flex gap-2 items-center">
           <label htmlFor="status-filter" className="text-sm text-muted-foreground hidden sm:inline">Stato:</label>
-          <select
-            id="status-filter"
-            aria-label="Filtra per stato"
-            value={statusFilter}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            className="px-2 md:px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="ALL">Tutti</option>
-            {Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+          <Select value={statusFilter} onValueChange={handleStatusChange}>
+            <SelectTrigger id="status-filter" aria-label="Filtra per stato" className="w-36">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tutti</SelectItem>
+              {Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {(searchQuery || statusFilter !== "ALL") && (
             <Button
@@ -550,7 +549,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => router.push(`/contracts/${c.id}`)}
-                      className="text-green-800 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-xs px-2"
+                      className="text-xs px-2"
                     >
                       Visualizza
                     </Button>
@@ -586,21 +585,23 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
           <div className="flex flex-col sm:flex-row items-center justify-between px-4 md:px-6 py-4 border-t border-border gap-4">
             <div className="flex items-center gap-2">
               <label htmlFor="page-size" className="text-xs md:text-sm text-muted-foreground">Righe:</label>
-              <select
-                id="page-size"
-                aria-label="Righe per pagina"
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
                   setPage(0);
                 }}
-                className="px-2 py-1 border border-input rounded text-xs md:text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
+                <SelectTrigger id="page-size" aria-label="Righe per pagina" className="w-18 h-8 text-xs md:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center gap-1">

@@ -29,7 +29,7 @@ export function AnomalyWidget() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <AlertOctagon className="h-5 w-5 text-red-500" aria-hidden="true" />
+          <AlertOctagon className="h-5 w-5 text-[var(--status-red-fg)]" aria-hidden="true" />
           Anomalie finanziarie
         </CardTitle>
         <CardDescription>
@@ -47,7 +47,7 @@ export function AnomalyWidget() {
 
         {isError && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
-            <WifiOff className="h-6 w-6 text-amber-500" aria-hidden="true" />
+            <WifiOff className="h-6 w-6 text-[var(--status-amber-fg)]" aria-hidden="true" />
             <p className="text-sm font-medium text-foreground">
               Rilevamento anomalie non disponibile
             </p>
@@ -59,7 +59,7 @@ export function AnomalyWidget() {
 
         {!isLoading && !isError && (!anomalies || anomalies.length === 0) && (
           <div className="flex flex-col items-center justify-center py-8 gap-2">
-            <CheckCircle2 className="h-6 w-6 text-green-500" aria-hidden="true" />
+            <CheckCircle2 className="h-6 w-6 text-[var(--status-green-fg)]" aria-hidden="true" />
             <p className="text-sm text-muted-foreground">Nessuna anomalia finanziaria rilevata</p>
           </div>
         )}

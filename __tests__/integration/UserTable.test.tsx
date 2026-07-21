@@ -264,7 +264,8 @@ describe('UserTable', () => {
   it('shows Clear button when verified filter is set and clears on click', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.selectOptions(screen.getByLabelText(/filtra per stato di verifica/i), 'VERIFIED');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per stato di verifica/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^verificato$/i }));
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
@@ -274,7 +275,8 @@ describe('UserTable', () => {
   it('filters to only unverified users when UNVERIFIED filter is selected', async () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.selectOptions(screen.getByLabelText(/filtra per stato di verifica/i), 'UNVERIFIED');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per stato di verifica/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^non verificato$/i }));
 
     expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument();
     expect(screen.getByText('bob@example.com')).toBeInTheDocument();

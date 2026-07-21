@@ -193,13 +193,11 @@ describe('ContractTable', () => {
 
     expect(screen.getByText('CNT-001')).toBeInTheDocument();
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
-    // "Attivo"/"Scaduto" also appear as options in the status filter select,
-    // so the row badge is one of two matches rather than the only one.
-    expect(screen.getAllByText('Attivo').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('Attivo')).toBeInTheDocument();
 
     expect(screen.getByText('CNT-002')).toBeInTheDocument();
     expect(screen.getByText('Beta Ltd')).toBeInTheDocument();
-    expect(screen.getAllByText('Scaduto').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('Scaduto')).toBeInTheDocument();
   });
 
   it('falls back to the raw status value when it is not a known status', () => {
@@ -285,12 +283,14 @@ describe('ContractTable', () => {
 
   // ── Filters ───────────────────────────────────────────────────────────────
 
-  it('renders the status filter select with all options', () => {
+  it('renders the status filter select with all options', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const select = screen.getByDisplayValue('Tutti');
-    expect(select).toBeInTheDocument();
-    expect(within(select.closest('div') ?? document.body).queryByRole('option', { name: /attivo/i })).toBeInTheDocument();
+    const trigger = screen.getByRole('combobox', { name: /filtra per stato/i });
+    expect(trigger).toHaveTextContent('Tutti');
+
+    await userEvent.click(trigger);
+    expect(await screen.findByRole('option', { name: /attivo/i })).toBeInTheDocument();
   });
 
   it('shows the Clear button when status filter is active', async () => {
@@ -299,8 +299,8 @@ describe('ContractTable', () => {
     // Initially no Clear button
     expect(screen.queryByRole('button', { name: /pulisci/i })).not.toBeInTheDocument();
 
-    const select = screen.getByDisplayValue('Tutti');
-    await userEvent.selectOptions(select, 'ACTIVE');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per stato/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^attivo$/i }));
 
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
@@ -308,8 +308,8 @@ describe('ContractTable', () => {
   it('hides the Clear button after filters are reset', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const select = screen.getByDisplayValue('Tutti');
-    await userEvent.selectOptions(select, 'ACTIVE');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per stato/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^attivo$/i }));
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
@@ -478,9 +478,10 @@ describe('ContractTable', () => {
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.selectOptions(screen.getByLabelText(/righe per pagina/i), '25');
+    await userEvent.click(screen.getByRole('combobox', { name: /righe per pagina/i }));
+    await userEvent.click(await screen.findByRole('option', { name: '25' }));
 
-    expect(screen.getByDisplayValue('25')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /righe per pagina/i })).toHaveTextContent('25');
   });
 
   it('navigates to page 1 when page 1 button is clicked', async () => {
@@ -710,8 +711,8 @@ describe('ContractTable', () => {
     await userEvent.click(within(rows[1]).getByRole('checkbox'));
     expect(screen.getByText('1 contratto selezionato')).toBeInTheDocument();
 
-    const select = screen.getByDisplayValue('Tutti');
-    await userEvent.selectOptions(select, 'ACTIVE');
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per stato/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^attivo$/i }));
 
     expect(screen.queryByText(/selezionat/i)).not.toBeInTheDocument();
   });

@@ -19,9 +19,9 @@ function DashboardMockup() {
         <div className="grid grid-cols-4 gap-2">
           {[
             { label: "Totali", value: "48", color: "text-foreground" },
-            { label: "Attivi", value: "35", color: "text-green-600 dark:text-green-400" },
-            { label: "In scadenza", value: "7", color: "text-yellow-600 dark:text-yellow-400" },
-            { label: "Scaduti", value: "6", color: "text-red-500" },
+            { label: "Attivi", value: "35", color: "text-[var(--status-green-fg)]" },
+            { label: "In scadenza", value: "7", color: "text-[var(--status-amber-fg)]" },
+            { label: "Scaduti", value: "6", color: "text-[var(--status-red-fg)]" },
           ].map((kpi) => (
             <div
               key={kpi.label}
@@ -34,9 +34,9 @@ function DashboardMockup() {
         </div>
 
         {/* Alert bar */}
-        <div className="flex items-center gap-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 px-3 py-2">
-          <Bell className="h-3.5 w-3.5 text-yellow-600 dark:text-yellow-400 shrink-0" />
-          <span className="text-[11px] text-yellow-700 dark:text-yellow-300">
+        <div className="flex items-center gap-2 rounded-lg bg-[var(--status-amber-bg)] border border-[var(--status-amber-fg)]/30 px-3 py-2">
+          <Bell className="h-3.5 w-3.5 text-[var(--status-amber-fg)] shrink-0" />
+          <span className="text-[11px] text-[var(--status-amber-fg)]">
             3 contratti scadono nei prossimi 7 giorni
           </span>
         </div>
@@ -44,9 +44,9 @@ function DashboardMockup() {
         {/* Contract rows */}
         <div className="space-y-1.5">
           {[
-            { num: "CNT-2025-001", client: "Acme Corp Srl", days: "28 gg", color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-900/20" },
-            { num: "CNT-2025-002", client: "Beta Systems SpA", days: "6 gg", color: "text-yellow-600 dark:text-yellow-400", bg: "bg-yellow-50 dark:bg-yellow-900/20" },
-            { num: "CNT-2025-003", client: "Gamma Holdings", days: "1 gg", color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
+            { num: "CNT-2025-001", client: "Acme Corp Srl", days: "28 gg", color: "text-[var(--status-green-fg)]", bg: "bg-[var(--status-green-bg)]" },
+            { num: "CNT-2025-002", client: "Beta Systems SpA", days: "6 gg", color: "text-[var(--status-amber-fg)]", bg: "bg-[var(--status-amber-bg)]" },
+            { num: "CNT-2025-003", client: "Gamma Holdings", days: "1 gg", color: "text-[var(--status-red-fg)]", bg: "bg-[var(--status-red-bg)]" },
           ].map((row) => (
             <div
               key={row.num}
@@ -69,10 +69,10 @@ function DashboardMockup() {
           <div className="flex-1">
             <p className="text-[10px] text-muted-foreground">Valutazione rischio</p>
             <div className="w-full h-1.5 bg-muted rounded-full mt-1">
-              <div className="h-1.5 bg-green-500 rounded-full" style={{ width: "62%" }} />
+              <div className="h-1.5 bg-[var(--status-green-fg)] rounded-full" style={{ width: "62%" }} />
             </div>
           </div>
-          <span className="text-[11px] font-bold text-green-600 dark:text-green-400">Basso</span>
+          <span className="text-[11px] font-bold text-[var(--status-green-fg)]">Basso</span>
         </div>
       </div>
     </div>

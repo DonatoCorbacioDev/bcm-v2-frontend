@@ -118,6 +118,14 @@ describe('FinancialForecastChart', () => {
     expect(await screen.findByText(/previsione finanziaria/i)).toBeInTheDocument();
   });
 
+  it('falls back to aggregated financial values when the API returns an empty historical array (e.g. stale ML cache) but real financial data exists', async () => {
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
+    (api.get as jest.Mock).mockResolvedValue({ data: { historical: [], forecast: [] } });
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+    expect(await screen.findByText(/previsione finanziaria/i)).toBeInTheDocument();
+    expect(screen.queryByText(/nessun dato finanziario disponibile/i)).not.toBeInTheDocument();
+  });
+
   it('shows unreliable warning when reliable=false and forecast is present', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
     (api.get as jest.Mock).mockResolvedValue({

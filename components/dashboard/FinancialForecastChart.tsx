@@ -98,7 +98,9 @@ export function FinancialForecastChart() {
   const isLoading = isLoadingHist || isLoadingForecast;
 
   const historical =
-    forecastData?.historical ?? aggregateHistorical(financialValues ?? []);
+    forecastData?.historical && forecastData.historical.length > 0
+      ? forecastData.historical
+      : aggregateHistorical(financialValues ?? []);
   const forecast = forecastData?.forecast ?? [];
   const isReliable = forecastData?.reliable ?? true;
   const chartData = buildChartData(historical, forecast);

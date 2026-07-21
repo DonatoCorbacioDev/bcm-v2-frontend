@@ -23,8 +23,9 @@ import {
   formatMonthLabel,
 } from "@/lib/chartTheme";
 
-const HISTORICAL_COLOR = "var(--chart-1)";
-const FORECAST_COLOR = "var(--chart-4)";
+// Historical and forecast share the same institutional blue; the line
+// style (solid vs dashed) is what tells them apart, not a second hue.
+const CHART_COLOR = "var(--chart-1)";
 
 type Horizon = 3 | 6;
 
@@ -141,8 +142,8 @@ export function FinancialForecastChart() {
   const firstForecastMonth = forecast[0]?.month;
 
   return (
-    <Card className="lg:col-span-2">
-      <CardHeader>
+    <Card className="lg:col-span-2 py-5 gap-5">
+      <CardHeader className="px-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <CardTitle>Previsione finanziaria</CardTitle>
@@ -178,7 +179,7 @@ export function FinancialForecastChart() {
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-5">
         {isLoading && (
           <div className="h-[300px] flex items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -192,16 +193,6 @@ export function FinancialForecastChart() {
         {!isLoading && chartData.length > 0 && (
           <ResponsiveContainer width="100%" height={300}>
             <ComposedChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-              <defs>
-                <linearGradient id="histGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={HISTORICAL_COLOR} stopOpacity={0.25} />
-                  <stop offset="95%" stopColor={HISTORICAL_COLOR} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="ciGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={FORECAST_COLOR} stopOpacity={0.15} />
-                  <stop offset="95%" stopColor={FORECAST_COLOR} stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid
                 horizontal
                 vertical={false}
@@ -235,9 +226,9 @@ export function FinancialForecastChart() {
               {firstForecastMonth && (
                 <ReferenceLine
                   x={firstForecastMonth}
-                  stroke={FORECAST_COLOR}
+                  stroke={CHART_COLOR}
                   strokeDasharray="4 4"
-                  label={{ value: "Previsione →", position: "insideTopRight", fontSize: 11, fill: FORECAST_COLOR }}
+                  label={{ value: "Previsione →", position: "insideTopRight", fontSize: 11, fill: CHART_COLOR }}
                 />
               )}
 
@@ -261,7 +252,8 @@ export function FinancialForecastChart() {
                     dataKey="ciRange"
                     stackId="ci"
                     stroke="none"
-                    fill="url(#ciGradient)"
+                    fill={CHART_COLOR}
+                    fillOpacity={0.1}
                     legendType="none"
                     tooltipType="none"
                     connectNulls={false}
@@ -269,25 +261,26 @@ export function FinancialForecastChart() {
                 </>
               )}
 
-              {/* Historical area */}
+              {/* Historical area — solid line, flat low-opacity fill (no gradient) */}
               <Area
                 type="monotone"
                 dataKey="historical"
-                stroke={HISTORICAL_COLOR}
+                stroke={CHART_COLOR}
                 strokeWidth={1.5}
-                fill="url(#histGradient)"
+                fill={CHART_COLOR}
+                fillOpacity={0.15}
                 connectNulls
                 dot={false}
                 activeDot={{ r: 4 }}
                 name="Storico"
               />
 
-              {/* Forecast line */}
+              {/* Forecast line — same blue, dashed stroke is the only differentiator */}
               {forecast.length > 0 && (
                 <Line
                   type="monotone"
                   dataKey="forecast"
-                  stroke={FORECAST_COLOR}
+                  stroke={CHART_COLOR}
                   strokeWidth={1.5}
                   strokeDasharray="6 3"
                   dot={false}

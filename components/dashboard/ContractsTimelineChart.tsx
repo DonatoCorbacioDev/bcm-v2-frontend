@@ -39,12 +39,12 @@ export function ContractsTimelineChart() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="py-5 gap-5">
+        <CardHeader className="px-5">
           <CardTitle>Andamento contratti</CardTitle>
           <CardDescription>Contratti avviati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
+        <CardContent className="px-5 h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Caricamento...</p>
         </CardContent>
       </Card>
@@ -53,12 +53,12 @@ export function ContractsTimelineChart() {
 
   if (isError) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="py-5 gap-5">
+        <CardHeader className="px-5">
           <CardTitle>Andamento contratti</CardTitle>
           <CardDescription>Contratti avviati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
+        <CardContent className="px-5 h-[300px] flex items-center justify-center">
           <p className="text-destructive text-sm">Impossibile caricare i dati del grafico</p>
         </CardContent>
       </Card>
@@ -67,12 +67,12 @@ export function ContractsTimelineChart() {
 
   if (!data || data.length === 0) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="py-5 gap-5">
+        <CardHeader className="px-5">
           <CardTitle>Andamento contratti</CardTitle>
           <CardDescription>Contratti avviati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
+        <CardContent className="px-5 h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Nessun dato disponibile</p>
         </CardContent>
       </Card>
@@ -86,8 +86,8 @@ export function ContractsTimelineChart() {
   const isUp = (delta ?? 0) >= 0;
 
   return (
-    <Card>
-      <CardContent className="pt-6">
+    <Card className="py-5">
+      <CardContent className="px-5 pt-5">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-[14.5px] font-semibold">Andamento contratti</p>
@@ -112,12 +112,6 @@ export function ContractsTimelineChart() {
         </div>
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-            <defs>
-              <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor={CHART_COLOR} stopOpacity={0.28} />
-                <stop offset="95%" stopColor={CHART_COLOR} stopOpacity={0} />
-              </linearGradient>
-            </defs>
             <CartesianGrid
               horizontal
               vertical={false}
@@ -145,7 +139,8 @@ export function ContractsTimelineChart() {
               name="Contratti"
               stroke={CHART_COLOR}
               strokeWidth={2}
-              fill="url(#timelineGradient)"
+              fill={CHART_COLOR}
+              fillOpacity={0.15}
               activeDot={{ r: 5 }}
               dot={<TimelineLastPointDot lastIndex={data.length - 1} color={CHART_COLOR} />}
             />

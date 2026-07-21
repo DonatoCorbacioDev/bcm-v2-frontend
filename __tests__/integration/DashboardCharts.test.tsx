@@ -259,6 +259,33 @@ describe('TopManagersChart', () => {
     render(<TopManagersChart />);
     expect(screen.getByText(/top manager/i)).toBeInTheDocument();
   });
+
+  it('shows the compact single-manager note instead of a ranking when there is only one manager', () => {
+    (useTopManagers as jest.Mock).mockReturnValue({
+      data: [{ managerName: 'John Doe', contractsCount: 10 }],
+      isLoading: false,
+      isError: false,
+    });
+    render(<TopManagersChart />);
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('10')).toBeInTheDocument();
+    expect(screen.getByText(/unico responsabile assegnato/i)).toBeInTheDocument();
+  });
+
+  it('renders the ranked bar list (no single-manager note) when there are multiple managers', () => {
+    (useTopManagers as jest.Mock).mockReturnValue({
+      data: [
+        { managerId: 1, managerName: 'John Doe', contractsCount: 10 },
+        { managerId: 2, managerName: 'Jane Smith', contractsCount: 6 },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<TopManagersChart />);
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.queryByText(/unico responsabile assegnato/i)).not.toBeInTheDocument();
+  });
 });
 
 // ─── KPICardSkeleton ──────────────────────────────────────────────────────────

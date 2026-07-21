@@ -9,17 +9,25 @@ jest.mock('recharts', () => ({
   // Renders a queryable stand-in per <Area> so tests can assert on the real
   // dataKey/stackId/tooltipType props (e.g. that the confidence band is
   // stacked as ciBase+ciRange, not a single "upper" area from 0).
-  Area: ({ dataKey, stackId, fill, tooltipType }: {
-    dataKey: string; stackId?: string; fill?: string; tooltipType?: string;
+  Area: ({ dataKey, stackId, fill, fillOpacity, stroke, strokeDasharray, tooltipType }: {
+    dataKey: string; stackId?: string; fill?: string; fillOpacity?: number;
+    stroke?: string; strokeDasharray?: string; tooltipType?: string;
   }) => (
     <div
       data-testid={`area-${dataKey}`}
       data-stackid={stackId ?? ''}
       data-fill={fill ?? ''}
+      data-fill-opacity={fillOpacity ?? ''}
+      data-stroke={stroke ?? ''}
+      data-stroke-dasharray={strokeDasharray ?? ''}
       data-tooltip-type={tooltipType ?? ''}
     />
   ),
-  Line: () => null,
+  Line: ({ dataKey, stroke, strokeDasharray }: {
+    dataKey: string; stroke?: string; strokeDasharray?: string;
+  }) => (
+    <div data-testid={`line-${dataKey}`} data-stroke={stroke ?? ''} data-stroke-dasharray={strokeDasharray ?? ''} />
+  ),
   XAxis: ({ tickFormatter }: { tickFormatter?: (v: string) => string }) => { tickFormatter?.('2024-01'); return null; },
   YAxis: ({ tickFormatter }: { tickFormatter?: (v: number) => string }) => { tickFormatter?.(1000); return null; },
   CartesianGrid: () => null,
@@ -84,6 +92,28 @@ describe('FinancialForecastChart', () => {
     expect(screen.queryByText(/previsione non disponibile/i)).not.toBeInTheDocument();
   });
 
+  it('uses the same institutional blue for historical (solid) and forecast (dashed), with flat opacity fill instead of a gradient', async () => {
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
+    (api.get as jest.Mock).mockResolvedValue({ data: forecastResponse });
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+
+    const historicalArea = await screen.findByTestId('area-historical');
+    const forecastLine = await screen.findByTestId('line-forecast');
+
+    // Same color for both series.
+    expect(historicalArea).toHaveAttribute('data-stroke', 'var(--chart-1)');
+    expect(forecastLine).toHaveAttribute('data-stroke', 'var(--chart-1)');
+
+    // Solid historical, dashed forecast — the only visual differentiator.
+    expect(historicalArea.getAttribute('data-stroke-dasharray')).toBe('');
+    expect(forecastLine.getAttribute('data-stroke-dasharray')).toBe('6 3');
+
+    // Flat fill, not a gradient URL.
+    expect(historicalArea).toHaveAttribute('data-fill', 'var(--chart-1)');
+    expect(historicalArea).toHaveAttribute('data-fill-opacity', '0.15');
+    expect(historicalArea.getAttribute('data-fill')).not.toMatch(/^url\(/);
+  });
+
   it('disables horizon buttons when forecast is offline', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
     (api.get as jest.Mock).mockRejectedValue(new Error('offline'));
@@ -130,7 +160,8 @@ describe('FinancialForecastChart', () => {
       expect(base).toHaveAttribute('data-tooltip-type', 'none');
 
       expect(range).toHaveAttribute('data-stackid', 'ci');
-      expect(range).toHaveAttribute('data-fill', 'url(#ciGradient)');
+      expect(range).toHaveAttribute('data-fill', 'var(--chart-1)');
+      expect(range).toHaveAttribute('data-fill-opacity', '0.1');
       expect(range).toHaveAttribute('data-tooltip-type', 'none');
 
       // The old single-area-from-zero implementation must be gone.

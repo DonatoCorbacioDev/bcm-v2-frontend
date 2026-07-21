@@ -29,27 +29,33 @@ describe('KPICard', () => {
     expect(flexContainer?.children).toHaveLength(1);
   });
 
-  it('applies the default variant accent', () => {
+  it('applies the default variant accent using the semantic status-blue token', () => {
     const { container } = render(<KPICard title="Default" value={1} />);
 
-    expect(container.firstChild).toHaveClass('border-l-primary');
+    expect(container.firstChild).toHaveClass('border-l-[var(--status-blue-fg)]');
   });
 
-  it('applies success variant accent', () => {
+  it('applies success variant accent using the semantic status-green token', () => {
     const { container } = render(<KPICard title="Active" value={5} variant="success" />);
 
-    expect(container.firstChild).toHaveClass('border-l-green-500');
+    expect(container.firstChild).toHaveClass('border-l-[var(--status-green-fg)]');
   });
 
-  it('applies warning variant accent', () => {
+  it('applies warning variant accent using the semantic status-amber token', () => {
     const { container } = render(<KPICard title="Expiring" value={2} variant="warning" />);
 
-    expect(container.firstChild).toHaveClass('border-l-amber-500');
+    expect(container.firstChild).toHaveClass('border-l-[var(--status-amber-fg)]');
   });
 
-  it('applies danger variant accent', () => {
+  it('applies danger variant accent using the semantic status-red token', () => {
     const { container } = render(<KPICard title="Expired" value={7} variant="danger" />);
 
-    expect(container.firstChild).toHaveClass('border-l-red-500');
+    expect(container.firstChild).toHaveClass('border-l-[var(--status-red-fg)]');
+  });
+
+  it('applies tabular-nums to the numeric value', () => {
+    render(<KPICard title="Total" value={24} />);
+
+    expect(screen.getByText('24')).toHaveClass('tabular-nums');
   });
 });

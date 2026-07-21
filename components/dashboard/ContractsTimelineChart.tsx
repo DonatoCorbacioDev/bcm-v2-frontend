@@ -42,7 +42,7 @@ export function ContractsTimelineChart() {
       <Card>
         <CardHeader>
           <CardTitle>Andamento contratti</CardTitle>
-          <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
+          <CardDescription>Contratti avviati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Caricamento...</p>
@@ -56,7 +56,7 @@ export function ContractsTimelineChart() {
       <Card>
         <CardHeader>
           <CardTitle>Andamento contratti</CardTitle>
-          <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
+          <CardDescription>Contratti avviati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-destructive text-sm">Impossibile caricare i dati del grafico</p>
@@ -70,7 +70,7 @@ export function ContractsTimelineChart() {
       <Card>
         <CardHeader>
           <CardTitle>Andamento contratti</CardTitle>
-          <CardDescription>Contratti creati negli ultimi 12 mesi</CardDescription>
+          <CardDescription>Contratti avviati negli ultimi 12 mesi</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Nessun dato disponibile</p>
@@ -91,7 +91,7 @@ export function ContractsTimelineChart() {
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-[14.5px] font-semibold">Andamento contratti</p>
-            <p className="mt-0.5 text-[12.5px] text-muted-foreground">Contratti creati negli ultimi 12 mesi</p>
+            <p className="mt-0.5 text-[12.5px] text-muted-foreground">Contratti avviati negli ultimi 12 mesi</p>
           </div>
           <div className="flex-none text-right">
             <div className="font-mono text-[26px] font-bold leading-none tracking-tight tabular-nums">

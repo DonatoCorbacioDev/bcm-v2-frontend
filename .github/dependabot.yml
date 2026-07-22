@@ -9,6 +9,13 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
+    ignore:
+      # ts-jest@29.4.11's peer dependency is "typescript >=4.3 <7" — npm
+      # refuses to even install with TS7 without --force/--legacy-peer-deps.
+      # Confirmed by actually trying it, not inferred. Revisit once ts-jest
+      # (or its replacement) supports TypeScript 7.
+      - dependency-name: "typescript"
+        versions: [">=7.0.0"]
 
   # GitHub Actions used in the workflows under .github/workflows/
   - package-ecosystem: "github-actions"

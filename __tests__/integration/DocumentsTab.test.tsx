@@ -29,6 +29,11 @@ const doc = {
 const smallDoc  = { ...doc, id: 2, fileName: 'tiny.pdf',   fileSize: 512 };
 const mediumDoc = { ...doc, id: 3, fileName: 'medium.pdf', fileSize: 102400 };
 
+const versionedDoc = {
+  ...doc, id: 4, fileName: 'contract-v2.pdf',
+  versionGroupId: 4, versionNumber: 2, versionCount: 2,
+};
+
 const analysis = {
   documentId: 1, rawText: 'Contract text here',
   detectedCustomerName: 'Acme Corp', detectedContractNumber: 'CNT-001',
@@ -277,6 +282,84 @@ describe('DocumentsTab', () => {
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Estrazione non riuscita'), { timeout: 3000 });
+  });
+
+  describe('versioning', () => {
+    it('shows the version badge for a document', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByText('v1')).toBeInTheDocument();
+    });
+
+    it('does not show the history button when there is only one version', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByText('contract.pdf')).toBeInTheDocument();
+      expect(screen.queryByTitle('Cronologia versioni')).not.toBeInTheDocument();
+    });
+
+    it('shows the history button with version count when multiple versions exist', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [versionedDoc] });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Cronologia versioni')).toBeInTheDocument();
+      expect(screen.getByText('2')).toBeInTheDocument();
+      expect(screen.getByText('v2')).toBeInTheDocument();
+    });
+
+    it('opens the version history dialog and fetches versions', async () => {
+      (api.get as jest.Mock).mockImplementation((url: string) => {
+        if (url.endsWith('/versions')) {
+          return Promise.resolve({ data: [versionedDoc, doc] });
+        }
+        return Promise.resolve({ data: [versionedDoc] });
+      });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Cronologia versioni')).toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Cronologia versioni'));
+      expect(await screen.findByText(/cronologia versioni/i)).toBeInTheDocument();
+      await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/4/versions'));
+    });
+
+    it('uploads a new version and shows success toast', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockResolvedValue({ data: versionedDoc });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Carica nuova versione'));
+      const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
+      const file = new File(['%PDF-1.4'], 'contract-v2.pdf', { type: 'application/pdf' });
+      fireEvent.change(input, { target: { files: [file] } });
+      await waitFor(() => expect(api.post).toHaveBeenCalledWith(
+        '/contracts/1/documents/1/versions',
+        expect.any(FormData),
+        expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } })
+      ));
+      expect(toast.success).toHaveBeenCalledWith('Nuova versione caricata con successo');
+    });
+
+    it('rejects a non-PDF file for a new version', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Carica nuova versione'));
+      const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
+      const file = new File(['not a pdf'], 'notes.txt', { type: 'text/plain' });
+      fireEvent.change(input, { target: { files: [file] } });
+      expect(toast.error).toHaveBeenCalledWith('Sono ammessi solo file PDF');
+      expect(api.post).not.toHaveBeenCalled();
+    });
+
+    it('shows error toast when new version upload fails', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Carica nuova versione'));
+      const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
+      const file = new File(['%PDF-1.4'], 'contract-v2.pdf', { type: 'application/pdf' });
+      fireEvent.change(input, { target: { files: [file] } });
+      await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Caricamento della nuova versione non riuscito'));
+    });
   });
 
   describe('clause risk analysis', () => {

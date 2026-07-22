@@ -185,6 +185,25 @@ export interface ContractDocument {
   contentType: string;
   uploadedAt: string;
   downloadUrl: string;
+  versionGroupId?: number;
+  versionNumber?: number;
+  versionCount?: number;
+}
+
+export type DiffTag = "EQUAL" | "INSERT" | "DELETE" | "CHANGE";
+
+export interface DiffLine {
+  tag: DiffTag;
+  oldText: string | null;
+  newText: string | null;
+}
+
+export interface DocumentDiff {
+  fromDocumentId: number;
+  fromFileName: string;
+  toDocumentId: number;
+  toFileName: string;
+  lines: DiffLine[];
 }
 
 export interface DocumentAnalysis {

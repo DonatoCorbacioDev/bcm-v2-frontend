@@ -5,11 +5,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Upload, Download, Trash2, FileText, Loader2, FileSearch, ChevronDown, ChevronUp,
-  ShieldAlert, CheckCircle2,
+  ShieldAlert, CheckCircle2, FilePlus2, History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import api from "@/lib/api";
+import DocumentVersionsDialog from "@/components/contracts/DocumentVersionsDialog";
 import type { Contract, ContractDocument, DocumentAnalysis, ClauseRiskAnalysis } from "@/types";
 
 const RISK_LEVEL_CONFIG = {
@@ -33,10 +34,13 @@ function formatBytes(bytes: number) {
 export default function DocumentsTab({ contractId, isAdmin, onApply }: DocumentsTabProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const versionInputRef = useRef<HTMLInputElement>(null);
   const [analysisMap, setAnalysisMap] = useState<Record<number, DocumentAnalysis>>({});
   const [expandedDoc, setExpandedDoc] = useState<number | null>(null);
   const [clauseRiskMap, setClauseRiskMap] = useState<Record<number, ClauseRiskAnalysis>>({});
   const [expandedRiskDoc, setExpandedRiskDoc] = useState<number | null>(null);
+  const [versionUploadTarget, setVersionUploadTarget] = useState<ContractDocument | null>(null);
+  const [historyDoc, setHistoryDoc] = useState<ContractDocument | null>(null);
 
   const { data: documents, isLoading } = useQuery<ContractDocument[]>({
     queryKey: ["documents", contractId],
@@ -62,6 +66,25 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
     onError: () => toast.error("Caricamento del documento non riuscito"),
+  });
+
+  const uploadVersionMutation = useMutation({
+    mutationFn: async ({ documentId, file }: { documentId: number; file: File }) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await api.post(`/contracts/${contractId}/documents/${documentId}/versions`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
+      queryClient.invalidateQueries({ queryKey: ["document-versions", contractId] });
+      toast.success("Nuova versione caricata con successo");
+      /* istanbul ignore next */
+      if (versionInputRef.current) versionInputRef.current.value = "";
+    },
+    onError: () => toast.error("Caricamento della nuova versione non riuscito"),
   });
 
   const deleteMutation = useMutation({
@@ -119,6 +142,16 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     uploadMutation.mutate(file);
   };
 
+  const handleVersionFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !versionUploadTarget) return;
+    if (file.type !== "application/pdf") {
+      toast.error("Sono ammessi solo file PDF");
+      return;
+    }
+    uploadVersionMutation.mutate({ documentId: versionUploadTarget.id, file });
+  };
+
   const handleDownload = async (doc: ContractDocument) => {
     try {
       const res = await api.get(`/contracts/${contractId}/documents/${doc.id}/download`, {
@@ -162,6 +195,14 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
           accept="application/pdf"
           className="hidden"
           onChange={handleFileChange}
+        />
+        <input
+          ref={versionInputRef}
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          data-testid="version-upload-input"
+          onChange={handleVersionFileChange}
         />
         <Button
           variant="outline"
@@ -213,8 +254,11 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                   <div className="flex items-center gap-3 min-w-0">
                     <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
+                      <p className="text-sm font-medium text-foreground truncate flex items-center gap-2">
                         {doc.fileName}
+                        <Badge variant="outline" className="text-[10px] font-normal">
+                          v{doc.versionNumber ?? 1}
+                        </Badge>
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {formatBytes(doc.fileSize)} ·{" "}
@@ -226,6 +270,37 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                   </div>
 
                   <div className="flex items-center gap-2 flex-shrink-0">
+                    {(doc.versionCount ?? 1) > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setHistoryDoc(doc)}
+                        title="Cronologia versioni"
+                        aria-label="Cronologia versioni"
+                      >
+                        <History className="h-4 w-4" />
+                        <span className="ml-1 text-xs">{doc.versionCount}</span>
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={/* istanbul ignore next */ () => {
+                        setVersionUploadTarget(doc);
+                        versionInputRef.current?.click();
+                      }}
+                      disabled={uploadVersionMutation.isPending}
+                      title="Carica nuova versione"
+                      aria-label="Carica nuova versione"
+                    >
+                      {uploadVersionMutation.isPending && uploadVersionMutation.variables?.documentId === doc.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FilePlus2 className="h-4 w-4" />
+                      )}
+                    </Button>
+
                     <Button
                       variant="ghost"
                       size="sm"
@@ -411,6 +486,15 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
           })}
         </div>
       )}
+
+      <DocumentVersionsDialog
+        contractId={contractId}
+        documentId={historyDoc?.id ?? null}
+        fileName={historyDoc?.fileName ?? ""}
+        open={historyDoc !== null}
+        onOpenChange={(next) => { if (!next) setHistoryDoc(null); }}
+        onDownload={handleDownload}
+      />
     </div>
   );
 }

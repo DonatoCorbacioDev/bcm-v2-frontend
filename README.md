@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwind-css)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-676%20passing-brightgreen)](./\_\_tests\_\_)
+[![Tests](https://img.shields.io/badge/Tests-859%20passing-brightgreen)](./\_\_tests\_\_)
 [![License](https://img.shields.io/badge/License-Custom-blue)](./LICENSE)
 
 ## 🎯 Overview
@@ -79,7 +79,7 @@ All data shown is synthetic demo data (Faker, `it_IT` locale) — see [Related P
 ### Code Quality
 - **100% TypeScript** - Full type safety
 - **Zod Validation** - Runtime type checking
-- **Clean Architecture** - Services → Hooks → Components
+- **Layered structure** - Pages → Components → Hooks → Services, each with a single responsibility
 - **Centralized API Client** - Axios with interceptors
 - **Query Caching** - TanStack Query optimization
 
@@ -129,7 +129,9 @@ graph TB
     style I fill:#ffab91,stroke:#bf360c,stroke-width:3px,color:#000
 ```
 
-### Clean Architecture Pattern
+### Layered Structure
+
+Not Clean Architecture in the strict sense — components and hooks are coupled to React/Next.js and to TanStack Query directly, there's no framework-independent domain layer. It's a conventional, effective layering for a Next.js app, just described accurately:
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -595,7 +597,7 @@ npm run lint
 npm run test:e2e
 ```
 
-**676 tests** across 42 test suites as of the last run (2026-07-06) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
+**859 tests** across 50 test suites as of the last run (2026-07-22) — covering Zod validation schemas, hooks, and integration tests for the main pages/tables/forms (login, dashboard, contracts, users, etc.). Run `npm test` for the current count and `npm run test:coverage` for per-file coverage; this number will drift as the suite grows, so treat the command output as the source of truth rather than this README.
 
 `lib/validations` has **100% coverage** across all 6 schemas.
 
@@ -783,8 +785,8 @@ BCM v2.0 is split across 4 repositories:
 **⭐ If you're a recruiter or technical reviewer**, feel free to explore the codebase. This project demonstrates:
 
 - Modern React/TypeScript development
-- Clean Architecture principles
-- Production-ready UX patterns
+- A layered, testable structure (services → hooks → components)
+- Accessible, responsive UI patterns (dark mode, keyboard nav, ARIA labeling)
 - Comprehensive form validation
 - Security best practices
 - Performance optimization

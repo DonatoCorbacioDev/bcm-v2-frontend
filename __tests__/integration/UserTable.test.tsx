@@ -128,6 +128,26 @@ describe('UserTable', () => {
     expect(bobCells[4]).toHaveTextContent('No');
   });
 
+  it('shows the approver badge per user', () => {
+    (useUsers as jest.Mock).mockReturnValue({
+      data: [
+        { ...mockUsers[0], canApproveContracts: true },
+        { ...mockUsers[1], canApproveContracts: false },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    // "Approvatore" is the 6th cell (index 5); see the verified-badge test
+    // above for why this targets by position instead of ambiguous text.
+    const rows = screen.getAllByRole('row');
+    const aliceCells = within(rows[1]).getAllByRole('cell');
+    const bobCells = within(rows[2]).getAllByRole('cell');
+    expect(aliceCells[5]).toHaveTextContent('Sì');
+    expect(bobCells[5]).toHaveTextContent('No');
+  });
+
   it('shows skeleton while loading', () => {
     (useUsers as jest.Mock).mockReturnValue({
       data: undefined,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
@@ -30,6 +30,16 @@ beforeEach(() => {
 describe('SemanticSearchBar', () => {
   it('does not search until the user submits a query', () => {
     render(<SemanticSearchBar />, { wrapper: createWrapper() });
+    expect(api.post).not.toHaveBeenCalled();
+  });
+
+  it('ignores a form submit when the query is blank', () => {
+    render(<SemanticSearchBar />, { wrapper: createWrapper() });
+    const input = screen.getByLabelText(/ricerca semantica/i);
+
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.submit(input.closest('form')!);
+
     expect(api.post).not.toHaveBeenCalled();
   });
 

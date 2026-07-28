@@ -139,6 +139,35 @@ describe('DocumentVersionsDialog', () => {
     expect(screen.queryByText(/confronto tra versioni/i)).not.toBeInTheDocument();
   });
 
+  it('falls back to version 1 when a document has no versionNumber', async () => {
+    const untaggedVersion = {
+      id: 4, contractId: 1, fileName: 'contract-legacy.pdf', fileSize: 1000,
+      contentType: 'application/pdf', uploadedAt: '2026-12-01T10:00:00Z', downloadUrl: '',
+    };
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/versions')) return Promise.resolve({ data: [v1, untaggedVersion] });
+      return Promise.resolve({ data: diff });
+    });
+    render(
+      <DocumentVersionsDialog
+        contractId={1} documentId={1} fileName="contract.pdf"
+        open={true} onOpenChange={jest.fn()} onDownload={onDownload}
+      />,
+      { wrapper: createWrapper() }
+    );
+    // Both v1 (versionNumber: 1) and the untagged version (versionNumber
+    // missing, falls back to 1) render as "v1" — exercising the `?? 1`
+    // fallback on the label and the `?? 0` fallback in the compare sort.
+    expect(await screen.findByText(/v1 · contract-legacy\.pdf/)).toBeInTheDocument();
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes).toHaveLength(2);
+
+    await userEvent.click(checkboxes[0]);
+    await userEvent.click(checkboxes[1]);
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/4/diff/1'));
+  });
+
   it('replaces the oldest selection when a third version is checked', async () => {
     (api.get as jest.Mock).mockImplementation((url: string) => {
       if (url.endsWith('/versions')) return Promise.resolve({ data: [v3, v2, v1] });

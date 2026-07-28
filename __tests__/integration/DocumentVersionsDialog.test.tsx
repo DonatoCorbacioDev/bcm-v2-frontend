@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('@/lib/api', () => ({
@@ -124,6 +125,62 @@ describe('DocumentVersionsDialog', () => {
     expect(await screen.findByText(/nessuna differenza rilevata/i)).toBeInTheDocument();
   });
 
+  it('renders an empty diff panel without crashing when the diff fetch fails', async () => {
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/versions')) return Promise.resolve({ data: [v2, v1] });
+      return Promise.reject(new Error('network error'));
+    });
+    render(
+      <DocumentVersionsDialog
+        contractId={1} documentId={1} fileName="contract.pdf"
+        open={true} onOpenChange={jest.fn()} onDownload={onDownload}
+      />,
+      { wrapper: createWrapper() }
+    );
+    const checkboxes = await screen.findAllByRole('checkbox');
+    await userEvent.click(checkboxes[0]);
+    await userEvent.click(checkboxes[1]);
+
+    expect(await screen.findByText(/confronto tra versioni/i)).toBeInTheDocument();
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/1/diff/2'));
+    await waitFor(() => {
+      expect(document.querySelector('.animate-spin')).not.toBeInTheDocument();
+    });
+    expect(screen.queryByText(/nessuna differenza rilevata/i)).not.toBeInTheDocument();
+  });
+
+  it('does not compute a compare pair when a selected version disappears from the cache', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/versions')) return Promise.resolve({ data: [v2, v1] });
+      return Promise.resolve({ data: diff });
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <DocumentVersionsDialog
+          contractId={1} documentId={1} fileName="contract.pdf"
+          open={true} onOpenChange={jest.fn()} onDownload={onDownload}
+        />
+      </QueryClientProvider>
+    );
+    const checkboxes = await screen.findAllByRole('checkbox');
+    await userEvent.click(checkboxes[0]);
+    await userEvent.click(checkboxes[1]);
+    expect(await screen.findByText(/confronto tra versioni/i)).toBeInTheDocument();
+
+    // Simulate the underlying versions list shrinking (e.g. a refetch after a
+    // version was deleted elsewhere) while `selected` still holds its id —
+    // comparePair's a/b lookup then returns undefined for the missing one,
+    // so no new diff is fetched for the (now-invalid) pair.
+    (api.get as jest.Mock).mockClear();
+    queryClient.setQueryData(['document-versions', 1, 1], [v1]);
+
+    await waitFor(() => {
+      expect(queryClient.getQueryData(['document-versions', 1, 1])).toEqual([v1]);
+    });
+    expect(api.get).not.toHaveBeenCalled();
+  });
+
   it('deselects a version when its checkbox is clicked again', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [v2, v1] });
     render(
@@ -166,6 +223,33 @@ describe('DocumentVersionsDialog', () => {
     await userEvent.click(checkboxes[1]);
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/4/diff/1'));
+  });
+
+  it('sorts two documents that both lack versionNumber without crashing', async () => {
+    const untagged1 = {
+      id: 5, contractId: 1, fileName: 'legacy-a.pdf', fileSize: 1000,
+      contentType: 'application/pdf', uploadedAt: '2026-11-01T10:00:00Z', downloadUrl: '',
+    };
+    const untagged2 = {
+      id: 6, contractId: 1, fileName: 'legacy-b.pdf', fileSize: 1000,
+      contentType: 'application/pdf', uploadedAt: '2026-12-01T10:00:00Z', downloadUrl: '',
+    };
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/versions')) return Promise.resolve({ data: [untagged1, untagged2] });
+      return Promise.resolve({ data: diff });
+    });
+    render(
+      <DocumentVersionsDialog
+        contractId={1} documentId={1} fileName="contract.pdf"
+        open={true} onOpenChange={jest.fn()} onDownload={onDownload}
+      />,
+      { wrapper: createWrapper() }
+    );
+    const checkboxes = await screen.findAllByRole('checkbox');
+    await userEvent.click(checkboxes[0]);
+    await userEvent.click(checkboxes[1]);
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(expect.stringContaining('/diff/')));
   });
 
   it('replaces the oldest selection when a third version is checked', async () => {

@@ -44,18 +44,12 @@ describe("budgetSchema", () => {
   });
 
   describe("year", () => {
-    it("rejects a year before 2000", () => {
-      const result = budgetSchema.safeParse({ ...validData, year: 1999 });
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects a year after 2100", () => {
-      const result = budgetSchema.safeParse({ ...validData, year: 2101 });
-      expect(result.success).toBe(false);
-    });
-
-    it("rejects a non-integer year", () => {
-      const result = budgetSchema.safeParse({ ...validData, year: 2025.5 });
+    it.each([
+      ["before 2000", 1999],
+      ["after 2100", 2101],
+      ["non-integer", 2025.5],
+    ])("rejects invalid year (%s: %p)", (_label, year) => {
+      const result = budgetSchema.safeParse({ ...validData, year });
       expect(result.success).toBe(false);
     });
   });

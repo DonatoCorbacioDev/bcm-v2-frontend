@@ -65,7 +65,7 @@ function computeConfidenceBand(
   if (!Number.isFinite(lower) || !Number.isFinite(upper)) {
     return {};
   }
-  const safeLower = lower < 0 ? 0 : lower;
+  const safeLower = Math.max(lower, 0);
   if (lower < 0) {
     console.warn(
       `FinancialForecastChart: clamping negative confidence lower bound to 0 for ${month} (was ${lower}).`,
@@ -216,7 +216,7 @@ export function FinancialForecastChart() {
               />
               <Tooltip
                 formatter={(value, name) => [formatEur(value as number), name]}
-                labelFormatter={(label) => formatMonthLabel(String(label))}
+                labelFormatter={(label) => (typeof label === "string" ? formatMonthLabel(label) : label)}
                 contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
                 labelStyle={CHART_TOOLTIP_LABEL_STYLE}
                 itemStyle={CHART_TOOLTIP_ITEM_STYLE}

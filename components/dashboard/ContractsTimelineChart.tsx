@@ -128,7 +128,7 @@ export function ContractsTimelineChart() {
             <YAxis allowDecimals={false} tick={CHART_TICK_STYLE} width={32} axisLine={false} tickLine={false} tickCount={4} />
             <Tooltip
               formatter={(value) => [value as number, "Contratti"]}
-              labelFormatter={(label) => formatMonthLabel(String(label))}
+              labelFormatter={(label) => (typeof label === "string" ? formatMonthLabel(label) : label)}
               contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
               labelStyle={CHART_TOOLTIP_LABEL_STYLE}
               itemStyle={CHART_TOOLTIP_ITEM_STYLE}

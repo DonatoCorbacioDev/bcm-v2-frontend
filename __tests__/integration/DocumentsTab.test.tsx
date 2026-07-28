@@ -354,6 +354,26 @@ describe('DocumentsTab', () => {
       expect(toast.success).toHaveBeenCalledWith('Nuova versione caricata con successo');
     });
 
+    it('only shows the spinner on the document the version upload is pending for', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc, smallDoc] });
+      let resolveUpload!: (value: { data: typeof versionedDoc }) => void;
+      (api.post as jest.Mock).mockReturnValueOnce(new Promise((resolve) => { resolveUpload = resolve; }));
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+
+      const uploadButtons = await screen.findAllByTitle('Carica nuova versione');
+      expect(uploadButtons).toHaveLength(2);
+      await userEvent.click(uploadButtons[0]);
+      const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
+      const file = new File(['%PDF-1.4'], 'contract-v2.pdf', { type: 'application/pdf' });
+      fireEvent.change(input, { target: { files: [file] } });
+
+      await waitFor(() => expect(uploadButtons[0].querySelector('.animate-spin')).toBeInTheDocument());
+      expect(uploadButtons[1].querySelector('.animate-spin')).not.toBeInTheDocument();
+
+      resolveUpload({ data: versionedDoc });
+      await waitFor(() => expect(uploadButtons[0].querySelector('.animate-spin')).not.toBeInTheDocument());
+    });
+
     it('rejects a non-PDF file for a new version', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });

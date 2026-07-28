@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
@@ -100,6 +100,42 @@ describe('ContractImportDialog', () => {
     await waitFor(() => expect(contractsService.importExcel).toHaveBeenCalledWith(xlsxFile));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('2 contratti importati con successo!'));
     expect(screen.getByText(/2 righe lette/i)).toBeInTheDocument();
+  });
+
+  it('uses singular wording when exactly one contract is imported', async () => {
+    (contractsService.importExcel as jest.Mock).mockResolvedValueOnce({
+      totalRows: 1, importedCount: 1, errorCount: 0, errors: [],
+    });
+    render(<ContractImportDialog open={true} onOpenChange={onOpenChange} />, { wrapper: createWrapper() });
+    await selectFile(screen.getByLabelText(/file excel/i), xlsxFile);
+    await userEvent.click(screen.getByRole('button', { name: /importa$/i }));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('1 contratto importato con successo!'));
+  });
+
+  it('disables Importa again when the file selection is cleared', async () => {
+    render(<ContractImportDialog open={true} onOpenChange={onOpenChange} />, { wrapper: createWrapper() });
+    const input = screen.getByLabelText(/file excel/i);
+    await selectFile(input, xlsxFile);
+    expect(screen.getByRole('button', { name: /importa$/i })).toBeEnabled();
+
+    fireEvent.change(input, { target: { files: [] } });
+
+    expect(screen.getByRole('button', { name: /importa$/i })).toBeDisabled();
+  });
+
+  it('shows "Importazione..." on the button while the import is pending', async () => {
+    let resolveImport!: (value: { totalRows: number; importedCount: number; errorCount: number; errors: never[] }) => void;
+    (contractsService.importExcel as jest.Mock).mockReturnValueOnce(
+      new Promise((resolve) => { resolveImport = resolve; })
+    );
+    render(<ContractImportDialog open={true} onOpenChange={onOpenChange} />, { wrapper: createWrapper() });
+    await selectFile(screen.getByLabelText(/file excel/i), xlsxFile);
+    await userEvent.click(screen.getByRole('button', { name: /importa$/i }));
+
+    expect(await screen.findByRole('button', { name: /importazione\.\.\./i })).toBeInTheDocument();
+
+    resolveImport({ totalRows: 1, importedCount: 1, errorCount: 0, errors: [] });
+    expect(await screen.findByRole('button', { name: /^importa$/i })).toBeInTheDocument();
   });
 
   it('shows per-row errors and a warning toast when some rows fail', async () => {

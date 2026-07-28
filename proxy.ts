@@ -26,6 +26,8 @@ const API_ORIGIN = apiOrigin();
 // don't use eval() for this, so this only relaxes the policy in dev.
 const IS_DEV = process.env.NODE_ENV === "development";
 
+const CONNECT_SRC = API_ORIGIN ? `connect-src 'self' ${API_ORIGIN}` : "connect-src 'self'";
+
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
 
@@ -35,7 +37,7 @@ export function proxy(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "font-src 'self'",
-    `connect-src 'self'${API_ORIGIN ? ` ${API_ORIGIN}` : ""}`,
+    CONNECT_SRC,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

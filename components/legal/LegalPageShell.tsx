@@ -25,6 +25,7 @@ export function LegalPageShell({ title, lastUpdated, children }: LegalPageShellP
           </Link>
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={toggle}
               className="p-2 rounded-lg hover:bg-accent transition-colors"
               aria-label={isDark ? "Passa alla modalità chiara" : "Passa alla modalità scura"}

@@ -41,6 +41,7 @@ export function LandingNav() {
 
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={toggle}
             className="p-2 rounded-lg hover:bg-accent transition-colors"
             aria-label={isDark ? "Passa alla modalità chiara" : "Passa alla modalità scura"}
@@ -69,6 +70,7 @@ export function LandingNav() {
 
           {/* Mobile menu toggle */}
           <button
+            type="button"
             className="md:hidden p-2 rounded-lg hover:bg-accent"
             onClick={() => setMenuOpen((o) => !o)}
             aria-label={menuOpen ? "Chiudi menu" : "Apri menu"}

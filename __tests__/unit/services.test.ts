@@ -19,6 +19,7 @@ import { financialValuesService } from '@/services/financialValues.service';
 import { managersService } from '@/services/managers.service';
 import { usersService } from '@/services/users.service';
 import { contractsService } from '@/services/contracts.service';
+import { contractWorkflowService } from '@/services/contractWorkflow.service';
 import { dashboardService } from '@/services/dashboard.service';
 import { rolesService } from '@/services/roles.service';
 import { contractTemplatesService } from '@/services/contractTemplates.service';
@@ -359,6 +360,60 @@ describe('contractsService', () => {
     const result = await contractsService.getTopManagers();
     expect(mockGet).toHaveBeenCalledWith('/contracts/stats/top-managers');
     expect(result).toEqual(data);
+  });
+
+  it('downloadImportTemplate() calls GET /contracts/import/template with blob responseType', async () => {
+    const blob = new Blob(['data']);
+    mockGet.mockResolvedValue({ data: blob });
+    const result = await contractsService.downloadImportTemplate();
+    expect(mockGet).toHaveBeenCalledWith('/contracts/import/template', { responseType: 'blob' });
+    expect(result).toBe(blob);
+  });
+
+  it('importExcel() calls POST /contracts/import/excel with a multipart form', async () => {
+    const result = { imported: 3, errors: [] };
+    mockPost.mockResolvedValue({ data: result });
+    const file = new File(['content'], 'contracts.xlsx');
+    const returned = await contractsService.importExcel(file);
+    expect(mockPost).toHaveBeenCalledWith(
+      '/contracts/import/excel',
+      expect.any(FormData),
+      { headers: { 'Content-Type': 'multipart/form-data' } },
+    );
+    expect(returned).toEqual(result);
+  });
+});
+
+// ─── contractWorkflowService ─────────────────────────────────────────────────
+
+describe('contractWorkflowService', () => {
+  it('submit() calls POST /contracts/:id/workflow/submit', async () => {
+    mockPost.mockResolvedValue({});
+    await contractWorkflowService.submit(1);
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/workflow/submit');
+  });
+
+  it('approve() calls POST /contracts/:id/workflow/approve', async () => {
+    mockPost.mockResolvedValue({});
+    await contractWorkflowService.approve(1);
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/workflow/approve');
+  });
+
+  it('reject() calls POST /contracts/:id/workflow/reject with a comment', async () => {
+    mockPost.mockResolvedValue({});
+    await contractWorkflowService.reject(1, 'Missing signature');
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/workflow/reject', { comment: 'Missing signature' });
+  });
+
+  it('getEvents() calls GET /contracts/:id/workflow/events and returns the events', async () => {
+    const events = [{
+      id: 1, fromStage: null, toStage: 'IN_REVIEW' as const, action: 'SUBMIT' as const,
+      actorUsername: 'user1', comment: null, createdAt: '2025-01-01',
+    }];
+    mockGet.mockResolvedValue({ data: events });
+    const result = await contractWorkflowService.getEvents(1);
+    expect(mockGet).toHaveBeenCalledWith('/contracts/1/workflow/events');
+    expect(result).toEqual(events);
   });
 });
 

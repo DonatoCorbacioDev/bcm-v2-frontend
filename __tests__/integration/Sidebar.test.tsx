@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
@@ -33,6 +33,7 @@ jest.mock('@/hooks/useAuth', () => ({
 import { usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
+import api from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -126,5 +127,31 @@ describe('Sidebar', () => {
     render(<Sidebar collapsed={true} />, { wrapper: createWrapper() });
     expect(screen.queryByText('GENERALE')).not.toBeInTheDocument();
     expect(screen.queryByText('AMMINISTRAZIONE')).not.toBeInTheDocument();
+  });
+
+  it('shows the organization name and a known subscription tier label', async () => {
+    (api.get as jest.Mock).mockResolvedValue({
+      data: { id: 1, name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'PRO', iban: null, bic: null, createdAt: '2025-01-01' },
+    });
+    render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText('Acme S.r.l.')).toBeInTheDocument();
+    expect(screen.getByText('Piano Pro')).toBeInTheDocument();
+  });
+
+  it('falls back to the raw tier value when it has no known label', async () => {
+    (api.get as jest.Mock).mockResolvedValue({
+      data: { id: 1, name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'CUSTOM_TIER', iban: null, bic: null, createdAt: '2025-01-01' },
+    });
+    render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText('Piano CUSTOM_TIER')).toBeInTheDocument();
+  });
+
+  it('falls back to a placeholder name while the organization is loading', () => {
+    (api.get as jest.Mock).mockReturnValue(new Promise(() => {}));
+    render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('Organizzazione', { selector: 'p' })).toBeInTheDocument();
   });
 });

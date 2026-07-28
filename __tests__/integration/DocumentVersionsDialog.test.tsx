@@ -23,6 +23,9 @@ const v1 = {
 const v2 = {
   ...v1, id: 2, fileName: 'contract-v2.pdf', versionNumber: 2, uploadedAt: '2027-02-01T10:00:00Z',
 };
+const v3 = {
+  ...v1, id: 3, fileName: 'contract-v3.pdf', versionNumber: 3, uploadedAt: '2027-03-01T10:00:00Z',
+};
 
 const diff = {
   fromDocumentId: 1, fromFileName: 'contract.pdf', toDocumentId: 2, toFileName: 'contract-v2.pdf',
@@ -134,5 +137,32 @@ describe('DocumentVersionsDialog', () => {
     await userEvent.click(checkboxes[0]);
     await userEvent.click(checkboxes[0]);
     expect(screen.queryByText(/confronto tra versioni/i)).not.toBeInTheDocument();
+  });
+
+  it('replaces the oldest selection when a third version is checked', async () => {
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/versions')) return Promise.resolve({ data: [v3, v2, v1] });
+      return Promise.resolve({ data: diff });
+    });
+    render(
+      <DocumentVersionsDialog
+        contractId={1} documentId={1} fileName="contract.pdf"
+        open={true} onOpenChange={jest.fn()} onDownload={onDownload}
+      />,
+      { wrapper: createWrapper() }
+    );
+    await screen.findByText(/v3 · contract-v3\.pdf/);
+
+    await userEvent.click(screen.getByRole('checkbox', { name: /versione 3/i }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /versione 2/i }));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/2/diff/3'));
+
+    // Selecting a third version drops the oldest-selected (v3), keeping v2 and adding v1.
+    await userEvent.click(screen.getByRole('checkbox', { name: /versione 1/i }));
+
+    expect(screen.getByRole('checkbox', { name: /versione 1/i })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /versione 2/i })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /versione 3/i })).not.toBeChecked();
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/1/diff/2'));
   });
 });

@@ -760,6 +760,49 @@ describe('BudgetForm', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento del budget non riuscito'));
   });
 
+  const fillValidCreateForm = async () => {
+    await userEvent.click(screen.getByRole('combobox', { name: /area di business/i }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Engineering' }));
+    const yearInput = screen.getByPlaceholderText('2025');
+    await userEvent.clear(yearInput);
+    await userEvent.type(yearInput, '2025');
+    await userEvent.type(screen.getByLabelText(/obiettivo/i), '10000');
+  };
+
+  it('calls mutateAsync on successful submit in create mode', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertBudget as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+
+    await fillValidCreateForm();
+    await userEvent.click(screen.getByRole('button', { name: /^crea$/i }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ id: undefined })));
+    expect(toast.success).toHaveBeenCalledWith('Budget creato con successo!');
+  });
+
+  it('shows error toast when mutation throws in create mode', async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
+    (useUpsertBudget as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+
+    await fillValidCreateForm();
+    await userEvent.click(screen.getByRole('button', { name: /^crea$/i }));
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Creazione del budget non riuscita'));
+  });
+
+  it('shows a validation error for a year before 2000', async () => {
+    render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    const yearInput = screen.getByPlaceholderText('2025');
+    await userEvent.clear(yearInput);
+    await userEvent.type(yearInput, '1999');
+
+    await userEvent.click(screen.getByRole('button', { name: /^crea$/i }));
+
+    expect(await screen.findByText(/l'anno deve essere 2000 o successivo/i)).toBeInTheDocument();
+  });
+
   it('calls onClose when Cancel is clicked', async () => {
     render(<BudgetForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /annulla/i }));

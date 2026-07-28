@@ -22,7 +22,7 @@ export function SemanticSearchBar() {
     mutationFn: semanticSearchService.search,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!query.trim()) return;
     setExpanded(true);

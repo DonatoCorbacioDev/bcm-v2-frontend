@@ -38,7 +38,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form.username || !form.role || !form.managerId) {
       toast.error("Compila tutti i campi.");

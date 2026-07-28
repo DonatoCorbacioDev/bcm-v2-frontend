@@ -23,7 +23,7 @@ function LoginContent() {
   const resetSuccess = searchParams.get("reset") === "success";
   const inviteSuccess = searchParams.get("invite") === "success";
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const result = await login(credentials);
     if (result.success) {
@@ -33,7 +33,7 @@ function LoginContent() {
     }
   };
 
-  const handleMfaSubmit = async (e: React.FormEvent) => {
+  const handleMfaSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!mfaToken) return;
     const success = await verifyTwoFactor(mfaToken, mfaCode);

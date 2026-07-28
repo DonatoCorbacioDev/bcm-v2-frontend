@@ -68,7 +68,7 @@ export default function ProfilePage() {
   const [confirm, setConfirm] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password.length < 8) {
       toast.error("La password deve contenere almeno 8 caratteri.");

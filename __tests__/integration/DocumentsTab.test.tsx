@@ -374,6 +374,23 @@ describe('DocumentsTab', () => {
       await waitFor(() => expect(uploadButtons[0].querySelector('.animate-spin')).not.toBeInTheDocument());
     });
 
+    it('ignores a version-upload change event where files itself is nullish', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Carica nuova versione'));
+      const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
+
+      // Real <input type="file"> elements never actually expose files as
+      // null — this directly overrides the DOM property to exercise the
+      // `?.` guard written for that theoretical case anyway.
+      Object.defineProperty(input, 'files', { value: null, configurable: true });
+      fireEvent.change(input);
+
+      expect(api.post).not.toHaveBeenCalled();
+      expect(toast.error).not.toHaveBeenCalled();
+    });
+
     it('rejects a non-PDF file for a new version', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });

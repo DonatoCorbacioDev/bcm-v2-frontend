@@ -31,6 +31,46 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function ClauseRiskContent({ riskAnalysis }: { readonly riskAnalysis: ClauseRiskAnalysis }) {
+  if (riskAnalysis.error) {
+    return <p className="text-sm text-muted-foreground">{riskAnalysis.error}</p>;
+  }
+
+  if (riskAnalysis.clauses.length === 0) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <CheckCircle2 className="h-4 w-4 text-green-500" />
+        Nessuna clausola a rischio rilevata
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {riskAnalysis.clauses.map((clause, idx) => {
+        const cfg = RISK_LEVEL_CONFIG[clause.riskLevel] ?? RISK_LEVEL_CONFIG.LOW;
+        return (
+          <div
+            key={`${clause.category}-${idx}`}
+            className="rounded-lg border border-border p-3 bg-card"
+          >
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="text-sm font-medium text-foreground">
+                {clause.category}
+              </span>
+              <Badge variant={cfg.badge}>{cfg.label}</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground italic mb-1.5">
+              &ldquo;{clause.excerpt}&rdquo;
+            </p>
+            <p className="text-sm text-foreground">{clause.reasoning}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function DocumentsTab({ contractId, isAdmin, onApply }: DocumentsTabProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -448,37 +488,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       </p>
                     </div>
 
-                    {riskAnalysis.error ? (
-                      <p className="text-sm text-muted-foreground">{riskAnalysis.error}</p>
-                    ) : riskAnalysis.clauses.length === 0 ? (
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        Nessuna clausola a rischio rilevata
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {riskAnalysis.clauses.map((clause, idx) => {
-                          const cfg = RISK_LEVEL_CONFIG[clause.riskLevel] ?? RISK_LEVEL_CONFIG.LOW;
-                          return (
-                            <div
-                              key={`${clause.category}-${idx}`}
-                              className="rounded-lg border border-border p-3 bg-card"
-                            >
-                              <div className="flex items-center justify-between gap-2 mb-1.5">
-                                <span className="text-sm font-medium text-foreground">
-                                  {clause.category}
-                                </span>
-                                <Badge variant={cfg.badge}>{cfg.label}</Badge>
-                              </div>
-                              <p className="text-xs text-muted-foreground italic mb-1.5">
-                                &ldquo;{clause.excerpt}&rdquo;
-                              </p>
-                              <p className="text-sm text-foreground">{clause.reasoning}</p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <ClauseRiskContent riskAnalysis={riskAnalysis} />
                   </div>
                 )}
               </div>

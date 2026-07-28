@@ -320,6 +320,23 @@ describe('DocumentsTab', () => {
       await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/4/versions'));
     });
 
+    it('closes the version history dialog on Escape', async () => {
+      (api.get as jest.Mock).mockImplementation((url: string) => {
+        if (url.endsWith('/versions')) {
+          return Promise.resolve({ data: [versionedDoc, doc] });
+        }
+        return Promise.resolve({ data: [versionedDoc] });
+      });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Cronologia versioni')).toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Cronologia versioni'));
+      expect(await screen.findByText(/cronologia versioni/i)).toBeInTheDocument();
+
+      await userEvent.keyboard('{Escape}');
+
+      await waitFor(() => expect(screen.queryByText(/cronologia versioni/i)).not.toBeInTheDocument());
+    });
+
     it('uploads a new version and shows success toast', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: versionedDoc });
@@ -385,6 +402,26 @@ describe('DocumentsTab', () => {
       expect(await screen.findByText('Rinnovo automatico')).toBeInTheDocument();
       expect(screen.getByText(/rinnovo tacito senza preavviso/i)).toBeInTheDocument();
       expect(toast.success).toHaveBeenCalledWith('Analisi clausole completata');
+    });
+
+    it('falls back to the LOW badge for an unrecognized risk level from the API', async () => {
+      (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
+      (api.post as jest.Mock).mockResolvedValue({
+        data: {
+          clauses: [{
+            category: 'Penale',
+            excerpt: 'Penale fuori scala',
+            riskLevel: 'CRITICAL' as unknown as 'LOW',
+            reasoning: 'Valore non previsto dal contratto frontend/backend.',
+          }],
+          error: null,
+        },
+      });
+      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
+      await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
+      expect(await screen.findByText('Penale')).toBeInTheDocument();
+      expect(screen.getByText('Basso')).toBeInTheDocument();
     });
 
     it('shows a positive message when no risky clauses are found', async () => {

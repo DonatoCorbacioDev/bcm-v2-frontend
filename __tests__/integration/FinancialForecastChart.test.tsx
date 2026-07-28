@@ -190,6 +190,21 @@ describe('FinancialForecastChart', () => {
       warnSpy.mockRestore();
     });
 
+    it('does not render the band when the interval is non-finite (NaN/Infinity)', async () => {
+      const nonFiniteForecast = {
+        historical: [{ month: '2024-01', amount: 15000 }],
+        forecast: [{ month: '2024-02', amount: 12000, lower: NaN, upper: 14000 }],
+      };
+      (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
+      (api.get as jest.Mock).mockResolvedValue({ data: nonFiniteForecast });
+      render(<FinancialForecastChart />, { wrapper: createWrapper() });
+
+      expect(await screen.findByText(/previsione finanziaria/i)).toBeInTheDocument();
+      await waitFor(() => expect(api.get).toHaveBeenCalled());
+      expect(screen.queryByTestId('area-ciBase')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('area-ciRange')).not.toBeInTheDocument();
+    });
+
     it('clamps a negative lower bound to 0 and warns, but still renders the band', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
       const negativeLowerForecast = {

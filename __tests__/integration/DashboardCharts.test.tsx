@@ -99,6 +99,15 @@ describe('ContractStatsChart', () => {
     expect(screen.getAllByText('20%')).toHaveLength(2);
   });
 
+  it('distributes the rounding remainder so percentages still sum to 100 (33/33/33 case)', () => {
+    // active=1, expiring=0, expired=1, cancelled=3-1-1=1 → three equal segments of
+    // 1 each, 33.33% raw each. Flooring alone would sum to 99 (33+33+33); the
+    // largest-remainder pass bumps exactly one segment up to 34 to reach 100.
+    render(<ContractStatsChart total={3} active={1} expiring={0} expired={1} />);
+    expect(screen.getAllByText('33%')).toHaveLength(2);
+    expect(screen.getAllByText('34%')).toHaveLength(1);
+  });
+
   it('does not show a cancelled segment when active + expired already account for the total', () => {
     render(<ContractStatsChart total={5} active={3} expiring={0} expired={2} />);
     expect(screen.queryByText('Annullati')).not.toBeInTheDocument();

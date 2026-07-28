@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const PRIVACY_CONTACT_EMAIL = "donato.corbacio.dev@gmail.com";
+const PRIVACY_CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 
 /** GDPR data-subject rights: what exists today is a request channel to the
  * data controller (see docs/GDPR.md §6/§9), not self-service automation —

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Come BCM tratta i dati personali: titolare, finalità, conservazione e diritti dell'interessato.",
 };
 
-const CONTACT_EMAIL = "donato.corbacio.dev@gmail.com";
+const CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 
 export default function PrivacyPage() {
   return (

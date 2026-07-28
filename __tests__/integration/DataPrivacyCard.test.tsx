@@ -14,7 +14,7 @@ describe('DataPrivacyCard', () => {
     render(<DataPrivacyCard />);
 
     const link = screen.getByRole('link', { name: /richiedi esportazione dati/i });
-    expect(link.getAttribute('href')).toContain('mailto:donato.corbacio.dev@gmail.com');
+    expect(link.getAttribute('href')).toContain('mailto:donatocorbacio92@gmail.com');
     expect(link.getAttribute('href')).toContain(encodeURIComponent('Richiesta esportazione dati - BCM'));
   });
 
@@ -22,7 +22,7 @@ describe('DataPrivacyCard', () => {
     render(<DataPrivacyCard />);
 
     const link = screen.getByRole('link', { name: /richiedi cancellazione account/i });
-    expect(link.getAttribute('href')).toContain('mailto:donato.corbacio.dev@gmail.com');
+    expect(link.getAttribute('href')).toContain('mailto:donatocorbacio92@gmail.com');
     expect(link.getAttribute('href')).toContain(encodeURIComponent('Richiesta cancellazione account - BCM'));
   });
 });

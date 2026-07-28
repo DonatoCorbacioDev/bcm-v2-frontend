@@ -95,7 +95,7 @@ export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
           <p className="text-xs text-muted-foreground">
             Sviluppato da{" "}
             <a
-              href="mailto:donato.corbacio.dev@gmail.com"
+              href="mailto:donatocorbacio92@gmail.com"
               className="hover:text-foreground transition-colors"
             >
               Donato Corbacio

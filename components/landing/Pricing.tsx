@@ -45,7 +45,7 @@ const PLANS = [
     period: "",
     description: "Per grandi organizzazioni con esigenze specifiche.",
     cta: "Contattaci",
-    ctaHref: "mailto:donato.corbacio.dev@gmail.com",
+    ctaHref: "mailto:donatocorbacio92@gmail.com",
     ctaVariant: "outline" as const,
     highlighted: false,
     features: [

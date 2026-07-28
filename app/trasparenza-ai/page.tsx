@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Quali funzioni di intelligenza artificiale usa BCM, come funzionano e quali sono i loro limiti.",
 };
 
-const CONTACT_EMAIL = "donato.corbacio.dev@gmail.com";
+const CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 
 export default function TrasparenzaAiPage() {
   return (

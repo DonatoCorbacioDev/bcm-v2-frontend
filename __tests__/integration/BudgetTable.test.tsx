@@ -128,6 +128,18 @@ describe('BudgetTable', () => {
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
+  it('uses the amber tone when usage is between 80% and 100%', () => {
+    const nearLimitBudget: Budget = {
+      id: 3, businessAreaId: 3, areaName: 'Marketing', category: 'COST',
+      year: 2025, targetAmount: 10000, actualAmount: 8500, percentUsed: 85,
+    };
+    (useBudgets as jest.Mock).mockReturnValue({ data: [nearLimitBudget], isLoading: false, isError: false });
+    const { container } = render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('85%')).toBeInTheDocument();
+    expect(container.querySelector('.bg-\\[var\\(--status-amber-fg\\)\\]')).toBeInTheDocument();
+  });
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   it('calls onEditClick with the correct budget when Edit is clicked', async () => {

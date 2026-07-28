@@ -31,10 +31,15 @@ jest.mock('recharts', () => ({
   XAxis: ({ tickFormatter }: { tickFormatter?: (v: string) => string }) => { tickFormatter?.('2024-01'); return null; },
   YAxis: ({ tickFormatter }: { tickFormatter?: (v: number) => string }) => { tickFormatter?.(1000); return null; },
   CartesianGrid: () => null,
-  Tooltip: ({ formatter }: { formatter?: (v: number, name: string) => unknown }) => {
+  Tooltip: ({ formatter, labelFormatter }: {
+    formatter?: (v: number, name: string) => unknown;
+    labelFormatter?: (label: unknown) => unknown;
+  }) => {
     formatter?.(1000, 'historical');
     formatter?.(1000, 'forecast');
     formatter?.(1000, 'unknown');
+    labelFormatter?.('2024-01');
+    labelFormatter?.(1000);
     return null;
   },
   Legend: () => null,
@@ -142,6 +147,20 @@ describe('FinancialForecastChart', () => {
     render(<FinancialForecastChart />, { wrapper: createWrapper() });
     expect(await screen.findByText(/previsione finanziaria/i)).toBeInTheDocument();
     // No band data at all → neither stacked Area should render.
+    expect(screen.queryByTestId('area-ciBase')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('area-ciRange')).not.toBeInTheDocument();
+  });
+
+  it('renders forecast without confidence interval when only lower is present (upper missing)', async () => {
+    const onlyLowerForecast = {
+      historical: [{ month: '2024-01', amount: 15000 }],
+      forecast:   [{ month: '2024-04', amount: 16000, lower: 14000 }], // no upper
+    };
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
+    (api.get as jest.Mock).mockResolvedValue({ data: onlyLowerForecast });
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+    expect(await screen.findByText(/previsione finanziaria/i)).toBeInTheDocument();
+    await waitFor(() => expect(api.get).toHaveBeenCalled());
     expect(screen.queryByTestId('area-ciBase')).not.toBeInTheDocument();
     expect(screen.queryByTestId('area-ciRange')).not.toBeInTheDocument();
   });

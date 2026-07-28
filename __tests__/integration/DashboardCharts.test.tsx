@@ -41,9 +41,17 @@ jest.mock('recharts', () => ({
   },
   YAxis: () => null,
   CartesianGrid: () => null,
-  // Call formatter to cover the inline arrow functions in each chart's Tooltip
-  Tooltip: ({ formatter }: { formatter?: (v: number) => unknown }) => {
+  // Call formatter/labelFormatter to cover the inline arrow functions in each
+  // chart's Tooltip — including labelFormatter's non-string branch, which
+  // Recharts itself never actually hits for a category axis but which the
+  // real component still guards against defensively.
+  Tooltip: ({ formatter, labelFormatter }: {
+    formatter?: (v: number) => unknown;
+    labelFormatter?: (label: unknown) => unknown;
+  }) => {
     formatter?.(42);
+    labelFormatter?.('2025-06');
+    labelFormatter?.(42);
     return null;
   },
   Legend: () => null,

@@ -28,6 +28,7 @@ const config = {
     "hooks/**/*.ts",
     "services/**/*.ts",
     "store/**/*.ts",
+    "proxy.ts",
     "!**/*.d.ts",
   ],
 };

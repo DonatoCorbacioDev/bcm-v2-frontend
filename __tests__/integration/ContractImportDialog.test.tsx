@@ -123,6 +123,21 @@ describe('ContractImportDialog', () => {
     expect(screen.getByRole('button', { name: /importa$/i })).toBeDisabled();
   });
 
+  it('handles a change event where files itself is nullish (defensive optional chaining)', async () => {
+    render(<ContractImportDialog open={true} onOpenChange={onOpenChange} />, { wrapper: createWrapper() });
+    const input = screen.getByLabelText(/file excel/i);
+    await selectFile(input, xlsxFile);
+    expect(screen.getByRole('button', { name: /importa$/i })).toBeEnabled();
+
+    // Real <input type="file"> elements never actually expose files as null —
+    // this directly overrides the DOM property to exercise the `?.` guard
+    // written for that theoretical case anyway.
+    Object.defineProperty(input, 'files', { value: null, configurable: true });
+    fireEvent.change(input);
+
+    expect(screen.getByRole('button', { name: /importa$/i })).toBeDisabled();
+  });
+
   it('shows "Importazione..." on the button while the import is pending', async () => {
     let resolveImport!: (value: { totalRows: number; importedCount: number; errorCount: number; errors: never[] }) => void;
     (contractsService.importExcel as jest.Mock).mockReturnValueOnce(

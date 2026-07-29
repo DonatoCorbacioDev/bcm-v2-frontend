@@ -395,7 +395,7 @@ describe('ContractTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Contratto eliminato con successo!');
+      expect(toast.success).toHaveBeenCalledWith('Contratto eliminato');
     });
   });
 
@@ -618,7 +618,7 @@ describe('ContractTable', () => {
     await waitFor(() => {
       expect(contractsService.delete).toHaveBeenCalledWith(1);
       expect(contractsService.delete).toHaveBeenCalledWith(2);
-      expect(toast.success).toHaveBeenCalledWith('2 contratti eliminati con successo!');
+      expect(toast.success).toHaveBeenCalledWith('2 contratti eliminati');
     });
   });
 
@@ -653,7 +653,7 @@ describe('ContractTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('1 contratto eliminato con successo!');
+      expect(toast.success).toHaveBeenCalledWith('1 contratto eliminato');
     });
   });
 

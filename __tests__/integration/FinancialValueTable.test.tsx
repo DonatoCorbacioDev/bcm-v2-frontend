@@ -202,7 +202,7 @@ describe('FinancialValueTable', () => {
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Valore finanziario eliminato con successo!');
+      expect(toast.success).toHaveBeenCalledWith('Valore finanziario eliminato');
     });
   });
 

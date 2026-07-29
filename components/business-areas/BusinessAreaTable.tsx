@@ -74,7 +74,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.businessAreas });
-      toast.success("Area di business eliminata con successo!");
+      toast.success("Area di business eliminata");
       setDeleteDialog({ open: false, businessArea: null });
     },
     onError: () => {
@@ -108,7 +108,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   if (businessAreas.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nessuna area di business trovata. Creane una!
+        Nessuna area di business trovata
       </div>
     );
   }

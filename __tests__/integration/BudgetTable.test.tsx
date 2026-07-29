@@ -176,7 +176,7 @@ describe('BudgetTable', () => {
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Budget eliminato con successo!');
+      expect(toast.success).toHaveBeenCalledWith('Budget eliminato');
     });
   });
 

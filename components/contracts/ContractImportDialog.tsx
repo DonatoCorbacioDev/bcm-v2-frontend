@@ -52,7 +52,7 @@ export default function ContractImportDialog({ open, onOpenChange }: ContractImp
         queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
       }
       if (data.errorCount === 0) {
-        toast.success(`${data.importedCount} contratt${data.importedCount === 1 ? "o" : "i"} importat${data.importedCount === 1 ? "o" : "i"} con successo!`);
+        toast.success(`${data.importedCount} contratt${data.importedCount === 1 ? "o" : "i"} importat${data.importedCount === 1 ? "o" : "i"}`);
       } else if (data.importedCount === 0) {
         toast.error("Nessun contratto importato: controlla gli errori");
       } else {

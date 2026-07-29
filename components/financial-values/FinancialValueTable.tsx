@@ -95,7 +95,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: financialValuesQueryKeys.all });
-      toast.success("Valore finanziario eliminato con successo!");
+      toast.success("Valore finanziario eliminato");
       setDeleteDialog({ open: false, financialValue: null });
     },
     onError: () => {
@@ -137,7 +137,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
   if (financialValues.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nessun valore finanziario trovato. Creane uno!
+        Nessun valore finanziario trovato
       </div>
     );
   }

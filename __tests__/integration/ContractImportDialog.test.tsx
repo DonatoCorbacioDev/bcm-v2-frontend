@@ -98,7 +98,7 @@ describe('ContractImportDialog', () => {
     await selectFile(screen.getByLabelText(/file excel/i), xlsxFile);
     await userEvent.click(screen.getByRole('button', { name: /importa$/i }));
     await waitFor(() => expect(contractsService.importExcel).toHaveBeenCalledWith(xlsxFile));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('2 contratti importati con successo!'));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('2 contratti importati'));
     expect(screen.getByText(/2 righe lette/i)).toBeInTheDocument();
   });
 
@@ -109,7 +109,7 @@ describe('ContractImportDialog', () => {
     render(<ContractImportDialog open={true} onOpenChange={onOpenChange} />, { wrapper: createWrapper() });
     await selectFile(screen.getByLabelText(/file excel/i), xlsxFile);
     await userEvent.click(screen.getByRole('button', { name: /importa$/i }));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('1 contratto importato con successo!'));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('1 contratto importato'));
   });
 
   it('disables Importa again when the file selection is cleared', async () => {

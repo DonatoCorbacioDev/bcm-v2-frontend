@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Check, Building2, Users, PartyPopper, LayoutDashboard } from "lucide-react";
+import { Check, Building2, Users, CheckCircle2, LayoutDashboard } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useUpsertBusinessArea } from "@/hooks/useUpsertBusinessArea";
 import { useUpsertManager } from "@/hooks/useUpsertManager";
@@ -127,7 +127,7 @@ function WelcomeStep({ onNext }: { readonly onNext: () => void }) {
         </div>
       </div>
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Benvenuto in BCM!</h2>
+        <h2 className="text-xl font-semibold">Benvenuto in BCM</h2>
         <p className="text-muted-foreground">
           Prima di iniziare, creiamo insieme le fondamenta della tua organizzazione:
           un&apos;area di business e il primo responsabile contratti.
@@ -422,11 +422,11 @@ function DoneStep() {
     <Card className="p-8 text-center space-y-6">
       <div className="flex justify-center">
         <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-          <PartyPopper className="w-8 h-8 text-green-600 dark:text-green-400" aria-hidden="true" />
+          <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" aria-hidden="true" />
         </div>
       </div>
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Tutto pronto!</h2>
+        <h2 className="text-xl font-semibold">Configurazione completata</h2>
         <p className="text-muted-foreground">
           La tua organizzazione è configurata. Puoi ora creare il tuo primo contratto.
         </p>

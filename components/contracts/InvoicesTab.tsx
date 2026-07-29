@@ -100,7 +100,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
-      toast.success("Fattura caricata con successo");
+      toast.success("Fattura caricata");
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
@@ -148,7 +148,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       queryClient.invalidateQueries({ queryKey: ["sepa-payments", contractId] });
       setSelectedIds([]);
-      toast.success("Pagamento SEPA generato con successo");
+      toast.success("Pagamento SEPA generato");
     },
     onError: () => toast.error("Generazione del pagamento SEPA non riuscita"),
   });

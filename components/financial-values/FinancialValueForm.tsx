@@ -78,13 +78,13 @@ export default function FinancialValueForm({
           id: financialValue.id,
           payload: data,
         });
-        toast.success("Valore finanziario aggiornato con successo!");
+        toast.success("Valore finanziario aggiornato");
       } else {
         await upsertMutation.mutateAsync({
           mode: "create",
           payload: data,
         });
-        toast.success("Valore finanziario creato con successo!");
+        toast.success("Valore finanziario creato");
       }
 
       /* istanbul ignore next */

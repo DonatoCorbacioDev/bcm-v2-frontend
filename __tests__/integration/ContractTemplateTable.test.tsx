@@ -194,7 +194,7 @@ describe('ContractTemplateTable', () => {
     const confirmBtn = within(dialog).getByRole('button', { name: /^elimina$/i });
     await userEvent.click(confirmBtn);
     await waitFor(() => expect(contractTemplatesService.delete).toHaveBeenCalledWith(template1.id));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template eliminato con successo!'));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template eliminato'));
   });
 
   it('shows error toast when delete fails', async () => {

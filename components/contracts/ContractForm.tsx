@@ -83,13 +83,13 @@ export default function ContractForm({
           id: contract.id,
           payload: data,
         });
-        toast.success("Contratto aggiornato con successo!");
+        toast.success("Contratto aggiornato");
       } else {
         await upsertMutation.mutateAsync({
           mode: "create",
           payload: data,
         });
-        toast.success("Contratto creato con successo!");
+        toast.success("Contratto creato");
       }
 
       /* istanbul ignore next */

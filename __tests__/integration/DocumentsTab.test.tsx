@@ -116,7 +116,7 @@ describe('DocumentsTab', () => {
     const file = new File(['%PDF-1.4'], 'valid.pdf', { type: 'application/pdf' });
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(api.post).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Documento caricato con successo');
+    expect(toast.success).toHaveBeenCalledWith('Documento caricato');
   });
 
   it('shows analysis results after clicking analyze button', async () => {
@@ -351,7 +351,7 @@ describe('DocumentsTab', () => {
         expect.any(FormData),
         expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } })
       ));
-      expect(toast.success).toHaveBeenCalledWith('Nuova versione caricata con successo');
+      expect(toast.success).toHaveBeenCalledWith('Nuova versione caricata');
     });
 
     it('only shows the spinner on the document the version upload is pending for', async () => {

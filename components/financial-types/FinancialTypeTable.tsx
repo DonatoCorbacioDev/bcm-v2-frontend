@@ -58,7 +58,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
     mutationFn: (id: number) => financialTypesService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.financialTypes });
-      toast.success("Tipo finanziario eliminato con successo!");
+      toast.success("Tipo finanziario eliminato");
       setDeleteDialog({ open: false, financialType: null });
     },
     onError: () => {
@@ -79,7 +79,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
   if (financialTypes.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nessun tipo finanziario trovato. Creane uno!
+        Nessun tipo finanziario trovato
       </div>
     );
   }

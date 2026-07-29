@@ -121,7 +121,7 @@ describe('ContractTemplateForm', () => {
     const callArg = mockMutateAsync.mock.calls[0][0];
     expect(callArg.mode).toBe('create');
     expect(callArg.payload.name).toBe('Nuovo Template');
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template creato con successo!'));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template creato'));
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
@@ -134,7 +134,7 @@ describe('ContractTemplateForm', () => {
     const callArg = mockMutateAsync.mock.calls[0][0];
     expect(callArg.mode).toBe('update');
     expect(callArg.id).toBe(5);
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template aggiornato con successo!'));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template aggiornato'));
   });
 
   it('shows validation errors for description, duration and notification days', async () => {

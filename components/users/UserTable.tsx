@@ -108,7 +108,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
-      toast.success("Utente eliminato con successo!");
+      toast.success("Utente eliminato");
       setDeleteDialog({ open: false, user: null });
     },
     onError: () => {
@@ -142,7 +142,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   if (users.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nessun utente trovato. Creane uno!
+        Nessun utente trovato
       </div>
     );
   }

@@ -62,7 +62,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
     mutationFn: (id: number) => budgetsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.budgets });
-      toast.success("Budget eliminato con successo!");
+      toast.success("Budget eliminato");
       setDeleteDialog({ open: false, budget: null });
     },
     onError: () => {
@@ -83,7 +83,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
   if (budgets.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nessun budget trovato. Creane uno!
+        Nessun budget trovato
       </div>
     );
   }

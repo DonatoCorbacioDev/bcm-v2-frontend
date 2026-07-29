@@ -130,7 +130,7 @@ export default function ContractDetailPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contractsQueryKeys.all });
-      toast.success("Contratto eliminato con successo!");
+      toast.success("Contratto eliminato");
       router.push("/contracts");
     },
     onError: () => {

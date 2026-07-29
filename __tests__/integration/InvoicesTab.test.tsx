@@ -229,7 +229,7 @@ describe('InvoicesTab', () => {
       expect.any(FormData),
       expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } }),
     ));
-    expect(toast.success).toHaveBeenCalledWith('Fattura caricata con successo');
+    expect(toast.success).toHaveBeenCalledWith('Fattura caricata');
   });
 
   it('shows error toast when upload fails', async () => {
@@ -425,7 +425,7 @@ describe('InvoicesTab', () => {
         expect.objectContaining({ responseType: 'blob' }),
       ),
     );
-    expect(toast.success).toHaveBeenCalledWith('Pagamento SEPA generato con successo');
+    expect(toast.success).toHaveBeenCalledWith('Pagamento SEPA generato');
   });
 
   it('shows error toast when SEPA generation fails', async () => {

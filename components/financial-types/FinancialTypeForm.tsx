@@ -42,7 +42,7 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
   const onSubmit = async (data: FinancialTypeFormData) => {
     try {
       await upsertMutation.mutateAsync({ id: financialType?.id, payload: data });
-      toast.success(isEditing ? "Tipo finanziario aggiornato con successo!" : "Tipo finanziario creato con successo!");
+      toast.success(isEditing ? "Tipo finanziario aggiornato" : "Tipo finanziario creato");
       onSuccess();
       onClose();
     } catch (error) {

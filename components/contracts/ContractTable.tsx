@@ -273,7 +273,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
     mutationFn: (id: number) => contractsService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
-      toast.success("Contratto eliminato con successo!");
+      toast.success("Contratto eliminato");
       setDeleteDialog({ open: false, contract: null });
     },
     onError: () => {
@@ -305,7 +305,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
     setSelectedIds(new Set());
 
     if (failed === 0) {
-      toast.success(`${succeeded} contratt${succeeded === 1 ? "o" : "i"} eliminat${succeeded === 1 ? "o" : "i"} con successo!`);
+      toast.success(`${succeeded} contratt${succeeded === 1 ? "o" : "i"} eliminat${succeeded === 1 ? "o" : "i"}`);
     } else if (succeeded === 0) {
       toast.error("Eliminazione dei contratti selezionati non riuscita");
     } else {

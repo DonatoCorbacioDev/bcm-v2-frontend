@@ -208,7 +208,7 @@ describe('ManagerTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Manager eliminato con successo!');
+      expect(toast.success).toHaveBeenCalledWith('Manager eliminato');
     });
   });
 

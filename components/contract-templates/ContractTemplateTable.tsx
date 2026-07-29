@@ -83,7 +83,7 @@ export default function ContractTemplateTable({ onEditClick }: ContractTemplateT
     mutationFn: (id: number) => contractTemplatesService.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contractTemplatesQueryKeys.list() });
-      toast.success("Template eliminato con successo!");
+      toast.success("Template eliminato");
       setDeleteDialog({ open: false, template: null });
     },
     onError: () => {

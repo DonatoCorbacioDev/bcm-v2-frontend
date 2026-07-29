@@ -55,7 +55,7 @@ export default function ContractsPage() {
       link.click();
       link.remove();
       globalThis.URL.revokeObjectURL(url);
-      toast.success("Excel esportato con successo!");
+      toast.success("Excel esportato");
     } catch (error) {
       toast.error("Esportazione del file Excel non riuscita");
       console.error("Export Excel error:", error);
@@ -76,7 +76,7 @@ export default function ContractsPage() {
       link.click();
       link.remove();
       globalThis.URL.revokeObjectURL(url);
-      toast.success("PDF esportato con successo!");
+      toast.success("PDF esportato");
     } catch (error) {
       toast.error("Esportazione del file PDF non riuscita");
       console.error("Export PDF error:", error);

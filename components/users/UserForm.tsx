@@ -78,8 +78,8 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
 
       /* istanbul ignore next */
       const message = isEditing
-        ? "Utente aggiornato con successo!"
-        : "Utente creato con successo!";
+        ? "Utente aggiornato"
+        : "Utente creato";
 
       toast.success(message);
       onSuccess();

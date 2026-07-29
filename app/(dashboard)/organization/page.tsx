@@ -56,7 +56,7 @@ export default function OrganizationPage() {
     mutationFn: organizationService.update,
     onSuccess: (updated) => {
       queryClient.setQueryData(["organization", "me"], updated);
-      toast.success("Dati bancari aggiornati con successo");
+      toast.success("Dati bancari aggiornati");
       reset({ iban: updated.iban ?? "", bic: updated.bic ?? "" });
     },
     onError: () => toast.error("Aggiornamento dei dati bancari non riuscito"),

@@ -52,13 +52,13 @@ export default function ManagerForm({
           id: manager.id,
           payload: data,
         });
-        toast.success("Manager aggiornato con successo!");
+        toast.success("Manager aggiornato");
       } else {
         await upsertMutation.mutateAsync({
           mode: "create",
           payload: data,
         });
-        toast.success("Manager creato con successo!");
+        toast.success("Manager creato");
       }
 
       onSuccess?.();

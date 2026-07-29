@@ -128,7 +128,7 @@ describe('OnboardingWizard', () => {
         payload: expect.objectContaining({ firstName: 'Marco', lastName: 'Rossi' }),
       });
     });
-    expect(screen.getByText(/tutto pronto/i)).toBeInTheDocument();
+    expect(screen.getByText(/configurazione completata/i)).toBeInTheDocument();
   });
 
   it('Done step renders both "Vai alla dashboard" and "Crea primo contratto" buttons', async () => {

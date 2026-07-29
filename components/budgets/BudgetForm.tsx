@@ -57,7 +57,7 @@ export default function BudgetForm({ onClose, onSuccess, budget }: BudgetFormPro
   const onSubmit = async (data: BudgetFormData) => {
     try {
       await upsertMutation.mutateAsync({ id: budget?.id, payload: data });
-      toast.success(isEditing ? "Budget aggiornato con successo!" : "Budget creato con successo!");
+      toast.success(isEditing ? "Budget aggiornato" : "Budget creato");
       onSuccess();
       onClose();
     } catch (error) {

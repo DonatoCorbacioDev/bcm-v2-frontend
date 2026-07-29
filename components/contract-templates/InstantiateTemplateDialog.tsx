@@ -69,7 +69,7 @@ export default function InstantiateTemplateDialog({
       }),
     onSuccess: async (contract) => {
       await qc.invalidateQueries({ queryKey: contractsQueryKeys.list() });
-      toast.success("Contratto creato con successo!", {
+      toast.success("Contratto creato", {
         action: {
           label: "Visualizza",
           onClick: () => router.push(`/contracts/${contract.id}`),

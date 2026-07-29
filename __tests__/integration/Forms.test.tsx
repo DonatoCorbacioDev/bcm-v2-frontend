@@ -155,7 +155,7 @@ describe('BusinessAreaForm', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Area di business aggiornata con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Area di business aggiornata');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
@@ -195,7 +195,7 @@ describe('BusinessAreaForm', () => {
     await userEvent.type(screen.getByPlaceholderText(/descrivi l.area di business/i), 'Sales department handles revenue');
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Area di business creata con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Area di business creata');
   });
 });
 
@@ -232,7 +232,7 @@ describe('FinancialTypeForm', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Tipo finanziario aggiornato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Tipo finanziario aggiornato');
   });
 
   it('calls create on submit in create mode', async () => {
@@ -243,7 +243,7 @@ describe('FinancialTypeForm', () => {
     await userEvent.type(screen.getByPlaceholderText(/descrivi questo tipo finanziario/i), 'Cost type description here');
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Tipo finanziario creato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Tipo finanziario creato');
   });
 
   it('shows error toast when mutation throws', async () => {
@@ -310,7 +310,7 @@ describe('ManagerForm', () => {
     render(<ManagerForm onClose={onClose} onSuccess={onSuccess} manager={validManager} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /aggiorna manager/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
-    expect(toast.success).toHaveBeenCalledWith('Manager aggiornato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Manager aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
@@ -326,7 +326,7 @@ describe('ManagerForm', () => {
     await userEvent.type(screen.getByPlaceholderText(/vendite, it, risorse umane/i), 'IT');
     await userEvent.click(screen.getByRole('button', { name: /crea manager/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'create' })));
-    expect(toast.success).toHaveBeenCalledWith('Manager creato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Manager creato');
   });
 
   it('shows error toast when mutation throws in update mode', async () => {
@@ -423,7 +423,7 @@ describe('InviteUserForm', () => {
 
     await userEvent.click(screen.getByRole('button', { name: /invia invito/i }));
     await waitFor(() => expect(usersService.invite).toHaveBeenCalled());
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Invito inviato con successo!'));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Invito inviato'));
   });
 
   it('shows error toast when invitation fails', async () => {
@@ -481,7 +481,7 @@ describe('UserForm', () => {
     render(<UserForm onClose={onClose} onSuccess={onSuccess} user={validUser} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Utente aggiornato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Utente aggiornato');
   });
 
   it('shows error toast when mutation throws in edit mode', async () => {
@@ -592,7 +592,7 @@ describe('ContractForm', () => {
     render(<ContractForm onClose={onClose} onSuccess={onSuccess} contract={validContract} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
-    expect(toast.success).toHaveBeenCalledWith('Contratto aggiornato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Contratto aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
@@ -666,7 +666,7 @@ describe('FinancialValueForm', () => {
     render(<FinancialValueForm onClose={onClose} onSuccess={onSuccess} financialValue={validFV} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /^aggiorna$/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
-    expect(toast.success).toHaveBeenCalledWith('Valore finanziario aggiornato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Valore finanziario aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
@@ -749,7 +749,7 @@ describe('BudgetForm', () => {
     render(<BudgetForm onClose={onClose} onSuccess={onSuccess} budget={validBudget} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /^aggiorna$/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Budget aggiornato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Budget aggiornato');
   });
 
   it('shows error toast when mutation throws', async () => {
@@ -778,7 +778,7 @@ describe('BudgetForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /^crea$/i }));
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ id: undefined })));
-    expect(toast.success).toHaveBeenCalledWith('Budget creato con successo!');
+    expect(toast.success).toHaveBeenCalledWith('Budget creato');
   });
 
   it('shows error toast when mutation throws in create mode', async () => {

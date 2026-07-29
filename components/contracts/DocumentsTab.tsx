@@ -101,7 +101,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
-      toast.success("Documento caricato con successo");
+      toast.success("Documento caricato");
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
@@ -120,7 +120,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
       queryClient.invalidateQueries({ queryKey: ["document-versions", contractId] });
-      toast.success("Nuova versione caricata con successo");
+      toast.success("Nuova versione caricata");
       /* istanbul ignore next */
       if (versionInputRef.current) versionInputRef.current.value = "";
     },

@@ -83,10 +83,10 @@ export default function ContractTemplateForm({
     try {
       if (template) {
         await upsertMutation.mutateAsync({ mode: "update", id: template.id, payload });
-        toast.success("Template aggiornato con successo!");
+        toast.success("Template aggiornato");
       } else {
         await upsertMutation.mutateAsync({ mode: "create", payload });
-        toast.success("Template creato con successo!");
+        toast.success("Template creato");
       }
       /* istanbul ignore next */
       onSuccess?.();

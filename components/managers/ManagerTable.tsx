@@ -79,7 +79,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.managers });
-      toast.success("Manager eliminato con successo!");
+      toast.success("Manager eliminato");
       setDeleteDialog({ open: false, manager: null });
     },
     onError: () => {

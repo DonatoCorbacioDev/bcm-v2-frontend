@@ -199,7 +199,7 @@ describe('BusinessAreaTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Area di business eliminata con successo!');
+      expect(toast.success).toHaveBeenCalledWith('Area di business eliminata');
     });
   });
 

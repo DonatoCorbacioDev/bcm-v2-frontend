@@ -82,7 +82,7 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       await api.patch(`/users/${profile?.id ?? user?.id}`, { password });
-      toast.success("Password aggiornata con successo!");
+      toast.success("Password aggiornata");
       setPassword("");
       setConfirm("");
     } catch {

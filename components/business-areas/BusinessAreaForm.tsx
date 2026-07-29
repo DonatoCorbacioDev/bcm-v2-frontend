@@ -44,8 +44,8 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
       });
 
       const message = isEditing
-        ? "Area di business aggiornata con successo!"
-        : "Area di business creata con successo!";
+        ? "Area di business aggiornata"
+        : "Area di business creata";
 
       toast.success(message);
       onSuccess();

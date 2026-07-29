@@ -196,7 +196,7 @@ describe('InstantiateTemplateDialog', () => {
       )
     );
     await waitFor(() =>
-      expect(toast.success).toHaveBeenCalledWith('Contratto creato con successo!', expect.any(Object))
+      expect(toast.success).toHaveBeenCalledWith('Contratto creato', expect.any(Object))
     );
   });
 

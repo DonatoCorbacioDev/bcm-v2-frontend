@@ -263,7 +263,7 @@ describe('UserTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Utente eliminato con successo!');
+      expect(toast.success).toHaveBeenCalledWith('Utente eliminato');
     });
   });
 

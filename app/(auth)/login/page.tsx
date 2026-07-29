@@ -22,6 +22,7 @@ function LoginContent() {
 
   const resetSuccess = searchParams.get("reset") === "success";
   const inviteSuccess = searchParams.get("invite") === "success";
+  const isDemo = searchParams.get("demo") === "1";
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,6 +136,22 @@ function LoginContent() {
               Inserisci le credenziali per continuare
             </p>
           </div>
+
+          {/* Public demo callout */}
+          {isDemo && (
+            <div className="mb-4 rounded-lg border border-border bg-muted/60 py-3 px-3.5 text-[13px] text-foreground">
+              <p className="font-medium mb-1">Account demo pubblico</p>
+              <p className="text-muted-foreground mb-2">
+                Dati di esempio, ripristinati automaticamente ogni notte. Copia le credenziali qui
+                sotto per accedere.
+              </p>
+              <p className="font-mono text-[12px]">
+                Utente: <span className="font-semibold">demo</span>
+                <br />
+                Password: <span className="font-semibold">BcmDemo#2026</span>
+              </p>
+            </div>
+          )}
 
           {/* Success messages */}
           {resetSuccess && (

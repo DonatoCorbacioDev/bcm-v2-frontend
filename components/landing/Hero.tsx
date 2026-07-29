@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Bell, TrendingUp } from "lucide-react";
+import { ArrowRight, PlayCircle, ShieldCheck, Bell, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /** Abstract dashboard mockup — shows the app's feel without a real screenshot. */
@@ -127,6 +127,15 @@ export function Hero() {
             <p className="text-sm text-muted-foreground">
               Nessuna carta di credito richiesta · Setup in 2 minuti
             </p>
+
+            <Link
+              href="/login?demo=1"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+            >
+              <PlayCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+              Prova la demo pubblica senza registrarti
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+            </Link>
           </div>
 
           {/* Mockup */}

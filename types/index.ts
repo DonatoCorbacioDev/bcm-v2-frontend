@@ -91,6 +91,7 @@ export interface FinancialValue {
   typeName?: string;
   areaName?: string;
   customerName?: string;
+  category?: FinancialCategory;
 }
 
 export interface ContractHistory {

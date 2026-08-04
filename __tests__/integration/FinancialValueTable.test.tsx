@@ -59,6 +59,7 @@ const value1: FinancialValue = {
   typeName: 'Revenue',
   areaName: 'Engineering',
   customerName: 'Acme Corp',
+  category: 'REVENUE',
 };
 
 const value2: FinancialValue = {
@@ -72,6 +73,7 @@ const value2: FinancialValue = {
   typeName: 'Expense',
   areaName: 'Sales',
   customerName: 'Beta Inc',
+  category: 'COST',
 };
 
 // ─── Test suite ──────────────────────────────────────────────────────────────
@@ -162,6 +164,30 @@ describe('FinancialValueTable', () => {
     await userEvent.click(screen.getByRole('combobox', { name: /filtra per mese/i }));
     await userEvent.click(await screen.findByRole('option', { name: /^gennaio$/i }));
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
+  });
+
+  // ── Category filter ───────────────────────────────────────────────────────
+
+  it('shows a category badge per row', () => {
+    render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    expect(screen.getByText('Ricavo')).toBeInTheDocument();
+    expect(screen.getByText('Costo')).toBeInTheDocument();
+  });
+
+  it('filters by category', async () => {
+    render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per categoria/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^ricavi$/i }));
+    expect(screen.getByText('Gen/2024')).toBeInTheDocument();
+    expect(screen.queryByText('Giu/2024')).not.toBeInTheDocument();
+  });
+
+  // ── Year prop ─────────────────────────────────────────────────────────────
+
+  it('restricts rows and the count to the given year', () => {
+    render(<FinancialValueTable onEditClick={onEditClick} year={2023} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/nessun valore finanziario corrisponde ai filtri/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 \/ 0 valori/i)).toBeInTheDocument();
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────

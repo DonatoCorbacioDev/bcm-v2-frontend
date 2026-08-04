@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 interface KPICardProps {
   readonly title: string;
-  readonly value: number;
+  readonly value: number | string;
   readonly icon?: React.ReactNode;
   readonly variant?: "default" | "success" | "warning" | "danger";
 }

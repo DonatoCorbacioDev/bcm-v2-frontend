@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,15 +40,23 @@ const EUR_FORMATTER = new Intl.NumberFormat("it-IT", { style: "currency", curren
 
 interface FinancialValueTableProps {
   readonly onEditClick: (financialValue: FinancialValue) => void;
+  /** Restricts rows to this year. `null` (the default) shows every year. */
+  readonly year?: number | null;
 }
 
 // Search and filter logic for financial values
-function useFinancialValueFilters(financialValues: FinancialValue[]) {
+function useFinancialValueFilters(financialValues: FinancialValue[], year: number | null) {
   const [searchQuery, setSearchQuery] = useState("");
   const [monthFilter, setMonthFilter] = useState<string>("ALL");
+  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+
+  const yearScopedValues = useMemo(
+    () => (year === null ? financialValues : financialValues.filter((fv) => fv.year === year)),
+    [financialValues, year]
+  );
 
   const filteredFinancialValues = useMemo(() => {
-    return financialValues.filter((fv) => {
+    return yearScopedValues.filter((fv) => {
       // Search filter (year or amount)
       const matchesSearch =
         searchQuery === "" ||
@@ -58,20 +67,27 @@ function useFinancialValueFilters(financialValues: FinancialValue[]) {
       const matchesMonth =
         monthFilter === "ALL" || fv.month.toString() === monthFilter;
 
-      return matchesSearch && matchesMonth;
+      // Category filter (Ricavi/Costi)
+      const matchesCategory =
+        categoryFilter === "ALL" || fv.category === categoryFilter;
+
+      return matchesSearch && matchesMonth && matchesCategory;
     });
-  }, [financialValues, searchQuery, monthFilter]);
+  }, [yearScopedValues, searchQuery, monthFilter, categoryFilter]);
 
   return {
     searchQuery,
     setSearchQuery,
     monthFilter,
     setMonthFilter,
+    categoryFilter,
+    setCategoryFilter,
     filteredFinancialValues,
+    yearScopedCount: yearScopedValues.length,
   };
 }
 
-export default function FinancialValueTable({ onEditClick }: FinancialValueTableProps) {
+export default function FinancialValueTable({ onEditClick, year = null }: FinancialValueTableProps) {
   const { data: financialValues = [], isLoading, isError } = useFinancialValues();
   const queryClient = useQueryClient();
 
@@ -81,8 +97,11 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
     setSearchQuery,
     monthFilter,
     setMonthFilter,
+    categoryFilter,
+    setCategoryFilter,
     filteredFinancialValues,
-  } = useFinancialValueFilters(financialValues);
+    yearScopedCount,
+  } = useFinancialValueFilters(financialValues, year);
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
@@ -123,7 +142,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
   };
 
   if (isLoading) {
-    return <TableSkeleton rows={5} columns={6} />;
+    return <TableSkeleton rows={5} columns={7} />;
   }
 
   if (isError) {
@@ -178,13 +197,26 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
             </SelectContent>
           </Select>
 
-          {(searchQuery || monthFilter !== "ALL") && (
+          <label htmlFor="category-filter" className="text-sm text-muted-foreground hidden sm:inline">Categoria:</label>
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger id="category-filter" aria-label="Filtra per categoria" className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tutte</SelectItem>
+              <SelectItem value="REVENUE">Ricavi</SelectItem>
+              <SelectItem value="COST">Costi</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {(searchQuery || monthFilter !== "ALL" || categoryFilter !== "ALL") && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
                 setSearchQuery("");
                 setMonthFilter("ALL");
+                setCategoryFilter("ALL");
               }}
               className="hidden sm:inline-flex"
             >
@@ -194,7 +226,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
         </div>
 
         <div className="text-xs md:text-sm text-muted-foreground">
-          {filteredFinancialValues.length} / {financialValues.length} valori
+          {filteredFinancialValues.length} / {yearScopedCount} valori
         </div>
       </div>
 
@@ -212,6 +244,7 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
             <TableHeader>
               <TableRow>
                 <TableHead>Periodo</TableHead>
+                <TableHead>Categoria</TableHead>
                 <TableHead>Importo</TableHead>
                 <TableHead className="hidden md:table-cell">Cliente</TableHead>
                 <TableHead className="hidden lg:table-cell">Tipo</TableHead>
@@ -224,6 +257,16 @@ export default function FinancialValueTable({ onEditClick }: FinancialValueTable
                 <TableRow key={fv.id}>
                   <TableCell className="font-medium text-sm">
                     {getMonthName(fv.month)}/{fv.year}
+                  </TableCell>
+                  <TableCell>
+                    {fv.category ? (
+                      <Badge variant={fv.category === "REVENUE" ? "success" : "secondary"}>
+                        {fv.category === "REVENUE" ? "Ricavo" : "Costo"}
+                      </Badge>
+                    ) : (
+                      /* istanbul ignore next */
+                      <span className="text-sm text-muted-foreground">N/D</span>
+                    )}
                   </TableCell>
                   <TableCell className="font-semibold text-sm">
                     {EUR_FORMATTER.format(fv.financialAmount)}

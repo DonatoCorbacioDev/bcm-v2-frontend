@@ -56,6 +56,41 @@ function NavLink({
   );
 }
 
+function OrgSwitcherContent({
+  isAdmin,
+  orgInitials,
+  children,
+}: {
+  readonly isAdmin: boolean;
+  readonly orgInitials: string;
+  readonly children: React.ReactNode;
+}) {
+  const avatar = (
+    <span className="h-7 w-7 rounded-md bg-[var(--primary)] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+      {orgInitials}
+    </span>
+  );
+
+  if (!isAdmin) {
+    return (
+      <div className="w-full flex items-center gap-2.5 px-2 py-1.5">
+        {avatar}
+        <div className="flex-1 min-w-0 text-left">{children}</div>
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href="/organization"
+      className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[var(--muted)] transition-colors group"
+    >
+      {avatar}
+      <div className="flex-1 min-w-0 text-left">{children}</div>
+    </Link>
+  );
+}
+
 export default function Sidebar({ collapsed }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -110,24 +145,16 @@ export default function Sidebar({ collapsed }: SidebarProps) {
       {/* Org switcher */}
       {!collapsed && (
         <div className="px-3 py-2.5 border-b border-[var(--sidebar-border)] shrink-0">
-          <button
-            type="button"
-            className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[var(--muted)] transition-colors group"
-          >
-            <span className="h-7 w-7 rounded-md bg-[var(--primary)] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-              {orgInitials}
-            </span>
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-[12px] font-semibold text-foreground truncate">
-                {organization?.name ?? "Organizzazione"}
+          <OrgSwitcherContent isAdmin={isAdmin} orgInitials={orgInitials}>
+            <p className="text-[12px] font-semibold text-foreground truncate">
+              {organization?.name ?? user?.organizationName ?? "Organizzazione"}
+            </p>
+            {organization && (
+              <p className="text-[11px] text-[var(--muted-foreground)] truncate">
+                Piano {TIER_LABELS[organization.subscriptionTier] ?? organization.subscriptionTier}
               </p>
-              {organization && (
-                <p className="text-[11px] text-[var(--muted-foreground)] truncate">
-                  Piano {TIER_LABELS[organization.subscriptionTier] ?? organization.subscriptionTier}
-                </p>
-              )}
-            </div>
-          </button>
+            )}
+          </OrgSwitcherContent>
         </div>
       )}
 

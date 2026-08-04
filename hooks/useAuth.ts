@@ -24,6 +24,7 @@ interface UserProfile {
   verified: boolean;
   createdAt: string;
   canApproveContracts: boolean;
+  organizationName: string | null;
 }
 
 interface ApiError extends AxiosError<{ message?: string }> {

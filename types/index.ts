@@ -8,6 +8,7 @@ export interface User {
   verified: boolean;
   createdAt: string;
   canApproveContracts?: boolean;
+  organizationName?: string | null;
 }
 
 export interface Manager {

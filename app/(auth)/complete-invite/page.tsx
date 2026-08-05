@@ -10,7 +10,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
 
@@ -26,15 +25,19 @@ function CompleteInviteContent() {
 
   if (!token) {
     return (
-      <Card>
-        <CardHeader className="space-y-1">
-          <LogoMark className="h-12 w-12 mx-auto mb-2" />
-          <CardTitle className="text-2xl font-bold text-center">Invito non valido</CardTitle>
-          <CardDescription className="text-center">
-            Questo link di invito non è valido o è scaduto. Contatta il tuo amministratore.
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <main id="main-content" className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardHeader className="space-y-1">
+              <LogoMark className="h-12 w-12 mx-auto mb-2" />
+              <h1 className="text-2xl font-bold text-center">Invito non valido</h1>
+              <CardDescription className="text-center">
+                Questo link di invito non è valido o è scaduto. Contatta il tuo amministratore.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </main>
     );
   }
 
@@ -67,7 +70,7 @@ function CompleteInviteContent() {
       <div className="w-full max-w-md">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Benvenuto in BCM</CardTitle>
+            <h1 className="text-2xl font-bold text-center">Benvenuto in BCM</h1>
             <CardDescription className="text-center">
               Scegli una password per attivare il tuo account
             </CardDescription>

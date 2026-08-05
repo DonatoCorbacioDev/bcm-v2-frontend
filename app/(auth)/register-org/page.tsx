@@ -14,7 +14,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
 
@@ -92,9 +91,9 @@ export default function RegisterOrgPage() {
     <Card>
       <CardHeader className="space-y-1">
         <LogoMark className="h-12 w-12 mx-auto mb-2" />
-        <CardTitle className="text-2xl font-bold text-center">
+        <h1 className="text-2xl font-bold text-center">
           Registra Organizzazione
-        </CardTitle>
+        </h1>
         <CardDescription className="text-center">
           Crea la tua organizzazione e l&apos;account amministratore
         </CardDescription>
@@ -192,7 +191,7 @@ export default function RegisterOrgPage() {
 
           <div className="text-center">
             <span className="text-sm text-muted-foreground">Hai già un account? </span>
-            <Link href="/login" className="text-sm text-primary hover:underline">
+            <Link href="/login" className="text-sm text-primary hover:underline dark:text-[var(--accent-foreground)]">
               Accedi
             </Link>
           </div>

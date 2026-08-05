@@ -11,7 +11,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
 
@@ -32,13 +31,13 @@ function ResetPasswordContent() {
           <Card>
             <CardHeader className="space-y-1">
               <LogoMark className="h-12 w-12 mx-auto mb-2" />
-              <CardTitle className="text-2xl font-bold text-center">Link non valido</CardTitle>
+              <h1 className="text-2xl font-bold text-center">Link non valido</h1>
               <CardDescription className="text-center">
                 Il link per reimpostare la password non è valido o è scaduto.
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+              <Link href="/forgot-password" className="text-sm text-primary hover:underline dark:text-[var(--accent-foreground)]">
                 Richiedi un nuovo link
               </Link>
             </CardContent>
@@ -77,7 +76,7 @@ function ResetPasswordContent() {
       <div className="w-full max-w-md">
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Reimposta password</CardTitle>
+            <h1 className="text-2xl font-bold text-center">Reimposta password</h1>
             <CardDescription className="text-center">
               Inserisci la nuova password
             </CardDescription>

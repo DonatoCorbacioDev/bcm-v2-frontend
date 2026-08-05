@@ -32,6 +32,46 @@ const businessAreas = [{ id: 1, name: "Engineering", description: "Eng" }];
 const managers = [
   { id: 1, firstName: "John", lastName: "Doe", email: "john@example.com", phoneNumber: "+39 333 1234567", department: "IT" },
 ];
+const financialTypes = [
+  { id: 1, name: "Ricavi licenze", category: "REVENUE" },
+  { id: 2, name: "Costi hosting", category: "COST" },
+];
+const budgets = [
+  { id: 1, areaId: 1, areaName: "Engineering", financialTypeId: 1, financialTypeName: "Ricavi licenze", category: "REVENUE", year: 2024, targetAmount: 100000, actualAmount: 45000, percentUsed: 45 },
+];
+const financialValues = [
+  {
+    id: 1,
+    month: 3,
+    // The financial-values page defaults its year filter to the current
+    // year, so a hardcoded year would silently filter this fixture out
+    // and hide the table from axe instead of exercising it.
+    year: new Date().getFullYear(),
+    financialAmount: 15000,
+    financialTypeId: 1,
+    businessAreaId: 1,
+    contractId: 1,
+    typeName: "Ricavi licenze",
+    areaName: "Engineering",
+    customerName: "Acme Corp",
+    category: "REVENUE",
+  },
+];
+const contractTemplates = [
+  { id: 1, name: "Manutenzione IT annuale", description: "Template standard", defaultDurationMonths: 12 },
+];
+const users = [
+  { id: 1, username: "admin", role: "ADMIN", roleId: 1, verified: true, managerId: 1, managerName: "John Doe" },
+];
+const auditLogs = {
+  content: [
+    { id: 1, action: "CREATE", entityType: "Contract", entityId: 1, username: "admin", orgId: 1, timestamp: "2024-03-01T10:00:00Z", details: null },
+  ],
+  totalPages: 1,
+  totalElements: 1,
+  number: 0,
+  size: 20,
+};
 
 const sampleContract = {
   id: 1,
@@ -67,7 +107,6 @@ export async function mockApi(
     "**/api/v1/contracts/stats/by-area": [{ areaName: "Engineering", count: 7 }, { areaName: "Sales", count: 5 }],
     "**/api/v1/contracts/stats/timeline": [{ month: "2024-01", count: 3 }, { month: "2024-02", count: 5 }],
     "**/api/v1/contracts/stats/top-managers": [{ managerId: 1, managerName: "John Doe", contractsCount: 6 }],
-    "**/api/v1/financial-values": [],
     "**/api/v1/forecast*": { historical: [{ month: "2024-01", amount: 15000 }], forecast: [] },
     "**/api/v1/risk-scores*": [
       { contractId: 1, customerName: "Acme Corp", riskScore: 0.82, level: "HIGH", anomalies: ["EXPIRING_SOON"] },
@@ -122,6 +161,26 @@ export async function mockApi(
     ],
     "**/api/v1/financial-values/by-contract/1": [],
     "**/api/v1/contract-history/contract/1": [],
+    "**/api/v1/financial-types": financialTypes,
+    "**/api/v1/budgets": budgets,
+    "**/api/v1/financial-values": financialValues,
+    "**/api/v1/contract-templates": contractTemplates,
+    "**/api/v1/users": users,
+    "**/api/v1/audit-logs*": auditLogs,
+    "**/api/v1/users/me/2fa/status": { enabled: false },
+    "**/api/v1/users/me/calendar-feed": { url: "https://bcm.example.com/api/v1/calendar/abc123.ics" },
+    "**/api/v1/auth/me": {
+      id: 1,
+      username: "admin",
+      managerId: 1,
+      role: "ADMIN",
+      roleId: 1,
+      verified: true,
+      createdAt: "2024-01-01T00:00:00Z",
+      canApproveContracts: true,
+      organizationName: "Acme Corp",
+    },
+    "**/api/v1/roles": [{ id: 1, role: "ADMIN" }, { id: 2, role: "MANAGER" }],
   };
 
   for (const [pattern, body] of Object.entries(routes)) {

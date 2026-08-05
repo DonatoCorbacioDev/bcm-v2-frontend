@@ -175,7 +175,12 @@ export default function ProfilePage() {
           ) : (
             <>
               <div className="flex items-center gap-2">
-                <Input readOnly value={calendarFeedUrl ?? ""} className="font-mono text-xs" />
+                <Input
+                  readOnly
+                  value={calendarFeedUrl ?? ""}
+                  aria-label="Link del feed calendario"
+                  className="font-mono text-xs"
+                />
                 <Button variant="outline" size="sm" onClick={handleCopyFeedUrl} aria-label="Copia link">
                   <Copy className="h-4 w-4" />
                 </Button>

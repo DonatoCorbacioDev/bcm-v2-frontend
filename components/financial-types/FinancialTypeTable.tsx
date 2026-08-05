@@ -140,7 +140,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(ft)}
-                        className="text-primary hover:text-primary text-xs px-2"
+                        className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
                       >
                         Modifica
                       </Button>

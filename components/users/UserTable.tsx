@@ -243,7 +243,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                         variant="ghost"
                         size="sm"
                         onClick={() => onEditClick(user)}
-                        className="text-primary hover:text-primary text-xs px-2"
+                        className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
                       >
                         Modifica
                       </Button>

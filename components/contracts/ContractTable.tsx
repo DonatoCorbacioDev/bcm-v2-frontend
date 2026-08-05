@@ -559,7 +559,7 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => onEditClick(c)}
-                          className="text-primary hover:text-primary text-xs px-2 hidden sm:inline-flex"
+                          className="text-primary hover:text-primary text-xs px-2 hidden sm:inline-flex dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
                         >
                           Modifica
                         </Button>

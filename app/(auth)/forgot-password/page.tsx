@@ -11,7 +11,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
 
@@ -40,13 +39,13 @@ export default function ForgotPasswordPage() {
     <Card>
       <CardHeader className="space-y-1">
         <LogoMark className="h-12 w-12 mx-auto mb-2" />
-        <CardTitle className="text-2xl font-bold text-center">Controlla la tua email</CardTitle>
+        <h1 className="text-2xl font-bold text-center">Controlla la tua email</h1>
         <CardDescription className="text-center">
           Se esiste un account per <span className="font-medium">{email}</span>, abbiamo inviato un link per reimpostare la password.
         </CardDescription>
       </CardHeader>
       <CardContent className="text-center">
-        <Link href="/login" className="text-sm text-primary hover:underline">
+        <Link href="/login" className="text-sm text-primary hover:underline dark:text-[var(--accent-foreground)]">
           Torna al login
         </Link>
       </CardContent>
@@ -54,7 +53,7 @@ export default function ForgotPasswordPage() {
   ) : (
     <Card>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Password dimenticata</CardTitle>
+        <h1 className="text-2xl font-bold text-center">Password dimenticata</h1>
         <CardDescription className="text-center">
           Inserisci la tua email e ti invieremo un link per reimpostare la password
         </CardDescription>
@@ -77,7 +76,7 @@ export default function ForgotPasswordPage() {
             {isLoading ? "Invio in corso…" : "Invia link di reset"}
           </Button>
           <div className="text-center">
-            <Link href="/login" className="text-sm text-primary hover:underline">
+            <Link href="/login" className="text-sm text-primary hover:underline dark:text-[var(--accent-foreground)]">
               Torna al login
             </Link>
           </div>

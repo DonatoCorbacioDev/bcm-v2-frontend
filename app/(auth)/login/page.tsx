@@ -244,7 +244,7 @@ function LoginContent() {
                   </Label>
                   <Link
                     href="/forgot-password"
-                    className="text-[12px] text-primary hover:underline"
+                    className="text-[12px] text-primary hover:underline dark:text-[var(--accent-foreground)]"
                   >
                     Password dimenticata?
                   </Link>
@@ -306,7 +306,7 @@ function LoginContent() {
 
           <p className="mt-6 text-center text-[12px] text-muted-foreground">
             Non hai un account?{" "}
-            <Link href="/register-org" className="text-primary font-medium hover:underline">
+            <Link href="/register-org" className="text-primary font-medium hover:underline dark:text-[var(--accent-foreground)]">
               Registra la tua organizzazione
             </Link>
           </p>

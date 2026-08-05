@@ -79,7 +79,7 @@ export default function PrivacyPage() {
           </li>
         </ul>
         <p className="mt-3">Per approfondire l&apos;uso dell&apos;intelligenza artificiale, vedi la pagina{" "}
-          <Link href="/trasparenza-ai" className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary">
+          <Link href="/trasparenza-ai" className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary dark:text-[var(--accent-foreground)] dark:decoration-[var(--accent-foreground)]/40 dark:hover:decoration-[var(--accent-foreground)]">
             Trasparenza sull&apos;uso dell&apos;AI
           </Link>.
         </p>
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
           La rettifica dei tuoi dati principali è disponibile direttamente dal tuo profilo
           utente. Per richiedere l&apos;esportazione dei tuoi dati, la cancellazione
           dell&apos;account o qualsiasi altro diritto, scrivi a{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary dark:text-[var(--accent-foreground)] dark:decoration-[var(--accent-foreground)]/40 dark:hover:decoration-[var(--accent-foreground)]">
             {CONTACT_EMAIL}
           </a>{" "}
           indicando l&apos;organizzazione di appartenenza: oggi la richiesta viene gestita
@@ -137,7 +137,7 @@ export default function PrivacyPage() {
         <p>
           Per qualsiasi domanda su questa informativa o sul trattamento dei tuoi dati,
           scrivi a{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary dark:text-[var(--accent-foreground)] dark:decoration-[var(--accent-foreground)]/40 dark:hover:decoration-[var(--accent-foreground)]">
             {CONTACT_EMAIL}
           </a>.
         </p>

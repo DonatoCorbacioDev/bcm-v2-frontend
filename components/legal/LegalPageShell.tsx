@@ -49,7 +49,7 @@ export function LegalPageShell({ title, lastUpdated, children }: LegalPageShellP
 
       <main id="main-content" className="flex-1">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-14 md:py-20">
-          <p className="text-[12px] font-semibold text-primary tracking-[0.08em] uppercase mb-3">
+          <p className="text-[12px] font-semibold text-primary dark:text-[var(--accent-foreground)] tracking-[0.08em] uppercase mb-3">
             Legale &amp; conformità
           </p>
           <h1 className="text-[32px] md:text-[38px] font-bold text-foreground tracking-tight mb-2">

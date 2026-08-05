@@ -69,7 +69,7 @@ export default function TrasparenzaAiPage() {
           di documenti a servizi cloud di intelligenza artificiale di terze parti: il testo
           del contratto non lascia mai il perimetro dell&apos;organizzazione. Dettagli sul
           trattamento dei dati sono nell&apos;
-          <Link href="/privacy" className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary">
+          <Link href="/privacy" className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary dark:text-[var(--accent-foreground)] dark:decoration-[var(--accent-foreground)]/40 dark:hover:decoration-[var(--accent-foreground)]">
             informativa privacy
           </Link>.
         </p>
@@ -102,7 +102,7 @@ export default function TrasparenzaAiPage() {
         <h2>7. Domande</h2>
         <p>
           Per qualsiasi domanda su queste funzioni, scrivi a{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary">
+          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary dark:text-[var(--accent-foreground)] dark:decoration-[var(--accent-foreground)]/40 dark:hover:decoration-[var(--accent-foreground)]">
             {CONTACT_EMAIL}
           </a>.
         </p>

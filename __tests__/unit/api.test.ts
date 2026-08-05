@@ -222,4 +222,28 @@ describe('lib/api', () => {
     await expect(resErrorFn!(error)).rejects.toBe(error);
     expect(mockClearAuth).not.toHaveBeenCalled();
   });
+
+  // ── Auth endpoints where 401 is a domain error, not session expiry ────────
+
+  it.each(['/auth/login', '/auth/2fa/verify'])(
+    'response error handler on 401 from %s does not attempt refresh or redirect',
+    async (url) => {
+      loadModule('http://localhost:8080');
+      const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { url, _retry: false } };
+      await expect(resErrorFn!(error)).rejects.toBe(error);
+      expect(mockAxiosPost).not.toHaveBeenCalled();
+      expect(mockClearAuth).not.toHaveBeenCalled();
+    }
+  );
+
+  it('response error handler on 401 from an authenticated endpoint still attempts refresh', async () => {
+    const { instance } = loadModule('http://localhost:8080');
+    mockAxiosPost.mockResolvedValue({ data: { token: 'new-token' } });
+    instance.request.mockResolvedValue({ data: 'retried' });
+
+    const error = { response: { status: 401, data: null }, message: 'Unauthorized', config: { url: '/contracts', headers: {}, _retry: false } };
+    await resErrorFn!(error);
+
+    expect(mockAxiosPost).toHaveBeenCalled();
+  });
 });

@@ -65,6 +65,16 @@ function redirectToLogin() {
   }
 }
 
+// Endpoints where a 401 is a domain-level outcome (wrong password, wrong TOTP
+// code) the caller must see as-is — not a signal that the access token
+// expired, which would otherwise trigger a doomed refresh attempt (no session
+// exists yet) followed by a hard redirect that wipes in-progress login state.
+const AUTH_ENDPOINTS_WITHOUT_SESSION = ["/auth/login", "/auth/2fa/verify"];
+
+function isAuthEndpointWithoutSession(url: string | undefined): boolean {
+  return AUTH_ENDPOINTS_WITHOUT_SESSION.some((path) => url?.endsWith(path));
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError & { userMessage?: string }) => {
@@ -75,7 +85,12 @@ api.interceptors.response.use(
       throw error;
     }
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isAuthEndpointWithoutSession(originalRequest.url)
+    ) {
       return handle401(error, originalRequest);
     }
 

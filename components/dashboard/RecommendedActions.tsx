@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AlertOctagon, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useRiskScores } from "@/hooks/useRiskScores";
 import type { Contract } from "@/types";
@@ -26,7 +26,7 @@ export function RecommendedActions({ criticalRenewals }: RecommendedActionsProps
   return (
     <div className="bg-card rounded-lg border border-border p-6">
       <div className="flex items-center gap-2 mb-1">
-        <AlertOctagon className="h-5 w-5 text-destructive" aria-hidden="true" />
+        <AlertTriangle className="h-5 w-5 text-[var(--status-amber-fg)]" aria-hidden="true" />
         <h2 className="text-lg font-semibold text-foreground">Azioni consigliate</h2>
       </div>
       <p className="text-sm text-muted-foreground mb-4">Cosa richiede attenzione oggi</p>

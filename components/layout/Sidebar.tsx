@@ -132,8 +132,11 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         <LogoMark size={32} className="shrink-0" />
         {!collapsed && (
           <div className="min-w-0">
-            <p className="text-[14px] font-bold text-foreground truncate leading-tight">
-              Business Contracts Manager
+            <p
+              title="Business Contracts Manager"
+              className="text-[14px] font-bold text-foreground truncate leading-tight"
+            >
+              BCM
             </p>
             <p className="text-[11px] text-[var(--muted-foreground)] truncate leading-tight">
               Gestione contratti

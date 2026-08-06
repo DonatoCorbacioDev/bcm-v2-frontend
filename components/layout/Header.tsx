@@ -8,24 +8,27 @@ import { useDarkMode } from "@/hooks/useDarkMode";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-const PAGE_META: Record<string, { title: string; subtitle: string }> = {
-  "/dashboard":          { title: "Dashboard",             subtitle: "Panoramica generale dei contratti" },
-  "/contracts":          { title: "Contratti",             subtitle: "Gestione e ricerca contratti" },
-  "/contract-templates": { title: "Modelli di contratto",  subtitle: "Template riutilizzabili" },
-  "/financial-values":   { title: "Valori finanziari",     subtitle: "Importi e voci di costo" },
-  "/financial-types":    { title: "Tipi finanziari",       subtitle: "Configurazione voci finanziarie" },
-  "/business-areas":     { title: "Aree di business",      subtitle: "Classificazione per area" },
-  "/managers":           { title: "Responsabili",          subtitle: "Referenti dei contratti" },
-  "/users":              { title: "Utenti",                subtitle: "Gestione accessi e ruoli" },
-  "/audit-logs":         { title: "Registro attività",     subtitle: "Tracciamento operazioni" },
-  "/profile":            { title: "Profilo",               subtitle: "Impostazioni account" },
+// Single-line wayfinding label only — each page's own <h1> (rendered below,
+// scrolls out of view under this sticky header) is the source of truth for
+// the page's title and description, so this must not duplicate that text.
+const PAGE_TITLES: Record<string, string> = {
+  "/dashboard":          "Dashboard",
+  "/contracts":          "Contratti",
+  "/contract-templates": "Modelli di contratto",
+  "/financial-values":   "Valori finanziari",
+  "/financial-types":    "Tipi finanziari",
+  "/business-areas":     "Aree di business",
+  "/managers":           "Responsabili",
+  "/users":              "Utenti",
+  "/audit-logs":         "Registro attività",
+  "/profile":            "Profilo",
 };
 
-function getPageMeta(pathname: string) {
-  if (PAGE_META[pathname]) return PAGE_META[pathname];
+function getPageTitle(pathname: string) {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   // Contract detail page
-  if (pathname.startsWith("/contracts/")) return { title: "Dettaglio contratto", subtitle: "Informazioni e documenti" };
-  return { title: "Business Contracts Manager", subtitle: "" };
+  if (pathname.startsWith("/contracts/")) return "Dettaglio contratto";
+  return "Business Contracts Manager";
 }
 
 function getUserInitials(username?: string): string {
@@ -51,7 +54,7 @@ export default function Header({
   const pathname = usePathname();
   const user = useAuthStore(/* istanbul ignore next */ (state) => state.user);
   const { isDark, toggle: toggleDark } = useDarkMode();
-  const { title, subtitle } = getPageMeta(pathname);
+  const title = getPageTitle(pathname);
   const initials = getUserInitials(user?.username);
 
   return (
@@ -85,15 +88,10 @@ export default function Header({
       </button>
 
       {/* Page title — intentionally a <p>, not <h1>; the real h1 lives in each page's main content */}
-      <div className="hidden sm:flex flex-col justify-center min-w-0">
+      <div className="hidden sm:flex items-center min-w-0">
         <p className="text-[14.5px] font-semibold text-foreground leading-tight truncate">
           {title}
         </p>
-        {subtitle && (
-          <p className="text-[11.5px] text-muted-foreground leading-tight truncate">
-            {subtitle}
-          </p>
-        )}
       </div>
 
       {/* Spacer */}

@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
+import { usePasswordResetForm } from "@/hooks/usePasswordResetForm";
 import { PasswordFields } from "@/components/auth/PasswordFields";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,10 +20,14 @@ function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { password, setPassword, confirm, setConfirm, isLoading, error, handleSubmit } =
+    usePasswordResetForm({
+      onSubmit: async (newPassword) => {
+        await api.post("/auth/reset-password", { token, newPassword });
+        router.push("/login?reset=success");
+      },
+      submitErrorMessage: "Il link non è valido o è scaduto. Richiedine uno nuovo.",
+    });
 
   if (!token) {
     return (
@@ -46,30 +51,6 @@ function ResetPasswordContent() {
       </main>
     );
   }
-
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-
-    if (password.length < 8) {
-      setError("La password deve contenere almeno 8 caratteri.");
-      return;
-    }
-    if (password !== confirm) {
-      setError("Le password non coincidono.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await api.post("/auth/reset-password", { token, newPassword: password });
-      router.push("/login?reset=success");
-    } catch {
-      setError("Il link non è valido o è scaduto. Richiedine uno nuovo.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <main id="main-content" className="flex-1 flex items-center justify-center p-8">

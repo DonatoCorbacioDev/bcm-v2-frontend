@@ -110,14 +110,15 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <Button
-                asChild
-                variant={plan.ctaVariant}
-                className="w-full"
-                disabled={plan.cta === "Presto disponibile"}
-              >
-                <Link href={plan.ctaHref}>{plan.cta}</Link>
-              </Button>
+              {plan.cta === "Presto disponibile" ? (
+                <Button type="button" variant={plan.ctaVariant} className="w-full" disabled>
+                  {plan.cta}
+                </Button>
+              ) : (
+                <Button asChild variant={plan.ctaVariant} className="w-full">
+                  <Link href={plan.ctaHref}>{plan.cta}</Link>
+                </Button>
+              )}
             </div>
           ))}
         </div>

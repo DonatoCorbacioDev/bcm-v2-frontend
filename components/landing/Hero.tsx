@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, PlayCircle, ShieldCheck, Bell, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/authStore";
+import { LogoMark } from "@/components/layout/Logo";
 
 /** Abstract dashboard mockup — shows the app's feel without a real screenshot. */
 function DashboardMockup() {
@@ -8,10 +12,8 @@ function DashboardMockup() {
     <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
       {/* Fake top bar */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/40">
-        <div className="w-3 h-3 rounded-full bg-red-400" />
-        <div className="w-3 h-3 rounded-full bg-yellow-400" />
-        <div className="w-3 h-3 rounded-full bg-green-400" />
-        <span className="ml-3 text-xs text-muted-foreground font-mono">BCM — Dashboard</span>
+        <LogoMark size={16} />
+        <span className="text-xs text-muted-foreground font-mono">BCM — Dashboard</span>
       </div>
 
       <div className="p-4 space-y-4">
@@ -80,6 +82,8 @@ function DashboardMockup() {
 }
 
 export function Hero() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
   return (
     <section className="relative overflow-hidden py-20 md:py-32">
       {/* Background gradient */}
@@ -112,30 +116,43 @@ export function Hero() {
               posto.
             </p>
 
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link href="/register-org">
-                  Inizia gratis
-                  <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+            {isAuthenticated ? (
+              <div className="flex flex-wrap gap-3">
+                <Button asChild size="lg">
+                  <Link href="/dashboard">
+                    Vai alla dashboard
+                    <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-wrap gap-3">
+                  <Button asChild size="lg">
+                    <Link href="/register-org">
+                      Inizia gratis
+                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href="/login">Accedi</Link>
+                  </Button>
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  Nessuna carta di credito richiesta · Setup in 2 minuti
+                </p>
+
+                <Link
+                  href="/login?demo=1"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                >
+                  <PlayCircle className="h-4 w-4 text-primary" aria-hidden="true" />
+                  Prova la demo pubblica senza registrarti
+                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                 </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link href="/login">Accedi</Link>
-              </Button>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              Nessuna carta di credito richiesta · Setup in 2 minuti
-            </p>
-
-            <Link
-              href="/login?demo=1"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-            >
-              <PlayCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-              Prova la demo pubblica senza registrarti
-              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-            </Link>
+              </>
+            )}
           </div>
 
           {/* Mockup */}

@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
+import { useAuthStore } from "@/store/authStore";
 
 interface LandingFooterProps {
   /** The homepage's last heading before the footer is h3 (Pricing plan
@@ -12,6 +15,13 @@ interface LandingFooterProps {
 export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
   const year = new Date().getFullYear();
   const HeadingTag = headingLevel;
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const accountLinks = isAuthenticated
+    ? [{ href: "/dashboard", label: "Dashboard" }]
+    : [
+        { href: "/register-org", label: "Registrati" },
+        { href: "/login", label: "Accedi" },
+      ];
 
   return (
     <footer className="border-t border-border bg-muted/30 py-12">
@@ -50,11 +60,7 @@ export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
           <div>
             <HeadingTag className="text-sm font-semibold text-foreground mb-3">Account</HeadingTag>
             <ul className="space-y-2">
-              {[
-                { href: "/register-org", label: "Registrati" },
-                { href: "/login", label: "Accedi" },
-                { href: "/dashboard", label: "Dashboard" },
-              ].map((link) => (
+              {accountLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}

@@ -200,6 +200,25 @@ describe('ContractTable', () => {
     expect(screen.getByText('Scaduto')).toBeInTheDocument();
   });
 
+  it('shows fallback text for a contract missing WBS code or assigned manager', () => {
+    const unassignedContract: Contract = {
+      ...activeContract,
+      id: 3,
+      contractNumber: 'CNT-003',
+      wbsCode: '',
+      managerName: '',
+    };
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([unassignedContract]),
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('N/D')).toBeInTheDocument();
+    expect(screen.getByText('Non assegnato')).toBeInTheDocument();
+  });
+
   it('falls back to the raw status value when it is not a known status', () => {
     const unknownStatusContract = { ...activeContract, status: 'ON_HOLD' as Contract['status'] };
     (useContractsPaged as jest.Mock).mockReturnValue({

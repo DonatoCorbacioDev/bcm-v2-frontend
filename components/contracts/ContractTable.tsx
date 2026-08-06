@@ -530,8 +530,8 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
                 </TableCell>
                 <TableCell className="text-sm">{c.customerName}</TableCell>
                 <TableCell className="hidden md:table-cell text-sm">{c.projectName}</TableCell>
-                <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode}</TableCell>
-                <TableCell className="hidden lg:table-cell text-sm">{c.managerName}</TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode || "N/D"}</TableCell>
+                <TableCell className="hidden lg:table-cell text-sm">{c.managerName || "Non assegnato"}</TableCell>
                 <TableCell>
                   <Badge variant={getContractStatusVariant(c.status)} className="text-xs">
                     {CONTRACT_STATUS_LABELS[c.status] ?? c.status}

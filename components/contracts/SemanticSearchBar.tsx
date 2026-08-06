@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { Search, Loader2, FileText } from "lucide-react";
+import { Sparkles, Loader2, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,9 +34,13 @@ export function SemanticSearchBar() {
   return (
     <Card>
       <CardContent className="pt-6">
+        <div className="flex items-center gap-1.5 mb-2">
+          <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          <span className="text-xs font-semibold text-foreground">Ricerca AI nei documenti</span>
+        </div>
         <form onSubmit={handleSubmit} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}

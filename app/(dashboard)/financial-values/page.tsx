@@ -94,7 +94,7 @@ export default function FinancialValuesPage() {
 
       <div>
         <h2 className="text-sm font-semibold text-foreground mb-3">
-          Movimenti {selectedYear === null ? "(tutti gli anni)" : selectedYear}
+          Movimenti {selectedYear ?? "(tutti gli anni)"}
         </h2>
         <FinancialValueTable onEditClick={handleEditClick} year={selectedYear} />
       </div>

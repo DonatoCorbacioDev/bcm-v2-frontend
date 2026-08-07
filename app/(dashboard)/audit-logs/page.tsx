@@ -38,8 +38,10 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
   Contract: "Contratto",
   ContractTemplate: "Modello di contratto",
   ContractDocument: "Documento contratto",
+  ContractHistory: "Storico contratto",
   ElectronicInvoice: "Fattura elettronica",
   BusinessArea: "Area di business",
+  Budget: "Budget",
   Manager: "Responsabile",
   FinancialType: "Tipo finanziario",
   FinancialValue: "Valore finanziario",
@@ -51,6 +53,8 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
   PasswordResetToken: "Reimpostazione password",
   VerificationToken: "Verifica account",
   LocalStorage: "File archiviato",
+  RiskFeedback: "Riscontro rischio",
+  SepaPayment: "Pagamento SEPA",
 };
 
 function actionLabel(action: string): string {

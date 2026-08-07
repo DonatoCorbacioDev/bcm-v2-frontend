@@ -6,6 +6,7 @@ import { Search, Moon, Sun, PanelLeft, ChevronDown } from "lucide-react";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { cn } from "@/lib/utils";
+import { roleLabel } from "@/lib/roleLabels";
 import Link from "next/link";
 
 // Single-line wayfinding label only — each page's own <h1> (rendered below,
@@ -17,9 +18,11 @@ const PAGE_TITLES: Record<string, string> = {
   "/contract-templates": "Modelli di contratto",
   "/financial-values":   "Valori finanziari",
   "/financial-types":    "Tipi finanziari",
+  "/budgets":            "Budget",
   "/business-areas":     "Aree di business",
   "/managers":           "Responsabili",
   "/users":              "Utenti",
+  "/organization":       "Organizzazione",
   "/audit-logs":         "Registro attività",
   "/profile":            "Profilo",
 };
@@ -136,7 +139,7 @@ export default function Header({
               {user?.username ?? "Utente"}
             </span>
             <span className="text-[11px] text-muted-foreground leading-tight capitalize">
-              {user?.role === "ADMIN" ? "Amministratore" : "Responsabile"}
+              {roleLabel(user?.role ?? "MANAGER")}
             </span>
           </div>
           <ChevronDown className="hidden sm:block h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />

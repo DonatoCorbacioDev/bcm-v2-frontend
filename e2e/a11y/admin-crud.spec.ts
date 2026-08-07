@@ -52,7 +52,7 @@ test.describe("Accessibility: admin CRUD pages", () => {
 
   test("managers page has no detectable axe violations", async ({ page }) => {
     await page.goto("/managers");
-    await expect(page.getByRole("heading", { name: "Manager" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Responsabili" })).toBeVisible();
     await expect(page.getByRole("table")).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();

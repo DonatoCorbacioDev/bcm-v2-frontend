@@ -101,7 +101,7 @@ describe('UserTable', () => {
 
   it.each([
     ['user rows', 'alice@example.com', 'bob@example.com'],
-    ['role names resolved from roleId via roleMap', 'ADMIN', 'VIEWER'],
+    ['role names resolved from roleId via roleMap', 'Amministratore', 'VIEWER'],
     ['manager names resolved instead of raw IDs', 'John Doe', 'Jane Smith'],
   ])('renders %s', (_label, first, second) => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });

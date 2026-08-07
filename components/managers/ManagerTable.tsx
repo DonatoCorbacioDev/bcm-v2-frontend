@@ -79,11 +79,11 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: referenceQueryKeys.managers });
-      toast.success("Manager eliminato");
+      toast.success("Responsabile eliminato");
       setDeleteDialog({ open: false, manager: null });
     },
     onError: () => {
-      toast.error("Eliminazione del manager non riuscita");
+      toast.error("Eliminazione del responsabile non riuscita");
     },
   });
 
@@ -105,7 +105,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   if (isError) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-destructive">Impossibile caricare i manager</p>
+        <p className="text-destructive">Impossibile caricare i responsabili</p>
         <p className="text-sm text-muted-foreground mt-2">Controlla API / rete</p>
       </div>
     );
@@ -114,9 +114,9 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   if (managers.length === 0) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-border">
-        <p className="text-muted-foreground">Nessun manager trovato</p>
+        <p className="text-muted-foreground">Nessun responsabile trovato</p>
         <p className="text-sm text-muted-foreground mt-2">
-          Crea il tuo primo manager per iniziare
+          Crea il tuo primo responsabile per iniziare
         </p>
       </div>
     );
@@ -128,8 +128,8 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            aria-label="Cerca manager"
-            placeholder="Cerca manager..."
+            aria-label="Cerca responsabili"
+            placeholder="Cerca responsabili..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -148,14 +148,14 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
         )}
 
         <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
-          {filteredManagers.length} / {managers.length} manager
+          {filteredManagers.length} / {managers.length} responsabili
         </div>
       </div>
 
       {/* Empty state after search */}
       {filteredManagers.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          Nessun manager corrisponde alla ricerca
+          Nessun responsabile corrisponde alla ricerca
         </div>
       )}
 
@@ -218,7 +218,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Elimina manager</DialogTitle>
+            <DialogTitle>Elimina responsabile</DialogTitle>
             <DialogDescription>
               Sei sicuro di voler eliminare{" "}
               <span className="font-semibold">

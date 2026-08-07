@@ -296,21 +296,21 @@ describe('ManagerForm', () => {
 
   it('renders Create Manager button in create mode', () => {
     render(<ManagerForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('button', { name: /crea manager/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /crea responsabile/i })).toBeInTheDocument();
   });
 
   it('renders Update Manager button in edit mode', () => {
     render(<ManagerForm onClose={onClose} manager={validManager} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('button', { name: /aggiorna manager/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /aggiorna responsabile/i })).toBeInTheDocument();
   });
 
   it('calls mutateAsync with update mode in edit mode', async () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertManager as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ManagerForm onClose={onClose} onSuccess={onSuccess} manager={validManager} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /aggiorna manager/i }));
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna responsabile/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
-    expect(toast.success).toHaveBeenCalledWith('Manager aggiornato');
+    expect(toast.success).toHaveBeenCalledWith('Responsabile aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
@@ -324,17 +324,17 @@ describe('ManagerForm', () => {
     await userEvent.type(screen.getByPlaceholderText(/manager@example.com/i), 'alice@example.com');
     await userEvent.type(screen.getByPlaceholderText(/\+39 123/i), '+39 333 1234567');
     await userEvent.type(screen.getByPlaceholderText(/vendite, it, risorse umane/i), 'IT');
-    await userEvent.click(screen.getByRole('button', { name: /crea manager/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crea responsabile/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'create' })));
-    expect(toast.success).toHaveBeenCalledWith('Manager creato');
+    expect(toast.success).toHaveBeenCalledWith('Responsabile creato');
   });
 
   it('shows error toast when mutation throws in update mode', async () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
     (useUpsertManager as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ManagerForm onClose={onClose} manager={validManager} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /aggiorna manager/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento del manager non riuscito'));
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna responsabile/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento del responsabile non riuscito'));
   });
 
   it('shows error toast when mutation throws in create mode', async () => {
@@ -346,8 +346,8 @@ describe('ManagerForm', () => {
     await userEvent.type(screen.getByPlaceholderText(/manager@example.com/i), 'alice@example.com');
     await userEvent.type(screen.getByPlaceholderText(/\+39 123/i), '+39 333 1234567');
     await userEvent.type(screen.getByPlaceholderText(/vendite, it, risorse umane/i), 'IT');
-    await userEvent.click(screen.getByRole('button', { name: /crea manager/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Creazione del manager non riuscita'));
+    await userEvent.click(screen.getByRole('button', { name: /crea responsabile/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Creazione del responsabile non riuscita'));
   });
 
   it('calls onClose when Cancel is clicked', async () => {
@@ -358,7 +358,7 @@ describe('ManagerForm', () => {
 
   it('shows validation errors when submitting empty form', async () => {
     render(<ManagerForm onClose={onClose} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /crea manager/i }));
+    await userEvent.click(screen.getByRole('button', { name: /crea responsabile/i }));
     await waitFor(() => {
       expect(screen.getAllByText(/almeno|obbligator|non valid/i).length).toBeGreaterThan(0);
     });
@@ -368,7 +368,7 @@ describe('ManagerForm', () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertManager as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ManagerForm onClose={onClose} manager={validManager} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /aggiorna manager/i }));
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna responsabile/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
     expect(onClose).toHaveBeenCalled();
   });
@@ -404,7 +404,7 @@ describe('InviteUserForm', () => {
 
   it('renders role options from hook', () => {
     render(<InviteUserForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('option', { name: 'ADMIN' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Amministratore' })).toBeInTheDocument();
   });
 
   it('calls onClose when Cancel is clicked', async () => {
@@ -419,7 +419,7 @@ describe('InviteUserForm', () => {
 
     await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
     await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'ADMIN');
-    await userEvent.selectOptions(screen.getByLabelText(/manager/i), '1');
+    await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), '1');
 
     await userEvent.click(screen.getByRole('button', { name: /invia invito/i }));
     await waitFor(() => expect(usersService.invite).toHaveBeenCalled());
@@ -432,7 +432,7 @@ describe('InviteUserForm', () => {
 
     await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
     await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'ADMIN');
-    await userEvent.selectOptions(screen.getByLabelText(/manager/i), '1');
+    await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), '1');
 
     await userEvent.click(screen.getByRole('button', { name: /invia invito/i }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Invio dell'invito non riuscito."));

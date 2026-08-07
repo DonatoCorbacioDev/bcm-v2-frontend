@@ -102,7 +102,7 @@ describe('ManagerTable', () => {
 
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/impossibile caricare i manager/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i responsabili/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no managers exist', () => {
@@ -114,8 +114,8 @@ describe('ManagerTable', () => {
 
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/nessun manager trovato/i)).toBeInTheDocument();
-    expect(screen.getByText(/crea il tuo primo manager/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun responsabile trovato/i)).toBeInTheDocument();
+    expect(screen.getByText(/crea il tuo primo responsabile/i)).toBeInTheDocument();
   });
 
   // ── Data rendering ────────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ describe('ManagerTable', () => {
   it('shows the manager count', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/2 \/ 2 manager/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 \/ 2 responsabili/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -140,13 +140,13 @@ describe('ManagerTable', () => {
   it('search input has an accessible label', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByRole('textbox', { name: /cerca manager/i })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /cerca responsabili/i })).toBeInTheDocument();
   });
 
   it('filters managers by name on search', async () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /cerca manager/i }), 'Alice');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca responsabili/i }), 'Alice');
 
     expect(screen.getByText('Alice Smith')).toBeInTheDocument();
     expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
@@ -155,9 +155,9 @@ describe('ManagerTable', () => {
   it('shows "no managers match" when search has no results', async () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /cerca manager/i }), 'xyz-no-match');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca responsabili/i }), 'xyz-no-match');
 
-    expect(screen.getByText(/nessun manager corrisponde alla ricerca/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun responsabile corrisponde alla ricerca/i)).toBeInTheDocument();
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -208,7 +208,7 @@ describe('ManagerTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Manager eliminato');
+      expect(toast.success).toHaveBeenCalledWith('Responsabile eliminato');
     });
   });
 
@@ -222,16 +222,16 @@ describe('ManagerTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Eliminazione del manager non riuscita");
+      expect(toast.error).toHaveBeenCalledWith("Eliminazione del responsabile non riuscita");
     });
   });
 
   it('clears the search field when Clear is clicked', async () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /cerca manager/i }), 'Alice');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca responsabili/i }), 'Alice');
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
 
-    expect(screen.getByRole('textbox', { name: /cerca manager/i })).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: /cerca responsabili/i })).toHaveValue('');
   });
 });

@@ -10,6 +10,7 @@ import {
 import { useUpsertUser } from "@/hooks/useUpsertUser";
 import { useManagers } from "@/hooks/useManagers";
 import { useRoles } from "@/hooks/useRoles";
+import { roleLabel } from "@/lib/roleLabels";
 import type { User } from "@/types";
 
 import { Button } from "@/components/ui/button";
@@ -133,7 +134,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
       {/* Manager Select */}
       <div>
         <label htmlFor="managerId" className="block text-sm font-medium mb-2">
-          Manager *
+          Responsabile *
         </label>
         <Controller
           name="managerId"
@@ -145,7 +146,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
               disabled={loadingManagers}
             >
               <SelectTrigger className={errors.managerId ? "border-destructive" : ""}>
-                <SelectValue placeholder="Seleziona un manager" />
+                <SelectValue placeholder="Seleziona un responsabile" />
               </SelectTrigger>
               <SelectContent>
                 {managers.map((manager) => (
@@ -182,7 +183,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
               <SelectContent>
                 {roles.map((role) => (
                   <SelectItem key={role.id} value={role.id.toString()}>
-                    {role.role}
+                    {roleLabel(role.role)}
                   </SelectItem>
                 ))}
               </SelectContent>

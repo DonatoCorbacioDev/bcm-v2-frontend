@@ -10,12 +10,7 @@ import { organizationService } from "@/services/organization.service";
 import { LogoMark } from "@/components/layout/Logo";
 import { LogOut } from "lucide-react";
 import { navGroups, type NavItem } from "@/components/layout/sidebarNavConfig";
-
-const TIER_LABELS: Record<string, string> = {
-  FREE: "Free",
-  PRO: "Pro",
-  ENTERPRISE: "Enterprise",
-};
+import { tierLabel } from "@/lib/tierLabels";
 
 interface SidebarProps {
   readonly collapsed: boolean;
@@ -154,7 +149,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
             </p>
             {organization && (
               <p className="text-[11px] text-[var(--muted-foreground)] truncate">
-                Piano {TIER_LABELS[organization.subscriptionTier] ?? organization.subscriptionTier}
+                Piano {tierLabel(organization.subscriptionTier)}
               </p>
             )}
           </OrgSwitcherContent>

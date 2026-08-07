@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
 import { organizationService } from "@/services/organization.service";
+import { tierLabel } from "@/lib/tierLabels";
 import {
   organizationBankDetailsSchema,
   type OrganizationBankDetailsFormData,
@@ -93,7 +94,7 @@ export default function OrganizationPage() {
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-muted-foreground">Piano</span>
-                <Badge variant="secondary">{organization?.subscriptionTier}</Badge>
+                <Badge variant="secondary">{organization?.subscriptionTier ? tierLabel(organization.subscriptionTier) : ""}</Badge>
               </div>
             </>
           )}

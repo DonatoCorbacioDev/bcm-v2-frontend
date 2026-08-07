@@ -7,6 +7,7 @@ import { useManagers } from "@/hooks/useManagers";
 import { useRoles } from "@/hooks/useRoles";
 import { usersService, type InviteUserPayload } from "@/services/users.service";
 import { usersQueryKeys } from "@/hooks/useUsers";
+import { roleLabel } from "@/lib/roleLabels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,14 +74,14 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           <option value="">Seleziona un ruolo</option>
           {roles.map((r) => (
             <option key={r.id} value={r.role}>
-              {r.role}
+              {roleLabel(r.role)}
             </option>
           ))}
         </select>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="invite-manager">Manager</Label>
+        <Label htmlFor="invite-manager">Responsabile</Label>
         <select
           id="invite-manager"
           value={form.managerId || ""}
@@ -88,7 +89,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           required
         >
-          <option value="">Seleziona un manager</option>
+          <option value="">Seleziona un responsabile</option>
           {managers.map((m) => (
             <option key={m.id} value={m.id}>
               {m.firstName} {m.lastName}

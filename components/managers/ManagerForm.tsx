@@ -25,7 +25,7 @@ export default function ManagerForm({
 }: ManagerFormProps) {
   const upsertMutation = useUpsertManager();
 
-  const submitLabel = manager?.id ? "Aggiorna manager" : "Crea manager";
+  const submitLabel = manager?.id ? "Aggiorna responsabile" : "Crea responsabile";
 
   const {
     register,
@@ -52,20 +52,20 @@ export default function ManagerForm({
           id: manager.id,
           payload: data,
         });
-        toast.success("Manager aggiornato");
+        toast.success("Responsabile aggiornato");
       } else {
         await upsertMutation.mutateAsync({
           mode: "create",
           payload: data,
         });
-        toast.success("Manager creato");
+        toast.success("Responsabile creato");
       }
 
       onSuccess?.();
       onClose();
     } catch (error) {
       toast.error(
-        manager?.id ? "Aggiornamento del manager non riuscito" : "Creazione del manager non riuscita"
+        manager?.id ? "Aggiornamento del responsabile non riuscito" : "Creazione del responsabile non riuscita"
       );
       console.error(error);
     }

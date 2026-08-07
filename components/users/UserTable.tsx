@@ -7,6 +7,7 @@ import { useUsers, usersQueryKeys } from "@/hooks/useUsers";
 import { useManagers } from "@/hooks/useManagers";
 import { useRoles } from "@/hooks/useRoles";
 import { usersService } from "@/services/users.service";
+import { roleLabel } from "@/lib/roleLabels";
 import type { User } from "@/types";
 
 import {
@@ -83,7 +84,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
     [managers]
   );
   const roleMap = useMemo(
-    () => new Map(roles.map((r) => [r.id, r.role])),
+    () => new Map(roles.map((r) => [r.id, roleLabel(r.role)])),
     [roles]
   );
   const queryClient = useQueryClient();
@@ -209,7 +210,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
               <TableRow>
                 <TableHead className="hidden lg:table-cell">ID</TableHead>
                 <TableHead>Nome utente</TableHead>
-                <TableHead className="hidden md:table-cell">Manager</TableHead>
+                <TableHead className="hidden md:table-cell">Responsabile</TableHead>
                 <TableHead className="hidden md:table-cell">Ruolo</TableHead>
                 <TableHead>Verificato</TableHead>
                 <TableHead className="hidden md:table-cell">Approvatore</TableHead>

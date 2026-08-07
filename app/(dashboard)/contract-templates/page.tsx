@@ -34,7 +34,7 @@ export default function ContractTemplatesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Template contratti</h1>
+          <h1 className="text-2xl font-bold text-foreground">Modelli di contratto</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Crea e gestisci template riutilizzabili per generare nuovi contratti rapidamente.
           </p>

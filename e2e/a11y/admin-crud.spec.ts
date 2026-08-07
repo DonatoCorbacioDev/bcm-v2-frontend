@@ -34,7 +34,7 @@ test.describe("Accessibility: admin CRUD pages", () => {
 
   test("contract templates page has no detectable axe violations", async ({ page }) => {
     await page.goto("/contract-templates");
-    await expect(page.getByRole("heading", { name: "Template contratti" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Modelli di contratto" })).toBeVisible();
     await expect(page.getByRole("table")).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();

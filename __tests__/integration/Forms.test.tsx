@@ -40,8 +40,8 @@ jest.mock('@/hooks/useRoles', () => ({
 jest.mock('@/hooks/useBusinessAreas', () => ({
   useBusinessAreas: jest.fn(),
 }));
-jest.mock('@/hooks/useContracts', () => ({
-  useContracts: jest.fn(),
+jest.mock('@/hooks/useContractsPaged', () => ({
+  useContractsPaged: jest.fn(),
 }));
 jest.mock('@/hooks/useFinancialTypes', () => ({
   useFinancialTypes: jest.fn(),
@@ -79,7 +79,7 @@ import { useUpsertBudget } from '@/hooks/useUpsertBudget';
 import { useManagers } from '@/hooks/useManagers';
 import { useRoles } from '@/hooks/useRoles';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
-import { useContracts } from '@/hooks/useContracts';
+import { useContractsPaged } from '@/hooks/useContractsPaged';
 import { useFinancialTypes } from '@/hooks/useFinancialTypes';
 import { usersService } from '@/services/users.service';
 
@@ -633,19 +633,19 @@ describe('FinancialValueForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useUpsertFinancialValue as jest.Mock).mockReturnValue(mockMutation());
-    (useContracts as jest.Mock).mockReturnValue({ data: contracts, isLoading: false, isError: false });
+    (useContractsPaged as jest.Mock).mockReturnValue({ data: { content: contracts }, isLoading: false, isError: false });
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: businessAreas, isLoading: false, isError: false });
     (useFinancialTypes as jest.Mock).mockReturnValue({ data: financialTypes, isLoading: false, isError: false });
   });
 
   it('shows loading state when reference data is loading', () => {
-    (useContracts as jest.Mock).mockReturnValue({ data: [], isLoading: true, isError: false });
+    (useContractsPaged as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
     render(<FinancialValueForm onClose={onClose} />, { wrapper: createWrapper() });
     expect(screen.getByText(/caricamento dati del modulo/i)).toBeInTheDocument();
   });
 
   it('shows error state when reference data fails', () => {
-    (useContracts as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: true });
+    (useContractsPaged as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: true });
     render(<FinancialValueForm onClose={onClose} />, { wrapper: createWrapper() });
     expect(screen.getByText(/impossibile caricare i dati di riferimento/i)).toBeInTheDocument();
   });

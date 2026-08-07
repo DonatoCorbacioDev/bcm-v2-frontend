@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { financialValueSchema, type FinancialValueFormData } from "@/lib/validations/financialValue.schema";
 import { useUpsertFinancialValue } from "@/hooks/useUpsertFinancialValue";
-import { useContracts } from "@/hooks/useContracts";
+import { useContractsPaged } from "@/hooks/useContractsPaged";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useFinancialTypes } from "@/hooks/useFinancialTypes";
 import type { FinancialValue } from "@/types";
@@ -34,12 +34,12 @@ export default function FinancialValueForm({
   financialValue,
 }: FinancialValueFormProps) {
   const upsertMutation = useUpsertFinancialValue();
-  const contractsQuery = useContracts();
+  const contractsQuery = useContractsPaged({ size: 1000 });
   const businessAreasQuery = useBusinessAreas();
   const financialTypesQuery = useFinancialTypes();
 
   /* istanbul ignore next */
-  const contracts = contractsQuery.data ?? [];
+  const contracts = contractsQuery.data?.content ?? [];
   /* istanbul ignore next */
   const businessAreas = businessAreasQuery.data ?? [];
   /* istanbul ignore next */

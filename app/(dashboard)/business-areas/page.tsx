@@ -55,7 +55,7 @@ export default function BusinessAreasPage() {
       <BusinessAreaTable onEditClick={handleEditClick} />
 
       {/* Create/Edit Dialog */}
-      <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
+      <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>

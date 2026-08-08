@@ -50,7 +50,7 @@ export default function BudgetsPage() {
         onEditClick={(b) => setFormDialog({ open: true, budget: b })}
       />
 
-      <Dialog open={formDialog.open} onOpenChange={handleCloseForm}>
+      <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>

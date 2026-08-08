@@ -7,9 +7,21 @@ import { XIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 function Dialog({
+  open,
   ...props
 }: Readonly<React.ComponentProps<typeof DialogPrimitive.Root>>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  // Radix marks <body> with `pointer-events: none` while a modal layer is
+  // open, and clears it on unmount. A Select opened inside a Dialog adds its
+  // own lock; closing the Dialog first unmounts the Select before it can run
+  // that cleanup, so the style sticks and the whole page stops responding to
+  // clicks until a reload. Clearing it ourselves once the Dialog is closed
+  // releases the orphaned lock. Radix re-applies it whenever a layer reopens.
+  React.useEffect(() => {
+    if (open) return
+    document.body.style.pointerEvents = ""
+  }, [open])
+
+  return <DialogPrimitive.Root data-slot="dialog" open={open} {...props} />
 }
 
 function DialogTrigger({

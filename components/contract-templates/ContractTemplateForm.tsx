@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -199,6 +200,15 @@ export default function ContractTemplateForm({
                 ))}
               </SelectContent>
             </Select>
+            {businessAreas.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Nessuna area di business creata ancora.{" "}
+                <Link href="/business-areas" className="underline">
+                  Creane una
+                </Link>
+                .
+              </p>
+            )}
           </div>
         )}
       />
@@ -225,6 +235,15 @@ export default function ContractTemplateForm({
                 ))}
               </SelectContent>
             </Select>
+            {managers.length === 0 && (
+              <p className="text-xs text-muted-foreground">
+                Nessun responsabile creato ancora.{" "}
+                <Link href="/managers" className="underline">
+                  Creane uno
+                </Link>
+                .
+              </p>
+            )}
           </div>
         )}
       />

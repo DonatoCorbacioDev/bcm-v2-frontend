@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { Button } from "@/components/ui/button";
 import BudgetTable from "@/components/budgets/BudgetTable";
 import BudgetForm from "@/components/budgets/BudgetForm";
+import { MissingPrerequisiteBanner } from "@/components/shared/MissingPrerequisiteBanner";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +20,9 @@ export default function BudgetsPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
+  const businessAreasQuery = useBusinessAreas();
+  const hasNoBusinessAreas =
+    businessAreasQuery.isSuccess && businessAreasQuery.data.length === 0;
 
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
@@ -41,10 +46,20 @@ export default function BudgetsPage() {
           <h1 className="text-3xl font-bold text-foreground">Budget</h1>
           <p className="text-muted-foreground mt-2">Obiettivi di ricavo e costo per area di business</p>
         </div>
-        <Button onClick={() => setFormDialog({ open: true, budget: null })}>
+        <Button
+          onClick={() => setFormDialog({ open: true, budget: null })}
+          disabled={hasNoBusinessAreas}
+        >
           + Nuovo budget
         </Button>
       </div>
+
+      {hasNoBusinessAreas && (
+        <MissingPrerequisiteBanner
+          message="Per creare un budget serve prima almeno un'area di business a cui assegnarlo."
+          actions={[{ label: "Crea un'area di business", href: "/business-areas" }]}
+        />
+      )}
 
       <BudgetTable
         onEditClick={(b) => setFormDialog({ open: true, budget: b })}

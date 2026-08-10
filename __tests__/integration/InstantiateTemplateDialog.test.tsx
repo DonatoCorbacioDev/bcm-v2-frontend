@@ -226,6 +226,26 @@ describe('InstantiateTemplateDialog', () => {
     );
   });
 
+  it('shows a blocking banner and disables submit when the template has no default area and none exist', () => {
+    (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false, isSuccess: true });
+    render(
+      <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(/serve prima crearne una|contatta un amministratore/i);
+    expect(screen.getByRole('button', { name: /crea contratto/i })).toBeDisabled();
+  });
+
+  it('does NOT show the banner when the template already has a default area, even if none exist org-wide', () => {
+    (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false, isSuccess: true });
+    render(
+      <InstantiateTemplateDialog template={fullTemplate} open={true} onOpenChange={onOpenChange} />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /crea contratto/i })).not.toBeDisabled();
+  });
+
   it('shows validation error when contractNumber has lowercase', async () => {
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,

@@ -27,7 +27,12 @@ export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
 
-  // Setup check: redirect new ADMIN orgs (no areas + no managers) to the onboarding wizard.
+  // Setup check: redirect new ADMIN orgs with no business area yet to the onboarding
+  // wizard. Registering an organization always creates a Managers record for the admin
+  // (see OrganizationService.registerOrganization), so `managers` is never empty for a
+  // real org — checking it here as well as businessAreas made the redirect condition
+  // practically unreachable. Business areas are the actual gate: without one, Budgets
+  // and Contracts can't be created either (see MissingPrerequisiteBanner).
   // Queries are disabled for non-admins; enabled queries share cache with the reference hooks.
   const { data: businessAreas = [], isLoading: loadingAreas } = useQuery({
     queryKey: referenceQueryKeys.businessAreas,
@@ -35,7 +40,7 @@ export default function DashboardPage() {
     enabled: isAdmin,
     staleTime: 5 * 60 * 1000,
   });
-  const { data: managers = [], isLoading: loadingManagers } = useQuery({
+  const { isLoading: loadingManagers } = useQuery({
     queryKey: referenceQueryKeys.managers,
     queryFn: managersService.list,
     enabled: isAdmin,
@@ -45,10 +50,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!isAdmin || loadingAreas || loadingManagers) return;
     if (localStorage.getItem(`bcm-setup-skip-${user?.id}`)) return;
-    if (businessAreas.length === 0 && managers.length === 0) {
+    if (businessAreas.length === 0) {
       router.push("/onboarding");
     }
-  }, [isAdmin, loadingAreas, loadingManagers, businessAreas, managers, router, user?.id]);
+  }, [isAdmin, loadingAreas, loadingManagers, businessAreas, router, user?.id]);
 
   const { data: stats, isLoading, isError } = useDashboardStats();
   const { data: expiringContracts = [], isLoading: isLoadingExpiring, isError: isErrorExpiring } = useExpiringContracts(30);

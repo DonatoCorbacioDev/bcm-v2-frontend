@@ -12,10 +12,12 @@ import { contractTemplatesService } from "@/services/contractTemplates.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
+import { useAuthStore } from "@/store/authStore";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MissingPrerequisiteBanner } from "@/components/shared/MissingPrerequisiteBanner";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +48,7 @@ export default function InstantiateTemplateDialog({
 }: InstantiateTemplateDialogProps) {
   const router = useRouter();
   const qc = useQueryClient();
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
 
@@ -53,6 +56,12 @@ export default function InstantiateTemplateDialog({
   const businessAreas = businessAreasQuery.data ?? [];
   /* istanbul ignore next */
   const managers = managersQuery.data ?? [];
+
+  // The template's own default area covers the requirement when it has one; only
+  // block when this instantiation would need a fresh pick and none exist (mirrors
+  // the backend check in ContractTemplateService.instantiateTemplate).
+  const missingRequiredArea =
+    !template?.businessAreaId && businessAreasQuery.isSuccess && businessAreas.length === 0;
 
   const instantiateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: InstantiateTemplateFormData }) =>
@@ -124,6 +133,17 @@ export default function InstantiateTemplateDialog({
             )}
           </DialogDescription>
         </DialogHeader>
+
+        {missingRequiredArea && (
+          <MissingPrerequisiteBanner
+            message={
+              isAdmin
+                ? "Questo template non ha un'area di business predefinita e l'organizzazione non ne ha ancora nessuna: serve prima crearne una."
+                : "Questo template non ha un'area di business predefinita e l'organizzazione non ne ha ancora nessuna. Contatta un amministratore."
+            }
+            actions={isAdmin ? [{ label: "Crea un'area di business", href: "/business-areas" }] : []}
+          />
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
           {/* Customer Name */}
@@ -282,7 +302,7 @@ export default function InstantiateTemplateDialog({
             >
               Annulla
             </Button>
-            <Button type="submit" disabled={instantiateMutation.isPending}>
+            <Button type="submit" disabled={instantiateMutation.isPending || missingRequiredArea}>
               {submitLabel}
             </Button>
           </div>

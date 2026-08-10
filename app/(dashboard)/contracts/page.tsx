@@ -6,6 +6,7 @@ import ContractTable from "@/components/contracts/ContractTable";
 import ContractForm from "@/components/contracts/ContractForm";
 import ContractImportDialog from "@/components/contracts/ContractImportDialog";
 import { SemanticSearchBar } from "@/components/contracts/SemanticSearchBar";
+import { MissingPrerequisiteBanner } from "@/components/shared/MissingPrerequisiteBanner";
 import {
   Dialog,
   DialogContent,
@@ -15,12 +16,20 @@ import {
 import type { Contract } from "@/types";
 import { contractsService } from "@/services/contracts.service";
 import { useAuthStore } from "@/store/authStore";
+import { useBusinessAreas } from "@/hooks/useBusinessAreas";
+import { useManagers } from "@/hooks/useManagers";
 import { toast } from "sonner";
 import { FileSpreadsheet, FileText, Upload } from "lucide-react";
 
 export default function ContractsPage() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
+
+  const businessAreasQuery = useBusinessAreas();
+  const managersQuery = useManagers();
+  const missingAreas = businessAreasQuery.isSuccess && businessAreasQuery.data.length === 0;
+  const missingManagers = managersQuery.isSuccess && managersQuery.data.length === 0;
+  const hasMissingPrerequisite = missingAreas || missingManagers;
 
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
@@ -34,6 +43,20 @@ export default function ContractsPage() {
   const handleCreateClick = () => {
     setFormDialog({ open: true, contract: null });
   };
+
+  const missingLabels = [
+    missingAreas ? "un'area di business" : null,
+    missingManagers ? "un responsabile" : null,
+  ].filter((label): label is string => label !== null);
+  const prerequisiteMessage = isAdmin
+    ? `Per creare un contratto serve prima ${missingLabels.join(" e ")}.`
+    : `Per creare un contratto serve prima ${missingLabels.join(" e ")}. Contatta un amministratore.`;
+  const prerequisiteActions = isAdmin
+    ? [
+        missingAreas ? { label: "Crea un'area di business", href: "/business-areas" } : null,
+        missingManagers ? { label: "Crea un responsabile", href: "/managers" } : null,
+      ].filter((action): action is { label: string; href: string } => action !== null)
+    : [];
 
   const handleEditClick = (contract: Contract) => {
     setFormDialog({ open: true, contract });
@@ -123,9 +146,15 @@ export default function ContractsPage() {
               Importa
             </Button>
           )}
-          <Button onClick={handleCreateClick}>+ Nuovo contratto</Button>
+          <Button onClick={handleCreateClick} disabled={hasMissingPrerequisite}>
+            + Nuovo contratto
+          </Button>
         </div>
       </div>
+
+      {hasMissingPrerequisite && (
+        <MissingPrerequisiteBanner message={prerequisiteMessage} actions={prerequisiteActions} />
+      )}
 
       <SemanticSearchBar />
 

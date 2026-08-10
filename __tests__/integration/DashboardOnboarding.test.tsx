@@ -82,7 +82,7 @@ describe('DashboardPage — onboarding redirect', () => {
     expect(mockPush).not.toHaveBeenCalledWith('/onboarding');
   });
 
-  it('does NOT redirect when ADMIN has at least one manager', async () => {
+  it('still redirects when ADMIN has a manager but no business area (registration always creates one manager)', async () => {
     mockAdmin(1);
     (api.get as jest.Mock).mockImplementation((url: string) => {
       if (url === '/managers') return Promise.resolve({ data: [{ id: 1, firstName: 'Marco', lastName: 'Rossi', email: 'a@b.com', phoneNumber: '123', department: 'IT' }] });
@@ -91,8 +91,9 @@ describe('DashboardPage — onboarding redirect', () => {
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/managers'));
-    expect(mockPush).not.toHaveBeenCalledWith('/onboarding');
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/onboarding');
+    });
   });
 
   it('does NOT redirect when the wizard was previously dismissed', async () => {

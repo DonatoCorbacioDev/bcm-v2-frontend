@@ -168,6 +168,26 @@ describe('ContractTemplateForm', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
+  it('shows a hint with a link to create one when no business areas exist yet', () => {
+    (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false });
+    render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/nessuna area di business creata ancora/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /creane una/i })).toHaveAttribute('href', '/business-areas');
+  });
+
+  it('shows a hint with a link to create one when no managers exist yet', () => {
+    (useManagers as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false });
+    render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/nessun responsabile creato ancora/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /creane uno/i })).toHaveAttribute('href', '/managers');
+  });
+
+  it('does not show either hint when business areas and managers already exist', () => {
+    render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
+    expect(screen.queryByText(/nessuna area di business creata ancora/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/nessun responsabile creato ancora/i)).not.toBeInTheDocument();
+  });
+
   it('calls onClose when Annulla is clicked', async () => {
     render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /annulla/i }));

@@ -5,9 +5,13 @@ import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
 import { useBudgets } from "@/hooks/useBudgets";
+import { useBusinessAreas } from "@/hooks/useBusinessAreas";
+import { useFinancialTypes } from "@/hooks/useFinancialTypes";
+import { useContractsPaged } from "@/hooks/useContractsPaged";
 import FinancialValueTable from "@/components/financial-values/FinancialValueTable";
 import FinancialValueForm from "@/components/financial-values/FinancialValueForm";
 import FinancialValueSummary from "@/components/financial-values/FinancialValueSummary";
+import { MissingPrerequisiteBanner } from "@/components/shared/MissingPrerequisiteBanner";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +32,30 @@ const ALL_YEARS = "ALL";
 export default function FinancialValuesPage() {
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
+
+  const businessAreasQuery = useBusinessAreas();
+  const financialTypesQuery = useFinancialTypes();
+  const contractsQuery = useContractsPaged({ size: 1000 });
+  const missingAreas = businessAreasQuery.isSuccess && businessAreasQuery.data.length === 0;
+  const missingTypes = financialTypesQuery.isSuccess && financialTypesQuery.data.length === 0;
+  const missingContracts =
+    contractsQuery.isSuccess && (contractsQuery.data.content?.length ?? 0) === 0;
+  const hasMissingPrerequisite = missingAreas || missingTypes || missingContracts;
+
+  const missingLabels = [
+    missingContracts ? "un contratto" : null,
+    missingTypes ? "un tipo finanziario" : null,
+    missingAreas ? "un'area di business" : null,
+  ].filter((label): label is string => label !== null);
+  const adminOnlyMissing = missingTypes || missingAreas;
+  const prerequisiteMessage = `Per creare un valore finanziario serve prima ${missingLabels.join(
+    ", "
+  )}.${!isAdmin && adminOnlyMissing ? " Contatta un amministratore per l'area di business/il tipo finanziario." : ""}`;
+  const prerequisiteActions = [
+    missingContracts ? { label: "Crea un contratto", href: "/contracts" } : null,
+    missingTypes && isAdmin ? { label: "Crea un tipo finanziario", href: "/financial-types" } : null,
+    missingAreas && isAdmin ? { label: "Crea un'area di business", href: "/business-areas" } : null,
+  ].filter((action): action is { label: string; href: string } => action !== null);
 
   const { data: financialValues = [] } = useFinancialValues();
   const { data: budgets = [] } = useBudgets();
@@ -81,9 +109,15 @@ export default function FinancialValuesPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={handleCreateClick}>+ Nuovo valore finanziario</Button>
+          <Button onClick={handleCreateClick} disabled={hasMissingPrerequisite}>
+            + Nuovo valore finanziario
+          </Button>
         </div>
       </div>
+
+      {hasMissingPrerequisite && (
+        <MissingPrerequisiteBanner message={prerequisiteMessage} actions={prerequisiteActions} />
+      )}
 
       <FinancialValueSummary
         financialValues={financialValues}

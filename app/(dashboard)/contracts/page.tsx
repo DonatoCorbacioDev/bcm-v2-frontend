@@ -146,9 +146,11 @@ export default function ContractsPage() {
               Importa
             </Button>
           )}
-          <Button onClick={handleCreateClick} disabled={hasMissingPrerequisite}>
-            + Nuovo contratto
-          </Button>
+          {isAdmin && (
+            <Button onClick={handleCreateClick} disabled={hasMissingPrerequisite}>
+              + Nuovo contratto
+            </Button>
+          )}
         </div>
       </div>
 

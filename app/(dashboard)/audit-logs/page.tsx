@@ -176,7 +176,9 @@ function AuditLogsContent({
         {/* Pagination */}
         <div className="flex items-center justify-between px-4 py-3 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            {data.totalElements} risultati totali
+            {data.totalElements === 1
+              ? "1 risultato totale"
+              : `${data.totalElements} risultati totali`}
           </p>
           <div className="flex items-center gap-3">
             <Button

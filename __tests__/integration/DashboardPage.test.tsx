@@ -169,6 +169,24 @@ describe('DashboardPage', () => {
     expect(screen.getByText(/\+ altri 2 rinnovi critici/i)).toBeInTheDocument();
   });
 
+  it('uses singular phrasing when exactly one critical renewal is hidden', async () => {
+    const fourCritical = Array.from({ length: 4 }, (_, i) => ({
+      ...criticalContract,
+      id: i + 1,
+      contractNumber: `CNT-CRIT-${i}`,
+      customerName: `Urgent ${i}`,
+    }));
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: fourCritical,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<DashboardPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/\+ 1 altro rinnovo critico/i)).toBeInTheDocument();
+  });
+
   it('caps high-risk contracts at 3 and notes how many more there are', async () => {
     const manyHighRisk = Array.from({ length: 5 }, (_, i) => ({
       ...highRiskScore,
@@ -183,6 +201,22 @@ describe('DashboardPage', () => {
     render(<DashboardPage />, { wrapper: createWrapper() });
 
     expect(await screen.findByText(/\+ altri 2 contratti ad alto rischio/i)).toBeInTheDocument();
+  });
+
+  it('uses singular phrasing when exactly one high-risk contract is hidden', async () => {
+    const fourHighRisk = Array.from({ length: 4 }, (_, i) => ({
+      ...highRiskScore,
+      contractId: i + 1,
+      customerName: `Risky ${i}`,
+    }));
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.resolve({ data: fourHighRisk });
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<DashboardPage />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/\+ 1 altro contratto ad alto rischio/i)).toBeInTheDocument();
   });
 
   it('shows a note when the risk analysis is unavailable', async () => {

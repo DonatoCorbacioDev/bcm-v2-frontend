@@ -60,7 +60,9 @@ export function RecommendedActions({ criticalRenewals }: RecommendedActionsProps
           </ul>
           {criticalRenewals.length > 3 && (
             <p className="text-xs text-muted-foreground mt-1">
-              + altri {criticalRenewals.length - 3} rinnovi critici
+              {criticalRenewals.length - 3 === 1
+                ? "+ 1 altro rinnovo critico"
+                : `+ altri ${criticalRenewals.length - 3} rinnovi critici`}
             </p>
           )}
         </div>
@@ -88,7 +90,9 @@ export function RecommendedActions({ criticalRenewals }: RecommendedActionsProps
           </ul>
           {highRisk.length > 3 && (
             <p className="text-xs text-muted-foreground mt-1">
-              + altri {highRisk.length - 3} contratti ad alto rischio
+              {highRisk.length - 3 === 1
+                ? "+ 1 altro contratto ad alto rischio"
+                : `+ altri ${highRisk.length - 3} contratti ad alto rischio`}
             </p>
           )}
         </div>

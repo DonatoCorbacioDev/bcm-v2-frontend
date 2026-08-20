@@ -379,10 +379,14 @@ describe('ManagerForm', () => {
 describe('InviteUserForm', () => {
   const onClose = jest.fn();
 
+  // The invite endpoint only accepts MANAGER — includes ADMIN here to verify
+  // it's filtered out of the rendered options, not just absent from the fixture.
+  const inviteRoles = [{ id: 1, role: 'ADMIN' }, { id: 2, role: 'MANAGER' }];
+
   beforeEach(() => {
     jest.clearAllMocks();
     (useManagers as jest.Mock).mockReturnValue({ data: managers });
-    (useRoles as jest.Mock).mockReturnValue({ data: roles });
+    (useRoles as jest.Mock).mockReturnValue({ data: inviteRoles });
   });
 
   it('renders the invitation form', () => {
@@ -402,9 +406,10 @@ describe('InviteUserForm', () => {
     expect(screen.getByText('John Doe')).toBeInTheDocument();
   });
 
-  it('renders role options from hook', () => {
+  it('only offers Responsabile, never Amministratore — the invite endpoint always rejects ADMIN', () => {
     render(<InviteUserForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('option', { name: 'Amministratore' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Responsabile' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Amministratore' })).not.toBeInTheDocument();
   });
 
   it('calls onClose when Cancel is clicked', async () => {
@@ -418,7 +423,7 @@ describe('InviteUserForm', () => {
     render(<InviteUserForm onClose={onClose} />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'ADMIN');
+    await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'MANAGER');
     await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), '1');
 
     await userEvent.click(screen.getByRole('button', { name: /invia invito/i }));
@@ -431,7 +436,7 @@ describe('InviteUserForm', () => {
     render(<InviteUserForm onClose={onClose} />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
-    await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'ADMIN');
+    await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'MANAGER');
     await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), '1');
 
     await userEvent.click(screen.getByRole('button', { name: /invia invito/i }));

@@ -19,6 +19,9 @@ interface InviteUserFormProps {
 export default function InviteUserForm({ onClose }: InviteUserFormProps) {
   const { data: managers = [] } = useManagers();
   const { data: roles = [] } = useRoles();
+  // The invite endpoint only ever accepts MANAGER (UserService.inviteUser
+  // rejects anything else) — offering ADMIN here would always fail on submit.
+  const inviteableRoles = roles.filter((r) => r.role === "MANAGER");
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState<InviteUserPayload>({
@@ -72,7 +75,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
           required
         >
           <option value="">Seleziona un ruolo</option>
-          {roles.map((r) => (
+          {inviteableRoles.map((r) => (
             <option key={r.id} value={r.role}>
               {roleLabel(r.role)}
             </option>

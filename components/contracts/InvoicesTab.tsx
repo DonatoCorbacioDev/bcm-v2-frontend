@@ -75,6 +75,9 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   const [ibanInput, setIbanInput] = useState("");
   const [bicInput, setBicInput] = useState("");
   const [dueDateInput, setDueDateInput] = useState("");
+  const [executionDateInput, setExecutionDateInput] = useState(
+    () => new Date().toISOString().slice(0, 10)
+  );
 
   const { data: invoices, isLoading } = useQuery<ElectronicInvoice[]>({
     queryKey: ["invoices", contractId],
@@ -136,7 +139,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
 
   const generateSepaMutation = useMutation({
     mutationFn: async (invoiceIds: number[]) => {
-      return sepaPaymentsService.create(contractId, { invoiceIds });
+      return sepaPaymentsService.create(contractId, { invoiceIds, executionDate: executionDateInput });
     },
     onSuccess: (blob) => {
       const url = URL.createObjectURL(blob);
@@ -269,17 +272,29 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
         </Button>
         <span className="text-xs text-muted-foreground">Solo XML FatturaPA</span>
         {selectedIds.length > 0 && (
-          <Button
-            onClick={() => generateSepaMutation.mutate(selectedIds)}
-            disabled={generateSepaMutation.isPending}
-          >
-            {generateSepaMutation.isPending ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Landmark className="h-4 w-4 mr-2" />
-            )}
-            Genera pagamento SEPA ({selectedIds.length})
-          </Button>
+          <>
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              Data esecuzione
+              <Input
+                type="date"
+                value={executionDateInput}
+                min={new Date().toISOString().slice(0, 10)}
+                onChange={(e) => setExecutionDateInput(e.target.value)}
+                className="w-auto"
+              />
+            </label>
+            <Button
+              onClick={() => generateSepaMutation.mutate(selectedIds)}
+              disabled={generateSepaMutation.isPending || !executionDateInput}
+            >
+              {generateSepaMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Landmark className="h-4 w-4 mr-2" />
+              )}
+              Genera pagamento SEPA ({selectedIds.length})
+            </Button>
+          </>
         )}
       </div>
 

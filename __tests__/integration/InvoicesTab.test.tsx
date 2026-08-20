@@ -418,14 +418,48 @@ describe('InvoicesTab', () => {
     expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
     await userEvent.click(screen.getByRole('button', { name: /genera pagamento sepa/i }));
+    const today = new Date().toISOString().slice(0, 10);
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith(
         '/contracts/1/sepa-payments',
-        { invoiceIds: [1] },
+        { invoiceIds: [1], executionDate: today },
         expect.objectContaining({ responseType: 'blob' }),
       ),
     );
     expect(toast.success).toHaveBeenCalledWith('Pagamento SEPA generato');
+  });
+
+  it('sends a custom execution date when the user changes it', async () => {
+    mockApiGet({ invoices: [invoice] });
+    (api.post as jest.Mock).mockResolvedValue({ data: new Blob(['<Document/>']) });
+    renderTab();
+    expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
+
+    const dateInput = screen.getByLabelText(/data esecuzione/i);
+    await userEvent.clear(dateInput);
+    await userEvent.type(dateInput, '2030-01-15');
+
+    await userEvent.click(screen.getByRole('button', { name: /genera pagamento sepa/i }));
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith(
+        '/contracts/1/sepa-payments',
+        { invoiceIds: [1], executionDate: '2030-01-15' },
+        expect.objectContaining({ responseType: 'blob' }),
+      ),
+    );
+  });
+
+  it('disables the generate button when the execution date is cleared', async () => {
+    mockApiGet({ invoices: [invoice] });
+    renderTab();
+    expect(await screen.findByText('Pronta per SEPA')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('checkbox', { name: /seleziona fattura/i }));
+
+    const dateInput = screen.getByLabelText(/data esecuzione/i);
+    await userEvent.clear(dateInput);
+
+    expect(screen.getByRole('button', { name: /genera pagamento sepa/i })).toBeDisabled();
   });
 
   it('shows error toast when SEPA generation fails', async () => {

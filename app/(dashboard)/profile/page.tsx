@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { PasswordFields } from "@/components/auth/PasswordFields";
 import { calendarFeedService } from "@/services/calendarFeed.service";
+import { roleLabel } from "@/lib/roleLabels";
 import TwoFactorAuthCard from "@/components/profile/TwoFactorAuthCard";
 import DataPrivacyCard from "@/components/profile/DataPrivacyCard";
 import { Button } from "@/components/ui/button";
@@ -118,7 +119,9 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center justify-between py-2 border-b border-border">
                 <span className="text-sm text-muted-foreground">Ruolo</span>
-                <Badge variant="secondary">{displayProfile?.role}</Badge>
+                <Badge variant="secondary">
+                  {displayProfile?.role ? roleLabel(displayProfile.role) : ""}
+                </Badge>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-muted-foreground">Stato account</span>

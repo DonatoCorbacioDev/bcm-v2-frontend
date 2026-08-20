@@ -456,7 +456,7 @@ export default function ContractDetailPage() {
             <p className="text-sm text-muted-foreground">Stato</p>
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
-              {contract.workflowStage && (
+              {contract.workflowStage && contract.workflowStage !== "DRAFT" && (
                 <Badge variant="outline">{WORKFLOW_STAGE_LABELS[contract.workflowStage] ?? contract.workflowStage}</Badge>
               )}
             </div>

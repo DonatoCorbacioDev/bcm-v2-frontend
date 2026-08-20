@@ -218,6 +218,17 @@ describe('ContractDetailPage — approval workflow', () => {
 
     expect(screen.getByText('In revisione')).toBeInTheDocument();
   });
+
+  it('does not duplicate the status badge when the workflow stage is DRAFT', () => {
+    mockContract({ workflowStage: 'DRAFT', status: 'DRAFT' });
+    mockAuthAs({ role: 'ADMIN' });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+
+    // Both the contract status and the workflow stage translate to "Bozza" —
+    // only the status badge should render, not two identical badges side by side.
+    expect(screen.getAllByText('Bozza')).toHaveLength(1);
+  });
 });
 
 describe('ContractDetailPage — financial values tab', () => {

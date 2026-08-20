@@ -213,14 +213,35 @@ export default function ContractDetailPage() {
                 </td>
               </tr>
             ))}
-            <tr className="bg-muted font-bold">
-              <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale</td>
-              <td className="px-4 py-3 text-sm text-foreground">
-                €{financialValues.reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0)
-                  .toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </td>
-              <td />
-            </tr>
+            {(() => {
+              const totalRevenue = financialValues
+                .filter((fv: FinancialValue) => fv.category === "REVENUE")
+                .reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0);
+              const totalCost = financialValues
+                .filter((fv: FinancialValue) => fv.category === "COST")
+                .reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0);
+              const formatEuro = (n: number) =>
+                `€${n.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+              return (
+                <>
+                  <tr className="bg-muted font-bold">
+                    <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale ricavi</td>
+                    <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalRevenue)}</td>
+                    <td />
+                  </tr>
+                  <tr className="bg-muted font-bold">
+                    <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale costi</td>
+                    <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalCost)}</td>
+                    <td />
+                  </tr>
+                  <tr className="bg-muted font-bold">
+                    <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Margine netto</td>
+                    <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalRevenue - totalCost)}</td>
+                    <td />
+                  </tr>
+                </>
+              );
+            })()}
           </tbody>
         </table>
       </div>

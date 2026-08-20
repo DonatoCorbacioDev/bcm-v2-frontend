@@ -70,6 +70,7 @@ import { toast } from 'sonner';
 import { useContract } from '@/hooks/useContract';
 import { useAuthStore } from '@/store/authStore';
 import { contractWorkflowService } from '@/services/contractWorkflow.service';
+import api from '@/lib/api';
 import ContractDetailPage from '@/app/(dashboard)/contracts/[id]/page';
 
 const baseContract = {
@@ -216,5 +217,39 @@ describe('ContractDetailPage — approval workflow', () => {
     render(<ContractDetailPage />, { wrapper: createWrapper() });
 
     expect(screen.getByText('In revisione')).toBeInTheDocument();
+  });
+});
+
+describe('ContractDetailPage — financial values tab', () => {
+  it('totals revenue and cost separately instead of blending them together', async () => {
+    mockContract({ workflowStage: 'DRAFT' });
+    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/financial-values/by-contract/1') {
+        return Promise.resolve({
+          data: [
+            { id: 1, typeName: 'Ricavi', areaName: 'IT', financialAmount: 1000, month: 1, year: 2025, category: 'REVENUE' },
+            { id: 2, typeName: 'Costi', areaName: 'IT', financialAmount: 400, month: 1, year: 2025, category: 'COST' },
+          ],
+        });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+
+    // Computed with the component's own formatting rather than hardcoded,
+    // so the assertion doesn't depend on the host's ICU separators for it-IT.
+    const eur = (n: number) =>
+      `€${n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    expect(await screen.findByText('Totale ricavi')).toBeInTheDocument();
+    expect(screen.getByText('Totale costi')).toBeInTheDocument();
+    expect(screen.getByText('Margine netto')).toBeInTheDocument();
+    expect(screen.getAllByText(eur(1000)).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(eur(400)).length).toBeGreaterThan(0);
+    expect(screen.getByText(eur(600))).toBeInTheDocument();
+    expect(screen.queryByText(/^Totale$/)).not.toBeInTheDocument();
   });
 });

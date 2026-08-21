@@ -9,6 +9,7 @@ export interface DashboardStats {
   active: number;
   expiring: number;
   expired: number;
+  draft: number;
 }
 
 export const dashboardService = {

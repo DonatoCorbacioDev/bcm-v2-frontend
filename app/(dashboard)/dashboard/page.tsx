@@ -240,6 +240,7 @@ export default function DashboardPage() {
           active={stats?.active ?? 0}
           expiring={stats?.expiring ?? 0}
           expired={stats?.expired ?? 0}
+          draft={stats?.draft ?? 0}
         />
         <TopManagersChart />
 

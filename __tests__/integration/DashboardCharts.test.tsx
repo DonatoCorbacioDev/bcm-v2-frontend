@@ -87,19 +87,19 @@ import KPICardSkeleton from '@/components/dashboard/KPICardSkeleton';
 
 describe('ContractStatsChart', () => {
   it('shows "Nessun contratto disponibile" when total is 0', () => {
-    render(<ContractStatsChart total={0} active={0} expiring={0} expired={0} />);
+    render(<ContractStatsChart total={0} active={0} expiring={0} expired={0} draft={0} />);
     expect(screen.getByText(/nessun contratto disponibile/i)).toBeInTheDocument();
   });
 
   it('renders chart title when there are contracts', () => {
-    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} />);
+    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} draft={0} />);
     expect(screen.getByText(/distribuzione contratti/i)).toBeInTheDocument();
   });
 
   it('shows the total in the center and splits out cancelled contracts so percentages sum to 100', () => {
     // active=5 includes the 2 "expiring", so the shown "Attivi" segment is 5-2=3;
     // the remaining 10-5-3=2 contracts are neither active nor expired, i.e. cancelled.
-    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} />);
+    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} draft={0} />);
     expect(screen.getByText('10')).toBeInTheDocument();
     expect(screen.getByText('Annullati')).toBeInTheDocument();
     // Attivi=3 (30%), In scadenza=2 (20%), Scaduti=3 (30%), Annullati=2 (20%) — sums to 10 / 100%.
@@ -111,25 +111,33 @@ describe('ContractStatsChart', () => {
     // active=1, expiring=0, expired=1, cancelled=3-1-1=1 → three equal segments of
     // 1 each, 33.33% raw each. Flooring alone would sum to 99 (33+33+33); the
     // largest-remainder pass bumps exactly one segment up to 34 to reach 100.
-    render(<ContractStatsChart total={3} active={1} expiring={0} expired={1} />);
+    render(<ContractStatsChart total={3} active={1} expiring={0} expired={1} draft={0} />);
     expect(screen.getAllByText('33%')).toHaveLength(2);
     expect(screen.getAllByText('34%')).toHaveLength(1);
   });
 
   it('does not show a cancelled segment when active + expired already account for the total', () => {
-    render(<ContractStatsChart total={5} active={3} expiring={0} expired={2} />);
+    render(<ContractStatsChart total={5} active={3} expiring={0} expired={2} draft={0} />);
     expect(screen.queryByText('Annullati')).not.toBeInTheDocument();
   });
 
   it('renders a single segment without padding between arcs when only one status is present', () => {
-    render(<ContractStatsChart total={5} active={5} expiring={0} expired={0} />);
+    render(<ContractStatsChart total={5} active={5} expiring={0} expired={0} draft={0} />);
     expect(screen.getByText('Attivi')).toBeInTheDocument();
     expect(screen.getByText('100%')).toBeInTheDocument();
   });
 
   it('passes a fixed numeric height to ResponsiveContainer instead of a percentage, to avoid the Recharts -1/-1 first-render warning', () => {
-    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} />);
+    render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} draft={0} />);
     expect(screen.getByTestId('responsive-container')).toHaveAttribute('data-height', '172');
+  });
+
+  it('shows draft contracts as their own segment instead of folding them into cancelled', () => {
+    // A single DRAFT contract used to be counted as "cancelled" (total - active -
+    // expired), since the backend didn't expose a draft count at all.
+    render(<ContractStatsChart total={1} active={0} expiring={0} expired={0} draft={1} />);
+    expect(screen.getByText('Bozza')).toBeInTheDocument();
+    expect(screen.queryByText('Annullati')).not.toBeInTheDocument();
   });
 });
 

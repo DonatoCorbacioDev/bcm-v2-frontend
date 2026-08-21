@@ -215,7 +215,7 @@ describe('useTopManagers', () => {
 
 describe('useDashboardStats', () => {
   it('fetches and returns stats', async () => {
-    const data = { total: 10, active: 5, expiring: 2, expired: 3 };
+    const data = { total: 10, active: 5, expiring: 2, expired: 3, draft: 0 };
     (dashboardService.getStats as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useDashboardStats(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));

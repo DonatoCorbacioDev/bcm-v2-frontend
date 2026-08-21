@@ -421,7 +421,7 @@ describe('contractWorkflowService', () => {
 
 describe('dashboardService', () => {
   it('getStats() calls GET /contracts/stats', async () => {
-    const data = { total: 10, active: 5, expiring: 2, expired: 3 };
+    const data = { total: 10, active: 5, expiring: 2, expired: 3, draft: 0 };
     mockGet.mockResolvedValue({ data });
     const result = await dashboardService.getStats();
     expect(mockGet).toHaveBeenCalledWith('/contracts/stats');

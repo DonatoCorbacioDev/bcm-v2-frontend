@@ -79,7 +79,7 @@ describe('DashboardPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useDashboardStats as jest.Mock).mockReturnValue({
-      data: { total: 10, active: 7, expiring: 2, expired: 1 },
+      data: { total: 10, active: 7, expiring: 2, expired: 1, draft: 0 },
       isLoading: false,
       isError: false,
     });

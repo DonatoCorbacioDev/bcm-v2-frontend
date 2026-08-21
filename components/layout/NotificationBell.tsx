@@ -9,11 +9,11 @@ import type { Notification } from "@/types";
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return "adesso";
+  if (mins < 60) return `${mins} min fa`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 24) return `${hours} h fa`;
+  return `${Math.floor(hours / 24)} g fa`;
 }
 
 const TYPE_DOT: Record<string, string> = {
@@ -83,7 +83,7 @@ export default function NotificationBell() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="relative p-2 rounded-lg hover:bg-accent transition-colors"
-        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
+        aria-label={unreadCount > 0 ? `Notifiche, ${unreadCount} non lette` : "Notifiche"}
       >
         <Bell className="h-5 w-5 text-muted-foreground" />
         {unreadCount > 0 && (
@@ -99,9 +99,9 @@ export default function NotificationBell() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <span className="text-sm font-semibold text-foreground">
-              Notifications
+              Notifiche
               {unreadCount > 0 && (
-                <span className="ml-2 text-xs text-muted-foreground">({unreadCount} unread)</span>
+                <span className="ml-2 text-xs text-muted-foreground">({unreadCount} non lette)</span>
               )}
             </span>
             {unreadCount > 0 && (
@@ -112,7 +112,7 @@ export default function NotificationBell() {
                 className="flex items-center gap-1 text-xs text-primary hover:text-primary disabled:opacity-50"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
-                Mark all read
+                Segna tutte come lette
               </button>
             )}
           </div>
@@ -121,7 +121,7 @@ export default function NotificationBell() {
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                No notifications
+                Nessuna notifica
               </div>
             ) : (
               notifications.map((n) => (
@@ -155,7 +155,7 @@ export default function NotificationBell() {
                       onClick={() => markReadMutation.mutate(n.id)}
                       disabled={markReadMutation.isPending}
                       className="mt-1 text-primary hover:text-primary disabled:opacity-50 flex-shrink-0"
-                      aria-label="Mark as read"
+                      aria-label="Segna come letta"
                     >
                       <Check className="h-4 w-4" />
                     </button>

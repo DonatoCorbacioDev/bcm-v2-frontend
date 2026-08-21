@@ -35,7 +35,7 @@ describe('NotificationBell', () => {
   it('shows bell button when notifications load', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
   });
 
   it('shows unread badge with correct count', async () => {
@@ -54,8 +54,8 @@ describe('NotificationBell', () => {
   it('opens dropdown on bell click', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [unread] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
     expect(screen.getByText('New Contract')).toBeInTheDocument();
   });
 
@@ -64,24 +64,24 @@ describe('NotificationBell', () => {
     render(<NotificationBell />, { wrapper: createWrapper() });
     expect(await screen.findByRole('button')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button'));
-    expect(screen.getByText(/no notifications/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessuna notifica/i)).toBeInTheDocument();
   });
 
-  it('shows "Mark all read" button when there are unread notifications', async () => {
+  it('shows "Segna tutte come lette" button when there are unread notifications', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [unread] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
-    expect(screen.getByText(/mark all read/i)).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
+    expect(screen.getByText(/segna tutte come lette/i)).toBeInTheDocument();
   });
 
   it('marks a single notification as read on check click', async () => {
     (api.patch as jest.Mock).mockResolvedValue({});
     (api.get as jest.Mock).mockResolvedValue({ data: [unread] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
-    await userEvent.click(screen.getByRole('button', { name: /mark as read/i }));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
+    await userEvent.click(screen.getByRole('button', { name: /segna come letta/i }));
     expect(api.patch).toHaveBeenCalledWith('/notifications/1/read');
   });
 
@@ -89,17 +89,17 @@ describe('NotificationBell', () => {
     (api.patch as jest.Mock).mockResolvedValue({});
     (api.get as jest.Mock).mockResolvedValue({ data: [unread, { ...unread, id: 5 }] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
-    await userEvent.click(screen.getByText(/mark all read/i));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
+    await userEvent.click(screen.getByText(/segna tutte come lette/i));
     await waitFor(() => expect(api.patch).toHaveBeenCalledTimes(2));
   });
 
   it('closes dropdown on outside click', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [unread] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
     expect(screen.getByText('New Contract')).toBeInTheDocument();
     fireEvent.mouseDown(document.body);
     await waitFor(() => expect(screen.queryByText('New Contract')).not.toBeInTheDocument());
@@ -108,8 +108,8 @@ describe('NotificationBell', () => {
   it('keeps dropdown open when clicking inside it', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [unread] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
     expect(screen.getByText('New Contract')).toBeInTheDocument();
     fireEvent.mouseDown(screen.getByText('New Contract'));
     expect(screen.getByText('New Contract')).toBeInTheDocument();
@@ -119,8 +119,8 @@ describe('NotificationBell', () => {
     const unknownType = { id: 20, title: 'Critical', message: 'msg', read: false, createdAt: new Date().toISOString(), type: 'CRITICAL' as 'INFO' };
     (api.get as jest.Mock).mockResolvedValue({ data: [unknownType] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
     expect(screen.getByText('Critical')).toBeInTheDocument();
   });
 
@@ -128,23 +128,23 @@ describe('NotificationBell', () => {
     const noType = { id: 10, title: 'No type', message: 'msg', read: false, createdAt: new Date().toISOString() };
     (api.get as jest.Mock).mockResolvedValue({ data: [noType] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
     expect(screen.getByText('No type')).toBeInTheDocument();
   });
 
   it('renders different notification types (INFO, WARNING, ERROR) with timeAgo', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [unread, read, error, oldNote] });
     render(<NotificationBell />, { wrapper: createWrapper() });
-    expect(await screen.findByRole('button', { name: /notifications/i })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: /notifications/i }));
+    expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
     expect(screen.getByText('New Contract')).toBeInTheDocument();
     expect(screen.getByText('Reminder')).toBeInTheDocument();
     expect(screen.getByText('Error')).toBeInTheDocument();
-    // timeAgo branches: just now, h ago, d ago
-    expect(screen.getByText('just now')).toBeInTheDocument();
-    expect(screen.getByText('30m ago')).toBeInTheDocument();
-    expect(screen.getByText('1h ago')).toBeInTheDocument();
-    expect(screen.getByText('1d ago')).toBeInTheDocument();
+    // timeAgo branches: adesso, min fa, h fa, g fa
+    expect(screen.getByText('adesso')).toBeInTheDocument();
+    expect(screen.getByText('30 min fa')).toBeInTheDocument();
+    expect(screen.getByText('1 h fa')).toBeInTheDocument();
+    expect(screen.getByText('1 g fa')).toBeInTheDocument();
   });
 });

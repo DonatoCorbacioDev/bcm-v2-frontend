@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
@@ -38,7 +39,7 @@ describe('LoginPage', () => {
   });
 
   it('renders username and password fields and the sign in button', () => {
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     expect(screen.getByLabelText(/nome utente/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
@@ -50,7 +51,7 @@ describe('LoginPage', () => {
       response: { status: 401, data: { message: 'Invalid credentials' } },
     });
 
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/nome utente/i), 'wrong@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword');
@@ -66,7 +67,7 @@ describe('LoginPage', () => {
       response: { status: 401, data: {} },
     });
 
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/nome utente/i), 'wrong@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'wrongpassword');
@@ -80,7 +81,7 @@ describe('LoginPage', () => {
   it('shows fallback error message on network error with no response body', async () => {
     mockPost.mockRejectedValueOnce({ code: 'ECONNABORTED' });
 
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/nome utente/i), 'user@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password');
@@ -105,7 +106,7 @@ describe('LoginPage', () => {
       },
     });
 
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/nome utente/i), 'admin@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password123');
@@ -124,7 +125,7 @@ describe('LoginPage', () => {
       data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
     });
 
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/nome utente/i), 'totp@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password123');
@@ -152,7 +153,7 @@ describe('LoginPage', () => {
       data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
     });
 
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/nome utente/i), 'totp@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password123');
@@ -178,7 +179,7 @@ describe('LoginPage', () => {
       data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
     });
 
-    render(<LoginPage />);
+    render(<LoginPage />, { wrapper: createWrapper() });
 
     await userEvent.type(screen.getByLabelText(/nome utente/i), 'totp@example.com');
     await userEvent.type(screen.getByLabelText(/password/i), 'password123');

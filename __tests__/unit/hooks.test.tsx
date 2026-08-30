@@ -1,4 +1,6 @@
+import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createWrapper } from '../mocks/wrapper';
 
 // ─── Service mocks ────────────────────────────────────────────────────────────
@@ -434,7 +436,7 @@ describe('useAuth', () => {
     });
     (api.post as jest.Mock).mockResolvedValue({});
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     await act(async () => { await result.current.logout(); });
     expect(api.post).toHaveBeenCalledWith('/auth/logout');
     expect(mockClearAuth).toHaveBeenCalled();
@@ -448,7 +450,7 @@ describe('useAuth', () => {
     });
     (api.post as jest.Mock).mockRejectedValue(new Error('network error'));
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     await act(async () => { await result.current.logout(); });
     expect(mockClearAuth).toHaveBeenCalled();
   });
@@ -461,7 +463,7 @@ describe('useAuth', () => {
     });
     (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123', mfaRequired: false, mfaToken: null } });
     (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let loginResult: LoginResult | undefined;
     await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'pw' }); });
     expect(loginResult?.success).toBe(true);
@@ -479,7 +481,7 @@ describe('useAuth', () => {
     (api.post as jest.Mock).mockRejectedValue({
       response: { data: { message: 'Invalid credentials' } },
     });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let loginResult: LoginResult | undefined;
     await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
     expect(loginResult?.success).toBe(false);
@@ -492,7 +494,7 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockRejectedValue({ response: { data: {} } });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let loginResult: LoginResult | undefined;
     await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
     expect(loginResult?.success).toBe(false);
@@ -505,7 +507,7 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockRejectedValue(new Error('Network Error'));
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let loginResult: LoginResult | undefined;
     await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
     expect(loginResult?.success).toBe(false);
@@ -518,7 +520,7 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockRejectedValue({ response: {} });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let loginResult: LoginResult | undefined;
     await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'wrong' }); });
     expect(loginResult?.success).toBe(false);
@@ -533,7 +535,7 @@ describe('useAuth', () => {
     (api.post as jest.Mock).mockResolvedValue({
       data: { token: null, mfaRequired: true, mfaToken: 'pending-token-123' },
     });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let loginResult: LoginResult | undefined;
     await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'pw' }); });
     expect(loginResult).toEqual({ success: false, mfaRequired: true, mfaToken: 'pending-token-123' });
@@ -548,7 +550,7 @@ describe('useAuth', () => {
     });
     (api.post as jest.Mock).mockResolvedValue({ data: { token: 'real-token', mfaRequired: false, mfaToken: null } });
     (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let success: boolean | undefined;
     await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '123456'); });
     expect(success).toBe(true);
@@ -562,7 +564,7 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockRejectedValue({ response: { data: { message: 'Invalid verification code' } } });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let success: boolean | undefined;
     await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '000000'); });
     expect(success).toBe(false);
@@ -575,7 +577,7 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockRejectedValue(new Error('Network Error'));
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let success: boolean | undefined;
     await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '000000'); });
     expect(success).toBe(false);
@@ -588,11 +590,52 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockRejectedValue({ response: {} });
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let success: boolean | undefined;
     await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '000000'); });
     expect(success).toBe(false);
     expect(result.current.error).toBe('Codice non valido. Riprova.');
+  });
+
+  // Regression coverage for the stale-cache-across-users bug fixed 2026-08-30:
+  // dashboard/contract query keys aren't scoped per-user, so without this the
+  // next account to log in (or the login screen after a logout) in the same
+  // tab could render the previous session's cached data for a moment.
+  it('clears the React Query cache on a successful login', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const clearSpy = jest.spyOn(queryClient, 'clear');
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123', mfaRequired: false, mfaToken: null } });
+    (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(async () => { await result.current.login({ username: 'alice', password: 'pw' }); });
+
+    expect(clearSpy).toHaveBeenCalled();
+  });
+
+  it('clears the React Query cache on logout', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const clearSpy = jest.spyOn(queryClient, 'clear');
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      setAuth: jest.fn(), clearAuth: jest.fn(),
+      user: null, isAuthenticated: false,
+    });
+    (api.post as jest.Mock).mockResolvedValue({});
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(async () => { await result.current.logout(); });
+
+    expect(clearSpy).toHaveBeenCalled();
   });
 });
 

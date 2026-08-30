@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
 import type { LoginRequest } from "@/types";
@@ -33,6 +34,7 @@ interface ApiError extends AxiosError<{ message?: string }> {
 
 export const useAuth = () => {
   const { setAuth, clearAuth, user, isAuthenticated } = useAuthStore();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +45,11 @@ export const useAuth = () => {
     const profileResponse = await api.get<UserProfile>("/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
+    // Query keys (dashboard stats, contracts, ...) aren't scoped per-user, so
+    // a query cached under a previous session (5min staleTime on the
+    // dashboard ones) would otherwise render stale — or another user's —
+    // data for a moment after switching accounts in the same tab.
+    queryClient.clear();
     setAuth(profileResponse.data, token);
   };
 
@@ -101,6 +108,9 @@ export const useAuth = () => {
       // proceed with clearing auth even if server-side revocation fails
     } finally {
       clearAuth();
+      // Same reasoning as completeLogin() — don't leave this user's cached
+      // data around for whoever logs in next in this tab.
+      queryClient.clear();
     }
   };
 

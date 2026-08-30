@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { Search, Moon, Sun, PanelLeft, ChevronDown } from "lucide-react";
 import NotificationBell from "@/components/layout/NotificationBell";
@@ -55,10 +56,18 @@ export default function Header({
   onCollapseToggle,
 }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const user = useAuthStore(/* istanbul ignore next */ (state) => state.user);
   const { isDark, toggle: toggleDark } = useDarkMode();
   const title = getPageTitle(pathname);
   const initials = getUserInitials(user?.username);
+  const [searchValue, setSearchValue] = useState("");
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmed = searchValue.trim();
+    router.push(trimmed ? `/contracts?q=${encodeURIComponent(trimmed)}` : "/contracts");
+  };
 
   return (
     <header
@@ -100,11 +109,22 @@ export default function Header({
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Search */}
-      <div className="hidden lg:flex items-center gap-2 h-9 w-[240px] px-3 rounded-lg border border-border bg-background text-[13px] text-muted-foreground">
-        <Search className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        <span className="truncate">Cerca contratti, controparti…</span>
-      </div>
+      {/* Search — jumps to the Contratti page pre-filtered by this term
+          (same contractNumber/customerName match as its own search box). */}
+      <form
+        onSubmit={handleSearchSubmit}
+        className="hidden lg:flex items-center gap-2 h-9 w-[240px] px-3 rounded-lg border border-border bg-background text-[13px] focus-within:ring-1 focus-within:ring-ring"
+      >
+        <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <input
+          type="text"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          placeholder="Cerca contratti, controparti…"
+          aria-label="Cerca contratti, controparti"
+          className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
+        />
+      </form>
 
       {/* Right cluster */}
       <div className="flex items-center gap-1">

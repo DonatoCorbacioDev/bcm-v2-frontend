@@ -2,6 +2,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createWrapper } from '../mocks/wrapper';
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 jest.mock('@/store/authStore', () => ({
   useAuthStore: jest.fn(),
 }));

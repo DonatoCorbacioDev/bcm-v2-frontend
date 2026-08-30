@@ -134,9 +134,12 @@ function getPageNumbers(current: number, total: number): PageItem[] {
 
 interface ContractTableProps {
   readonly onEditClick: (contract: Contract) => void;
+  /** Pre-fills the search box — used by the header's global search, which
+   * links here as `/contracts?q=...`. */
+  readonly initialSearchQuery?: string;
 }
 
-export default function ContractTable({ onEditClick }: ContractTableProps) {
+export default function ContractTable({ onEditClick, initialSearchQuery = "" }: ContractTableProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { user } = useAuthStore();
@@ -147,8 +150,18 @@ export default function ContractTable({ onEditClick }: ContractTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
   // Search and filter state (server-side now)
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+
+  // Re-searching from the header while already on this page (same route,
+  // new `q`) doesn't remount this component, so the useState initializer
+  // above won't see the new value — pick it up here instead.
+  const [prevInitialSearchQuery, setPrevInitialSearchQuery] = useState(initialSearchQuery);
+  if (initialSearchQuery !== prevInitialSearchQuery) {
+    setPrevInitialSearchQuery(initialSearchQuery);
+    setSearchQuery(initialSearchQuery);
+    setPage(0);
+  }
 
   // Sort state (client-side, current page only — see sortContracts)
   const [sortKey, setSortKey] = useState<SortableColumn | null>(null);

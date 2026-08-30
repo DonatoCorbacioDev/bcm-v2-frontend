@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import ContractTable from "@/components/contracts/ContractTable";
 import ContractForm from "@/components/contracts/ContractForm";
@@ -21,9 +22,11 @@ import { useManagers } from "@/hooks/useManagers";
 import { toast } from "sonner";
 import { FileSpreadsheet, FileText, Upload } from "lucide-react";
 
-export default function ContractsPage() {
+function ContractsPageContent() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
+  const searchParams = useSearchParams();
+  const initialSearchQuery = searchParams.get("q") ?? "";
 
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
@@ -160,7 +163,7 @@ export default function ContractsPage() {
 
       <SemanticSearchBar />
 
-      <ContractTable onEditClick={handleEditClick} />
+      <ContractTable onEditClick={handleEditClick} initialSearchQuery={initialSearchQuery} />
 
       {isAdmin && (
         <ContractImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
@@ -181,5 +184,13 @@ export default function ContractsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function ContractsPage() {
+  return (
+    <Suspense>
+      <ContractsPageContent />
+    </Suspense>
   );
 }

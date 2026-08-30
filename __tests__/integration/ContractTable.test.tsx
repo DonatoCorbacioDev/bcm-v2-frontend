@@ -186,6 +186,34 @@ describe('ContractTable', () => {
     expect(screen.getByText(/modifica i criteri di ricerca/i)).toBeInTheDocument();
   });
 
+  it('pre-fills the search box from initialSearchQuery (header search deep-link)', () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([activeContract]),
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} initialSearchQuery="Acme" />, { wrapper: createWrapper() });
+
+    expect(screen.getByPlaceholderText(/cerca contratti/i)).toHaveValue('Acme');
+  });
+
+  it('re-syncs the search box when initialSearchQuery changes without remounting', () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([activeContract]),
+      isLoading: false,
+      isError: false,
+    });
+
+    const { rerender } = render(
+      <ContractTable onEditClick={onEditClick} initialSearchQuery="Acme" />,
+      { wrapper: createWrapper() }
+    );
+    rerender(<ContractTable onEditClick={onEditClick} initialSearchQuery="Beta" />);
+
+    expect(screen.getByPlaceholderText(/cerca contratti/i)).toHaveValue('Beta');
+  });
+
   // ── Data rendering ────────────────────────────────────────────────────────
 
   it('renders contract rows with number, customer name and status', () => {

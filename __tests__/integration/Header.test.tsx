@@ -4,8 +4,10 @@ import userEvent from '@testing-library/user-event';
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
+const mockPush = jest.fn();
+
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush }),
   usePathname: jest.fn(() => '/dashboard'),
 }));
 
@@ -155,5 +157,28 @@ describe('Header', () => {
     (usePathname as jest.Mock).mockReturnValueOnce('/unknown-page');
     render(<Header {...defaultProps} />);
     expect(screen.getByText('Business Contracts Manager')).toBeInTheDocument();
+  });
+
+  describe('global search box', () => {
+    it('accepts typed input', async () => {
+      render(<Header {...defaultProps} />);
+      const input = screen.getByRole('textbox', { name: /cerca contratti, controparti/i });
+      await userEvent.type(input, 'Acme');
+      expect(input).toHaveValue('Acme');
+    });
+
+    it('navigates to /contracts with the typed term on submit', async () => {
+      render(<Header {...defaultProps} />);
+      const input = screen.getByRole('textbox', { name: /cerca contratti, controparti/i });
+      await userEvent.type(input, 'Acme Corp{Enter}');
+      expect(mockPush).toHaveBeenCalledWith('/contracts?q=Acme%20Corp');
+    });
+
+    it('navigates to /contracts with no query when submitted empty', async () => {
+      render(<Header {...defaultProps} />);
+      const input = screen.getByRole('textbox', { name: /cerca contratti, controparti/i });
+      await userEvent.type(input, '{Enter}');
+      expect(mockPush).toHaveBeenCalledWith('/contracts');
+    });
   });
 });

@@ -63,7 +63,7 @@ export default function Header({
   const initials = getUserInitials(user?.username);
   const [searchValue, setSearchValue] = useState("");
 
-  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSearchSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmed = searchValue.trim();
     router.push(trimmed ? `/contracts?q=${encodeURIComponent(trimmed)}` : "/contracts");

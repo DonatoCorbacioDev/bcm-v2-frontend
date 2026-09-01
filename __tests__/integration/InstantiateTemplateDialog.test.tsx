@@ -72,6 +72,7 @@ jest.mock('@tanstack/react-query', () => {
 import { toast } from 'sonner';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
 import { useManagers } from '@/hooks/useManagers';
+import { useAuthStore } from '@/store/authStore';
 import InstantiateTemplateDialog from '@/components/contract-templates/InstantiateTemplateDialog';
 
 const baseTemplate = { id: 3, name: 'NDA Standard', autoRenew: false } as never;
@@ -234,6 +235,23 @@ describe('InstantiateTemplateDialog', () => {
     );
     expect(screen.getByRole('alert')).toHaveTextContent(/serve prima crearne una|contatta un amministratore/i);
     expect(screen.getByRole('button', { name: /crea contratto/i })).toBeDisabled();
+  });
+
+  it('shows the admin-specific banner message and action link when the caller is an ADMIN', () => {
+    useAuthStore.setState({
+      user: { id: 1, username: 'admin', managerId: 0, role: 'ADMIN', roleId: 1, verified: true, createdAt: '' },
+    });
+    (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false, isSuccess: true });
+    try {
+      render(
+        <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
+        { wrapper: createWrapper() }
+      );
+      expect(screen.getByRole('alert')).toHaveTextContent(/serve prima crearne una/i);
+      expect(screen.getByRole('link', { name: /crea un'area di business/i })).toBeInTheDocument();
+    } finally {
+      useAuthStore.setState({ user: null });
+    }
   });
 
   it('does NOT show the banner when the template already has a default area, even if none exist org-wide', () => {

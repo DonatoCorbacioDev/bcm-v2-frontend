@@ -334,7 +334,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       title="Carica nuova versione"
                       aria-label="Carica nuova versione"
                     >
-                      {uploadVersionMutation.isPending && uploadVersionMutation.variables?.documentId === doc.id ? (
+                      {/* variables is always set once isPending is true — React Query updates both
+                          atomically on mutate() — so this is never the nullish case the `?.` guards for. */}
+                      {uploadVersionMutation.isPending && uploadVersionMutation.variables!.documentId === doc.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <FilePlus2 className="h-4 w-4" />
@@ -502,7 +504,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
         documentId={historyDoc?.id ?? null}
         fileName={historyDoc?.fileName ?? ""}
         open={historyDoc !== null}
-        onOpenChange={(next) => { if (!next) setHistoryDoc(null); }}
+        onOpenChange={() => setHistoryDoc(null)}
         onDownload={handleDownload}
       />
     </div>

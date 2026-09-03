@@ -7,16 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAgentInsights } from "@/hooks/useAgentInsights";
 import { useAskAgent } from "@/hooks/useAskAgent";
+import { useCreateReminder } from "@/hooks/useCreateReminder";
 
 export function AgentInsightsWidget() {
   const { data, isLoading, isError } = useAgentInsights();
   const [question, setQuestion] = useState("");
   const askAgent = useAskAgent();
+  const createReminder = useCreateReminder();
 
   function handleAsk(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const trimmed = question.trim();
     if (!trimmed) return;
+    createReminder.reset();
     askAgent.mutate(trimmed);
   }
 
@@ -104,6 +107,41 @@ export function AgentInsightsWidget() {
           <p className="mt-3 text-sm text-muted-foreground">
             Non è stato possibile contattare l&apos;assistente. Riprova.
           </p>
+        )}
+
+        {askAgent.isSuccess && askAgent.data.proposedAction && (
+          <div className="mt-3 rounded-lg border border-border p-3 space-y-2">
+            <p className="text-sm text-foreground">
+              Promemoria proposto per{" "}
+              <span className="font-medium">{askAgent.data.proposedAction.customerName}</span>:
+              {" "}&ldquo;{askAgent.data.proposedAction.message}&rdquo;
+            </p>
+            {createReminder.isSuccess ? (
+              <p className="text-sm text-[var(--status-green-fg)]">Promemoria creato.</p>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                disabled={createReminder.isPending}
+                onClick={() => {
+                  const action = askAgent.data?.proposedAction;
+                  if (!action) return;
+                  createReminder.mutate({ contractId: action.contractId, message: action.message });
+                }}
+              >
+                {createReminder.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  "Conferma promemoria"
+                )}
+              </Button>
+            )}
+            {createReminder.isError && (
+              <p className="text-sm text-muted-foreground">
+                Impossibile creare il promemoria. Riprova.
+              </p>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>

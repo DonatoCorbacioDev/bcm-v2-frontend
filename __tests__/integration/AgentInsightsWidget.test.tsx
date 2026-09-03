@@ -96,5 +96,69 @@ describe('AgentInsightsWidget', () => {
 
       expect(await screen.findByText(/non è stato possibile contattare l'assistente/i)).toBeInTheDocument();
     });
+
+    describe('confirming a proposed reminder', () => {
+      function mockProposedAction() {
+        (api.post as jest.Mock).mockImplementation((url: string) => {
+          if (url === '/agent/ask') {
+            return Promise.resolve({
+              data: {
+                answer: 'Ho preparato un promemoria, confermi?',
+                error: null,
+                proposedAction: { type: 'CREATE_REMINDER', contractId: 1, customerName: 'Acme', message: 'Rinnovo in scadenza' },
+              },
+            });
+          }
+          return Promise.resolve({ data: {} });
+        });
+      }
+
+      it('shows the proposed reminder with a confirm button', async () => {
+        mockProposedAction();
+        render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+
+        await userEvent.type(screen.getByLabelText('Chiedi qualcosa sui tuoi contratti'), 'Ricordami di rinnovare Acme');
+        await userEvent.click(screen.getByRole('button', { name: 'Invia domanda' }));
+
+        expect(await screen.findByText(/rinnovo in scadenza/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Conferma promemoria' })).toBeInTheDocument();
+      });
+
+      it('creates the reminder and shows a confirmation on click', async () => {
+        mockProposedAction();
+        render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+
+        await userEvent.type(screen.getByLabelText('Chiedi qualcosa sui tuoi contratti'), 'Ricordami di rinnovare Acme');
+        await userEvent.click(screen.getByRole('button', { name: 'Invia domanda' }));
+        await userEvent.click(await screen.findByRole('button', { name: 'Conferma promemoria' }));
+
+        await waitFor(() =>
+          expect(api.post).toHaveBeenCalledWith('/notifications', { contractId: 1, message: 'Rinnovo in scadenza' })
+        );
+        expect(await screen.findByText('Promemoria creato.')).toBeInTheDocument();
+      });
+
+      it('shows an error when confirming the reminder fails', async () => {
+        (api.post as jest.Mock).mockImplementation((url: string) => {
+          if (url === '/agent/ask') {
+            return Promise.resolve({
+              data: {
+                answer: 'Confermi?',
+                error: null,
+                proposedAction: { type: 'CREATE_REMINDER', contractId: 1, customerName: 'Acme', message: 'hi' },
+              },
+            });
+          }
+          return Promise.reject(new Error('Network Error'));
+        });
+        render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+
+        await userEvent.type(screen.getByLabelText('Chiedi qualcosa sui tuoi contratti'), 'Ricordami Acme');
+        await userEvent.click(screen.getByRole('button', { name: 'Invia domanda' }));
+        await userEvent.click(await screen.findByRole('button', { name: 'Conferma promemoria' }));
+
+        expect(await screen.findByText(/impossibile creare il promemoria/i)).toBeInTheDocument();
+      });
+    });
   });
 });

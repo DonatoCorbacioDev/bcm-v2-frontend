@@ -148,10 +148,20 @@ export interface AgentInsights {
   error: string | null;
 }
 
+// A write action the agent suggests but never performs itself — the user
+// must explicitly confirm it (POST /notifications) before anything is created.
+export interface ProposedAction {
+  type: "CREATE_REMINDER";
+  contractId: number;
+  customerName: string;
+  message: string;
+}
+
 // Response from POST /agent/ask (free-text question answered via tool-calling).
 export interface AgentAnswer {
   answer: string | null;
   error: string | null;
+  proposedAction: ProposedAction | null;
 }
 
 export interface SemanticSearchResult {

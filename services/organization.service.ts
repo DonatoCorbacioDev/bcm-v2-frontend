@@ -12,7 +12,6 @@ export interface Organization {
 
 export interface UpdateOrganizationPayload {
   name?: string;
-  subscriptionTier?: string;
   iban?: string;
   bic?: string;
 }

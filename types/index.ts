@@ -148,6 +148,12 @@ export interface AgentInsights {
   error: string | null;
 }
 
+// Response from POST /agent/ask (free-text question answered via tool-calling).
+export interface AgentAnswer {
+  answer: string | null;
+  error: string | null;
+}
+
 export interface SemanticSearchResult {
   contractId: number;
   contractNumber: string;

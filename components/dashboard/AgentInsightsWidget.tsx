@@ -1,11 +1,24 @@
 "use client";
 
-import { Sparkles, Loader2, WifiOff } from "lucide-react";
+import { useState } from "react";
+import { Sparkles, Loader2, WifiOff, Send } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useAgentInsights } from "@/hooks/useAgentInsights";
+import { useAskAgent } from "@/hooks/useAskAgent";
 
 export function AgentInsightsWidget() {
   const { data, isLoading, isError } = useAgentInsights();
+  const [question, setQuestion] = useState("");
+  const askAgent = useAskAgent();
+
+  function handleAsk(e: React.SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const trimmed = question.trim();
+    if (!trimmed) return;
+    askAgent.mutate(trimmed);
+  }
 
   return (
     <Card>
@@ -54,6 +67,42 @@ export function AgentInsightsWidget() {
         {!isLoading && !isError && data?.report && (
           <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
             {data.report}
+          </p>
+        )}
+
+        <form onSubmit={handleAsk} className="mt-4 flex items-center gap-2">
+          <Input
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder="Chiedi qualcosa sui tuoi contratti..."
+            disabled={askAgent.isPending}
+            aria-label="Chiedi qualcosa sui tuoi contratti"
+          />
+          <Button
+            type="submit"
+            size="icon"
+            disabled={askAgent.isPending || !question.trim()}
+            aria-label="Invia domanda"
+          >
+            {askAgent.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Send className="h-4 w-4" aria-hidden="true" />
+            )}
+          </Button>
+        </form>
+
+        {askAgent.isSuccess && askAgent.data.error && (
+          <p className="mt-3 text-sm text-muted-foreground">{askAgent.data.error}</p>
+        )}
+        {askAgent.isSuccess && askAgent.data.answer && (
+          <p className="mt-3 text-sm text-foreground whitespace-pre-line leading-relaxed">
+            {askAgent.data.answer}
+          </p>
+        )}
+        {askAgent.isError && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Non è stato possibile contattare l&apos;assistente. Riprova.
           </p>
         )}
       </CardContent>

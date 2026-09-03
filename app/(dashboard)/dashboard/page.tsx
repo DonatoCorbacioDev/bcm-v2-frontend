@@ -20,6 +20,7 @@ import { TopManagersChart } from "@/components/dashboard/TopManagersChart";
 import { FinancialForecastChart } from "@/components/dashboard/FinancialForecastChart";
 import { RiskScoreWidget } from "@/components/dashboard/RiskScoreWidget";
 import { AnomalyWidget } from "@/components/dashboard/AnomalyWidget";
+import { AgentInsightsWidget } from "@/components/dashboard/AgentInsightsWidget";
 import { RecommendedActions, CRITICAL_RENEWAL_DAYS } from "@/components/dashboard/RecommendedActions";
 
 export default function DashboardPage() {
@@ -261,6 +262,11 @@ export default function DashboardPage() {
         {/* Row 5: Financial anomalies (full width — table benefits from wider layout) */}
         <div className="lg:col-span-2">
           <AnomalyWidget />
+        </div>
+
+        {/* Row 6: AI narrative synthesis (full width — prose reads better wide) */}
+        <div className="lg:col-span-2">
+          <AgentInsightsWidget />
         </div>
       </div>
     </div>

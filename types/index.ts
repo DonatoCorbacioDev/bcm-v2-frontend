@@ -139,6 +139,15 @@ export interface ForecastResponse {
   reliable?: boolean;
 }
 
+// Narrative report from bcm-v2-ml's LLM agent (risk + forecast synthesis).
+// riskScores/forecast are also in the payload but unused here — the other
+// dashboard widgets already render that raw data; this type only covers
+// what AgentInsightsWidget actually displays.
+export interface AgentInsights {
+  report: string | null;
+  error: string | null;
+}
+
 export interface SemanticSearchResult {
   contractId: number;
   contractNumber: string;

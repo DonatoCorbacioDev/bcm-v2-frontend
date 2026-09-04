@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { api, AGENT_REQUEST_TIMEOUT_MS } from "@/lib/api";
 import type { AgentInsights } from "@/types";
 
 export function useAgentInsights() {
   return useQuery<AgentInsights>({
     queryKey: ["agent-insights"],
     queryFn: async () => {
-      const res = await api.get<AgentInsights>("/agent/insights");
+      const res = await api.get<AgentInsights>("/agent/insights", {
+        timeout: AGENT_REQUEST_TIMEOUT_MS,
+      });
       return res.data;
     },
     retry: false,

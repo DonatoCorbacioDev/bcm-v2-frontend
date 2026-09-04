@@ -5,6 +5,7 @@ import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('@/lib/api', () => ({
   api: { get: jest.fn(), post: jest.fn() },
+  AGENT_REQUEST_TIMEOUT_MS: 140_000,
 }));
 
 import { api } from '@/lib/api';
@@ -47,6 +48,18 @@ describe('AgentInsightsWidget', () => {
     expect(await screen.findByText(/i contratti più a rischio sono/i)).toBeInTheDocument();
   });
 
+  it('requests /agent/insights with a timeout above the backend/Ollama response budget', async () => {
+    // Regression test: the shared axios instance defaults to a 10s timeout,
+    // which is too short for a real (up to ~40s) LLM response — this request
+    // must override it, or the widget aborts a legitimate slow response.
+    (api.get as jest.Mock).mockResolvedValue({ data: { report: null, error: null } });
+    render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+
+    await waitFor(() =>
+      expect(api.get).toHaveBeenCalledWith('/agent/insights', { timeout: 140_000 })
+    );
+  });
+
   describe('ask a question', () => {
     beforeEach(() => {
       (api.get as jest.Mock).mockResolvedValue({ data: { report: null, error: null } });
@@ -70,7 +83,11 @@ describe('AgentInsightsWidget', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Invia domanda' }));
 
       await waitFor(() =>
-        expect(api.post).toHaveBeenCalledWith('/agent/ask', { question: 'Quali contratti scadono a marzo?' })
+        expect(api.post).toHaveBeenCalledWith(
+          '/agent/ask',
+          { question: 'Quali contratti scadono a marzo?' },
+          { timeout: 140_000 }
+        )
       );
       expect(await screen.findByText('Hai 3 contratti in scadenza a marzo.')).toBeInTheDocument();
     });

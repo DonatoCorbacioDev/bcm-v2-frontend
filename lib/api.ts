@@ -30,6 +30,14 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+// The agent endpoints (/agent/insights, /agent/ask) call an LLM through the
+// backend's own ML proxy, which allows up to 130s for a slow-but-successful
+// Ollama response (see bcm-v2-backend's RestTemplateConfig). The 10s default
+// above is right for every other (fast, DB-backed) endpoint but would abort
+// a legitimate agent response — pass this as a per-request `timeout` override
+// on those two calls specifically, never change the instance default.
+export const AGENT_REQUEST_TIMEOUT_MS = 140_000;
+
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().getToken();

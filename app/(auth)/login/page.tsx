@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogoMark } from "@/components/layout/Logo";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import { ArrowRight, Lock, Moon, Sun } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lock, Moon, Sun } from "lucide-react";
 
 function LoginContent() {
   const router = useRouter();
@@ -106,6 +106,15 @@ function LoginContent() {
         id="main-content"
         className="flex flex-col items-center justify-center p-8 relative bg-card"
       >
+        {/* Back to home */}
+        <Link
+          href="/"
+          className="absolute top-4 left-4 flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          Torna alla home
+        </Link>
+
         {/* Theme toggle */}
         <button
           type="button"

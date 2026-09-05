@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import Script from "next/script";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
+import { CookieNotice } from "@/components/legal/CookieNotice";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -45,12 +46,13 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReactQueryProvider>
           {children}
-          <Toaster 
-            position="top-right" 
-            richColors 
+          <Toaster
+            position="top-right"
+            richColors
             closeButton
             duration={3000}
           />
+          <CookieNotice />
         </ReactQueryProvider>
       </body>
     </html>

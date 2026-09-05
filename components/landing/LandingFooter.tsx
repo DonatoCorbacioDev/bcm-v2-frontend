@@ -79,6 +79,7 @@ export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
             <ul className="space-y-2">
               {[
                 { href: "/privacy", label: "Informativa Privacy" },
+                { href: "/cookie-policy", label: "Cookie Policy" },
                 { href: "/trasparenza-ai", label: "Trasparenza sull'AI" },
               ].map((link) => (
                 <li key={link.href}>

@@ -166,20 +166,34 @@ describe('FinancialValueTable', () => {
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
-  // ── Category filter ───────────────────────────────────────────────────────
+  // ── Category sections (revenue and cost are never in the same table) ────────
 
-  it('shows a category badge per row', () => {
+  it('renders revenue and cost as two separate sections', () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText('Ricavo')).toBeInTheDocument();
-    expect(screen.getByText('Costo')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Ricavi' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Costi' })).toBeInTheDocument();
   });
 
-  it('filters by category', async () => {
+  it('places a revenue row only under the Ricavi section, never Costi', () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('combobox', { name: /filtra per categoria/i }));
-    await userEvent.click(await screen.findByRole('option', { name: /^ricavi$/i }));
-    expect(screen.getByText('Gen/2024')).toBeInTheDocument();
-    expect(screen.queryByText('Giu/2024')).not.toBeInTheDocument();
+    const tables = screen.getAllByRole('table');
+    expect(within(tables[0]).getByText('Gen/2024')).toBeInTheDocument();
+    expect(within(tables[0]).queryByText('Giu/2024')).not.toBeInTheDocument();
+    expect(within(tables[1]).getByText('Giu/2024')).toBeInTheDocument();
+    expect(within(tables[1]).queryByText('Gen/2024')).not.toBeInTheDocument();
+  });
+
+  it('shows a per-section total', () => {
+    render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    const totals = screen.getAllByText('Totale');
+    expect(totals).toHaveLength(2);
+  });
+
+  it('shows an empty message for a section with no rows after filtering', async () => {
+    render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('combobox', { name: /filtra per mese/i }));
+    await userEvent.click(await screen.findByRole('option', { name: /^gennaio$/i }));
+    expect(screen.getByText(/nessun costo per questo periodo/i)).toBeInTheDocument();
   });
 
   // ── Year prop ─────────────────────────────────────────────────────────────

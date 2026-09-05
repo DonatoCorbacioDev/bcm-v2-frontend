@@ -11,11 +11,11 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,17 +38,24 @@ import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 const EUR_FORMATTER = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
+const MONTH_NAMES = [
+  "Gen", "Feb", "Mar", "Apr", "Mag", "Giu",
+  "Lug", "Ago", "Set", "Ott", "Nov", "Dic",
+];
+const getMonthName = (month: number) => /* istanbul ignore next */ MONTH_NAMES[month - 1] || month;
+
 interface FinancialValueTableProps {
   readonly onEditClick: (financialValue: FinancialValue) => void;
   /** Restricts rows to this year. `null` (the default) shows every year. */
   readonly year?: number | null;
 }
 
-// Search and filter logic for financial values
+// Search and filter logic for financial values (category is no longer a
+// filter: revenue and cost render as two separate sections, never mixed in
+// the same table - see CategorySection below).
 function useFinancialValueFilters(financialValues: FinancialValue[], year: number | null) {
   const [searchQuery, setSearchQuery] = useState("");
   const [monthFilter, setMonthFilter] = useState<string>("ALL");
-  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
 
   const yearScopedValues = useMemo(
     () => (year === null ? financialValues : financialValues.filter((fv) => fv.year === year)),
@@ -57,48 +64,127 @@ function useFinancialValueFilters(financialValues: FinancialValue[], year: numbe
 
   const filteredFinancialValues = useMemo(() => {
     return yearScopedValues.filter((fv) => {
-      // Search filter (year or amount)
       const matchesSearch =
         searchQuery === "" ||
         fv.year.toString().includes(searchQuery) ||
         fv.financialAmount.toString().includes(searchQuery);
 
-      // Month filter
       const matchesMonth =
         monthFilter === "ALL" || fv.month.toString() === monthFilter;
 
-      // Category filter (Ricavi/Costi)
-      const matchesCategory =
-        categoryFilter === "ALL" || fv.category === categoryFilter;
-
-      return matchesSearch && matchesMonth && matchesCategory;
+      return matchesSearch && matchesMonth;
     });
-  }, [yearScopedValues, searchQuery, monthFilter, categoryFilter]);
+  }, [yearScopedValues, searchQuery, monthFilter]);
 
   return {
     searchQuery,
     setSearchQuery,
     monthFilter,
     setMonthFilter,
-    categoryFilter,
-    setCategoryFilter,
     filteredFinancialValues,
     yearScopedCount: yearScopedValues.length,
   };
+}
+
+interface CategorySectionProps {
+  readonly title: string;
+  readonly emptyLabel: string;
+  readonly rows: FinancialValue[];
+  readonly totalVariantClass: string;
+  readonly onEditClick: (fv: FinancialValue) => void;
+  readonly onDeleteClick: (fv: FinancialValue) => void;
+}
+
+function CategorySection({ title, emptyLabel, rows, totalVariantClass, onEditClick, onDeleteClick }: CategorySectionProps) {
+  const total = rows.reduce((sum, fv) => sum + fv.financialAmount, 0);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        <span className="text-xs text-muted-foreground">{rows.length} {rows.length === 1 ? "voce" : "voci"}</span>
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="text-center py-6 text-sm text-muted-foreground bg-card rounded-lg border border-border">
+          {emptyLabel}
+        </div>
+      ) : (
+        <div className="bg-card rounded-lg border border-border overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Periodo</TableHead>
+                <TableHead>Importo</TableHead>
+                <TableHead className="hidden md:table-cell">Cliente</TableHead>
+                <TableHead className="hidden lg:table-cell">Tipo</TableHead>
+                <TableHead className="hidden lg:table-cell">Area di business</TableHead>
+                <TableHead>Azioni</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((fv) => (
+                <TableRow key={fv.id}>
+                  <TableCell className="font-medium text-sm">
+                    {getMonthName(fv.month)}/{fv.year}
+                  </TableCell>
+                  <TableCell className="font-semibold text-sm">
+                    {EUR_FORMATTER.format(fv.financialAmount)}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */fv.customerName || 'N/D'}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.typeName || 'N/D'}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.areaName || 'N/D'}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEditClick(fv)}
+                        className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
+                      >
+                        Modifica
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDeleteClick(fv)}
+                        className="text-destructive hover:text-destructive text-xs px-2"
+                      >
+                        Elimina
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell className="text-sm font-semibold text-foreground">Totale</TableCell>
+                <TableCell className={`text-sm font-bold ${totalVariantClass}`}>
+                  {EUR_FORMATTER.format(total)}
+                </TableCell>
+                <TableCell className="hidden md:table-cell" />
+                <TableCell className="hidden lg:table-cell" />
+                <TableCell className="hidden lg:table-cell" />
+                <TableCell />
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function FinancialValueTable({ onEditClick, year = null }: FinancialValueTableProps) {
   const { data: financialValues = [], isLoading, isError } = useFinancialValues();
   const queryClient = useQueryClient();
 
-  // Search and filter state
   const {
     searchQuery,
     setSearchQuery,
     monthFilter,
     setMonthFilter,
-    categoryFilter,
-    setCategoryFilter,
     filteredFinancialValues,
     yearScopedCount,
   } = useFinancialValueFilters(financialValues, year);
@@ -133,14 +219,6 @@ export default function FinancialValueTable({ onEditClick, year = null }: Financ
     }
   };
 
-  const getMonthName = (month: number) => {
-    const months = [
-      "Gen", "Feb", "Mar", "Apr", "Mag", "Giu",
-      "Lug", "Ago", "Set", "Ott", "Nov", "Dic"
-    ];
-    return /* istanbul ignore next */months[month - 1] || month;
-  };
-
   if (isLoading) {
     return <TableSkeleton rows={5} columns={7} />;
   }
@@ -160,6 +238,9 @@ export default function FinancialValueTable({ onEditClick, year = null }: Financ
       </div>
     );
   }
+
+  const revenueRows = filteredFinancialValues.filter((fv) => fv.category === "REVENUE");
+  const costRows = filteredFinancialValues.filter((fv) => fv.category === "COST");
 
   return (
     <>
@@ -197,26 +278,13 @@ export default function FinancialValueTable({ onEditClick, year = null }: Financ
             </SelectContent>
           </Select>
 
-          <label htmlFor="category-filter" className="text-sm text-muted-foreground hidden sm:inline">Categoria:</label>
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-            <SelectTrigger id="category-filter" aria-label="Filtra per categoria" className="w-28">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Tutte</SelectItem>
-              <SelectItem value="REVENUE">Ricavi</SelectItem>
-              <SelectItem value="COST">Costi</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {(searchQuery || monthFilter !== "ALL" || categoryFilter !== "ALL") && (
+          {(searchQuery || monthFilter !== "ALL") && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
                 setSearchQuery("");
                 setMonthFilter("ALL");
-                setCategoryFilter("ALL");
               }}
               className="hidden sm:inline-flex"
             >
@@ -237,67 +305,26 @@ export default function FinancialValueTable({ onEditClick, year = null }: Financ
         </div>
       )}
 
-      {/* Table with Responsive Columns */}
+      {/* Ricavi and Costi always rendered as two separate sections - never
+          interleaved in the same table, so it's never ambiguous which is which. */}
       {filteredFinancialValues.length > 0 && (
-        <div className="bg-card rounded-lg border border-border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Periodo</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Importo</TableHead>
-                <TableHead className="hidden md:table-cell">Cliente</TableHead>
-                <TableHead className="hidden lg:table-cell">Tipo</TableHead>
-                <TableHead className="hidden lg:table-cell">Area di business</TableHead>
-                <TableHead>Azioni</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredFinancialValues.map((fv) => (
-                <TableRow key={fv.id}>
-                  <TableCell className="font-medium text-sm">
-                    {getMonthName(fv.month)}/{fv.year}
-                  </TableCell>
-                  <TableCell>
-                    {fv.category ? (
-                      <Badge variant={fv.category === "REVENUE" ? "success" : "secondary"}>
-                        {fv.category === "REVENUE" ? "Ricavo" : "Costo"}
-                      </Badge>
-                    ) : (
-                      /* istanbul ignore next */
-                      <span className="text-sm text-muted-foreground">N/D</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-semibold text-sm">
-                    {EUR_FORMATTER.format(fv.financialAmount)}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */fv.customerName || 'N/D'}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.typeName || 'N/D'}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm">{/* istanbul ignore next */fv.areaName || 'N/D'}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEditClick(fv)}
-                        className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
-                      >
-                        Modifica
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteClick(fv)}
-                        className="text-destructive hover:text-destructive text-xs px-2"
-                      >
-                        Elimina
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="space-y-6">
+          <CategorySection
+            title="Ricavi"
+            emptyLabel="Nessun ricavo per questo periodo"
+            rows={revenueRows}
+            totalVariantClass="text-[var(--status-green-fg)]"
+            onEditClick={onEditClick}
+            onDeleteClick={handleDeleteClick}
+          />
+          <CategorySection
+            title="Costi"
+            emptyLabel="Nessun costo per questo periodo"
+            rows={costRows}
+            totalVariantClass="text-[var(--status-red-fg)]"
+            onEditClick={onEditClick}
+            onDeleteClick={handleDeleteClick}
+          />
         </div>
       )}
 

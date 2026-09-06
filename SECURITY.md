@@ -75,50 +75,47 @@ Use DOMPurify or rely on React's built-in XSS protection
 
 ## 🛡️ Security Measures
 
-### Current Implementation
+### Current Implementation — verified against production (`bcm.donatocorbacio.dev`), not just code
 
 #### Authentication & Session Management
 - ✅ **Refresh token in an HTTP-only cookie** - never reachable from JS, `Secure` (prod) + `SameSite=Lax`, scoped to `/auth`
 - ✅ **Access token kept in memory only** - never written to localStorage/sessionStorage; lost on reload by design, silently restored via the refresh cookie
 - ✅ **Automatic token refresh** - seamless re-authentication on 401 and on page reload
 - ✅ **Auto-logout on 401** - immediate redirect on unauthorized when refresh also fails
-- ✅ **HTTPS enforcement** - production deployment best practice
+- ✅ **MFA (TOTP)** - implemented backend-side (`TwoFactorAuthService`), toggled from the profile page
+- ✅ **HTTPS + HSTS** - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` set at the reverse proxy (see `bcm-v2-docker/Caddyfile`)
+
+#### Content Security Policy
+- ✅ **Real CSP, not a static header** - `proxy.ts` (Next.js 16's renamed `middleware.ts`) issues a fresh nonce per request and sets `script-src 'self' 'nonce-<value>' 'strict-dynamic'`, so Next's own inline bootstrap scripts work without `'unsafe-inline'`
+- ✅ `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()` - all set in `proxy.ts`, confirmed present on live response headers
+- ✅ `X-Powered-By` header disabled (`poweredByHeader: false` in `next.config.ts`) - don't advertise the framework for free
 
 #### Data Protection
-- ✅ **XSS Prevention** - React's automatic escaping
-- ✅ **CSRF Protection** - SameSite cookie attribute
+- ✅ **XSS Prevention** - React's automatic escaping + the CSP above as a second layer
+- ✅ **CSRF Protection** - SameSite cookie + Authorization-header-based auth (see backend `SecurityConfig` for the full rationale on why CSRF is disabled safely)
 - ✅ **Input Validation** - Zod schemas with runtime checks
 - ✅ **Form Validation** - React Hook Form with error boundaries
-- ✅ **Type Safety** - 100% TypeScript coverage
+- ✅ **Type Safety** - 100% TypeScript coverage, strict mode
 
-#### Network Security
-- ✅ **HTTPS API Calls** - Axios configured for secure connections
-- ✅ **Request Interceptors** - Automatic JWT attachment
-- ✅ **Error Handling** - No sensitive data in error messages
-- ✅ **CORS-compliant** - Respects backend CORS policies
+#### Dependency Hygiene
+- ✅ **`npm audit`** - 0 known vulnerabilities as of the last check (2026-09-06); re-run before any release, not just on a fixed schedule
+- ✅ **Dependabot** - configured at the `bcm-v2-docker` level for base image updates
 
-#### Code Quality
-- ✅ **TypeScript strict mode** - Maximum type safety
-- ✅ **ESLint security rules** - Automatic vulnerability detection
-- ✅ **No inline scripts** - Content Security Policy ready
-- ✅ **Dependency audit** - Regular `npm audit` checks
+#### Accessibility (relevant to security in the sense of not shipping broken auth flows)
+- ✅ **Automated a11y coverage** - `@axe-core/playwright` runs against every dashboard page, all admin CRUD pages, and the legal pages (`e2e/a11y/*.spec.ts`)
+- ✅ **Static a11y linting** - `eslint-config-next`'s `core-web-vitals` config bundles `jsx-a11y` rules
 
 ---
 
 ## ⚠️ Known Limitations
 
-This is a **portfolio/demonstration project**. The following security considerations should be addressed before production use:
+Real gaps, kept current — last reviewed 2026-09-06:
 
-### Not Yet Implemented
-
-- ❌ **Content Security Policy (CSP)** - No CSP headers configured
-- ❌ **Subresource Integrity (SRI)** - External scripts not hashed
-- ❌ **Rate Limiting** - No client-side throttling
-- ❌ **Session Timeout Warning** - No UI warning before JWT expiry
-- ❌ **MFA Support** - Not implemented
-- ❌ **Audit Logging** - No client-side security event logging
-- ❌ **Input Sanitization Library** - Relies on React only (consider DOMPurify)
-- ❌ **Biometric Authentication** - Not supported
+- ❌ **No self-service data export/deletion** - GDPR requests (access, portability, erasure) are handled manually via email today; see `/privacy` for the disclosed process. Fine for the current scale, worth automating before onboarding paying customers.
+- ❌ **Session Timeout Warning** - No UI warning before JWT expiry, refresh just happens silently
+- ❌ **No client-side security event logging** - Server-side audit log exists (`/audit-logs`); nothing client-side
+- ❌ **Subresource Integrity (SRI)** - Not applicable today (no third-party `<script src>` tags loaded), revisit if one is ever added
+- ❌ **No WAF / infra-level rate limiting** - Only the app-level Redis-backed rate limiter on `/auth/**` (backend); nothing in front of it at the Caddy/network layer
 
 ### Browser Security
 
@@ -183,96 +180,26 @@ Before deploying to production:
 
 ### Infrastructure
 
-- [ ] **HTTPS Only** - Valid SSL/TLS certificate (Let's Encrypt, Cloudflare)
-- [ ] **CDN** - Use Vercel, Cloudflare, or similar for DDoS protection
-- [ ] **WAF (Web Application Firewall)** - Block common attacks
-- [ ] **Rate Limiting** - Cloudflare or API Gateway level
-- [ ] **DDoS Protection** - Infrastructure-level protection
-- [ ] **Security Headers** - Configure in next.config.js or CDN
+- [x] **HTTPS Only** - Let's Encrypt via Caddy, auto-renewed
+- [ ] **CDN / WAF / DDoS protection** - Not in front of the VM today; acceptable at current traffic, revisit if that changes
+- [x] **Security Headers** - Set in `proxy.ts` (app-level) and `bcm-v2-docker/Caddyfile` (HSTS, edge-level)
 
 ### Application Configuration
 
-- [ ] **Environment Variables** - Use platform secrets (Vercel, Netlify)
-- [ ] **API URL** - HTTPS backend endpoint only
-- [ ] **Cookie Flags** - `Secure=true`, `HttpOnly=true`, `SameSite=Strict`
-- [ ] **CSP Headers** - Content Security Policy configured
-- [ ] **HSTS** - HTTP Strict Transport Security enabled
-- [ ] **X-Frame-Options** - Prevent clickjacking
-- [ ] **X-Content-Type-Options** - Prevent MIME sniffing
-- [ ] **Referrer-Policy** - Limit referrer information
+- [x] **Environment Variables** - `.env` on the VM, gitignored, never committed (verified)
+- [x] **API URL** - HTTPS only in `docker-compose.prod.yml`
+- [x] **Cookie Flags** - `Secure` + `HttpOnly` + `SameSite=Lax`, scoped to `/auth`
+- [x] **CSP Headers** - nonce-based, `strict-dynamic` (see above)
+- [x] **HSTS** - enabled at the Caddy layer
+- [x] **X-Frame-Options / X-Content-Type-Options / Referrer-Policy** - all set
 
 ### Code & Build
 
-- [ ] **Source Maps** - Disabled in production build
-- [ ] **Console Logs** - Remove debug statements
-- [ ] **Error Boundaries** - Catch and handle errors gracefully
-- [ ] **Dependencies** - No critical/high vulnerabilities (`npm audit`)
-- [ ] **Minification** - Production build optimized
-- [ ] **Tree Shaking** - Unused code removed
+- [x] **Dependencies** - `npm audit`: 0 vulnerabilities (checked 2026-09-06)
+- [ ] **Error Tracking** - No Sentry/LogRocket yet
+- [ ] **Uptime Monitoring** - No external uptime alerting yet
 
-### Monitoring & Response
-
-- [ ] **Error Tracking** - Sentry, LogRocket, or similar
-- [ ] **Analytics** - Privacy-respecting analytics (Plausible, Fathom)
-- [ ] **Uptime Monitoring** - Alert on downtime
-- [ ] **Performance Monitoring** - Core Web Vitals tracking
-- [ ] **Incident Response Plan** - Documented procedures
-
----
-
-## 🛡️ Security Headers Configuration
-
-Add to `next.config.ts` for production:
-
-```typescript
-const securityHeaders = [
-  {
-    key: 'X-DNS-Prefetch-Control',
-    value: 'on'
-  },
-  {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=63072000; includeSubDomains; preload'
-  },
-  {
-    key: 'X-Frame-Options',
-    value: 'SAMEORIGIN'
-  },
-  {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff'
-  },
-  {
-    key: 'X-XSS-Protection',
-    value: '1; mode=block'
-  },
-  {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin'
-  },
-  {
-    key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()'
-  },
-  {
-    key: 'Content-Security-Policy',
-    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://your-api-domain.com"
-  }
-];
-
-const nextConfig = {
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: securityHeaders,
-      },
-    ];
-  },
-};
-
-export default nextConfig;
-```
+Where the headers actually live, if you're checking: `proxy.ts` (CSP, frame-ancestors, permissions-policy, referrer-policy) and `bcm-v2-docker/Caddyfile` (HSTS, TLS termination, routing). Don't reintroduce a static header list in `next.config.ts` — it can't issue a per-request CSP nonce, which is why `proxy.ts` exists.
 
 ---
 
@@ -327,6 +254,7 @@ We follow **coordinated disclosure**:
 
 ### Version 2.0.x (Current)
 
+- **2026-09-06:** Full audit against production — CSP/HSTS/header claims corrected to match what's actually deployed, `next` bumped to 16.3.4 (0 known vulnerabilities, was 4 high), `X-Powered-By` disabled, HSTS added at the Caddy layer, this document rewritten to stop describing a 2025 snapshot
 - **2025-02-05:** Initial security policy published
 - **2025-02-05:** HTTP-only cookies implemented for JWT storage
 - **2025-01-20:** TypeScript strict mode enabled
@@ -334,12 +262,11 @@ We follow **coordinated disclosure**:
 
 ### Planned Enhancements
 
-- [ ] Content Security Policy headers (Q2 2025)
-- [ ] Session timeout warnings (Q2 2025)
-- [ ] Enhanced error boundaries (Q2 2025)
-- [ ] Security audit with OWASP ZAP (Q3 2025)
+- [ ] Self-service GDPR data export/deletion
+- [ ] Session timeout warning in the UI
+- [ ] External uptime monitoring + error tracking
 
 ---
 
-**Last Updated:** February 5, 2026  
-**Policy Version:** 1.0
+**Last Updated:** September 6, 2026
+**Policy Version:** 2.0

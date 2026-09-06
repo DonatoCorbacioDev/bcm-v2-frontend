@@ -6,6 +6,8 @@ import type { NextConfig } from "next";
 // static values.
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Don't advertise the framework to every visitor for free.
+  poweredByHeader: false,
 };
 
 export default nextConfig;

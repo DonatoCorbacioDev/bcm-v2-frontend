@@ -254,4 +254,14 @@ describe('CounterpartyTable', () => {
     // Data is still visible — the page is read-only, not blocked entirely.
     expect(screen.getByText('Alfa Srl')).toBeInTheDocument();
   });
+
+  it('hides the Actions column when there is no authenticated user', () => {
+    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
+      const state = { user: null, isAuthenticated: false };
+      return selector ? selector(state) : state;
+    });
+    render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.queryByRole('columnheader', { name: /azioni/i })).not.toBeInTheDocument();
+  });
 });

@@ -153,6 +153,18 @@ describe('DashboardPage', () => {
     expect(screen.getByText(/urgent corp/i).closest('a')).toHaveAttribute('href', '/contracts/1');
   });
 
+  it('falls back to "N/D" for a critical renewal with no counterparty', async () => {
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: [{ ...criticalContract, counterparty: undefined }],
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<DashboardPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/N\/D/)).toBeInTheDocument();
+  });
+
   it('caps critical renewals at 3 and notes how many more there are', async () => {
     const manyCritical = Array.from({ length: 5 }, (_, i) => ({
       ...criticalContract,

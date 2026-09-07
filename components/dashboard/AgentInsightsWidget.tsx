@@ -123,7 +123,7 @@ export function AgentInsightsWidget() {
                 type="button"
                 size="sm"
                 disabled={createReminder.isPending}
-                onClick={() => {
+                onClick={/* istanbul ignore next: defensive, the button only renders when proposedAction is already set */ () => {
                   const action = askAgent.data?.proposedAction;
                   if (!action) return;
                   createReminder.mutate({ contractId: action.contractId, message: action.message });

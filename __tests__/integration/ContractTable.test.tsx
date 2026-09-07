@@ -249,6 +249,27 @@ describe('ContractTable', () => {
     expect(screen.getByText('Non assegnato')).toBeInTheDocument();
   });
 
+  it('shows fallback text and sorts correctly for a contract with no counterparty', async () => {
+    const noCounterpartyContract: Contract = {
+      ...activeContract,
+      id: 3,
+      contractNumber: 'CNT-003',
+      counterparty: undefined,
+    };
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([activeContract, noCounterpartyContract]),
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('N/D')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /controparte/i }));
+    const order = screen.getAllByRole('row').slice(1).map((row) => within(row).getAllByRole('cell')[2].textContent);
+    expect(order).toEqual(['N/D', 'Acme Corp']);
+  });
+
   it('falls back to the raw status value when it is not a known status', () => {
     const unknownStatusContract = { ...activeContract, status: 'ON_HOLD' as Contract['status'] };
     (useContractsPaged as jest.Mock).mockReturnValue({
@@ -606,6 +627,16 @@ describe('ContractTable', () => {
     await userEvent.click(header);
     expect(getCustomerOrder()).toEqual(['Acme Corp', 'Beta Ltd']);
     expect(header.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+  });
+
+  it('sorts by every other sortable column without error', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    for (const name of [/progetto/i, /codice wbs/i, /responsabile/i, /^stato/i, /data inizio/i, /data fine/i]) {
+      const header = screen.getByRole('button', { name });
+      await userEvent.click(header);
+      expect(header.closest('th')).toHaveAttribute('aria-sort', 'ascending');
+    }
   });
 
   it('resets to ascending when switching to a different column', async () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
@@ -72,6 +72,28 @@ describe('AgentInsightsWidget', () => {
       expect(api.post).not.toHaveBeenCalled();
     });
 
+    it('does not call the agent when the question is only whitespace', async () => {
+      const { container } = render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+      await userEvent.type(screen.getByLabelText('Chiedi qualcosa sui tuoi contratti'), '   ');
+      // The submit button is disabled for a blank/whitespace-only value, so
+      // dispatch the form's submit event directly to exercise handleAsk's
+      // own trimmed-empty guard rather than relying on the button state.
+      fireEvent.submit(container.querySelector('form')!);
+      expect(api.post).not.toHaveBeenCalled();
+    });
+
+    it('shows a spinner on the ask button while the question is pending', async () => {
+      (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
+      render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+
+      await userEvent.type(screen.getByLabelText('Chiedi qualcosa sui tuoi contratti'), 'Domanda?');
+      await userEvent.click(screen.getByRole('button', { name: 'Invia domanda' }));
+
+      const button = screen.getByRole('button', { name: 'Invia domanda' });
+      await waitFor(() => expect(button).toBeDisabled());
+      expect(button.querySelector('.animate-spin')).toBeInTheDocument();
+    });
+
     it('submits the trimmed question and shows the answer', async () => {
       (api.post as jest.Mock).mockResolvedValue({
         data: { answer: 'Hai 3 contratti in scadenza a marzo.', error: null },
@@ -139,6 +161,30 @@ describe('AgentInsightsWidget', () => {
 
         expect(await screen.findByText(/rinnovo in scadenza/i)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Conferma promemoria' })).toBeInTheDocument();
+      });
+
+      it('shows a spinner on the confirm button while the reminder is being created', async () => {
+        (api.post as jest.Mock).mockImplementation((url: string) => {
+          if (url === '/agent/ask') {
+            return Promise.resolve({
+              data: {
+                answer: 'Confermi?',
+                error: null,
+                proposedAction: { type: 'CREATE_REMINDER', contractId: 1, customerName: 'Acme', message: 'hi' },
+              },
+            });
+          }
+          return new Promise(() => {});
+        });
+        render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+
+        await userEvent.type(screen.getByLabelText('Chiedi qualcosa sui tuoi contratti'), 'Ricordami Acme');
+        await userEvent.click(screen.getByRole('button', { name: 'Invia domanda' }));
+        const confirmButton = await screen.findByRole('button', { name: 'Conferma promemoria' });
+        await userEvent.click(confirmButton);
+
+        await waitFor(() => expect(confirmButton).toBeDisabled());
+        expect(confirmButton.querySelector('.animate-spin')).toBeInTheDocument();
       });
 
       it('creates the reminder and shows a confirmation on click', async () => {

@@ -39,6 +39,9 @@ jest.mock('@/services/dashboard.service', () => ({
 jest.mock('@/services/contractTemplates.service', () => ({
   contractTemplatesService: { list: jest.fn(), create: jest.fn(), update: jest.fn() },
 }));
+jest.mock('@/services/counterparties.service', () => ({
+  counterpartiesService: { list: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
+}));
 
 jest.mock('@/store/authStore', () => ({
   useAuthStore: jest.fn(() => ({
@@ -71,6 +74,7 @@ import { rolesService } from '@/services/roles.service';
 import { contractsService } from '@/services/contracts.service';
 import { dashboardService } from '@/services/dashboard.service';
 import { contractTemplatesService } from '@/services/contractTemplates.service';
+import { counterpartiesService } from '@/services/counterparties.service';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 
@@ -99,6 +103,7 @@ import { useUpsertFinancialValue } from '@/hooks/useUpsertFinancialValue';
 import { useUpsertManager } from '@/hooks/useUpsertManager';
 import { useUpsertUser } from '@/hooks/useUpsertUser';
 import { useUpsertContract } from '@/hooks/useUpsertContract';
+import { useUpsertCounterparty } from '@/hooks/useUpsertCounterparty';
 import { useAuth, type LoginResult } from '@/hooks/useAuth';
 
 beforeEach(() => jest.clearAllMocks());
@@ -422,6 +427,32 @@ describe('useUpsertContract', () => {
       await result.current.mutateAsync({ mode: 'update', id: 1, payload });
     });
     expect(contractsService.update).toHaveBeenCalledWith(1, payload);
+  });
+});
+
+describe('useUpsertCounterparty', () => {
+  const payload = {
+    name: 'Acme Srl', type: 'CUSTOMER' as const,
+  };
+
+  it('calls create when no id is given', async () => {
+    (counterpartiesService.create as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    const { result } = renderHook(() => useUpsertCounterparty(), { wrapper: createWrapper() });
+    await act(async () => {
+      await result.current.mutateAsync({ payload });
+    });
+    expect(counterpartiesService.create).toHaveBeenCalledWith(payload);
+    expect(counterpartiesService.update).not.toHaveBeenCalled();
+  });
+
+  it('calls update when an id is given', async () => {
+    (counterpartiesService.update as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    const { result } = renderHook(() => useUpsertCounterparty(), { wrapper: createWrapper() });
+    await act(async () => {
+      await result.current.mutateAsync({ id: 1, payload });
+    });
+    expect(counterpartiesService.update).toHaveBeenCalledWith(1, payload);
+    expect(counterpartiesService.create).not.toHaveBeenCalled();
   });
 });
 

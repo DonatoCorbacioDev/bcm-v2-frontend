@@ -290,6 +290,74 @@ describe('CounterpartyForm', () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
     expect(toast.success).toHaveBeenCalledWith('Controparte creata');
   });
+
+  it('shows error toast when creating a new counterparty fails', async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<CounterpartyForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.type(screen.getByPlaceholderText(/alfa srl/i), 'Beta Srl');
+    await userEvent.click(screen.getByRole('button', { name: /crea/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Creazione della controparte non riuscita'));
+  });
+
+  it('pre-fills all optional fields in edit mode when present', () => {
+    render(
+      <CounterpartyForm
+        onClose={onClose}
+        onSuccess={onSuccess}
+        counterparty={{
+          id: 1,
+          name: 'Alfa Srl',
+          type: 'CUSTOMER',
+          vatNumber: 'IT01234567890',
+          taxCode: 'ALFSRL80A01H501Z',
+          address: 'Via Roma 1',
+          contactName: 'Mario Rossi',
+          contactEmail: 'mario@alfa.it',
+          contactPhone: '0212345678',
+          notes: 'Cliente storico',
+        }}
+      />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByDisplayValue('IT01234567890')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('ALFSRL80A01H501Z')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Via Roma 1')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Mario Rossi')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('mario@alfa.it')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('0212345678')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Cliente storico')).toBeInTheDocument();
+  });
+
+  it('shows validation errors for optional fields that exceed their limits', async () => {
+    // fireEvent.submit on the <form> directly, not a click on the submit
+    // button: jsdom enforces native constraint validation for the
+    // type="email" input on a real button click, which silently blocks the
+    // submit event (and every other field's validation with it) before
+    // react-hook-form's handleSubmit ever runs.
+    const { container } = render(<CounterpartyForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+
+    fireEvent.change(screen.getByPlaceholderText(/alfa srl/i), { target: { value: 'Valid Name' } });
+    fireEvent.change(screen.getByLabelText('Partita IVA'), { target: { value: 'A'.repeat(51) } });
+    fireEvent.change(screen.getByLabelText('Codice fiscale'), { target: { value: 'A'.repeat(51) } });
+    fireEvent.change(screen.getByLabelText('Indirizzo'), { target: { value: 'A'.repeat(501) } });
+    fireEvent.change(screen.getByLabelText('Referente'), { target: { value: 'A'.repeat(256) } });
+    fireEvent.change(screen.getByLabelText('Email referente'), { target: { value: 'not-an-email' } });
+    fireEvent.change(screen.getByLabelText('Telefono referente'), { target: { value: 'A'.repeat(51) } });
+    fireEvent.change(screen.getByLabelText('Note'), { target: { value: 'A'.repeat(2001) } });
+
+    fireEvent.submit(container.querySelector('form')!);
+
+    await waitFor(() => {
+      expect(screen.getByText('La partita IVA non può superare i 50 caratteri')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Il codice fiscale non può superare i 50 caratteri')).toBeInTheDocument();
+    expect(screen.getByText("L'indirizzo non può superare i 500 caratteri")).toBeInTheDocument();
+    expect(screen.getByText('Il nome del referente non può superare i 255 caratteri')).toBeInTheDocument();
+    expect(screen.getByText('Email non valida')).toBeInTheDocument();
+    expect(screen.getByText('Il telefono non può superare i 50 caratteri')).toBeInTheDocument();
+    expect(screen.getByText('Le note non possono superare i 2000 caratteri')).toBeInTheDocument();
+  });
 });
 
 // ─── FinancialTypeForm ────────────────────────────────────────────────────────
@@ -734,6 +802,39 @@ describe('ContractForm', () => {
     expect(screen.getByLabelText(/frequenza fatturazione/i)).toBeInTheDocument();
   });
 
+  it('pre-fills financial terms in edit mode when already set', () => {
+    render(
+      <ContractForm
+        onClose={onClose}
+        contract={{ ...validContract, financialTypeId: 1, annualValue: 36000, billingFrequency: 'MONTHLY' }}
+      />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByRole('combobox', { name: /tipo finanziario/i })).toHaveTextContent('Revenue');
+    expect(screen.getByDisplayValue('36000')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /frequenza fatturazione/i })).toHaveTextContent('Mensile');
+  });
+
+  it('selects a financial type and billing frequency and submits them', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<ContractForm onClose={onClose} onSuccess={onSuccess} contract={validContract} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('combobox', { name: /tipo finanziario/i }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Revenue' }));
+    await userEvent.type(screen.getByLabelText(/valore annuo/i), '36000');
+    await userEvent.click(screen.getByRole('combobox', { name: /frequenza fatturazione/i }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Mensile' }));
+
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    const payload = mutateAsync.mock.calls[0][0].payload;
+    expect(payload.financialTypeId).toBe(1);
+    expect(payload.annualValue).toBe(36000);
+    expect(payload.billingFrequency).toBe('MONTHLY');
+  });
+
   it('rejects submitting only some of the three financial-term fields', async () => {
     // Edit mode so counterparty/area/manager/dates are already valid and
     // don't mask the financial-terms error behind unrelated "obbligatorio"
@@ -788,6 +889,21 @@ describe('FinancialValueForm', () => {
   it('renders Update button in edit mode', () => {
     render(<FinancialValueForm onClose={onClose} financialValue={validFV} />, { wrapper: createWrapper() });
     expect(screen.getByRole('button', { name: /^aggiorna$/i })).toBeInTheDocument();
+  });
+
+  it('shows "N/D" in the contract picker for a contract with no counterparty', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: { content: [{ ...contracts[0], counterparty: undefined }] },
+      isLoading: false,
+      isError: false,
+    });
+    render(<FinancialValueForm onClose={onClose} />, { wrapper: createWrapper() });
+
+    // The "Contratto" <SelectTrigger> has no id/label association (a
+    // pre-existing gap, not part of this change), so it can't be queried by
+    // accessible name — it's the second combobox after "Mese".
+    await userEvent.click(screen.getAllByRole('combobox')[1]);
+    expect(await screen.findByRole('option', { name: /CNT-001 - N\/D/ })).toBeInTheDocument();
   });
 
   it('calls mutateAsync with update mode in edit mode', async () => {

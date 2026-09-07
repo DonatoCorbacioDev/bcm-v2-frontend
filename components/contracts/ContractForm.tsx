@@ -23,13 +23,7 @@ const BILLING_FREQUENCY_LABELS: Record<string, string> = {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SelectField } from "@/components/shared/SelectField";
 
 import { contractSchema, type ContractFormData } from "@/lib/validations/contract.schema";
 
@@ -154,31 +148,15 @@ export default function ContractForm({
         control={control}
         name="counterpartyId"
         render={({ field }) => (
-          <div className="space-y-2">
-            <Label htmlFor="counterpartyId">
-              Controparte <span className="text-destructive">*</span>
-            </Label>
-
-            <Select
-              value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
-            >
-              <SelectTrigger id="counterpartyId">
-                <SelectValue placeholder="Seleziona la controparte" />
-              </SelectTrigger>
-              <SelectContent>
-                {counterparties.map((cp) => (
-                  <SelectItem key={cp.id} value={String(cp.id)}>
-                    {cp.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {errors.counterpartyId && (
-              <p className="text-sm text-destructive">{errors.counterpartyId.message}</p>
-            )}
-          </div>
+          <SelectField
+            id="counterpartyId"
+            label={<>Controparte <span className="text-destructive">*</span></>}
+            value={field.value ? String(field.value) : ""}
+            onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+            placeholder="Seleziona la controparte"
+            options={counterparties.map((cp) => ({ value: String(cp.id), label: cp.name }))}
+            error={errors.counterpartyId?.message}
+          />
         )}
       />
 
@@ -257,24 +235,15 @@ export default function ContractForm({
         control={control}
         name="status"
         render={({ field }) => (
-          <div className="space-y-2">
-            <Label htmlFor="status">
-              Stato <span className="text-destructive">*</span>
-            </Label>
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Seleziona lo stato" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {/* istanbul ignore next */errors.status && (
-              <p className="text-sm text-destructive">{errors.status.message}</p>
-            )}
-          </div>
+          <SelectField
+            id="status"
+            label={<>Stato <span className="text-destructive">*</span></>}
+            value={field.value}
+            onValueChange={field.onChange}
+            placeholder="Seleziona lo stato"
+            options={Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => ({ value, label }))}
+            error={/* istanbul ignore next */ errors.status?.message}
+          />
         )}
       />
 
@@ -283,31 +252,15 @@ export default function ContractForm({
         control={control}
         name="areaId"
         render={({ field }) => (
-          <div className="space-y-2">
-            <Label htmlFor="areaId">
-              Area di business <span className="text-destructive">*</span>
-            </Label>
-
-            <Select
-              value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
-            >
-              <SelectTrigger id="areaId">
-                <SelectValue placeholder="Seleziona l'area di business" />
-              </SelectTrigger>
-              <SelectContent>
-                {businessAreas.map((area) => (
-                  <SelectItem key={area.id} value={String(area.id)}>
-                    {area.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {errors.areaId && (
-              <p className="text-sm text-destructive">{errors.areaId.message}</p>
-            )}
-          </div>
+          <SelectField
+            id="areaId"
+            label={<>Area di business <span className="text-destructive">*</span></>}
+            value={field.value ? String(field.value) : ""}
+            onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+            placeholder="Seleziona l'area di business"
+            options={businessAreas.map((area) => ({ value: String(area.id), label: area.name }))}
+            error={errors.areaId?.message}
+          />
         )}
       />
 
@@ -316,31 +269,15 @@ export default function ContractForm({
         control={control}
         name="managerId"
         render={({ field }) => (
-          <div className="space-y-2">
-            <Label htmlFor="managerId">
-              Responsabile <span className="text-destructive">*</span>
-            </Label>
-
-            <Select
-              value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
-            >
-              <SelectTrigger id="managerId">
-                <SelectValue placeholder="Seleziona il responsabile" />
-              </SelectTrigger>
-              <SelectContent>
-                {managers.map((m) => (
-                  <SelectItem key={m.id} value={String(m.id)}>
-                    {m.firstName} {m.lastName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {errors.managerId && (
-              <p className="text-sm text-destructive">{errors.managerId.message}</p>
-            )}
-          </div>
+          <SelectField
+            id="managerId"
+            label={<>Responsabile <span className="text-destructive">*</span></>}
+            value={field.value ? String(field.value) : ""}
+            onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+            placeholder="Seleziona il responsabile"
+            options={managers.map((m) => ({ value: String(m.id), label: `${m.firstName} ${m.lastName}` }))}
+            error={errors.managerId?.message}
+          />
         )}
       />
 
@@ -359,27 +296,18 @@ export default function ContractForm({
           control={control}
           name="financialTypeId"
           render={({ field }) => (
-            <div className="space-y-2">
-              <Label htmlFor="financialTypeId">Tipo finanziario</Label>
-              <Select
-                value={field.value ? String(field.value) : ""}
-                onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
-              >
-                <SelectTrigger id="financialTypeId">
-                  <SelectValue placeholder="Seleziona il tipo finanziario" />
-                </SelectTrigger>
-                <SelectContent>
-                  {financialTypes.map((ft) => (
-                    <SelectItem key={ft.id} value={String(ft.id)}>
-                      {ft.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.financialTypeId && (
-                <p className="text-sm text-destructive">{errors.financialTypeId.message}</p>
-              )}
-            </div>
+            <SelectField
+              id="financialTypeId"
+              label="Tipo finanziario"
+              value={field.value ? String(field.value) : ""}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              placeholder="Seleziona il tipo finanziario"
+              options={financialTypes.map((ft) => ({ value: String(ft.id), label: ft.name }))}
+              // The schema's all-or-nothing refine always attaches its error to
+              // annualValue (see contract.schema.ts) — financialTypeId has no
+              // validator of its own, so this can never actually be set.
+              error={/* istanbul ignore next */ errors.financialTypeId?.message}
+            />
           )}
         />
 
@@ -405,22 +333,17 @@ export default function ContractForm({
             control={control}
             name="billingFrequency"
             render={({ field }) => (
-              <div className="space-y-2">
-                <Label htmlFor="billingFrequency">Frequenza fatturazione</Label>
-                <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                  <SelectTrigger id="billingFrequency">
-                    <SelectValue placeholder="Seleziona la frequenza" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(BILLING_FREQUENCY_LABELS).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.billingFrequency && (
-                  <p className="text-sm text-destructive">{errors.billingFrequency.message}</p>
-                )}
-              </div>
+              <SelectField
+                id="billingFrequency"
+                label="Frequenza fatturazione"
+                value={field.value ?? ""}
+                onValueChange={field.onChange}
+                placeholder="Seleziona la frequenza"
+                options={Object.entries(BILLING_FREQUENCY_LABELS).map(([value, label]) => ({ value, label }))}
+                // Same as financialTypeId above — the refine's error always
+                // lands on annualValue, never on this field.
+                error={/* istanbul ignore next */ errors.billingFrequency?.message}
+              />
             )}
           />
         </div>

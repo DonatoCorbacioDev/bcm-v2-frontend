@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MissingPrerequisiteBanner } from "@/components/shared/MissingPrerequisiteBanner";
+import { SelectField } from "@/components/shared/SelectField";
 import {
   Dialog,
   DialogContent,
@@ -26,15 +27,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { instantiateTemplateSchema, type InstantiateTemplateFormData } from "@/lib/validations/contractTemplate.schema";
+
+const STATUS_OPTIONS = [
+  { value: "DRAFT", label: "Bozza" },
+  { value: "ACTIVE", label: "Attivo" },
+  { value: "CANCELLED", label: "Annullato" },
+] as const;
 
 interface InstantiateTemplateDialogProps {
   readonly template: ContractTemplate | null;
@@ -155,29 +155,15 @@ export default function InstantiateTemplateDialog({
             control={control}
             name="counterpartyId"
             render={({ field }) => (
-              <div className="space-y-2">
-                <Label htmlFor="inst-counterpartyId">
-                  Controparte <span className="text-destructive">*</span>
-                </Label>
-                <Select
-                  value={field.value ? String(field.value) : ""}
-                  onValueChange={/* istanbul ignore next */ (v) => field.onChange(Number(v))}
-                >
-                  <SelectTrigger id="inst-counterpartyId">
-                    <SelectValue placeholder="Seleziona la controparte" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {counterparties.map((cp) => (
-                      <SelectItem key={cp.id} value={String(cp.id)}>
-                        {cp.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.counterpartyId && (
-                  <p className="text-sm text-destructive">{errors.counterpartyId.message}</p>
-                )}
-              </div>
+              <SelectField
+                id="inst-counterpartyId"
+                label={<>Controparte <span className="text-destructive">*</span></>}
+                value={field.value ? String(field.value) : ""}
+                onValueChange={/* istanbul ignore next */ (v) => field.onChange(Number(v))}
+                placeholder="Seleziona la controparte"
+                options={counterparties.map((cp) => ({ value: String(cp.id), label: cp.name }))}
+                error={errors.counterpartyId?.message}
+              />
             )}
           />
 
@@ -237,22 +223,14 @@ export default function InstantiateTemplateDialog({
             control={control}
             name="status"
             render={({ field }) => (
-              <div className="space-y-2">
-                <Label htmlFor="inst-status">Stato</Label>
-                <Select
-                  value={field.value ?? ""}
-                  onValueChange={/* istanbul ignore next */ (v) => field.onChange(v || null)}
-                >
-                  <SelectTrigger id="inst-status">
-                    <SelectValue placeholder="Dal template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="DRAFT">Bozza</SelectItem>
-                    <SelectItem value="ACTIVE">Attivo</SelectItem>
-                    <SelectItem value="CANCELLED">Annullato</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <SelectField
+                id="inst-status"
+                label="Stato"
+                value={field.value ?? ""}
+                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v || null)}
+                placeholder="Dal template"
+                options={STATUS_OPTIONS}
+              />
             )}
           />
 
@@ -261,29 +239,19 @@ export default function InstantiateTemplateDialog({
             control={control}
             name="businessAreaId"
             render={({ field }) => (
-              <div className="space-y-2">
-                <Label htmlFor="inst-businessAreaId">
-                  Area di business
-                  {!template?.businessAreaId && (
-                    <span className="text-destructive ml-1">*</span>
-                  )}
-                </Label>
-                <Select
-                  value={field.value ? String(field.value) : ""}
-                  onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
-                >
-                  <SelectTrigger id="inst-businessAreaId">
-                    <SelectValue placeholder={template?.businessAreaId ? "Dal template" : "Seleziona area..."} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {businessAreas.map((area) => (
-                      <SelectItem key={area.id} value={String(area.id)}>
-                        {area.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <SelectField
+                id="inst-businessAreaId"
+                label={
+                  <>
+                    Area di business
+                    {!template?.businessAreaId && <span className="text-destructive ml-1">*</span>}
+                  </>
+                }
+                value={field.value ? String(field.value) : ""}
+                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
+                placeholder={template?.businessAreaId ? "Dal template" : "Seleziona area..."}
+                options={businessAreas.map((area) => ({ value: String(area.id), label: area.name }))}
+              />
             )}
           />
 
@@ -292,24 +260,14 @@ export default function InstantiateTemplateDialog({
             control={control}
             name="managerId"
             render={({ field }) => (
-              <div className="space-y-2">
-                <Label htmlFor="inst-managerId">Responsabile</Label>
-                <Select
-                  value={field.value ? String(field.value) : ""}
-                  onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
-                >
-                  <SelectTrigger id="inst-managerId">
-                    <SelectValue placeholder="Dal template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {managers.map((m) => (
-                      <SelectItem key={m.id} value={String(m.id)}>
-                        {m.firstName} {m.lastName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <SelectField
+                id="inst-managerId"
+                label="Responsabile"
+                value={field.value ? String(field.value) : ""}
+                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
+                placeholder="Dal template"
+                options={managers.map((m) => ({ value: String(m.id), label: `${m.firstName} ${m.lastName}` }))}
+              />
             )}
           />
 

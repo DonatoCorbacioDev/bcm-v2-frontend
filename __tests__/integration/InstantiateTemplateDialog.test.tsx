@@ -1,11 +1,31 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
+
+// Real Radix Dialog + real Radix Select, both mounted at once, is the one
+// combination in this codebase where a component IS both the dialog and the
+// form (everywhere else, a page mounts a plain Select-using form inside a
+// Dialog it owns, and that form's own tests render it standalone, without
+// a Dialog). Under jsdom, two nested Radix FocusScopes (Dialog's + Select's)
+// correct each other's focus back and forth forever the moment the Select
+// popover opens (RangeError: Maximum call stack size exceeded, repeated
+// until the Jest worker OOMs — confirmed by isolating exactly which test
+// triggers it: the first one in this file to actually open the Select).
+// Stubbing out Dialog's chrome removes the *other* focus trap so the real,
+// unmodified Select (whose actual behavior these tests care about) has
+// nothing left to fight with.
+jest.mock('@/components/ui/dialog', () => ({
+  Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
+    open ? <div role="dialog" aria-modal="true">{children}</div> : null,
+  DialogContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
+  DialogDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+}));
 const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({ useRouter: () => ({ push: mockPush }) }));
 
@@ -192,12 +212,18 @@ describe('InstantiateTemplateDialog', () => {
     expect(screen.getByPlaceholderText('es. CTR-2026-001')).toBeInTheDocument();
   });
 
-  it('calls onOpenChange(false) when Annulla is clicked', async () => {
+  it('calls onOpenChange(false) when Annulla is clicked', () => {
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
       { wrapper: createWrapper() }
     );
-    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
+    // fireEvent, not userEvent: same reason as selectCounterparty() above —
+    // userEvent's realistic focus emulation on a button inside an open Radix
+    // Dialog makes the Dialog's focus-scope and jsdom fight over focus in an
+    // infinite loop (RangeError: Maximum call stack size exceeded, repeated
+    // until the Jest worker OOMs — this is what was actually crashing this
+    // suite, not a memory-accumulation issue).
+    fireEvent.click(screen.getByRole('button', { name: /annulla/i }));
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 

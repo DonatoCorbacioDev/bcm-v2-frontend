@@ -4,4 +4,5 @@ export const referenceQueryKeys = {
   roles: ["reference", "roles"] as const,
   financialTypes: ["reference", "financial-types"] as const,
   budgets: ["reference", "budgets"] as const,
+  counterparties: ["reference", "counterparties"] as const,
 };

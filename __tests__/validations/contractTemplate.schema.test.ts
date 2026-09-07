@@ -75,7 +75,7 @@ describe("contractTemplateSchema", () => {
 });
 
 const validInstantiate = {
-  customerName: "Acme Corp",
+  counterpartyId: 1,
   contractNumber: "CTR-2024-001",
   startDate: "2024-01-01",
 };
@@ -83,6 +83,18 @@ const validInstantiate = {
 describe("instantiateTemplateSchema", () => {
   it("accepts minimal valid data", () => {
     expect(instantiateTemplateSchema.safeParse(validInstantiate).success).toBe(true);
+  });
+
+  describe("counterpartyId", () => {
+    it("rejects zero or negative IDs", () => {
+      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, counterpartyId: 0 }).success).toBe(false);
+      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, counterpartyId: -1 }).success).toBe(false);
+    });
+
+    it("rejects a missing counterpartyId", () => {
+      const { counterpartyId: _omit, ...withoutCounterparty } = validInstantiate;
+      expect(instantiateTemplateSchema.safeParse(withoutCounterparty).success).toBe(false);
+    });
   });
 
   describe("contractNumber", () => {

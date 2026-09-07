@@ -37,7 +37,7 @@ import { api } from '@/lib/api';
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
-const baseContract: Omit<Contract, 'id' | 'contractNumber' | 'customerName' | 'daysUntilExpiry'> = {
+const baseContract: Omit<Contract, 'id' | 'contractNumber' | 'counterpartyId' | 'counterparty' | 'daysUntilExpiry'> = {
   wbsCode: 'WBS-001',
   projectName: 'Project',
   areaId: 1,
@@ -53,7 +53,8 @@ const criticalContract: Contract = {
   ...baseContract,
   id: 1,
   contractNumber: 'CNT-CRIT',
-  customerName: 'Urgent Corp',
+  counterpartyId: 1,
+  counterparty: { id: 1, name: 'Urgent Corp', type: 'CUSTOMER' },
   daysUntilExpiry: 3,
 };
 
@@ -61,7 +62,8 @@ const nonCriticalContract: Contract = {
   ...baseContract,
   id: 2,
   contractNumber: 'CNT-SOON',
-  customerName: 'Later Corp',
+  counterpartyId: 2,
+  counterparty: { id: 2, name: 'Later Corp', type: 'CUSTOMER' },
   daysUntilExpiry: 20,
 };
 
@@ -156,7 +158,8 @@ describe('DashboardPage', () => {
       ...criticalContract,
       id: i + 1,
       contractNumber: `CNT-CRIT-${i}`,
-      customerName: `Urgent ${i}`,
+      counterpartyId: i + 1,
+      counterparty: { id: i + 1, name: `Urgent ${i}`, type: 'CUSTOMER' as const },
     }));
     (useExpiringContracts as jest.Mock).mockReturnValue({
       data: manyCritical,
@@ -174,7 +177,8 @@ describe('DashboardPage', () => {
       ...criticalContract,
       id: i + 1,
       contractNumber: `CNT-CRIT-${i}`,
-      customerName: `Urgent ${i}`,
+      counterpartyId: i + 1,
+      counterparty: { id: i + 1, name: `Urgent ${i}`, type: 'CUSTOMER' as const },
     }));
     (useExpiringContracts as jest.Mock).mockReturnValue({
       data: fourCritical,

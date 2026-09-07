@@ -53,11 +53,10 @@ export const contractTemplateSchema = z.object({
 export type ContractTemplateFormData = z.infer<typeof contractTemplateSchema>;
 
 export const instantiateTemplateSchema = z.object({
-  customerName: z
-    .string({ message: "Il nome del cliente è obbligatorio" })
-    .min(2, "Il nome del cliente deve contenere almeno 2 caratteri")
-    .max(100)
-    .trim(),
+  counterpartyId: z
+    .number({ message: "La controparte è obbligatoria" })
+    .int("La controparte deve essere un numero intero")
+    .positive("La controparte deve essere un numero positivo"),
 
   contractNumber: z
     .string({ message: "Il numero contratto è obbligatorio" })

@@ -4,7 +4,7 @@ import type { Contract, ContractImportResult, ContractsByArea, ContractsTimeline
 export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT";
 
 export type ContractUpsertPayload = {
-  customerName: string;
+  counterpartyId: number;
   contractNumber: string;
   wbsCode: string;
   projectName: string;

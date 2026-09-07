@@ -12,6 +12,7 @@ import { contractTemplatesService } from "@/services/contractTemplates.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
+import { useCounterparties } from "@/hooks/useCounterparties";
 import { useAuthStore } from "@/store/authStore";
 
 import { Button } from "@/components/ui/button";
@@ -51,11 +52,14 @@ export default function InstantiateTemplateDialog({
   const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
+  const counterpartiesQuery = useCounterparties();
 
   /* istanbul ignore next */
   const businessAreas = businessAreasQuery.data ?? [];
   /* istanbul ignore next */
   const managers = managersQuery.data ?? [];
+  /* istanbul ignore next */
+  const counterparties = counterpartiesQuery.data ?? [];
 
   // The template's own default area covers the requirement when it has one; only
   // block when this instantiation would need a fresh pick and none exist (mirrors
@@ -66,7 +70,7 @@ export default function InstantiateTemplateDialog({
   const instantiateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: InstantiateTemplateFormData }) =>
       contractTemplatesService.instantiate(id, {
-        customerName: payload.customerName,
+        counterpartyId: payload.counterpartyId,
         contractNumber: payload.contractNumber,
         wbsCode: payload.wbsCode || null,
         projectName: payload.projectName || null,
@@ -146,20 +150,36 @@ export default function InstantiateTemplateDialog({
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
-          {/* Customer Name */}
-          <div className="space-y-2">
-            <Label htmlFor="inst-customerName">
-              Nome cliente <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="inst-customerName"
-              {...register("customerName")}
-              placeholder="Inserisci il nome del cliente"
-            />
-            {errors.customerName && (
-              <p className="text-sm text-destructive">{errors.customerName.message}</p>
+          {/* Counterparty */}
+          <Controller
+            control={control}
+            name="counterpartyId"
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label htmlFor="inst-counterpartyId">
+                  Controparte <span className="text-destructive">*</span>
+                </Label>
+                <Select
+                  value={field.value ? String(field.value) : ""}
+                  onValueChange={/* istanbul ignore next */ (v) => field.onChange(Number(v))}
+                >
+                  <SelectTrigger id="inst-counterpartyId">
+                    <SelectValue placeholder="Seleziona la controparte" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {counterparties.map((cp) => (
+                      <SelectItem key={cp.id} value={String(cp.id)}>
+                        {cp.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.counterpartyId && (
+                  <p className="text-sm text-destructive">{errors.counterpartyId.message}</p>
+                )}
+              </div>
             )}
-          </div>
+          />
 
           {/* Contract Number */}
           <div className="space-y-2">

@@ -82,7 +82,8 @@ const makePageResponse = (contracts: Contract[], totalPages = 1) => ({
 const activeContract: Contract = {
   id: 1,
   contractNumber: 'CNT-001',
-  customerName: 'Acme Corp',
+  counterpartyId: 1,
+  counterparty: { id: 1, name: 'Acme Corp', type: 'CUSTOMER' },
   projectName: 'Digital Transform',
   wbsCode: 'WBS-001',
   areaId: 1,
@@ -98,7 +99,8 @@ const expiredContract: Contract = {
   ...activeContract,
   id: 2,
   contractNumber: 'CNT-002',
-  customerName: 'Beta Ltd',
+  counterpartyId: 2,
+  counterparty: { id: 2, name: 'Beta Ltd', type: 'CUSTOMER' },
   status: 'EXPIRED',
 };
 
@@ -592,7 +594,7 @@ describe('ContractTable', () => {
     const getCustomerOrder = () =>
       screen.getAllByRole('row').slice(1).map((row) => within(row).getByText(/corp|ltd/i).textContent);
 
-    const header = screen.getByRole('button', { name: /cliente/i });
+    const header = screen.getByRole('button', { name: /controparte/i });
     await userEvent.click(header);
     expect(getCustomerOrder()).toEqual(['Acme Corp', 'Beta Ltd']);
     expect(header.closest('th')).toHaveAttribute('aria-sort', 'ascending');
@@ -609,7 +611,7 @@ describe('ContractTable', () => {
   it('resets to ascending when switching to a different column', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const customerHeader = screen.getByRole('button', { name: /cliente/i });
+    const customerHeader = screen.getByRole('button', { name: /controparte/i });
     await userEvent.click(customerHeader);
     await userEvent.click(customerHeader);
     expect(customerHeader.closest('th')).toHaveAttribute('aria-sort', 'descending');

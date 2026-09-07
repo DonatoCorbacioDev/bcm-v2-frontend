@@ -5,12 +5,11 @@ import { z } from "zod";
  * Used for both CREATE and UPDATE operations
  */
 export const contractSchema = z.object({
-  // Customer information
-  customerName: z
-    .string({ message: "Il nome del cliente è obbligatorio" })
-    .min(2, "Il nome del cliente deve contenere almeno 2 caratteri")
-    .max(100, "Il nome del cliente non può superare i 100 caratteri")
-    .trim(),
+  // Counterparty (customer/supplier) ID (foreign key)
+  counterpartyId: z
+    .number({ message: "La controparte è obbligatoria" })
+    .int("La controparte deve essere un numero intero")
+    .positive("La controparte deve essere un numero positivo"),
 
   // Contract number (format: C001, C002, etc.)
   contractNumber: z

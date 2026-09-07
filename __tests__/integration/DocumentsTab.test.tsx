@@ -149,10 +149,15 @@ describe('DocumentsTab', () => {
     await userEvent.click(screen.getByTitle('Estrai campi'));
     expect(await screen.findByText(/applica al contratto/i)).toBeInTheDocument();
     await userEvent.click(screen.getByText(/applica al contratto/i));
+    // customerName is intentionally no longer auto-applied: the contract's
+    // counterparty is now a Select bound to an ID, not a free-text field, so
+    // there's nothing for a raw detected name string to write into.
     expect(onApply).toHaveBeenCalledWith(expect.objectContaining({
-      customerName: 'Acme Corp',
       contractNumber: 'CNT-001',
     }));
+    expect(onApply).toHaveBeenCalledWith(
+      expect.not.objectContaining({ customerName: expect.anything() })
+    );
   });
 
   it('collapses analysis panel when toggle button is clicked', async () => {

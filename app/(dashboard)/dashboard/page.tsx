@@ -179,7 +179,7 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-foreground">
-                          {contract.contractNumber} - {contract.customerName}
+                          {contract.contractNumber} - {contract.counterparty?.name ?? "N/D"}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           Scade il: {new Date(contract.endDate).toLocaleDateString("it-IT")}

@@ -26,6 +26,10 @@ jest.mock('@/hooks/useManagers', () => ({
   useManagers: jest.fn(),
 }));
 
+jest.mock('@/hooks/useCounterparties', () => ({
+  useCounterparties: jest.fn(),
+}));
+
 jest.mock('@/lib/api', () => ({
   __esModule: true,
   default: {
@@ -72,6 +76,7 @@ jest.mock('@tanstack/react-query', () => {
 import { toast } from 'sonner';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
 import { useManagers } from '@/hooks/useManagers';
+import { useCounterparties } from '@/hooks/useCounterparties';
 import { useAuthStore } from '@/store/authStore';
 import InstantiateTemplateDialog from '@/components/contract-templates/InstantiateTemplateDialog';
 
@@ -91,12 +96,26 @@ beforeEach(() => {
   jest.clearAllMocks();
   (useBusinessAreas as jest.Mock).mockReturnValue({ data: [{ id: 1, name: 'Eng', description: '' }], isLoading: false, isError: false });
   (useManagers as jest.Mock).mockReturnValue({ data: [{ id: 1, firstName: 'Marco', lastName: 'Rossi' }], isLoading: false, isError: false });
+  (useCounterparties as jest.Mock).mockReturnValue({ data: [{ id: 1, name: 'Acme Corp', type: 'CUSTOMER' }], isLoading: false, isError: false });
 });
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function fillAndSubmit() {
-  fireEvent.change(screen.getByPlaceholderText('Inserisci il nome del cliente'), { target: { value: 'Acme Corp' } });
+// The counterparty field is a Radix Select (bound to an ID, not free text),
+// so picking a value means opening it and clicking the option -- fireEvent
+// can't type into it directly the way it can the plain text inputs below.
+// Plain fireEvent.click (not userEvent.click) is required here: this Select
+// lives inside an open Radix Dialog, and userEvent's realistic pointer/focus
+// emulation makes the Dialog's and the Select's focus-scopes fight over
+// focus in a loop under jsdom (RangeError: Maximum call stack size
+// exceeded). fireEvent.click skips that focus emulation entirely.
+async function selectCounterparty(name = 'Acme Corp') {
+  fireEvent.click(screen.getByRole('combobox', { name: /controparte/i }));
+  fireEvent.click(await screen.findByRole('option', { name }));
+}
+
+async function fillAndSubmit() {
+  await selectCounterparty();
   fireEvent.change(screen.getByPlaceholderText('es. CTR-2026-001'), { target: { value: 'CTR-2024-001' } });
   const startDate = screen.queryByTestId('inst-startDate');
   if (startDate) fireEvent.change(startDate, { target: { value: '2024-01-01' } });
@@ -152,24 +171,24 @@ describe('InstantiateTemplateDialog', () => {
     expect(screen.getAllByText('Marco Rossi').length).toBeGreaterThan(0);
   });
 
-  it('shows validation errors for customerName and startDate when submitted empty', async () => {
+  it('shows validation errors for counterpartyId and startDate when submitted empty', async () => {
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
       { wrapper: createWrapper() }
     );
     const form = document.querySelector('form');
     fireEvent.submit(form!);
-    expect(await screen.findByText(/il nome del cliente deve contenere almeno 2 caratteri/i)).toBeInTheDocument();
+    expect(await screen.findByText(/la controparte è obbligatoria/i)).toBeInTheDocument();
     expect(screen.getByText(/la data di inizio è obbligatoria/i)).toBeInTheDocument();
     expect(mockInstantiate).not.toHaveBeenCalled();
   });
 
-  it('shows customerName and contractNumber inputs', () => {
+  it('shows counterparty select and contractNumber input', () => {
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
       { wrapper: createWrapper() }
     );
-    expect(screen.getByPlaceholderText('Inserisci il nome del cliente')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /controparte/i })).toBeInTheDocument();
     expect(screen.getByPlaceholderText('es. CTR-2026-001')).toBeInTheDocument();
   });
 
@@ -183,17 +202,17 @@ describe('InstantiateTemplateDialog', () => {
   });
 
   it('submits the form and shows success toast', async () => {
-    const contract = { id: 99, customerName: 'Acme' };
+    const contract = { id: 99, counterparty: { id: 1, name: 'Acme Corp', type: 'CUSTOMER' } };
     mockInstantiate.mockResolvedValueOnce(contract);
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
       { wrapper: createWrapper() }
     );
-    fillAndSubmit();
+    await fillAndSubmit();
     await waitFor(() =>
       expect(mockInstantiate).toHaveBeenCalledWith(
         3,
-        expect.objectContaining({ customerName: 'Acme Corp', contractNumber: 'CTR-2024-001', startDate: '2024-01-01' })
+        expect.objectContaining({ counterpartyId: 1, contractNumber: 'CTR-2024-001', startDate: '2024-01-01' })
       )
     );
     await waitFor(() =>
@@ -202,13 +221,13 @@ describe('InstantiateTemplateDialog', () => {
   });
 
   it('navigates to the new contract when the success toast action is clicked', async () => {
-    const contract = { id: 99, customerName: 'Acme' };
+    const contract = { id: 99, counterparty: { id: 1, name: 'Acme Corp', type: 'CUSTOMER' } };
     mockInstantiate.mockResolvedValueOnce(contract);
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
       { wrapper: createWrapper() }
     );
-    fillAndSubmit();
+    await fillAndSubmit();
     await waitFor(() => expect(toast.success).toHaveBeenCalled());
     const [, options] = (toast.success as jest.Mock).mock.calls[0];
     options.action.onClick();
@@ -221,7 +240,7 @@ describe('InstantiateTemplateDialog', () => {
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
       { wrapper: createWrapper() }
     );
-    fillAndSubmit();
+    await fillAndSubmit();
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Creazione del contratto non riuscita')
     );
@@ -269,7 +288,7 @@ describe('InstantiateTemplateDialog', () => {
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
       { wrapper: createWrapper() }
     );
-    fireEvent.change(screen.getByPlaceholderText('Inserisci il nome del cliente'), { target: { value: 'Acme' } });
+    await selectCounterparty();
     fireEvent.change(screen.getByPlaceholderText('es. CTR-2026-001'), { target: { value: 'ctr-001' } });
     const startDate = screen.queryByTestId('inst-startDate');
     if (startDate) fireEvent.change(startDate, { target: { value: '2024-01-01' } });

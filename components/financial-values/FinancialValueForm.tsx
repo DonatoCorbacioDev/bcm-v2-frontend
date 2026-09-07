@@ -208,7 +208,7 @@ export default function FinancialValueForm({
               <SelectContent>
                 {contracts.map((c) => (
                   <SelectItem key={c.id} value={String(c.id)}>
-                    {c.contractNumber} - {c.customerName}
+                    {c.contractNumber} - {c.counterparty?.name ?? "N/D"}
                   </SelectItem>
                 ))}
               </SelectContent>

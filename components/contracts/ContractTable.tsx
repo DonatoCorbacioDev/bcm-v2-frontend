@@ -47,7 +47,7 @@ type PageItem = number | "ellipsis-start" | "ellipsis-end";
 
 type SortableColumn =
   | "contractNumber"
-  | "customerName"
+  | "counterpartyName"
   | "projectName"
   | "wbsCode"
   | "managerName"
@@ -59,7 +59,7 @@ type SortDirection = "asc" | "desc";
 
 const COLUMNS: { key: SortableColumn; label: string; className?: string }[] = [
   { key: "contractNumber", label: "Numero" },
-  { key: "customerName", label: "Cliente" },
+  { key: "counterpartyName", label: "Controparte" },
   { key: "projectName", label: "Progetto", className: "hidden md:table-cell" },
   { key: "wbsCode", label: "Codice WBS", className: "hidden lg:table-cell" },
   { key: "managerName", label: "Responsabile", className: "hidden lg:table-cell" },
@@ -67,6 +67,21 @@ const COLUMNS: { key: SortableColumn; label: string; className?: string }[] = [
   { key: "startDate", label: "Data inizio", className: "hidden md:table-cell" },
   { key: "endDate", label: "Data fine", className: "hidden lg:table-cell" },
 ];
+
+// counterpartyName has no flat property on Contract (only the nested
+// counterparty object) -- every other column is a plain string field, so a
+// resolver map keeps sortContracts generic without adding a redundant flat
+// field to the Contract type just for sorting.
+const SORT_VALUE: Record<SortableColumn, (c: Contract) => string> = {
+  contractNumber: (c) => c.contractNumber,
+  counterpartyName: (c) => c.counterparty?.name ?? "",
+  projectName: (c) => c.projectName,
+  wbsCode: (c) => c.wbsCode,
+  managerName: (c) => c.managerName,
+  status: (c) => c.status,
+  startDate: (c) => c.startDate,
+  endDate: (c) => c.endDate,
+};
 
 /**
  * Sorts only the contracts already on the current page: pagination is
@@ -81,13 +96,12 @@ function sortContracts(
   direction: SortDirection
 ): Contract[] {
   if (!sortKey) return contracts;
+  const getValue = SORT_VALUE[sortKey];
   const sorted = [...contracts].sort((a, b) => {
-    // Every SortableColumn is a non-nullable string on Contract; the
-    // fallback only guards against malformed API data slipping past types.
     /* istanbul ignore next */
-    const aVal = a[sortKey] ?? "";
+    const aVal = getValue(a) ?? "";
     /* istanbul ignore next */
-    const bVal = b[sortKey] ?? "";
+    const bVal = getValue(b) ?? "";
     return String(aVal).localeCompare(String(bVal), "it", { numeric: true });
   });
   return direction === "asc" ? sorted : sorted.reverse();
@@ -541,7 +555,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                 <TableCell className="font-medium text-sm">
                   {c.contractNumber}
                 </TableCell>
-                <TableCell className="text-sm">{c.customerName}</TableCell>
+                <TableCell className="text-sm">{c.counterparty?.name ?? "N/D"}</TableCell>
                 <TableCell className="hidden md:table-cell text-sm">{c.projectName}</TableCell>
                 <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode || "N/D"}</TableCell>
                 <TableCell className="hidden lg:table-cell text-sm">{c.managerName || "Non assegnato"}</TableCell>

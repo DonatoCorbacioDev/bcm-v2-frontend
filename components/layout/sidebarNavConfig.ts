@@ -10,6 +10,7 @@ import {
   Shield,
   Landmark,
   Wallet,
+  Handshake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -36,6 +37,7 @@ export const navGroups: { title: string; items: NavItem[] }[] = [
       { label: "Tipi finanziari",   href: "/financial-types", icon: Tag,       adminOnly: true },
       { label: "Budget",            href: "/budgets",         icon: Wallet,    adminOnly: true },
       { label: "Aree di business",  href: "/business-areas",  icon: Building2, adminOnly: true },
+      { label: "Controparti",       href: "/counterparties",  icon: Handshake, adminOnly: true },
       { label: "Responsabili",      href: "/managers",         icon: Users,     adminOnly: true },
       { label: "Utenti",            href: "/users",            icon: User,      adminOnly: true },
       { label: "Organizzazione",    href: "/organization",     icon: Landmark,  adminOnly: true },

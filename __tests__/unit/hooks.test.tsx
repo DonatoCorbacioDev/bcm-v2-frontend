@@ -177,7 +177,7 @@ describe('useUsers', () => {
 
 describe('useContracts', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, customerName: 'Acme' }];
+    const data = [{ id: 1, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } }];
     (contractsService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useContracts(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -238,7 +238,7 @@ describe('useContractsPaged', () => {
 
 describe('useContract', () => {
   it('fetches contract when id > 0', async () => {
-    const data = { id: 1, customerName: 'Acme' };
+    const data = { id: 1, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } };
     (contractsService.getById as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useContract(1), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -253,7 +253,7 @@ describe('useContract', () => {
 
 describe('useExpiringContracts', () => {
   it('fetches expiring contracts', async () => {
-    const data = [{ id: 1, customerName: 'Acme' }];
+    const data = [{ id: 1, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } }];
     (api.get as jest.Mock).mockResolvedValue({ data });
     const { result } = renderHook(() => useExpiringContracts(30), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -261,7 +261,7 @@ describe('useExpiringContracts', () => {
   });
 
   it('uses default days=30 when called without arguments', async () => {
-    const data = [{ id: 2, customerName: 'Beta' }];
+    const data = [{ id: 2, counterparty: { id: 2, name: 'Beta', type: 'CUSTOMER' } }];
     (api.get as jest.Mock).mockResolvedValue({ data });
     const { result } = renderHook(() => useExpiringContracts(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -401,7 +401,7 @@ describe('useUpsertUser', () => {
 
 describe('useUpsertContract', () => {
   const payload = {
-    customerName: 'Acme', contractNumber: 'CNT-001', wbsCode: 'WBS-001',
+    counterpartyId: 1, contractNumber: 'CNT-001', wbsCode: 'WBS-001',
     projectName: 'Proj A', startDate: '2024-01-01', endDate: '2024-12-31',
     status: 'ACTIVE' as const, areaId: 1, managerId: 1,
   };

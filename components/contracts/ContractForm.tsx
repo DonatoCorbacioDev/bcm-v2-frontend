@@ -9,6 +9,7 @@ import type { Contract } from "@/types";
 import { useUpsertContract } from "@/hooks/useUpsertContract";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
+import { useCounterparties } from "@/hooks/useCounterparties";
 import { CONTRACT_STATUS_LABELS } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -40,15 +41,19 @@ export default function ContractForm({
   // Reference data via React Query
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
+  const counterpartiesQuery = useCounterparties();
 
   /* istanbul ignore next */
   const businessAreas = businessAreasQuery.data ?? [];
   /* istanbul ignore next */
   const managers = managersQuery.data ?? [];
+  /* istanbul ignore next */
+  const counterparties = counterpartiesQuery.data ?? [];
 
   const isReferenceLoading =
-    businessAreasQuery.isLoading || managersQuery.isLoading;
-  const isReferenceError = businessAreasQuery.isError || managersQuery.isError;
+    businessAreasQuery.isLoading || managersQuery.isLoading || counterpartiesQuery.isLoading;
+  const isReferenceError =
+    businessAreasQuery.isError || managersQuery.isError || counterpartiesQuery.isError;
 
   const {
     register,
@@ -59,7 +64,7 @@ export default function ContractForm({
     resolver: zodResolver(contractSchema),
     defaultValues: contract
       ? {
-          customerName: contract.customerName,
+          counterpartyId: contract.counterpartyId,
           contractNumber: contract.contractNumber,
           wbsCode: contract.wbsCode,
           projectName: contract.projectName,
@@ -121,27 +126,45 @@ export default function ContractForm({
   if (isReferenceError) {
     return (
       <div className="py-8 text-center text-sm text-destructive">
-        Impossibile caricare aree di business/responsabili.
+        Impossibile caricare aree di business/responsabili/controparti.
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {/* Customer Name */}
-      <div className="space-y-2">
-        <Label htmlFor="customerName">
-          Nome cliente <span className="text-destructive">*</span>
-        </Label>
-        <Input
-          id="customerName"
-          {...register("customerName")}
-          placeholder="Inserisci il nome del cliente"
-        />
-        {errors.customerName && (
-          <p className="text-sm text-destructive">{errors.customerName.message}</p>
+      {/* Counterparty (Controller) */}
+      <Controller
+        control={control}
+        name="counterpartyId"
+        render={({ field }) => (
+          <div className="space-y-2">
+            <Label htmlFor="counterpartyId">
+              Controparte <span className="text-destructive">*</span>
+            </Label>
+
+            <Select
+              value={field.value ? String(field.value) : ""}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+            >
+              <SelectTrigger id="counterpartyId">
+                <SelectValue placeholder="Seleziona la controparte" />
+              </SelectTrigger>
+              <SelectContent>
+                {counterparties.map((cp) => (
+                  <SelectItem key={cp.id} value={String(cp.id)}>
+                    {cp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {errors.counterpartyId && (
+              <p className="text-sm text-destructive">{errors.counterpartyId.message}</p>
+            )}
+          </div>
         )}
-      </div>
+      />
 
       {/* Contract Number */}
       <div className="space-y-2">

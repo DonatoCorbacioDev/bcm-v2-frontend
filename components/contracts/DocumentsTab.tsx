@@ -210,7 +210,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
 
   const handleApply = (analysis: DocumentAnalysis) => {
     const detected: Partial<Contract> = {};
-    if (analysis.detectedCustomerName) detected.customerName = analysis.detectedCustomerName;
+    // No auto-apply for the detected customer name: counterparty is now a
+    // Select bound to a Counterparty ID, not a free-text field, and the
+    // document analysis only extracts a raw name string with no ID to match.
     if (analysis.detectedContractNumber) detected.contractNumber = analysis.detectedContractNumber;
     if (analysis.detectedStartDate) detected.startDate = analysis.detectedStartDate;
     if (analysis.detectedEndDate) detected.endDate = analysis.detectedEndDate;

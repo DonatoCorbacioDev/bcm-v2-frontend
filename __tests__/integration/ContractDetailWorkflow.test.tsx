@@ -75,7 +75,8 @@ import ContractDetailPage from '@/app/(dashboard)/contracts/[id]/page';
 
 const baseContract = {
   id: 1,
-  customerName: 'Acme',
+  counterpartyId: 1,
+  counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' as const },
   contractNumber: 'CNT-1',
   wbsCode: 'WBS-1',
   projectName: 'Progetto',

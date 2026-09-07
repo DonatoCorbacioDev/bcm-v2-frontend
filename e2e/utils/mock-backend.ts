@@ -29,6 +29,7 @@ export async function mockAuthenticatedSession(page: Page) {
 }
 
 const businessAreas = [{ id: 1, name: "Engineering", description: "Eng" }];
+const counterparties = [{ id: 1, name: "Acme Corp", type: "CUSTOMER" }];
 const managers = [
   { id: 1, firstName: "John", lastName: "Doe", email: "john@example.com", phoneNumber: "+39 333 1234567", department: "IT" },
 ];
@@ -75,7 +76,8 @@ const auditLogs = {
 
 const sampleContract = {
   id: 1,
-  customerName: "Acme Corp",
+  counterpartyId: 1,
+  counterparty: counterparties[0],
   contractNumber: "CNT-2024-001",
   wbsCode: "WBS-001",
   projectName: "Digital Transformation",
@@ -122,6 +124,7 @@ export async function mockApi(
     },
     "**/api/v1/business-areas": businessAreas,
     "**/api/v1/managers": managers,
+    "**/api/v1/counterparties": counterparties,
     "**/api/v1/contracts/search*": {
       content: [sampleContract, expiringContract],
       totalElements: 2,

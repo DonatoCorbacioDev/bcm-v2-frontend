@@ -40,6 +40,12 @@ jest.mock('@/hooks/useRoles', () => ({
 jest.mock('@/hooks/useBusinessAreas', () => ({
   useBusinessAreas: jest.fn(),
 }));
+jest.mock('@/hooks/useCounterparties', () => ({
+  useCounterparties: jest.fn(),
+}));
+jest.mock('@/hooks/useUpsertCounterparty', () => ({
+  useUpsertCounterparty: jest.fn(),
+}));
 jest.mock('@/hooks/useContractsPaged', () => ({
   useContractsPaged: jest.fn(),
 }));
@@ -79,11 +85,14 @@ import { useUpsertBudget } from '@/hooks/useUpsertBudget';
 import { useManagers } from '@/hooks/useManagers';
 import { useRoles } from '@/hooks/useRoles';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
+import { useCounterparties } from '@/hooks/useCounterparties';
+import { useUpsertCounterparty } from '@/hooks/useUpsertCounterparty';
 import { useContractsPaged } from '@/hooks/useContractsPaged';
 import { useFinancialTypes } from '@/hooks/useFinancialTypes';
 import { usersService } from '@/services/users.service';
 
 import BusinessAreaForm from '@/components/business-areas/BusinessAreaForm';
+import CounterpartyForm from '@/components/counterparties/CounterpartyForm';
 import FinancialTypeForm from '@/components/financial-types/FinancialTypeForm';
 import ManagerForm from '@/components/managers/ManagerForm';
 import InviteUserForm from '@/components/users/InviteUserForm';
@@ -102,7 +111,8 @@ const mockMutation = (opts: { mutateAsync?: jest.Mock; isPending?: boolean } = {
 const managers = [{ id: 1, firstName: 'John', lastName: 'Doe', email: 'j@d.com', phoneNumber: '123', department: 'IT' }];
 const roles = [{ id: 1, role: 'ADMIN' }];
 const businessAreas = [{ id: 1, name: 'Engineering', description: 'Eng' }];
-const contracts = [{ id: 1, contractNumber: 'CNT-001', customerName: 'Acme', projectName: 'P', wbsCode: 'W', areaId: 1, managerId: 1, startDate: '2024-01-01', endDate: '2024-12-31', status: 'ACTIVE', createdAt: '2024-01-01' }];
+const counterparties = [{ id: 1, name: 'Acme', type: 'CUSTOMER' as const }];
+const contracts = [{ id: 1, contractNumber: 'CNT-001', counterpartyId: 1, counterparty: counterparties[0], projectName: 'P', wbsCode: 'W', areaId: 1, managerId: 1, startDate: '2024-01-01', endDate: '2024-12-31', status: 'ACTIVE', createdAt: '2024-01-01' }];
 const financialTypes = [{ id: 1, name: 'Revenue', description: 'Rev', category: 'REVENUE' as const }];
 
 // ─── BusinessAreaForm ─────────────────────────────────────────────────────────
@@ -196,6 +206,89 @@ describe('BusinessAreaForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
     expect(toast.success).toHaveBeenCalledWith('Area di business creata');
+  });
+});
+
+// ─── CounterpartyForm ─────────────────────────────────────────────────────────
+
+describe('CounterpartyForm', () => {
+  const onClose = jest.fn();
+  const onSuccess = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation());
+  });
+
+  it('renders Create button in create mode', () => {
+    render(<CounterpartyForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    expect(screen.getByRole('button', { name: /crea/i })).toBeInTheDocument();
+  });
+
+  it('renders Update button in edit mode', () => {
+    render(
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }} />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByRole('button', { name: /aggiorna/i })).toBeInTheDocument();
+  });
+
+  it('pre-fills fields in edit mode', () => {
+    render(
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'SUPPLIER' }} />,
+      { wrapper: createWrapper() }
+    );
+    expect(screen.getByDisplayValue('Alfa Srl')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /tipo/i })).toHaveTextContent('Fornitore');
+  });
+
+  it('shows validation errors when submitting empty form', async () => {
+    render(<CounterpartyForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /crea/i }));
+    await waitFor(() => {
+      expect(screen.getByText(/almeno 2 caratteri/i)).toBeInTheDocument();
+    });
+  });
+
+  it('calls mutateAsync with correct payload on successful submit', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }} />,
+      { wrapper: createWrapper() }
+    );
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(toast.success).toHaveBeenCalledWith('Controparte aggiornata');
+    expect(onSuccess).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('shows error toast when mutation throws', async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }} />,
+      { wrapper: createWrapper() }
+    );
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento della controparte non riuscito'));
+  });
+
+  it('calls onClose when Cancel is clicked', async () => {
+    render(<CounterpartyForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls create (no id) when submitting new counterparty', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<CounterpartyForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
+    await userEvent.type(screen.getByPlaceholderText(/alfa srl/i), 'Beta Srl');
+    await userEvent.click(screen.getByRole('button', { name: /crea/i }));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(toast.success).toHaveBeenCalledWith('Controparte creata');
   });
 });
 
@@ -549,7 +642,7 @@ describe('ContractForm', () => {
   const onClose = jest.fn();
   const onSuccess = jest.fn();
   const validContract = {
-    id: 1, customerName: 'Acme', contractNumber: 'CNT-001', wbsCode: 'WBS-001',
+    id: 1, counterpartyId: 1, counterparty: counterparties[0], contractNumber: 'CNT-001', wbsCode: 'WBS-001',
     projectName: 'Project A', startDate: '2024-01-01', endDate: '2024-12-31',
     status: 'ACTIVE' as const, areaId: 1, managerId: 1, createdAt: '2024-01-01',
     managerName: 'John Doe',
@@ -560,6 +653,7 @@ describe('ContractForm', () => {
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation());
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: businessAreas, isLoading: false, isError: false });
     (useManagers as jest.Mock).mockReturnValue({ data: managers, isLoading: false, isError: false });
+    (useCounterparties as jest.Mock).mockReturnValue({ data: counterparties, isLoading: false, isError: false });
   });
 
   it('shows loading state when reference data is loading', () => {
@@ -576,7 +670,7 @@ describe('ContractForm', () => {
 
   it('renders form fields in create mode', () => {
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByLabelText(/nome cliente/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/controparte/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /crea contratto/i })).toBeInTheDocument();
   });
 
@@ -587,7 +681,7 @@ describe('ContractForm', () => {
 
   it('pre-fills fields in edit mode', () => {
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
-    expect(screen.getByDisplayValue('Acme')).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /controparte/i })).toHaveTextContent('Acme');
     expect(screen.getByDisplayValue('CNT-001')).toBeInTheDocument();
   });
 
@@ -616,7 +710,7 @@ describe('ContractForm', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('shows validation errors for areaId and managerId when submitting empty form', async () => {
+  it('shows validation errors for counterpartyId, areaId and managerId when submitting empty form', async () => {
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /crea contratto/i }));
     await waitFor(() => {

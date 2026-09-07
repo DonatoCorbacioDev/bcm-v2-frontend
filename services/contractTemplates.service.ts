@@ -13,7 +13,7 @@ export type ContractTemplateUpsertPayload = {
 };
 
 export type InstantiateTemplatePayload = {
-  customerName: string;
+  counterpartyId: number;
   contractNumber: string;
   wbsCode?: string | null;
   projectName?: string | null;

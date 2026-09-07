@@ -378,7 +378,7 @@ export default function ContractDetailPage() {
             Torna ai contratti
           </Button>
           <h1 className="text-3xl font-bold text-foreground">Dettagli contratto</h1>
-          <p className="text-muted-foreground mt-1">{contract.customerName}</p>
+          <p className="text-muted-foreground mt-1">{contract.counterparty?.name ?? "N/D"}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
           {contract.workflowStage === "DRAFT" && isOwnContract && (
@@ -440,7 +440,7 @@ export default function ContractDetailPage() {
         <h2 className="text-lg font-semibold text-foreground mb-4">Informazioni generali</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { label: "Nome cliente", value: contract.customerName },
+            { label: "Controparte", value: contract.counterparty?.name ?? "N/D" },
             { label: "Numero contratto", value: contract.contractNumber },
             { label: "Nome progetto", value: contract.projectName },
             { label: "Codice WBS", value: contract.wbsCode },
@@ -582,7 +582,7 @@ export default function ContractDetailPage() {
               <DialogDescription>
                 Sei sicuro di voler eliminare il contratto{" "}
                 <span className="font-semibold">{contract.contractNumber}</span>{" "}
-                ({contract.customerName})? L&apos;operazione non può essere annullata.
+                ({contract.counterparty?.name ?? "N/D"})? L&apos;operazione non può essere annullata.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>

@@ -19,6 +19,7 @@ import { contractsService } from "@/services/contracts.service";
 import { useAuthStore } from "@/store/authStore";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
+import { useCounterparties } from "@/hooks/useCounterparties";
 import { toast } from "sonner";
 import { FileSpreadsheet, FileText, Upload } from "lucide-react";
 
@@ -30,9 +31,11 @@ function ContractsPageContent() {
 
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
+  const counterpartiesQuery = useCounterparties();
   const missingAreas = businessAreasQuery.isSuccess && businessAreasQuery.data.length === 0;
   const missingManagers = managersQuery.isSuccess && managersQuery.data.length === 0;
-  const hasMissingPrerequisite = missingAreas || missingManagers;
+  const missingCounterparties = counterpartiesQuery.isSuccess && counterpartiesQuery.data.length === 0;
+  const hasMissingPrerequisite = missingAreas || missingManagers || missingCounterparties;
 
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
@@ -50,6 +53,7 @@ function ContractsPageContent() {
   const missingLabels = [
     missingAreas ? "un'area di business" : null,
     missingManagers ? "un responsabile" : null,
+    missingCounterparties ? "una controparte" : null,
   ].filter((label): label is string => label !== null);
   const prerequisiteMessage = isAdmin
     ? `Per creare un contratto serve prima ${missingLabels.join(" e ")}.`
@@ -58,6 +62,7 @@ function ContractsPageContent() {
     ? [
         missingAreas ? { label: "Crea un'area di business", href: "/business-areas" } : null,
         missingManagers ? { label: "Crea un responsabile", href: "/managers" } : null,
+        missingCounterparties ? { label: "Crea una controparte", href: "/counterparties" } : null,
       ].filter((action): action is { label: string; href: string } => action !== null)
     : [];
 

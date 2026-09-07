@@ -14,6 +14,7 @@ jest.mock('@/lib/api', () => ({
 
 import api from '@/lib/api';
 import { businessAreasService } from '@/services/businessAreas.service';
+import { counterpartiesService } from '@/services/counterparties.service';
 import { financialTypesService } from '@/services/financialTypes.service';
 import { financialValuesService } from '@/services/financialValues.service';
 import { managersService } from '@/services/managers.service';
@@ -68,6 +69,42 @@ describe('businessAreasService', () => {
     mockDelete.mockResolvedValue({});
     await businessAreasService.delete(1);
     expect(mockDelete).toHaveBeenCalledWith('/business-areas/1');
+  });
+});
+
+// ─── counterpartiesService ───────────────────────────────────────────────────
+
+describe('counterpartiesService', () => {
+  it('list() calls GET /counterparties and returns data', async () => {
+    const data = [{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }];
+    mockGet.mockResolvedValue({ data });
+    const result = await counterpartiesService.list();
+    expect(mockGet).toHaveBeenCalledWith('/counterparties');
+    expect(result).toEqual(data);
+  });
+
+  it('create() calls POST /counterparties with payload', async () => {
+    const payload = { name: 'Alfa Srl', type: 'CUSTOMER' as const };
+    const data = { id: 1, ...payload };
+    mockPost.mockResolvedValue({ data });
+    const result = await counterpartiesService.create(payload);
+    expect(mockPost).toHaveBeenCalledWith('/counterparties', payload);
+    expect(result).toEqual(data);
+  });
+
+  it('update() calls PUT /counterparties/:id with payload', async () => {
+    const payload = { name: 'Alfa Srl Updated', type: 'SUPPLIER' as const };
+    const data = { id: 1, ...payload };
+    mockPut.mockResolvedValue({ data });
+    const result = await counterpartiesService.update(1, payload);
+    expect(mockPut).toHaveBeenCalledWith('/counterparties/1', payload);
+    expect(result).toEqual(data);
+  });
+
+  it('delete() calls DELETE /counterparties/:id', async () => {
+    mockDelete.mockResolvedValue({});
+    await counterpartiesService.delete(1);
+    expect(mockDelete).toHaveBeenCalledWith('/counterparties/1');
   });
 });
 
@@ -262,7 +299,7 @@ describe('usersService', () => {
 
 describe('contractsService', () => {
   const payload = {
-    customerName: 'Acme', contractNumber: 'CNT-001', wbsCode: 'WBS-001',
+    counterpartyId: 1, contractNumber: 'CNT-001', wbsCode: 'WBS-001',
     projectName: 'Project A', startDate: '2024-01-01', endDate: '2024-12-31',
     status: 'ACTIVE' as const, areaId: 1, managerId: 1,
   };
@@ -482,8 +519,8 @@ describe('contractTemplatesService', () => {
   });
 
   it('instantiate() calls POST /contract-templates/:id/instantiate', async () => {
-    const instantiatePayload = { customerName: 'Acme', contractNumber: 'CTR-001', startDate: '2024-01-01' };
-    const contract = { id: 10, customerName: 'Acme' };
+    const instantiatePayload = { counterpartyId: 1, contractNumber: 'CTR-001', startDate: '2024-01-01' };
+    const contract = { id: 10, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } };
     mockPost.mockResolvedValue({ data: contract });
     const result = await contractTemplatesService.instantiate(1, instantiatePayload);
     expect(mockPost).toHaveBeenCalledWith('/contract-templates/1/instantiate', instantiatePayload);

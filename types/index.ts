@@ -31,6 +31,21 @@ export interface BusinessArea {
   description: string;
 }
 
+export type CounterpartyType = "CUSTOMER" | "SUPPLIER" | "BOTH";
+
+export interface Counterparty {
+  id: number;
+  name: string;
+  type: CounterpartyType;
+  vatNumber?: string | null;
+  taxCode?: string | null;
+  address?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  notes?: string | null;
+}
+
 export type FinancialCategory = "REVENUE" | "COST";
 
 export interface FinancialType {
@@ -53,7 +68,8 @@ export interface Budget {
 
 export interface Contract {
   id: number;
-  customerName: string;
+  counterpartyId: number;
+  counterparty?: Counterparty;
   contractNumber: string;
   wbsCode: string;
   projectName: string;

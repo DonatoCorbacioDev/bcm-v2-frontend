@@ -51,7 +51,7 @@ export function RecommendedActions({ criticalRenewals }: RecommendedActionsProps
                   className="flex items-center justify-between gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 hover:border-destructive/60 transition-colors"
                 >
                   <span className="text-sm text-foreground truncate">
-                    <span className="font-medium">{c.contractNumber}</span> - {c.customerName}
+                    <span className="font-medium">{c.contractNumber}</span> - {c.counterparty?.name ?? "N/D"}
                   </span>
                   <Badge variant="destructive" className="whitespace-nowrap">Rinnova ora</Badge>
                 </Link>

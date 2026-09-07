@@ -1,7 +1,7 @@
 import { contractSchema } from "@/lib/validations/contract.schema";
 
 const validContract = {
-  customerName: "Acme Corporation",
+  counterpartyId: 1,
   contractNumber: "C001",
   wbsCode: "WBS-001",
   projectName: "Cloud Migration",
@@ -18,20 +18,27 @@ describe("contractSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  describe("customerName", () => {
-    it("rejects names shorter than 2 characters", () => {
+  describe("counterpartyId", () => {
+    it("rejects zero or negative IDs", () => {
+      expect(
+        contractSchema.safeParse({ ...validContract, counterpartyId: 0 }).success,
+      ).toBe(false);
+      expect(
+        contractSchema.safeParse({ ...validContract, counterpartyId: -1 }).success,
+      ).toBe(false);
+    });
+
+    it("rejects non-integer IDs", () => {
       const result = contractSchema.safeParse({
         ...validContract,
-        customerName: "A",
+        counterpartyId: 1.5,
       });
       expect(result.success).toBe(false);
     });
 
-    it("rejects names longer than 100 characters", () => {
-      const result = contractSchema.safeParse({
-        ...validContract,
-        customerName: "A".repeat(101),
-      });
+    it("rejects a missing counterpartyId", () => {
+      const { counterpartyId: _omit, ...withoutCounterparty } = validContract;
+      const result = contractSchema.safeParse(withoutCounterparty);
       expect(result.success).toBe(false);
     });
   });

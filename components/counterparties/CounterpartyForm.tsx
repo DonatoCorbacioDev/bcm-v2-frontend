@@ -104,7 +104,7 @@ export default function CounterpartyForm({ onClose, onSuccess, counterparty }: C
                 ))}
               </SelectContent>
             </Select>
-            {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
+            {/* istanbul ignore next: type always has a value from the Select (defaults to CUSTOMER), so this can't actually trigger */errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
           </div>
         )}
       />

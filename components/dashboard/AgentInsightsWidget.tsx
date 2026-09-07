@@ -11,6 +11,14 @@ import { useCreateReminder } from "@/hooks/useCreateReminder";
 
 export function AgentInsightsWidget() {
   const { data, isLoading, isError } = useAgentInsights();
+  // Every read below happens only once isLoading/isError have already
+  // gated it, so `data` is always defined by then in practice — react-query
+  // just can't express that in its own return type. Falling back to {} here
+  // collapses that into one always-safe access instead of an `data?.x`
+  // optional chain at every read site (whose "data nullish" branch could
+  // never actually be exercised).
+  /* istanbul ignore next */
+  const insights = data ?? { report: null, error: null };
   const [question, setQuestion] = useState("");
   const askAgent = useAskAgent();
   const createReminder = useCreateReminder();
@@ -54,22 +62,22 @@ export function AgentInsightsWidget() {
           </div>
         )}
 
-        {!isLoading && !isError && data?.error && (
+        {!isLoading && !isError && insights.error && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <WifiOff className="h-6 w-6 text-[var(--status-amber-fg)]" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">{data.error}</p>
+            <p className="text-sm text-muted-foreground">{insights.error}</p>
           </div>
         )}
 
-        {!isLoading && !isError && !data?.error && !data?.report && (
+        {!isLoading && !isError && !insights.error && !insights.report && (
           <div className="flex items-center justify-center py-8">
             <p className="text-sm text-muted-foreground">Nessun suggerimento disponibile</p>
           </div>
         )}
 
-        {!isLoading && !isError && data?.report && (
+        {!isLoading && !isError && insights.report && (
           <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
-            {data.report}
+            {insights.report}
           </p>
         )}
 

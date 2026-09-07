@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import CounterpartyTable from "@/components/counterparties/CounterpartyTable";
@@ -15,7 +14,6 @@ import {
 import type { Counterparty } from "@/types";
 
 export default function CounterpartiesPage() {
-  const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
 
@@ -23,12 +21,6 @@ export default function CounterpartiesPage() {
     open: boolean;
     counterparty: Counterparty | null;
   }>({ open: false, counterparty: null });
-
-  useEffect(() => {
-    if (!isAdmin) router.replace("/dashboard");
-  }, [isAdmin, router]);
-
-  if (!isAdmin) return null;
 
   const handleCreateClick = () => {
     setFormDialog({ open: true, counterparty: null });
@@ -49,7 +41,7 @@ export default function CounterpartiesPage() {
           <h1 className="text-3xl font-bold text-foreground">Controparti</h1>
           <p className="text-muted-foreground mt-2">Gestisci clienti e fornitori</p>
         </div>
-        <Button onClick={handleCreateClick}>+ Nuova controparte</Button>
+        {isAdmin && <Button onClick={handleCreateClick}>+ Nuova controparte</Button>}
       </div>
 
       <CounterpartyTable onEditClick={handleEditClick} />

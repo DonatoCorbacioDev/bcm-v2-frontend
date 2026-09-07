@@ -14,6 +14,10 @@ jest.mock('@/hooks/useCounterparties', () => ({
   useCounterparties: jest.fn(),
 }));
 
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(),
+}));
+
 jest.mock('@/services/counterparties.service', () => ({
   counterpartiesService: {
     list: jest.fn(),
@@ -43,7 +47,15 @@ jest.mock('@/lib/api', () => ({
 import { toast } from 'sonner';
 import { useCounterparties } from '@/hooks/useCounterparties';
 import { counterpartiesService } from '@/services/counterparties.service';
+import { useAuthStore } from '@/store/authStore';
 import CounterpartyTable from '@/components/counterparties/CounterpartyTable';
+
+const mockAuthAs = (role: string) => {
+  (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
+    const state = { user: { id: 1, username: 'user', role }, isAuthenticated: true };
+    return selector ? selector(state) : state;
+  });
+};
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
@@ -67,6 +79,7 @@ describe('CounterpartyTable', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuthAs('ADMIN');
     (useCounterparties as jest.Mock).mockReturnValue({
       data: [alfa, beta],
       isLoading: false,
@@ -227,5 +240,18 @@ describe('CounterpartyTable', () => {
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
 
     expect(screen.getByRole('textbox', { name: /cerca controparti/i })).toHaveValue('');
+  });
+
+  // ── Role-based access ────────────────────────────────────────────────────────
+
+  it('hides the Actions column and Edit/Delete buttons for a MANAGER user', () => {
+    mockAuthAs('MANAGER');
+    render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.queryByRole('columnheader', { name: /azioni/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /modifica/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /elimina/i })).not.toBeInTheDocument();
+    // Data is still visible — the page is read-only, not blocked entirely.
+    expect(screen.getByText('Alfa Srl')).toBeInTheDocument();
   });
 });

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useCounterparties } from "@/hooks/useCounterparties";
 import { counterpartiesService } from "@/services/counterparties.service";
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
+import { useAuthStore } from "@/store/authStore";
 import type { Counterparty } from "@/types";
 
 import {
@@ -60,6 +61,7 @@ function useCounterpartyFilters(counterparties: Counterparty[]) {
 export default function CounterpartyTable({ onEditClick }: CounterpartyTableProps) {
   const { data: counterparties = [], isLoading, isError } = useCounterparties();
   const queryClient = useQueryClient();
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
 
   const { searchQuery, setSearchQuery, filteredCounterparties } = useCounterpartyFilters(counterparties);
 
@@ -157,7 +159,7 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
                 <TableHead>Tipo</TableHead>
                 <TableHead className="hidden md:table-cell">Partita IVA</TableHead>
                 <TableHead className="hidden lg:table-cell">Referente</TableHead>
-                <TableHead>Azioni</TableHead>
+                {isAdmin && <TableHead>Azioni</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -169,26 +171,28 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{cp.vatNumber || "N/D"}</TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">{cp.contactName || "N/D"}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEditClick(cp)}
-                        className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
-                      >
-                        Modifica
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteClick(cp)}
-                        className="text-destructive hover:text-destructive text-xs px-2"
-                      >
-                        Elimina
-                      </Button>
-                    </div>
-                  </TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditClick(cp)}
+                          className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
+                        >
+                          Modifica
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(cp)}
+                          className="text-destructive hover:text-destructive text-xs px-2"
+                        >
+                          Elimina
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

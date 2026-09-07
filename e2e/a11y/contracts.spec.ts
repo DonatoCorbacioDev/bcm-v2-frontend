@@ -21,7 +21,7 @@ test.describe("Accessibility: contracts table and form", () => {
     await page.getByRole("button", { name: "+ Nuovo contratto" }).click();
 
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByLabel("Nome cliente")).toBeVisible();
+    await expect(dialog.getByRole("combobox", { name: "Controparte" })).toBeVisible();
 
     const results = await new AxeBuilder({ page }).include('[role="dialog"]').analyze();
     expect(results.violations).toEqual([]);

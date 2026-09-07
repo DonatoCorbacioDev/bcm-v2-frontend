@@ -10,7 +10,15 @@ import { useUpsertContract } from "@/hooks/useUpsertContract";
 import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
 import { useCounterparties } from "@/hooks/useCounterparties";
+import { useFinancialTypes } from "@/hooks/useFinancialTypes";
 import { CONTRACT_STATUS_LABELS } from "@/lib/utils";
+
+const BILLING_FREQUENCY_LABELS: Record<string, string> = {
+  MONTHLY: "Mensile",
+  QUARTERLY: "Trimestrale",
+  SEMIANNUAL: "Semestrale",
+  ANNUAL: "Annuale",
+};
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +50,7 @@ export default function ContractForm({
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
   const counterpartiesQuery = useCounterparties();
+  const financialTypesQuery = useFinancialTypes();
 
   /* istanbul ignore next */
   const businessAreas = businessAreasQuery.data ?? [];
@@ -49,11 +58,15 @@ export default function ContractForm({
   const managers = managersQuery.data ?? [];
   /* istanbul ignore next */
   const counterparties = counterpartiesQuery.data ?? [];
+  /* istanbul ignore next */
+  const financialTypes = financialTypesQuery.data ?? [];
 
   const isReferenceLoading =
-    businessAreasQuery.isLoading || managersQuery.isLoading || counterpartiesQuery.isLoading;
+    businessAreasQuery.isLoading || managersQuery.isLoading || counterpartiesQuery.isLoading
+    || financialTypesQuery.isLoading;
   const isReferenceError =
-    businessAreasQuery.isError || managersQuery.isError || counterpartiesQuery.isError;
+    businessAreasQuery.isError || managersQuery.isError || counterpartiesQuery.isError
+    || financialTypesQuery.isError;
 
   const {
     register,
@@ -73,6 +86,9 @@ export default function ContractForm({
           status: contract.status,
           areaId: contract.areaId,
           managerId: contract.managerId,
+          financialTypeId: contract.financialTypeId ?? undefined,
+          annualValue: contract.annualValue ?? undefined,
+          billingFrequency: contract.billingFrequency ?? undefined,
         }
       : {
           status: "ACTIVE",
@@ -327,6 +343,88 @@ export default function ContractForm({
           </div>
         )}
       />
+
+      {/* Financial terms (optional) — when all three are set, the backend
+          auto-generates this contract's financial values instead of
+          requiring them to be entered one row at a time. */}
+      <div className="space-y-4 rounded-lg border border-border p-4">
+        <div>
+          <p className="text-sm font-medium text-foreground">Termini finanziari (opzionale)</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Se compilati, i valori finanziari del contratto vengono generati automaticamente.
+          </p>
+        </div>
+
+        <Controller
+          control={control}
+          name="financialTypeId"
+          render={({ field }) => (
+            <div className="space-y-2">
+              <Label htmlFor="financialTypeId">Tipo finanziario</Label>
+              <Select
+                value={field.value ? String(field.value) : ""}
+                onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              >
+                <SelectTrigger id="financialTypeId">
+                  <SelectValue placeholder="Seleziona il tipo finanziario" />
+                </SelectTrigger>
+                <SelectContent>
+                  {financialTypes.map((ft) => (
+                    <SelectItem key={ft.id} value={String(ft.id)}>
+                      {ft.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.financialTypeId && (
+                <p className="text-sm text-destructive">{errors.financialTypeId.message}</p>
+              )}
+            </div>
+          )}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="annualValue">Valore annuo (€)</Label>
+            <Input
+              id="annualValue"
+              type="number"
+              step="0.01"
+              // Not valueAsNumber: an empty optional number input reads as
+              // NaN through that path (even untouched), which would fail
+              // Zod's z.number() check instead of being treated as unset.
+              {...register("annualValue", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
+              placeholder="es. 36000"
+            />
+            {errors.annualValue && (
+              <p className="text-sm text-destructive">{errors.annualValue.message}</p>
+            )}
+          </div>
+
+          <Controller
+            control={control}
+            name="billingFrequency"
+            render={({ field }) => (
+              <div className="space-y-2">
+                <Label htmlFor="billingFrequency">Frequenza fatturazione</Label>
+                <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                  <SelectTrigger id="billingFrequency">
+                    <SelectValue placeholder="Seleziona la frequenza" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(BILLING_FREQUENCY_LABELS).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.billingFrequency && (
+                  <p className="text-sm text-destructive">{errors.billingFrequency.message}</p>
+                )}
+              </div>
+            )}
+          />
+        </div>
+      </div>
 
       {/* Buttons */}
       <div className="flex justify-end gap-2 pt-4">

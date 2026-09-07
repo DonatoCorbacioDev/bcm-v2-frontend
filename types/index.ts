@@ -66,6 +66,8 @@ export interface Budget {
   percentUsed: number;
 }
 
+export type BillingFrequency = "MONTHLY" | "QUARTERLY" | "SEMIANNUAL" | "ANNUAL";
+
 export interface Contract {
   id: number;
   counterpartyId: number;
@@ -84,6 +86,12 @@ export interface Contract {
   area?: BusinessArea;
   daysUntilExpiry?: number;
   workflowStage?: "DRAFT" | "IN_REVIEW" | "APPROVED" | null;
+  // Optional financial terms — when all three are set, the backend
+  // auto-generates this contract's FinancialValue rows instead of requiring
+  // them to be entered one at a time.
+  financialTypeId?: number | null;
+  annualValue?: number | null;
+  billingFrequency?: BillingFrequency | null;
 }
 
 export interface ContractWorkflowEvent {
@@ -95,6 +103,8 @@ export interface ContractWorkflowEvent {
   comment: string | null;
   createdAt: string;
 }
+
+export type FinancialValueSource = "MANUAL" | "GENERATED";
 
 export interface FinancialValue {
   id: number;
@@ -108,6 +118,14 @@ export interface FinancialValue {
   areaName?: string;
   customerName?: string;
   category?: FinancialCategory;
+  source?: FinancialValueSource;
+}
+
+export interface FinancialGenerationResult {
+  created: number;
+  regenerated: number;
+  skippedManual: number;
+  values: FinancialValue[];
 }
 
 export interface ContractHistory {

@@ -23,7 +23,7 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 jest.mock('@/services/contracts.service', () => ({
-  contractsService: { delete: jest.fn() },
+  contractsService: { delete: jest.fn(), generateFinancialValues: jest.fn() },
 }));
 
 jest.mock('@/services/contractWorkflow.service', () => ({
@@ -69,6 +69,7 @@ jest.mock('@/components/contracts/ContractForm', () => ({
 import { toast } from 'sonner';
 import { useContract } from '@/hooks/useContract';
 import { useAuthStore } from '@/store/authStore';
+import { contractsService } from '@/services/contracts.service';
 import { contractWorkflowService } from '@/services/contractWorkflow.service';
 import api from '@/lib/api';
 import ContractDetailPage from '@/app/(dashboard)/contracts/[id]/page';
@@ -88,6 +89,9 @@ const baseContract = {
   status: 'DRAFT',
   createdAt: '2025-01-01',
   workflowStage: null as string | null,
+  financialTypeId: null as number | null,
+  annualValue: null as number | null,
+  billingFrequency: null as string | null,
 };
 
 const mockAuthAs = (overrides: Partial<{ role: string; managerId: number; canApproveContracts: boolean }>) => {
@@ -263,5 +267,74 @@ describe('ContractDetailPage — financial values tab', () => {
     expect(screen.getAllByText(eur(400)).length).toBeGreaterThan(0);
     expect(screen.getByText(eur(600))).toBeInTheDocument();
     expect(screen.queryByText(/^Totale$/)).not.toBeInTheDocument();
+  });
+});
+
+describe('ContractDetailPage — regenerate financial values button', () => {
+  const contractWithFinancialTerms = {
+    financialTypeId: 1,
+    annualValue: 36000,
+    billingFrequency: 'MONTHLY' as const,
+  };
+
+  it('shows the button for an ADMIN when the contract has financial terms set', async () => {
+    mockContract(contractWithFinancialTerms);
+    mockAuthAs({ role: 'ADMIN' });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+
+    expect(await screen.findByRole('button', { name: /rigenera valori finanziari/i })).toBeInTheDocument();
+  });
+
+  it('hides the button when the contract has no financial terms set', async () => {
+    mockContract({}); // baseContract has no financialTypeId/annualValue/billingFrequency
+    mockAuthAs({ role: 'ADMIN' });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+
+    expect(screen.queryByRole('button', { name: /rigenera valori finanziari/i })).not.toBeInTheDocument();
+  });
+
+  it('hides the button for a MANAGER even when financial terms are set', async () => {
+    mockContract(contractWithFinancialTerms);
+    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+
+    expect(screen.queryByRole('button', { name: /rigenera valori finanziari/i })).not.toBeInTheDocument();
+  });
+
+  it('calls generateFinancialValues and shows a summary toast on click', async () => {
+    mockContract(contractWithFinancialTerms);
+    mockAuthAs({ role: 'ADMIN' });
+    (contractsService.generateFinancialValues as jest.Mock).mockResolvedValue({
+      created: 5, regenerated: 2, skippedManual: 1, values: [],
+    });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /rigenera valori finanziari/i }));
+
+    await waitFor(() => expect(contractsService.generateFinancialValues).toHaveBeenCalledWith(1));
+    await waitFor(() =>
+      expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('5 creati'))
+    );
+  });
+
+  it('shows an error toast when regeneration fails', async () => {
+    mockContract(contractWithFinancialTerms);
+    mockAuthAs({ role: 'ADMIN' });
+    (contractsService.generateFinancialValues as jest.Mock).mockRejectedValue(new Error('fail'));
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /rigenera valori finanziari/i }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Rigenerazione dei valori finanziari non riuscita')
+    );
   });
 });

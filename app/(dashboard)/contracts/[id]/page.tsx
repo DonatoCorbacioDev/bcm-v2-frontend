@@ -28,6 +28,11 @@ import api from "@/lib/api";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant } from "@/lib/utils";
 import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent } from "@/types";
 
+const FINANCIAL_VALUE_SOURCE_LABELS: Record<string, string> = {
+  MANUAL: "Manuale",
+  GENERATED: "Generato",
+};
+
 const WORKFLOW_STAGE_LABELS: Record<string, string> = {
   DRAFT: "Bozza",
   IN_REVIEW: "In revisione",
@@ -115,6 +120,17 @@ export default function ContractDetailPage() {
     enabled: !!contractId,
   });
 
+  const regenerateFinancialValuesMutation = useMutation({
+    mutationFn: () => contractsService.generateFinancialValues(contractId),
+    onSuccess: (result) => {
+      toast.success(
+        `${result.created} creati, ${result.regenerated} rigenerati, ${result.skippedManual} saltati (manuali)`
+      );
+      queryClient.invalidateQueries({ queryKey: ["financial-values", "by-contract", contractId] });
+    },
+    onError: () => toast.error("Rigenerazione dei valori finanziari non riuscita"),
+  });
+
   const { data: contractHistory, isLoading: isLoadingHistory } = useQuery<ContractHistory[]>({
     queryKey: ["contract-history", "by-contract", contractId],
     queryFn: async () => {
@@ -163,6 +179,26 @@ export default function ContractDetailPage() {
     { id: "invoices", label: "Fatture", icon: <Receipt className="h-4 w-4" /> },
   ];
 
+  const hasFinancialTerms = Boolean(
+    contract?.financialTypeId && contract?.annualValue && contract?.billingFrequency
+  );
+
+  const renderRegenerateButton = () => {
+    if (!isAdmin || !hasFinancialTerms) return null;
+    return (
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => regenerateFinancialValuesMutation.mutate()}
+          disabled={regenerateFinancialValuesMutation.isPending}
+        >
+          {regenerateFinancialValuesMutation.isPending ? "Rigenerazione..." : "Rigenera valori finanziari"}
+        </Button>
+      </div>
+    );
+  };
+
   const renderFinancialValues = () => {
     if (isLoadingFinancials) {
       return (
@@ -174,6 +210,7 @@ export default function ContractDetailPage() {
     if (!financialValues || financialValues.length === 0) {
       return (
         <div className="text-center py-12">
+          {renderRegenerateButton()}
           <div className="flex justify-center mb-4">
             <div className="p-4 rounded-full bg-muted">
               <DollarSign className="h-8 w-8 text-muted-foreground" />
@@ -189,11 +226,13 @@ export default function ContractDetailPage() {
       );
     }
     return (
-      <div className="overflow-x-auto">
+      <div>
+        {renderRegenerateButton()}
+        <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-border">
           <thead className="bg-muted">
             <tr>
-              {["Tipo", "Area di business", "Importo", "Mese/Anno"].map((h) => (
+              {["Tipo", "Area di business", "Importo", "Mese/Anno", "Fonte"].map((h) => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {h}
                 </th>
@@ -210,6 +249,11 @@ export default function ContractDetailPage() {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                   {fv.month}/{fv.year}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                  <Badge variant="outline" className="text-xs">
+                    {fv.source ? FINANCIAL_VALUE_SOURCE_LABELS[fv.source] : FINANCIAL_VALUE_SOURCE_LABELS.MANUAL}
+                  </Badge>
                 </td>
               </tr>
             ))}
@@ -228,15 +272,18 @@ export default function ContractDetailPage() {
                     <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale ricavi</td>
                     <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalRevenue)}</td>
                     <td />
+                    <td />
                   </tr>
                   <tr className="bg-muted font-bold">
                     <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale costi</td>
                     <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalCost)}</td>
                     <td />
+                    <td />
                   </tr>
                   <tr className="bg-muted font-bold">
                     <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Margine netto</td>
                     <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalRevenue - totalCost)}</td>
+                    <td />
                     <td />
                   </tr>
                 </>
@@ -244,6 +291,7 @@ export default function ContractDetailPage() {
             })()}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };

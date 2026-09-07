@@ -342,6 +342,14 @@ describe('contractsService', () => {
     expect(mockDelete).toHaveBeenCalledWith('/contracts/1');
   });
 
+  it('generateFinancialValues() calls POST /contracts/:id/generate-financial-values', async () => {
+    const data = { created: 2, regenerated: 0, skippedManual: 1, values: [] };
+    mockPost.mockResolvedValue({ data });
+    const result = await contractsService.generateFinancialValues(1);
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/generate-financial-values');
+    expect(result).toEqual(data);
+  });
+
   it('searchPaged() calls GET /contracts/search with default params', async () => {
     const data = { content: [], totalElements: 0, totalPages: 0, number: 0, size: 10 };
     mockGet.mockResolvedValue({ data });

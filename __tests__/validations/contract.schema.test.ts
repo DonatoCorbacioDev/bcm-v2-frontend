@@ -124,4 +124,57 @@ describe("contractSchema", () => {
       ).toBe(false);
     });
   });
+
+  describe("financial terms (financialTypeId / annualValue / billingFrequency)", () => {
+    it("accepts a contract with none of the three set", () => {
+      const result = contractSchema.safeParse(validContract);
+      expect(result.success).toBe(true);
+    });
+
+    it("accepts a contract with all three set", () => {
+      const result = contractSchema.safeParse({
+        ...validContract,
+        financialTypeId: 1,
+        annualValue: 36000,
+        billingFrequency: "MONTHLY",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects a contract with only some of the three set", () => {
+      expect(
+        contractSchema.safeParse({ ...validContract, financialTypeId: 1 }).success,
+      ).toBe(false);
+      expect(
+        contractSchema.safeParse({ ...validContract, annualValue: 36000 }).success,
+      ).toBe(false);
+      expect(
+        contractSchema.safeParse({
+          ...validContract,
+          financialTypeId: 1,
+          annualValue: 36000,
+        }).success,
+      ).toBe(false);
+    });
+
+    it("rejects a negative or zero annualValue", () => {
+      const result = contractSchema.safeParse({
+        ...validContract,
+        financialTypeId: 1,
+        annualValue: 0,
+        billingFrequency: "MONTHLY",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects an unknown billingFrequency", () => {
+      const result = contractSchema.safeParse({
+        ...validContract,
+        financialTypeId: 1,
+        annualValue: 36000,
+        billingFrequency: "WEEKLY",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
 });

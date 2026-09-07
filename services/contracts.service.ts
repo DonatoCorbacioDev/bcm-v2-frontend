@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { Contract, ContractImportResult, ContractsByArea, ContractsTimeline, TopManager } from "@/types";
+import type { BillingFrequency, Contract, ContractImportResult, ContractsByArea, ContractsTimeline, FinancialGenerationResult, TopManager } from "@/types";
 
 export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT";
 
@@ -13,6 +13,9 @@ export type ContractUpsertPayload = {
   status: ContractStatus;
   areaId: number;
   managerId: number;
+  financialTypeId?: number | null;
+  annualValue?: number | null;
+  billingFrequency?: BillingFrequency | null;
 };
 
 // Pagination types
@@ -54,6 +57,11 @@ export const contractsService = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/contracts/${id}`);
+  },
+
+  generateFinancialValues: async (id: number): Promise<FinancialGenerationResult> => {
+    const res = await api.post<FinancialGenerationResult>(`/contracts/${id}/generate-financial-values`);
+    return res.data;
   },
 
   // Paginated search

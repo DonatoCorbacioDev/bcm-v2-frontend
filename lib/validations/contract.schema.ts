@@ -70,6 +70,29 @@ export const contractSchema = z.object({
     .number({ message: "Il responsabile è obbligatorio" })
     .int("Il responsabile deve essere un numero intero")
     .positive("Il responsabile deve essere un numero positivo"),
+
+  // Optional financial terms: when all three are set, the backend
+  // auto-generates this contract's financial values instead of requiring
+  // them to be entered one row at a time (see the .refine below).
+  financialTypeId: z
+    .number()
+    .int("Il tipo finanziario deve essere un numero intero")
+    .positive("Il tipo finanziario deve essere un numero positivo")
+    .nullish(),
+
+  // Note: ContractForm reads this field with a custom `setValueAs` (not
+  // `valueAsNumber`) specifically so an empty input becomes `undefined`
+  // here, not NaN — see that component for why.
+  annualValue: z
+    .number()
+    .positive("Il valore annuo deve essere un numero positivo")
+    .nullish(),
+
+  billingFrequency: z
+    .enum(["MONTHLY", "QUARTERLY", "SEMIANNUAL", "ANNUAL"], {
+      message: "La frequenza di fatturazione non è valida",
+    })
+    .nullish(),
 })
   // Cross-field validation: endDate must be after or equal to startDate
   .refine(
@@ -81,6 +104,21 @@ export const contractSchema = z.object({
     {
       message: "La data di fine deve essere uguale o successiva alla data di inizio",
       path: ["endDate"], // Show error on endDate field
+    }
+  )
+  // Financial terms are all-or-nothing: a contract either fully opts into
+  // auto-generation or leaves it off entirely (matches the backend, which
+  // only generates when financialTypeId + annualValue + billingFrequency
+  // are ALL present).
+  .refine(
+    (data) => {
+      const fields = [data.financialTypeId, data.annualValue, data.billingFrequency];
+      const setCount = fields.filter((f) => f !== null && f !== undefined).length;
+      return setCount === 0 || setCount === 3;
+    },
+    {
+      message: "Per generare i valori finanziari servono tipo, valore annuo e frequenza insieme",
+      path: ["annualValue"],
     }
   );
 

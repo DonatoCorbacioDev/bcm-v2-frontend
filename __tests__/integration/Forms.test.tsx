@@ -654,6 +654,7 @@ describe('ContractForm', () => {
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: businessAreas, isLoading: false, isError: false });
     (useManagers as jest.Mock).mockReturnValue({ data: managers, isLoading: false, isError: false });
     (useCounterparties as jest.Mock).mockReturnValue({ data: counterparties, isLoading: false, isError: false });
+    (useFinancialTypes as jest.Mock).mockReturnValue({ data: financialTypes, isLoading: false, isError: false });
   });
 
   it('shows loading state when reference data is loading', () => {
@@ -694,6 +695,11 @@ describe('ContractForm', () => {
     expect(toast.success).toHaveBeenCalledWith('Contratto aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
+    // validContract has no financial terms set — an untouched optional
+    // annualValue input must submit as undefined, not NaN (see ContractForm's
+    // setValueAs comment for why valueAsNumber alone would break this).
+    const payload = mutateAsync.mock.calls[0][0].payload;
+    expect(payload.annualValue).toBeUndefined();
   });
 
   it('shows error toast when mutation throws in update mode', async () => {
@@ -715,6 +721,31 @@ describe('ContractForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /crea contratto/i }));
     await waitFor(() => {
       expect(screen.getAllByText(/obbligator|almeno|non valid/i).length).toBeGreaterThan(0);
+    });
+  });
+
+  // ── Optional financial terms ────────────────────────────────────────────
+
+  it('renders the optional financial terms section with all three fields', () => {
+    render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/termini finanziari \(opzionale\)/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/tipo finanziario/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/valore annuo/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/frequenza fatturazione/i)).toBeInTheDocument();
+  });
+
+  it('rejects submitting only some of the three financial-term fields', async () => {
+    // Edit mode so counterparty/area/manager/dates are already valid and
+    // don't mask the financial-terms error behind unrelated "obbligatorio"
+    // errors (Zod only runs the cross-field .refine() once the base object
+    // schema itself is otherwise valid).
+    render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
+
+    await userEvent.type(screen.getByLabelText(/valore annuo/i), '36000');
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/tipo, valore annuo e frequenza insieme/i).length).toBeGreaterThan(0);
     });
   });
 });

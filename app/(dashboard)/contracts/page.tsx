@@ -23,6 +23,62 @@ import { useCounterparties } from "@/hooks/useCounterparties";
 import { toast } from "sonner";
 import { FileSpreadsheet, FileText, Upload } from "lucide-react";
 
+type MissingPrerequisiteFlags = {
+  missingAreas: boolean;
+  missingManagers: boolean;
+  missingCounterparties: boolean;
+};
+
+const PREREQUISITE_ITEMS = [
+  { flag: "missingAreas", label: "un'area di business", action: { label: "Crea un'area di business", href: "/business-areas" } },
+  { flag: "missingManagers", label: "un responsabile", action: { label: "Crea un responsabile", href: "/managers" } },
+  { flag: "missingCounterparties", label: "una controparte", action: { label: "Crea una controparte", href: "/counterparties" } },
+] as const;
+
+/**
+ * Consolidates the three independent "missing prerequisite" flags into the
+ * banner's message/actions, kept out of the page component so its own
+ * cognitive complexity stays low.
+ */
+function buildPrerequisiteInfo(flags: MissingPrerequisiteFlags, isAdmin: boolean) {
+  const missingItems = PREREQUISITE_ITEMS.filter((item) => flags[item.flag]);
+  const missingLabels = missingItems.map((item) => item.label);
+  const contactSuffix = isAdmin ? "" : " Contatta un amministratore.";
+  const message = `Per creare un contratto serve prima ${missingLabels.join(" e ")}.${contactSuffix}`;
+  const actions = isAdmin ? missingItems.map((item) => item.action) : [];
+  return { message, actions };
+}
+
+const EXPORT_CONFIG = {
+  excel: {
+    extension: "xlsx",
+    label: "Excel",
+    exportFn: () => contractsService.exportExcel(),
+    errorMessage: "Esportazione del file Excel non riuscita",
+  },
+  pdf: {
+    extension: "pdf",
+    label: "PDF",
+    exportFn: () => contractsService.exportPdf(),
+    errorMessage: "Esportazione del file PDF non riuscita",
+  },
+} as const;
+
+/** Triggers a browser download for the exported blob — shared by the Excel/PDF buttons. */
+async function exportContracts(kind: keyof typeof EXPORT_CONFIG) {
+  const config = EXPORT_CONFIG[kind];
+  const blob = await config.exportFn();
+  const url = globalThis.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `contracts_${new Date().toISOString().split("T")[0]}.${config.extension}`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  globalThis.URL.revokeObjectURL(url);
+  toast.success(`${config.label} esportato`);
+}
+
 function ContractsPageContent() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
@@ -50,21 +106,10 @@ function ContractsPageContent() {
     setFormDialog({ open: true, contract: null });
   };
 
-  const missingLabels = [
-    missingAreas ? "un'area di business" : null,
-    missingManagers ? "un responsabile" : null,
-    missingCounterparties ? "una controparte" : null,
-  ].filter((label): label is string => label !== null);
-  const prerequisiteMessage = isAdmin
-    ? `Per creare un contratto serve prima ${missingLabels.join(" e ")}.`
-    : `Per creare un contratto serve prima ${missingLabels.join(" e ")}. Contatta un amministratore.`;
-  const prerequisiteActions = isAdmin
-    ? [
-        missingAreas ? { label: "Crea un'area di business", href: "/business-areas" } : null,
-        missingManagers ? { label: "Crea un responsabile", href: "/managers" } : null,
-        missingCounterparties ? { label: "Crea una controparte", href: "/counterparties" } : null,
-      ].filter((action): action is { label: string; href: string } => action !== null)
-    : [];
+  const { message: prerequisiteMessage, actions: prerequisiteActions } = buildPrerequisiteInfo(
+    { missingAreas, missingManagers, missingCounterparties },
+    isAdmin
+  );
 
   const handleEditClick = (contract: Contract) => {
     setFormDialog({ open: true, contract });
@@ -74,43 +119,13 @@ function ContractsPageContent() {
     setFormDialog({ open: false, contract: null });
   };
 
-  const handleExportExcel = async () => {
+  const handleExport = async (kind: keyof typeof EXPORT_CONFIG) => {
     setIsExporting(true);
     try {
-      const blob = await contractsService.exportExcel();
-      const url = globalThis.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `contracts_${new Date().toISOString().split("T")[0]}.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      globalThis.URL.revokeObjectURL(url);
-      toast.success("Excel esportato");
+      await exportContracts(kind);
     } catch (error) {
-      toast.error("Esportazione del file Excel non riuscita");
-      console.error("Export Excel error:", error);
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleExportPdf = async () => {
-    setIsExporting(true);
-    try {
-      const blob = await contractsService.exportPdf();
-      const url = globalThis.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `contracts_${new Date().toISOString().split("T")[0]}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      globalThis.URL.revokeObjectURL(url);
-      toast.success("PDF esportato");
-    } catch (error) {
-      toast.error("Esportazione del file PDF non riuscita");
-      console.error("Export PDF error:", error);
+      toast.error(EXPORT_CONFIG[kind].errorMessage);
+      console.error(`Export ${kind} error:`, error);
     } finally {
       setIsExporting(false);
     }
@@ -128,7 +143,7 @@ function ContractsPageContent() {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={handleExportExcel}
+            onClick={() => handleExport("excel")}
             disabled={isExporting}
             className="hidden sm:flex"
           >
@@ -137,7 +152,7 @@ function ContractsPageContent() {
           </Button>
           <Button
             variant="outline"
-            onClick={handleExportPdf}
+            onClick={() => handleExport("pdf")}
             disabled={isExporting}
             className="hidden sm:flex"
           >

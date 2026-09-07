@@ -50,8 +50,7 @@ export function CookieNotice() {
   if (dismissed) return null;
 
   return (
-    <div
-      role="region"
+    <section
       aria-label="Informativa sui cookie"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/95 backdrop-blur-md px-4 py-4 md:px-8"
     >
@@ -74,6 +73,6 @@ export function CookieNotice() {
           Capito
         </button>
       </div>
-    </div>
+    </section>
   );
 }

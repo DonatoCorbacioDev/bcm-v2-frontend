@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import userEvent from "@testing-library/user-event";
 import { CookieNotice } from "@/components/legal/CookieNotice";
 
@@ -30,6 +31,14 @@ describe("CookieNotice", () => {
     expect(localStorage.getItem("bcm-cookie-notice-dismissed")).toBe("1");
   });
 
+  it("renders nothing on the server-rendered pass, even when not dismissed", () => {
+    // useSyncExternalStore uses getServerSnapshot (not isDismissed/localStorage,
+    // which don't exist server-side) during renderToString — this must return
+    // "dismissed" so the notice never flashes/mismatches on first hydration.
+    const html = renderToString(<CookieNotice />);
+    expect(html).not.toContain("Informativa sui cookie");
+  });
+
   it("does not render again once already dismissed", async () => {
     localStorage.setItem("bcm-cookie-notice-dismissed", "1");
     render(<CookieNotice />);
@@ -37,5 +46,19 @@ describe("CookieNotice", () => {
     await waitFor(() => {
       expect(screen.queryByRole("region", { name: /informativa sui cookie/i })).not.toBeInTheDocument();
     });
+  });
+
+  it("treats an unavailable localStorage (private mode, blocked) as already dismissed", async () => {
+    const getItemSpy = jest.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("localStorage is disabled");
+    });
+
+    render(<CookieNotice />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("region", { name: /informativa sui cookie/i })).not.toBeInTheDocument();
+    });
+
+    getItemSpy.mockRestore();
   });
 });

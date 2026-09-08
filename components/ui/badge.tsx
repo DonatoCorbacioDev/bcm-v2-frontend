@@ -24,6 +24,8 @@ const badgeVariants = cva(
           "border-transparent bg-[var(--status-green-bg)] text-[var(--status-green-fg)] [a&]:hover:opacity-90",
         warning:
           "border-transparent bg-[var(--status-amber-bg)] text-[var(--status-amber-fg)] [a&]:hover:opacity-90",
+        info:
+          "border-transparent bg-[var(--status-blue-bg)] text-[var(--status-blue-fg)] [a&]:hover:opacity-90",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
       },

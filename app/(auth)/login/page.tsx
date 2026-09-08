@@ -52,7 +52,8 @@ function LoginContent() {
         aria-label="Presentazione applicazione"
         className="hidden md:flex flex-col justify-between p-10 text-white relative overflow-hidden"
         style={{
-          background: "linear-gradient(155deg,#13235f 0%,#1d3fa8 48%,#2563eb 100%)",
+          background:
+            "linear-gradient(155deg,var(--brand-hero-from) 0%,var(--brand-hero-via) 48%,var(--brand-hero-to) 100%)",
         }}
       >
         {/* Glow circles */}

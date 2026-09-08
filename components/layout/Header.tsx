@@ -155,7 +155,7 @@ export default function Header({
           className="flex items-center gap-2 h-9 px-2 rounded-lg hover:bg-muted transition-colors group"
           aria-label="Vai al profilo"
         >
-          <span className="h-7 w-7 rounded-md bg-[#1d4ed8] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+          <span className="h-7 w-7 rounded-md bg-[var(--primary)] text-primary-foreground text-[11px] font-bold flex items-center justify-center shrink-0">
             {initials}
           </span>
           <div className="hidden sm:flex flex-col items-start min-w-0">

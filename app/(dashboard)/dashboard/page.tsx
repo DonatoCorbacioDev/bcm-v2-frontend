@@ -31,6 +31,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
+  const greeting = user?.username ? `Ciao, ${user.username}` : "Dashboard";
 
   // Setup check: redirect new ADMIN orgs with no business area yet to the onboarding
   // wizard. Registering an organization always creates a Managers record for the admin
@@ -91,7 +92,7 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Dashboard
+            {greeting}
           </h1>
           <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
         </div>
@@ -123,7 +124,7 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Dashboard
+            {greeting}
           </h1>
           <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
         </div>
@@ -143,7 +144,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">
-          Dashboard
+          {greeting}
         </h1>
         <p className="text-muted-foreground mt-2">Panoramica dei tuoi contratti</p>
       </div>
@@ -161,16 +162,16 @@ export default function DashboardPage() {
       )}
 
       {!isLoadingExpiring && !isErrorExpiring && nonCriticalExpiring.length > 0 && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 dark:border-yellow-600 rounded-lg p-6">
+        <div className="bg-[var(--status-amber-bg)] border-2 border-[var(--status-amber-fg)]/40 rounded-lg p-6">
           <div className="flex items-start gap-4">
-            <div className="p-2 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg">
-                <AlertTriangle className="h-6 w-6 text-yellow-600 dark:text-yellow-400" aria-hidden="true" />
+            <div className="p-2 bg-[var(--status-amber-bg)] rounded-lg">
+                <AlertTriangle className="h-6 w-6 text-[var(--status-amber-fg)]" aria-hidden="true" />
               </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+              <h2 className="text-lg font-semibold text-[var(--status-amber-fg)] mb-2">
                 {nonCriticalExpiring.length} contratt{nonCriticalExpiring.length > 1 ? 'i' : 'o'} in scadenza
               </h2>
-              <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
+              <p className="text-sm text-[var(--status-amber-fg)] mb-4">
                 I seguenti contratti scadranno nei prossimi 30 giorni. Rinnovali o chiudili.
               </p>
               <div className="space-y-2">
@@ -178,7 +179,7 @@ export default function DashboardPage() {
                   <Link
                     key={contract.id}
                     href={`/contracts/${contract.id}`}
-                    className="block p-3 bg-card rounded border border-yellow-300 dark:border-yellow-700 hover:border-yellow-500 dark:hover:border-yellow-500 transition-colors"
+                    className="block p-3 bg-card rounded border border-[var(--status-amber-fg)]/30 hover:border-[var(--status-amber-fg)] transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -189,7 +190,7 @@ export default function DashboardPage() {
                           Scade il: {new Date(contract.endDate).toLocaleDateString("it-IT")}
                         </p>
                       </div>
-                      <div className="text-sm font-medium text-yellow-800 dark:text-yellow-400">
+                      <div className="text-sm font-medium text-[var(--status-amber-fg)]">
                         {formatDaysLeft(contract.daysUntilExpiry)}
                       </div>
                     </div>
@@ -198,7 +199,7 @@ export default function DashboardPage() {
                 {nonCriticalExpiring.length > 5 && (
                   <Link
                     href="/contracts?status=ACTIVE"
-                    className="block text-center p-2 text-sm text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-100 font-medium"
+                    className="block text-center p-2 text-sm text-[var(--status-amber-fg)] hover:opacity-80 font-medium"
                   >
                     + Mostra altri {nonCriticalExpiring.length - 5} contratti in scadenza
                   </Link>

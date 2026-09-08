@@ -10,14 +10,15 @@ import { AlertOctagon, CheckCircle2, Loader2, WifiOff } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAnomalies } from "@/hooks/useAnomalies";
+import { RISK_LEVEL_VARIANT } from "@/lib/statusConfig";
 
 const VISIBLE_COUNT = 5;
 const MONTHS_IT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
 
 const SEVERITY_CONFIG = {
-  HIGH:   { badge: "destructive" as const, label: "Alta" },
-  MEDIUM: { badge: "warning" as const,     label: "Media" },
-  LOW:    { badge: "secondary" as const,   label: "Bassa" },
+  HIGH:   { badge: RISK_LEVEL_VARIANT.HIGH,   label: "Alta" },
+  MEDIUM: { badge: RISK_LEVEL_VARIANT.MEDIUM, label: "Media" },
+  LOW:    { badge: RISK_LEVEL_VARIANT.LOW,    label: "Bassa" },
 };
 
 function formatAmount(n: number): string {

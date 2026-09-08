@@ -33,20 +33,13 @@ import {
 import api from "@/lib/api";
 import { sepaPaymentsService, type SepaPaymentBatch } from "@/services/sepaPayments.service";
 import { invoiceMatchingService } from "@/services/invoiceMatching.service";
-import type { ElectronicInvoice, InvoiceMatchStatus } from "@/types";
+import { MATCH_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from "@/lib/statusConfig";
+import type { ElectronicInvoice } from "@/types";
 
 interface InvoicesTabProps {
   readonly contractId: number;
   readonly isAdmin: boolean;
 }
-
-const MATCH_STATUS_CONFIG: Record<InvoiceMatchStatus, { badge: "warning" | "success" | "secondary" | "destructive"; label: string }> = {
-  UNMATCHED: { badge: "secondary", label: "N/D" },
-  SUGGESTED: { badge: "warning", label: "Suggerito" },
-  CONFIRMED: { badge: "success", label: "Verificata" },
-  REJECTED: { badge: "secondary", label: "Rifiutata" },
-  COUNTERPARTY_MISMATCH: { badge: "destructive", label: "Fornitore non corrisponde" },
-};
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -386,7 +379,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1.5">
-                      <Badge variant={(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).badge}>
+                      <Badge variant={(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).variant}>
                         {(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).label}
                         {invoice.matchStatus === "SUGGESTED" && invoice.matchConfidence != null
                           ? ` · ${Math.round(invoice.matchConfidence * 100)}%`
@@ -423,15 +416,16 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     {(() => {
                       if (invoice.sepaBatchId != null) {
-                        return <Badge variant="success">Pagata</Badge>;
+                        return <Badge variant={PAYMENT_STATUS_CONFIG.PAID.variant}>{PAYMENT_STATUS_CONFIG.PAID.label}</Badge>;
                       }
                       if (invoice.supplierIban) {
-                        return <Badge variant="secondary">Pronta per SEPA</Badge>;
+                        return <Badge variant={PAYMENT_STATUS_CONFIG.READY.variant}>{PAYMENT_STATUS_CONFIG.READY.label}</Badge>;
                       }
                       return (
                         <Button
                           variant="outline"
                           size="sm"
+                          className="border-[var(--status-amber-fg)]/40 text-[var(--status-amber-fg)] hover:bg-[var(--status-amber-bg)]"
                           onClick={() => openPaymentDetailsDialog(invoice)}
                         >
                           <Pencil className="h-3.5 w-3.5 mr-1.5" />

@@ -108,9 +108,16 @@ export default function Sidebar({ collapsed }: SidebarProps) {
     router.push("/login");
   };
 
-  const orgInitials = user?.username
-    ? user.username.slice(0, 2).toUpperCase()
-    : "CE";
+  const orgName = organization?.name ?? user?.organizationName;
+  const orgInitials = orgName
+    ? orgName
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+    : "OR";
 
   return (
     <aside
@@ -149,7 +156,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
         <div className="px-3 py-2.5 border-b border-[var(--sidebar-border)] shrink-0">
           <OrgSwitcherContent isAdmin={isAdmin} orgInitials={orgInitials}>
             <p className="text-[12px] font-semibold text-foreground truncate">
-              {organization?.name ?? user?.organizationName ?? "Organizzazione"}
+              {orgName ?? "Organizzazione"}
             </p>
             {organization && (
               <p className="text-[11px] text-[var(--muted-foreground)] truncate">

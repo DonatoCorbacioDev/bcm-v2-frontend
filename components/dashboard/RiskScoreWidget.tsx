@@ -11,14 +11,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useRiskScores } from "@/hooks/useRiskScores";
 import { useRiskFeedback, useSubmitRiskFeedback } from "@/hooks/useRiskFeedback";
+import { RISK_LEVEL_VARIANT } from "@/lib/statusConfig";
 import type { RiskScore } from "@/types";
 
 const VISIBLE_COUNT = 5;
 
 const LEVEL_CONFIG = {
-  HIGH:   { color: "bg-[var(--status-red-fg)]",   badge: "destructive" as const, label: "Alto" },
-  MEDIUM: { color: "bg-[var(--status-amber-fg)]",  badge: "warning" as const,     label: "Medio" },
-  LOW:    { color: "bg-[var(--status-green-fg)]",  badge: "success" as const,     label: "Basso" },
+  HIGH:   { color: "bg-[var(--status-red-fg)]",   badge: RISK_LEVEL_VARIANT.HIGH,   label: "Alto" },
+  MEDIUM: { color: "bg-[var(--status-amber-fg)]", badge: RISK_LEVEL_VARIANT.MEDIUM, label: "Medio" },
+  LOW:    { color: "bg-[var(--status-green-fg)]", badge: RISK_LEVEL_VARIANT.LOW,    label: "Basso" },
 };
 
 const ANOMALY_LABELS: Record<string, string> = {

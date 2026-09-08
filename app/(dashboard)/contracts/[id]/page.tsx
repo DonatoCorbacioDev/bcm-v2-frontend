@@ -16,6 +16,7 @@ import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText, Receipt, Send, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -29,18 +30,12 @@ import ContractForm from "@/components/contracts/ContractForm";
 import DocumentsTab from "@/components/contracts/DocumentsTab";
 import InvoicesTab from "@/components/contracts/InvoicesTab";
 import api from "@/lib/api";
-import { CONTRACT_STATUS_LABELS, getContractStatusVariant } from "@/lib/utils";
+import { CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
 import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent } from "@/types";
 
 const FINANCIAL_VALUE_SOURCE_LABELS: Record<string, string> = {
   MANUAL: "Manuale",
   GENERATED: "Generato",
-};
-
-const WORKFLOW_STAGE_LABELS: Record<string, string> = {
-  DRAFT: "Bozza",
-  IN_REVIEW: "In revisione",
-  APPROVED: "Approvato",
 };
 
 const WORKFLOW_ACTION_LABELS: Record<string, string> = {
@@ -488,9 +483,14 @@ export default function ContractDetailPage() {
       </div>
 
       {/* General Information */}
-      <div className="bg-card rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Informazioni generali</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" aria-hidden="true" />
+            Informazioni generali
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
             { label: "Controparte", value: contract.counterparty?.name ?? "N/D" },
             { label: "Numero contratto", value: contract.contractNumber },
@@ -509,7 +509,9 @@ export default function ContractDetailPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
               {contract.workflowStage && contract.workflowStage !== "DRAFT" && (
-                <Badge variant="outline">{WORKFLOW_STAGE_LABELS[contract.workflowStage] ?? contract.workflowStage}</Badge>
+                <Badge variant={(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).variant}>
+                  {(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).label}
+                </Badge>
               )}
             </div>
           </div>
@@ -525,8 +527,8 @@ export default function ContractDetailPage() {
               {contract.area?.name || "Non assegnato"}
             </p>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Tabs */}
       <div className="bg-card rounded-lg border border-border">

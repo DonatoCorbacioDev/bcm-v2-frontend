@@ -50,7 +50,7 @@
   --radius: 0.5625rem; /* 9px — buttons/inputs */
 
   /* Core surfaces */
-  --background:        #f5f7fb;
+  --background:        #f6f5fb;
   --foreground:        #0b1220;
   --card:              #ffffff;
   --card-foreground:   #0b1220;
@@ -61,6 +61,11 @@
   --primary:           #2563eb;
   --primary-hover:     #1d4ed8;
   --primary-foreground:#ffffff;
+
+  /* Login hero panel — intentionally constant across light/dark, not redefined in .dark */
+  --brand-hero-from:   #13235f;
+  --brand-hero-via:    #1d3fa8;
+  --brand-hero-to:     #2563eb;
 
   /* Secondary / muted */
   --secondary:         #eef2f7;
@@ -116,7 +121,7 @@
 }
 
 .dark {
-  --background:        #070b14;
+  --background:        #0a0814;
   --foreground:        #e9eef6;
   --card:              #0e1525;
   --card-foreground:   #e9eef6;

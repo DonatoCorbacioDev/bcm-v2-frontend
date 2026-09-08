@@ -1,5 +1,9 @@
 "use client";
 
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
 import { useState } from "react";
 import Link from "next/link";
 import { AlertOctagon, CheckCircle2, Loader2, WifiOff } from "lucide-react";

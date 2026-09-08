@@ -1,5 +1,9 @@
 'use client';
 
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTopManagers } from '@/hooks/useTopManagers';
 import { CapsuleBarList } from '@/components/dashboard/CapsuleBarList';

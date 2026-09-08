@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
+
 export default function KPICardSkeleton() {
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm border-l-4 border-l-muted p-6 animate-pulse">

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
+
 import { z } from "zod";
 
 const IBAN_PATTERN = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;

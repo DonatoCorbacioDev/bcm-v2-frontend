@@ -1,5 +1,9 @@
 "use client";
 
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";

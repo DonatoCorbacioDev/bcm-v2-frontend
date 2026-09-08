@@ -1,5 +1,9 @@
 "use client";
 
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Download, FileText, GitCompareArrows, Loader2 } from "lucide-react";

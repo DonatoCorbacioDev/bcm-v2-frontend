@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
+
 import { z } from "zod";
 
 export const contractTemplateSchema = z.object({

@@ -1,5 +1,9 @@
 "use client";
 
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
 import Link from "next/link";
 import { ArrowRight, PlayCircle, ShieldCheck, Bell, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";

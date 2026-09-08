@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025 Donato Corbacio. All rights reserved.
+ * Licensed under the terms of the LICENSE file at the repository root.
+ */
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { contractsService, type ContractUpsertPayload } from "@/services/contracts.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";

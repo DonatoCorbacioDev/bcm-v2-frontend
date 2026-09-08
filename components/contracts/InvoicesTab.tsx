@@ -386,8 +386,8 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1.5">
-                      <Badge variant={MATCH_STATUS_CONFIG[invoice.matchStatus].badge}>
-                        {MATCH_STATUS_CONFIG[invoice.matchStatus].label}
+                      <Badge variant={(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).badge}>
+                        {(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).label}
                         {invoice.matchStatus === "SUGGESTED" && invoice.matchConfidence != null
                           ? ` · ${Math.round(invoice.matchConfidence * 100)}%`
                           : null}

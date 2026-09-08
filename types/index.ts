@@ -133,6 +133,44 @@ export interface FinancialGenerationResult {
   values: FinancialValue[];
 }
 
+export type InvoiceMatchStatus = "UNMATCHED" | "SUGGESTED" | "CONFIRMED" | "REJECTED" | "COUNTERPARTY_MISMATCH";
+
+export interface InvoiceLineItem {
+  lineNumber: number;
+  description: string;
+  quantity: number;
+  unitOfMeasure: string;
+  unitPrice: number;
+  totalPrice: number;
+  vatRate: number;
+}
+
+export interface ElectronicInvoice {
+  id: number;
+  contractId: number;
+  fileName: string;
+  fileSize: number;
+  uploadedAt: string;
+  downloadUrl: string;
+  supplierName: string;
+  supplierVatNumber: string;
+  documentType: string;
+  invoiceNumber: string;
+  invoiceDate: string;
+  totalAmount: number;
+  currency: string;
+  lineItems: InvoiceLineItem[];
+  supplierIban: string | null;
+  supplierBic: string | null;
+  paymentDueDate: string | null;
+  sepaBatchId: number | null;
+  matchStatus: InvoiceMatchStatus;
+  matchedFinancialValueId: number | null;
+  matchConfidence: number | null;
+  matchedAt: string | null;
+  matchedByUsername: string | null;
+}
+
 export interface ContractHistory {
   id: number;
   contractId: number;

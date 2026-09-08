@@ -52,7 +52,17 @@ const invoice = {
   supplierBic: 'UNCRITMMXXX',
   paymentDueDate: '2024-04-01',
   sepaBatchId: null,
+  matchStatus: 'UNMATCHED',
+  matchedFinancialValueId: null,
+  matchConfidence: null,
+  matchedAt: null,
+  matchedByUsername: null,
 };
+
+const invoiceSuggested = { ...invoice, id: 7, fileName: 'suggerita.xml', matchStatus: 'SUGGESTED', matchConfidence: 0.84 };
+const invoiceConfirmed = { ...invoice, id: 8, fileName: 'confermata.xml', matchStatus: 'CONFIRMED' };
+const invoiceRejected = { ...invoice, id: 9, fileName: 'rifiutata.xml', matchStatus: 'REJECTED' };
+const invoiceMismatch = { ...invoice, id: 10, fileName: 'fornitore-diverso.xml', matchStatus: 'COUNTERPARTY_MISMATCH' };
 
 const invoiceKB   = { ...invoice, id: 2, fileName: 'piccola.xml', fileSize: 512    }; // 512 B
 const invoiceMed  = { ...invoice, id: 3, fileName: 'media.xml',   fileSize: 102400 }; // 100 KB
@@ -663,5 +673,102 @@ describe('InvoicesTab', () => {
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith('Download del pagamento SEPA non riuscito'),
     );
+  });
+
+  // ── invoice matching ───────────────────────────────────────────────────────
+
+  it('shows "N/D" for an unmatched invoice with no confirm/reject buttons', async () => {
+    mockApiGet({ invoices: [invoice] });
+    renderTab();
+    expect(await screen.findByText('N/D')).toBeInTheDocument();
+    expect(screen.queryByTitle('Conferma abbinamento')).not.toBeInTheDocument();
+  });
+
+  it('shows the suggested match with its confidence percentage and admin actions', async () => {
+    mockApiGet({ invoices: [invoiceSuggested] });
+    renderTab(true);
+    expect(await screen.findByText('Suggerito · 84%')).toBeInTheDocument();
+    expect(screen.getByTitle('Conferma abbinamento')).toBeInTheDocument();
+    expect(screen.getByTitle('Rifiuta abbinamento')).toBeInTheDocument();
+  });
+
+  it('hides confirm/reject buttons for a suggested match when the user is not admin', async () => {
+    mockApiGet({ invoices: [invoiceSuggested] });
+    renderTab(false);
+    expect(await screen.findByText('Suggerito · 84%')).toBeInTheDocument();
+    expect(screen.queryByTitle('Conferma abbinamento')).not.toBeInTheDocument();
+    expect(screen.queryByTitle('Rifiuta abbinamento')).not.toBeInTheDocument();
+  });
+
+  it('shows "Verificata" for a confirmed match', async () => {
+    mockApiGet({ invoices: [invoiceConfirmed] });
+    renderTab();
+    expect(await screen.findByText('Verificata')).toBeInTheDocument();
+  });
+
+  it('shows "Rifiutata" for a rejected match', async () => {
+    mockApiGet({ invoices: [invoiceRejected] });
+    renderTab();
+    expect(await screen.findByText('Rifiutata')).toBeInTheDocument();
+  });
+
+  it('shows a mismatch warning when the supplier does not correspond to the counterparty', async () => {
+    mockApiGet({ invoices: [invoiceMismatch] });
+    renderTab();
+    expect(await screen.findByText('Fornitore non corrisponde')).toBeInTheDocument();
+  });
+
+  it('confirms a suggested match and shows a success toast', async () => {
+    mockApiGet({ invoices: [invoiceSuggested] });
+    (api.post as jest.Mock).mockResolvedValue({ data: { ...invoiceSuggested, matchStatus: 'CONFIRMED' } });
+    renderTab();
+    expect(await screen.findByTitle('Conferma abbinamento')).toBeInTheDocument();
+    await userEvent.click(screen.getByTitle('Conferma abbinamento'));
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/contracts/1/invoices/7/match/confirm', {}),
+    );
+    expect(toast.success).toHaveBeenCalledWith('Abbinamento confermato');
+  });
+
+  it('shows an error toast when confirming a match fails', async () => {
+    mockApiGet({ invoices: [invoiceSuggested] });
+    (api.post as jest.Mock).mockRejectedValue(new Error('confirm failed'));
+    renderTab();
+    expect(await screen.findByTitle('Conferma abbinamento')).toBeInTheDocument();
+    await userEvent.click(screen.getByTitle('Conferma abbinamento'));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Conferma dell'abbinamento non riuscita"),
+    );
+  });
+
+  it('rejects a suggested match and shows a success toast', async () => {
+    mockApiGet({ invoices: [invoiceSuggested] });
+    (api.post as jest.Mock).mockResolvedValue({ data: { ...invoiceSuggested, matchStatus: 'REJECTED' } });
+    renderTab();
+    expect(await screen.findByTitle('Rifiuta abbinamento')).toBeInTheDocument();
+    await userEvent.click(screen.getByTitle('Rifiuta abbinamento'));
+    await waitFor(() =>
+      expect(api.post).toHaveBeenCalledWith('/contracts/1/invoices/7/match/reject'),
+    );
+    expect(toast.success).toHaveBeenCalledWith('Abbinamento rifiutato');
+  });
+
+  it('shows an error toast when rejecting a match fails', async () => {
+    mockApiGet({ invoices: [invoiceSuggested] });
+    (api.post as jest.Mock).mockRejectedValue(new Error('reject failed'));
+    renderTab();
+    expect(await screen.findByTitle('Rifiuta abbinamento')).toBeInTheDocument();
+    await userEvent.click(screen.getByTitle('Rifiuta abbinamento'));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Rifiuto dell'abbinamento non riuscito"),
+    );
+  });
+
+  it('clicking the matching cell does not open the detail dialog', async () => {
+    mockApiGet({ invoices: [invoiceSuggested] });
+    renderTab();
+    const badge = await screen.findByText('Suggerito · 84%');
+    fireEvent.click(badge.closest('td')!);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

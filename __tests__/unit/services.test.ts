@@ -28,6 +28,7 @@ import { calendarFeedService } from '@/services/calendarFeed.service';
 import { organizationService } from '@/services/organization.service';
 import { twoFactorAuthService } from '@/services/twoFactorAuth.service';
 import { budgetsService } from '@/services/budgets.service';
+import { invoiceMatchingService } from '@/services/invoiceMatching.service';
 
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
@@ -609,5 +610,40 @@ describe('twoFactorAuthService', () => {
     mockPost.mockResolvedValue({});
     await twoFactorAuthService.disable('123456');
     expect(mockPost).toHaveBeenCalledWith('/users/me/2fa/disable', { code: '123456' });
+  });
+});
+
+// ─── invoiceMatchingService ──────────────────────────────────────────────────
+
+describe('invoiceMatchingService', () => {
+  it('confirm() calls POST .../match/confirm with no body when no override is given', async () => {
+    const data = { id: 1, matchStatus: 'CONFIRMED' };
+    mockPost.mockResolvedValue({ data });
+    const result = await invoiceMatchingService.confirm(1, 7);
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/7/match/confirm', {});
+    expect(result).toEqual(data);
+  });
+
+  it('confirm() sends the financialValueId when overriding the suggestion', async () => {
+    const data = { id: 1, matchStatus: 'CONFIRMED' };
+    mockPost.mockResolvedValue({ data });
+    await invoiceMatchingService.confirm(1, 7, 42);
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/7/match/confirm', { financialValueId: 42 });
+  });
+
+  it('reject() calls POST .../match/reject and returns the updated invoice', async () => {
+    const data = { id: 1, matchStatus: 'REJECTED' };
+    mockPost.mockResolvedValue({ data });
+    const result = await invoiceMatchingService.reject(1, 7);
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/7/match/reject');
+    expect(result).toEqual(data);
+  });
+
+  it('recompute() calls POST .../invoices/match/recompute and returns the updated invoices', async () => {
+    const data = [{ id: 1, matchStatus: 'SUGGESTED' }];
+    mockPost.mockResolvedValue({ data });
+    const result = await invoiceMatchingService.recompute(1);
+    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/match/recompute');
+    expect(result).toEqual(data);
   });
 });

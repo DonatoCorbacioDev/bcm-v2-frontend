@@ -7,7 +7,17 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Upload, Download, Trash2, Receipt, Loader2, Landmark, Pencil } from "lucide-react";
+import {
+  Upload,
+  Download,
+  Trash2,
+  Receipt,
+  Loader2,
+  Landmark,
+  Pencil,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -22,42 +32,21 @@ import {
 } from "@/components/ui/dialog";
 import api from "@/lib/api";
 import { sepaPaymentsService, type SepaPaymentBatch } from "@/services/sepaPayments.service";
-
-interface LineItem {
-  lineNumber: number;
-  description: string;
-  quantity: number;
-  unitOfMeasure: string;
-  unitPrice: number;
-  totalPrice: number;
-  vatRate: number;
-}
-
-interface ElectronicInvoice {
-  id: number;
-  contractId: number;
-  fileName: string;
-  fileSize: number;
-  uploadedAt: string;
-  downloadUrl: string;
-  supplierName: string;
-  supplierVatNumber: string;
-  documentType: string;
-  invoiceNumber: string;
-  invoiceDate: string;
-  totalAmount: number;
-  currency: string;
-  lineItems: LineItem[];
-  supplierIban: string | null;
-  supplierBic: string | null;
-  paymentDueDate: string | null;
-  sepaBatchId: number | null;
-}
+import { invoiceMatchingService } from "@/services/invoiceMatching.service";
+import type { ElectronicInvoice, InvoiceMatchStatus } from "@/types";
 
 interface InvoicesTabProps {
   readonly contractId: number;
   readonly isAdmin: boolean;
 }
+
+const MATCH_STATUS_CONFIG: Record<InvoiceMatchStatus, { badge: "warning" | "success" | "secondary" | "destructive"; label: string }> = {
+  UNMATCHED: { badge: "secondary", label: "N/D" },
+  SUGGESTED: { badge: "warning", label: "Suggerito" },
+  CONFIRMED: { badge: "success", label: "Verificata" },
+  REJECTED: { badge: "secondary", label: "Rifiutata" },
+  COUNTERPARTY_MISMATCH: { badge: "destructive", label: "Fornitore non corrisponde" },
+};
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -139,6 +128,24 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       setPaymentDetailsInvoice(null);
     },
     onError: () => toast.error("Aggiornamento dei dati di pagamento non riuscito"),
+  });
+
+  const confirmMatchMutation = useMutation({
+    mutationFn: (invoiceId: number) => invoiceMatchingService.confirm(contractId, invoiceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      toast.success("Abbinamento confermato");
+    },
+    onError: () => toast.error("Conferma dell'abbinamento non riuscita"),
+  });
+
+  const rejectMatchMutation = useMutation({
+    mutationFn: (invoiceId: number) => invoiceMatchingService.reject(contractId, invoiceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      toast.success("Abbinamento rifiutato");
+    },
+    onError: () => toast.error("Rifiuto dell'abbinamento non riuscito"),
   });
 
   const generateSepaMutation = useMutation({
@@ -325,7 +332,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                 <th className="px-4 py-3 w-10">
                   <span className="sr-only">Seleziona</span>
                 </th>
-                {["File", "Fornitore", "N. fattura", "Data", "Totale", "Pagamento", "Azioni"].map((h) => (
+                {["File", "Fornitore", "N. fattura", "Data", "Totale", "Abbinamento", "Pagamento", "Azioni"].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
@@ -376,6 +383,42 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   </td>
                   <td className="px-4 py-3 text-sm font-bold text-foreground whitespace-nowrap">
                     {formatAmount(invoice.totalAmount, invoice.currency)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={MATCH_STATUS_CONFIG[invoice.matchStatus].badge}>
+                        {MATCH_STATUS_CONFIG[invoice.matchStatus].label}
+                        {invoice.matchStatus === "SUGGESTED" && invoice.matchConfidence != null
+                          ? ` · ${Math.round(invoice.matchConfidence * 100)}%`
+                          : null}
+                      </Badge>
+                      {isAdmin && invoice.matchStatus === "SUGGESTED" && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => confirmMatchMutation.mutate(invoice.id)}
+                            disabled={confirmMatchMutation.isPending}
+                            title="Conferma abbinamento"
+                            aria-label="Conferma abbinamento"
+                            className="text-[var(--status-green-fg)] hover:text-[var(--status-green-fg)]"
+                          >
+                            <CheckCircle2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => rejectMatchMutation.mutate(invoice.id)}
+                            disabled={rejectMatchMutation.isPending}
+                            title="Rifiuta abbinamento"
+                            aria-label="Rifiuta abbinamento"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     {(() => {

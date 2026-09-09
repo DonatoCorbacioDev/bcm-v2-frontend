@@ -141,20 +141,18 @@ export function Hero() {
                   <Button asChild variant="outline" size="lg">
                     <Link href="/login">Accedi</Link>
                   </Button>
+                  <Button asChild variant="secondary" size="lg">
+                    <Link href="/login?demo=1">
+                      <PlayCircle className="h-4 w-4" aria-hidden="true" />
+                      Prova la demo
+                    </Link>
+                  </Button>
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Nessuna carta di credito richiesta · Setup in 2 minuti
+                  Nessuna carta di credito richiesta · Setup in 2 minuti · la demo non richiede
+                  registrazione
                 </p>
-
-                <Link
-                  href="/login?demo=1"
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-                >
-                  <PlayCircle className="h-4 w-4 text-primary" aria-hidden="true" />
-                  Prova la demo pubblica senza registrarti
-                  <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-                </Link>
               </>
             )}
           </div>

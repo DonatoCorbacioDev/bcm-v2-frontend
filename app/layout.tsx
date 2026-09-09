@@ -10,6 +10,7 @@ import Script from "next/script";
 import { Toaster } from "sonner";
 import ReactQueryProvider from "@/providers/ReactQueryProvider";
 import { CookieNotice } from "@/components/legal/CookieNotice";
+import { SessionGuard } from "@/components/providers/SessionGuard";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -50,6 +51,7 @@ export default async function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReactQueryProvider>
+          <SessionGuard />
           {children}
           <Toaster
             position="top-right"

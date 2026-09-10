@@ -107,6 +107,26 @@ describe('counterpartiesService', () => {
     await counterpartiesService.delete(1);
     expect(mockDelete).toHaveBeenCalledWith('/counterparties/1');
   });
+
+  it('getById() calls GET /counterparties/:id and returns data', async () => {
+    const data = { id: 1, name: 'Alfa Srl', type: 'CUSTOMER' };
+    mockGet.mockResolvedValue({ data });
+    const result = await counterpartiesService.getById(1);
+    expect(mockGet).toHaveBeenCalledWith('/counterparties/1');
+    expect(result).toEqual(data);
+  });
+
+  it('getInvoicingSummary() calls GET /counterparties/:id/invoicing-summary and returns data', async () => {
+    const data = {
+      counterpartyId: 1, counterpartyName: 'Alfa Srl', activeContracts: 3,
+      contractedValue: 36000, invoicedYtd: 24000, variancePercent: -33.3,
+      invoiceCount: 8, lastInvoiceDate: '2026-08-28',
+    };
+    mockGet.mockResolvedValue({ data });
+    const result = await counterpartiesService.getInvoicingSummary(1);
+    expect(mockGet).toHaveBeenCalledWith('/counterparties/1/invoicing-summary');
+    expect(result).toEqual(data);
+  });
 });
 
 // ─── financialTypesService ───────────────────────────────────────────────────
@@ -471,6 +491,14 @@ describe('dashboardService', () => {
     mockGet.mockResolvedValue({ data });
     const result = await dashboardService.getStats();
     expect(mockGet).toHaveBeenCalledWith('/contracts/stats');
+    expect(result).toEqual(data);
+  });
+
+  it('getInvoicingSummary() calls GET /contracts/stats/invoicing-summary', async () => {
+    const data = { year: 2026, expectedYtd: 100000, invoicedYtd: 94500, variance: -5500, variancePercent: -5.5 };
+    mockGet.mockResolvedValue({ data });
+    const result = await dashboardService.getInvoicingSummary();
+    expect(mockGet).toHaveBeenCalledWith('/contracts/stats/invoicing-summary');
     expect(result).toEqual(data);
   });
 });

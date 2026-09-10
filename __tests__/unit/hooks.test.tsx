@@ -34,13 +34,16 @@ jest.mock('@/services/contracts.service', () => ({
   },
 }));
 jest.mock('@/services/dashboard.service', () => ({
-  dashboardService: { getStats: jest.fn() },
+  dashboardService: { getStats: jest.fn(), getInvoicingSummary: jest.fn() },
 }));
 jest.mock('@/services/contractTemplates.service', () => ({
   contractTemplatesService: { list: jest.fn(), create: jest.fn(), update: jest.fn() },
 }));
 jest.mock('@/services/counterparties.service', () => ({
-  counterpartiesService: { list: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn() },
+  counterpartiesService: {
+    list: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(),
+    getById: jest.fn(), getInvoicingSummary: jest.fn(),
+  },
 }));
 
 jest.mock('@/store/authStore', () => ({
@@ -88,7 +91,8 @@ import { useContracts } from '@/hooks/useContracts';
 import { useContractsByArea } from '@/hooks/useContractsByArea';
 import { useContractsTimeline } from '@/hooks/useContractsTimeline';
 import { useTopManagers } from '@/hooks/useTopManagers';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useDashboardStats, useInvoicingSummary } from '@/hooks/useDashboardStats';
+import { useCounterparty, useCounterpartyInvoicingSummary } from '@/hooks/useCounterparty';
 import { useContractsPaged } from '@/hooks/useContractsPaged';
 import { useContract } from '@/hooks/useContract';
 import { useExpiringContracts } from '@/hooks/useExpiringContracts';
@@ -227,6 +231,50 @@ describe('useDashboardStats', () => {
     const { result } = renderHook(() => useDashboardStats(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
+  });
+});
+
+describe('useInvoicingSummary', () => {
+  it('fetches and returns the invoicing summary', async () => {
+    const data = { year: 2026, expectedYtd: 100000, invoicedYtd: 94500, variance: -5500, variancePercent: -5.5 };
+    (dashboardService.getInvoicingSummary as jest.Mock).mockResolvedValue(data);
+    const { result } = renderHook(() => useInvoicingSummary(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(data);
+  });
+});
+
+describe('useCounterparty', () => {
+  it('fetches counterparty when id > 0', async () => {
+    const data = { id: 1, name: 'Alfa Srl', type: 'CUSTOMER' };
+    (counterpartiesService.getById as jest.Mock).mockResolvedValue(data);
+    const { result } = renderHook(() => useCounterparty(1), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(data);
+  });
+
+  it('is disabled when id is 0', () => {
+    const { result } = renderHook(() => useCounterparty(0), { wrapper: createWrapper() });
+    expect(result.current.fetchStatus).toBe('idle');
+  });
+});
+
+describe('useCounterpartyInvoicingSummary', () => {
+  it('fetches the invoicing summary when id > 0', async () => {
+    const data = {
+      counterpartyId: 1, counterpartyName: 'Alfa Srl', activeContracts: 3,
+      contractedValue: 36000, invoicedYtd: 24000, variancePercent: -33.3,
+      invoiceCount: 8, lastInvoiceDate: '2026-08-28',
+    };
+    (counterpartiesService.getInvoicingSummary as jest.Mock).mockResolvedValue(data);
+    const { result } = renderHook(() => useCounterpartyInvoicingSummary(1), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(data);
+  });
+
+  it('is disabled when id is 0', () => {
+    const { result } = renderHook(() => useCounterpartyInvoicingSummary(0), { wrapper: createWrapper() });
+    expect(result.current.fetchStatus).toBe('idle');
   });
 });
 

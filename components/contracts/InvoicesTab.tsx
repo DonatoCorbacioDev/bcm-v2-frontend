@@ -7,6 +7,7 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 import {
   Upload,
   Download,
@@ -93,7 +94,13 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    onError: () => toast.error("Caricamento della fattura non riuscito"),
+    onError: (error: AxiosError<{ message?: string }>) => {
+      if (error.response?.status === 409) {
+        toast.error("Questa fattura è già stata caricata");
+        return;
+      }
+      toast.error("Caricamento della fattura non riuscito");
+    },
   });
 
   const deleteMutation = useMutation({

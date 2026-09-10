@@ -255,6 +255,19 @@ describe('InvoicesTab', () => {
     );
   });
 
+  it('shows a specific toast when the upload is rejected as a duplicate (409)', async () => {
+    mockApiGet({ invoices: [] });
+    (api.post as jest.Mock).mockRejectedValue({ response: { status: 409, data: { message: 'Questa fattura risulta già caricata' } } });
+    renderTab();
+    expect(await screen.findByText(/carica fattura/i)).toBeInTheDocument();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' });
+    fireEvent.change(input, { target: { files: [file] } });
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Questa fattura è già stata caricata'),
+    );
+  });
+
   it('shows uploading state while mutation is pending', async () => {
     mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));

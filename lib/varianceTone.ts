@@ -9,14 +9,25 @@ export interface Tone {
 }
 
 /**
- * Color for "percent of budget used" (Budget / FinancialValueSummary):
- * higher is worse, over 100% means over budget. Previously duplicated
- * verbatim as a local `usageTone` in both components.
+ * Color for "percent of budget used" (Budget / FinancialValueSummary).
+ * Direction depends on the budget's category: for a COST budget, higher is
+ * worse (over 100% means over budget); for a REVENUE budget it's the
+ * opposite (over 100% means the target was met or exceeded, which is good
+ * news, not a problem to flag).
  */
-export function budgetUsageTone(percentUsed: number): Tone {
-  if (percentUsed > 100) return { bar: "bg-[var(--status-red-fg)]", text: "text-[var(--status-red-fg)]" };
-  if (percentUsed >= 80) return { bar: "bg-[var(--status-amber-fg)]", text: "text-[var(--status-amber-fg)]" };
-  return { bar: "bg-[var(--status-green-fg)]", text: "text-[var(--status-green-fg)]" };
+export function budgetUsageTone(percentUsed: number, category: "REVENUE" | "COST"): Tone {
+  const GREEN: Tone = { bar: "bg-[var(--status-green-fg)]", text: "text-[var(--status-green-fg)]" };
+  const AMBER: Tone = { bar: "bg-[var(--status-amber-fg)]", text: "text-[var(--status-amber-fg)]" };
+  const RED: Tone = { bar: "bg-[var(--status-red-fg)]", text: "text-[var(--status-red-fg)]" };
+
+  if (category === "REVENUE") {
+    if (percentUsed >= 100) return GREEN;
+    if (percentUsed >= 80) return AMBER;
+    return RED;
+  }
+  if (percentUsed > 100) return RED;
+  if (percentUsed >= 80) return AMBER;
+  return GREEN;
 }
 
 /**

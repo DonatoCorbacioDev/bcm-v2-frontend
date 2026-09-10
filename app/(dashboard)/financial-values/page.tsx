@@ -14,7 +14,7 @@ import { useFinancialTypes } from "@/hooks/useFinancialTypes";
 import { useContractsPaged } from "@/hooks/useContractsPaged";
 import FinancialValueTable from "@/components/financial-values/FinancialValueTable";
 import FinancialValueForm from "@/components/financial-values/FinancialValueForm";
-import FinancialValueSummary from "@/components/financial-values/FinancialValueSummary";
+import FinancialValueSummary, { type BudgetAreaSelection } from "@/components/financial-values/FinancialValueSummary";
 import { MissingPrerequisiteBanner } from "@/components/shared/MissingPrerequisiteBanner";
 import {
   Dialog,
@@ -91,6 +91,11 @@ export default function FinancialValuesPage() {
     setFormDialog({ open: false, financialValue: null });
   };
 
+  const [areaFilter, setAreaFilter] = useState<BudgetAreaSelection | null>(null);
+  const handleAreaClick = (area: BudgetAreaSelection) => {
+    setAreaFilter((current) => (current?.id === area.id ? null : area));
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -128,13 +133,27 @@ export default function FinancialValuesPage() {
         budgets={budgets}
         year={selectedYear}
         isAdmin={isAdmin}
+        selectedAreaId={areaFilter?.id ?? null}
+        onAreaClick={handleAreaClick}
       />
 
       <div>
-        <h2 className="text-sm font-semibold text-foreground mb-3">
-          Movimenti {selectedYear ?? "(tutti gli anni)"}
-        </h2>
-        <FinancialValueTable onEditClick={handleEditClick} year={selectedYear} />
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <h2 className="text-sm font-semibold text-foreground">
+            Movimenti {selectedYear ?? "(tutti gli anni)"}
+          </h2>
+          {areaFilter && (
+            <button
+              type="button"
+              onClick={() => setAreaFilter(null)}
+              className="inline-flex items-center gap-1.5 text-xs rounded-full border border-border bg-muted px-2.5 py-1 text-secondary-foreground hover:bg-accent"
+            >
+              Area: {areaFilter.name}
+              <span aria-hidden="true">×</span>
+            </button>
+          )}
+        </div>
+        <FinancialValueTable onEditClick={handleEditClick} year={selectedYear} areaId={areaFilter?.id ?? null} />
       </div>
 
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>

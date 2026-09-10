@@ -140,6 +140,28 @@ describe('BudgetTable', () => {
     expect(container.querySelector('.bg-\\[var\\(--status-amber-fg\\)\\]')).toBeInTheDocument();
   });
 
+  it('uses the green tone for a revenue budget that exceeds 100% (target beaten is good news)', () => {
+    const beatsTarget: Budget = {
+      id: 4, businessAreaId: 4, areaName: 'Sales', category: 'REVENUE',
+      year: 2025, targetAmount: 10000, actualAmount: 12700, percentUsed: 127,
+    };
+    (useBudgets as jest.Mock).mockReturnValue({ data: [beatsTarget], isLoading: false, isError: false });
+    render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-green-fg)]');
+  });
+
+  it('uses the red tone for a cost budget that exceeds 100% (over budget is bad news)', () => {
+    const overBudget: Budget = {
+      id: 5, businessAreaId: 5, areaName: 'Ops', category: 'COST',
+      year: 2025, targetAmount: 10000, actualAmount: 12700, percentUsed: 127,
+    };
+    (useBudgets as jest.Mock).mockReturnValue({ data: [overBudget], isLoading: false, isError: false });
+    render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-red-fg)]');
+  });
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   it('calls onEditClick with the correct budget when Edit is clicked', async () => {

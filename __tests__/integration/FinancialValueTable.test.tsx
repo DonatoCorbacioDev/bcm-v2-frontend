@@ -204,6 +204,21 @@ describe('FinancialValueTable', () => {
     expect(screen.getByText(/0 \/ 0 valori/i)).toBeInTheDocument();
   });
 
+  // ── Area prop ─────────────────────────────────────────────────────────────
+
+  it('restricts rows and the count to the given business area', () => {
+    render(<FinancialValueTable onEditClick={onEditClick} areaId={1} />, { wrapper: createWrapper() });
+    expect(screen.getByText('Gen/2024')).toBeInTheDocument();
+    expect(screen.queryByText('Giu/2024')).not.toBeInTheDocument();
+    expect(screen.getByText(/1 \/ 1 valori/i)).toBeInTheDocument();
+  });
+
+  it('shows every area when areaId is null', () => {
+    render(<FinancialValueTable onEditClick={onEditClick} areaId={null} />, { wrapper: createWrapper() });
+    expect(screen.getByText('Gen/2024')).toBeInTheDocument();
+    expect(screen.getByText('Giu/2024')).toBeInTheDocument();
+  });
+
   // ── Actions ───────────────────────────────────────────────────────────────
 
   it('calls onEditClick with the correct value when Edit is clicked', async () => {

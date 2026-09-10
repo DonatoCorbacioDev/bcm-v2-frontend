@@ -52,22 +52,27 @@ interface FinancialValueTableProps {
   readonly onEditClick: (financialValue: FinancialValue) => void;
   /** Restricts rows to this year. `null` (the default) shows every year. */
   readonly year?: number | null;
+  /** Restricts rows to this business area. `null` (the default) shows every area. */
+  readonly areaId?: number | null;
 }
 
 // Search and filter logic for financial values (category is no longer a
 // filter: revenue and cost render as two separate sections, never mixed in
 // the same table - see CategorySection below).
-function useFinancialValueFilters(financialValues: FinancialValue[], year: number | null) {
+function useFinancialValueFilters(financialValues: FinancialValue[], year: number | null, areaId: number | null) {
   const [searchQuery, setSearchQuery] = useState("");
   const [monthFilter, setMonthFilter] = useState<string>("ALL");
 
-  const yearScopedValues = useMemo(
-    () => (year === null ? financialValues : financialValues.filter((fv) => fv.year === year)),
-    [financialValues, year]
-  );
+  const scopedValues = useMemo(() => {
+    return financialValues.filter((fv) => {
+      const matchesYear = year === null || fv.year === year;
+      const matchesArea = areaId === null || fv.businessAreaId === areaId;
+      return matchesYear && matchesArea;
+    });
+  }, [financialValues, year, areaId]);
 
   const filteredFinancialValues = useMemo(() => {
-    return yearScopedValues.filter((fv) => {
+    return scopedValues.filter((fv) => {
       const matchesSearch =
         searchQuery === "" ||
         fv.year.toString().includes(searchQuery) ||
@@ -78,7 +83,7 @@ function useFinancialValueFilters(financialValues: FinancialValue[], year: numbe
 
       return matchesSearch && matchesMonth;
     });
-  }, [yearScopedValues, searchQuery, monthFilter]);
+  }, [scopedValues, searchQuery, monthFilter]);
 
   return {
     searchQuery,
@@ -86,7 +91,7 @@ function useFinancialValueFilters(financialValues: FinancialValue[], year: numbe
     monthFilter,
     setMonthFilter,
     filteredFinancialValues,
-    yearScopedCount: yearScopedValues.length,
+    yearScopedCount: scopedValues.length,
   };
 }
 
@@ -180,7 +185,7 @@ function CategorySection({ title, emptyLabel, rows, totalVariantClass, onEditCli
   );
 }
 
-export default function FinancialValueTable({ onEditClick, year = null }: FinancialValueTableProps) {
+export default function FinancialValueTable({ onEditClick, year = null, areaId = null }: FinancialValueTableProps) {
   const { data: financialValues = [], isLoading, isError } = useFinancialValues();
   const queryClient = useQueryClient();
 
@@ -191,7 +196,7 @@ export default function FinancialValueTable({ onEditClick, year = null }: Financ
     setMonthFilter,
     filteredFinancialValues,
     yearScopedCount,
-  } = useFinancialValueFilters(financialValues, year);
+  } = useFinancialValueFilters(financialValues, year, areaId);
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;

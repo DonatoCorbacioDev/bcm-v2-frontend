@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import FinancialValueSummary from '@/components/financial-values/FinancialValueSummary';
 import type { Budget, FinancialValue } from '@/types';
 
@@ -112,7 +113,7 @@ describe('FinancialValueSummary', () => {
     expect(screen.queryByText(/Andamento rispetto al budget/)).not.toBeInTheDocument();
   });
 
-  it('shows budget rows scoped to the selected year with category badge and percentage', () => {
+  it('shows budget rows scoped to the selected year, grouped under a Ricavi section', () => {
     const budgets = [
       budget({ id: 1, areaName: 'IT', category: 'REVENUE', year: 2026, percentUsed: 42 }),
       budget({ id: 2, areaName: 'Sales', category: 'COST', year: 2025, percentUsed: 99 }), // different year, excluded
@@ -120,23 +121,48 @@ describe('FinancialValueSummary', () => {
     render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
 
     expect(screen.getByText('Andamento rispetto al budget 2026')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Ricavi' })).toBeInTheDocument();
     expect(screen.getByText('IT')).toBeInTheDocument();
-    expect(screen.getByText('Ricavo')).toBeInTheDocument();
     expect(screen.getByText('42%')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Costi' })).not.toBeInTheDocument();
     expect(screen.queryByText('Sales')).not.toBeInTheDocument();
   });
 
-  it('labels a cost budget row as "Costo"', () => {
+  it('groups a cost budget row under a Costi section, never mixed with Ricavi', () => {
     render(
       <FinancialValueSummary
         financialValues={[]}
-        budgets={[budget({ category: 'COST', percentUsed: 10 })]}
+        budgets={[budget({ category: 'COST', areaName: 'Marketing', percentUsed: 10 })]}
         year={2026}
         isAdmin={false}
       />
     );
 
-    expect(screen.getByText('Costo')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Costi' })).toBeInTheDocument();
+    expect(screen.getByText('Marketing')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Ricavi' })).not.toBeInTheDocument();
+  });
+
+  it('sorts revenue budgets worst-first (lowest achievement on top)', () => {
+    const budgets = [
+      budget({ id: 1, areaName: 'On track', category: 'REVENUE', percentUsed: 95 }),
+      budget({ id: 2, areaName: 'Behind', category: 'REVENUE', percentUsed: 20 }),
+    ];
+    render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
+
+    const names = screen.getAllByTitle(/On track|Behind/).map((el) => el.textContent);
+    expect(names).toEqual(['Behind', 'On track']);
+  });
+
+  it('sorts cost budgets worst-first (highest overrun on top)', () => {
+    const budgets = [
+      budget({ id: 1, areaName: 'Under budget', category: 'COST', percentUsed: 30 }),
+      budget({ id: 2, areaName: 'Over budget', category: 'COST', percentUsed: 140 }),
+    ];
+    render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
+
+    const names = screen.getAllByTitle(/Under budget|Over budget/).map((el) => el.textContent);
+    expect(names).toEqual(['Over budget', 'Under budget']);
   });
 
   it('caps the progress bar width at 100% when a budget is over-used', () => {
@@ -154,6 +180,36 @@ describe('FinancialValueSummary', () => {
     expect(bar).toHaveStyle({ width: '100%' });
   });
 
+  it('uses the green tone for a revenue budget over 100% achieved (target exceeded is good news)', () => {
+    const { container } = render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[budget({ category: 'REVENUE', percentUsed: 127 })]}
+        year={2026}
+        isAdmin={false}
+      />
+    );
+
+    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-green-fg)]');
+    const bar = container.querySelector('[style*="width"]');
+    expect(bar).toHaveClass('bg-[var(--status-green-fg)]');
+  });
+
+  it('uses the red tone for a cost budget over 100% used (over budget is bad news)', () => {
+    const { container } = render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[budget({ category: 'COST', percentUsed: 127 })]}
+        year={2026}
+        isAdmin={false}
+      />
+    );
+
+    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-red-fg)]');
+    const bar = container.querySelector('[style*="width"]');
+    expect(bar).toHaveClass('bg-[var(--status-red-fg)]');
+  });
+
   it('uses the amber tone for a budget between 80% and 100% used', () => {
     const { container } = render(
       <FinancialValueSummary
@@ -167,6 +223,72 @@ describe('FinancialValueSummary', () => {
     expect(screen.getByText('85%')).toHaveClass('text-[var(--status-amber-fg)]');
     const bar = container.querySelector('[style*="width"]');
     expect(bar).toHaveClass('bg-[var(--status-amber-fg)]');
+  });
+
+  it('calls onAreaClick with the area id and name when a budget row is clicked', async () => {
+    const onAreaClick = jest.fn();
+    render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[budget({ id: 7, businessAreaId: 42, areaName: 'IT', percentUsed: 50 })]}
+        year={2026}
+        isAdmin={false}
+        onAreaClick={onAreaClick}
+      />
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: /IT/ }));
+    expect(onAreaClick).toHaveBeenCalledWith({ id: 42, name: 'IT' });
+  });
+
+  it('calls onAreaClick when Enter or Space is pressed on a budget row, but not on other keys', () => {
+    const onAreaClick = jest.fn();
+    render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[budget({ id: 7, businessAreaId: 42, areaName: 'IT', percentUsed: 50 })]}
+        year={2026}
+        isAdmin={false}
+        onAreaClick={onAreaClick}
+      />
+    );
+
+    const row = screen.getByRole('button', { name: /IT/ });
+    fireEvent.keyDown(row, { key: 'Tab' });
+    expect(onAreaClick).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(row, { key: 'Enter' });
+    fireEvent.keyDown(row, { key: ' ' });
+    expect(onAreaClick).toHaveBeenCalledTimes(2);
+    expect(onAreaClick).toHaveBeenCalledWith({ id: 42, name: 'IT' });
+  });
+
+  it('is not rendered as a clickable button when onAreaClick is not provided', () => {
+    render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[budget({ areaName: 'IT', percentUsed: 50 })]}
+        year={2026}
+        isAdmin={false}
+      />
+    );
+
+    expect(screen.queryByRole('button', { name: /IT/ })).not.toBeInTheDocument();
+  });
+
+  it('highlights the selected area row', () => {
+    render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[budget({ businessAreaId: 42, areaName: 'IT', percentUsed: 50 })]}
+        year={2026}
+        isAdmin={false}
+        selectedAreaId={42}
+        onAreaClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /IT/ })).toHaveClass('bg-muted');
   });
 
   it('shows the "Gestisci budget" link only for admins', () => {

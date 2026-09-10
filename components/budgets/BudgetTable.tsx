@@ -130,7 +130,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
             </TableHeader>
             <TableBody>
               {filtered.map((b) => {
-                const tone = budgetUsageTone(b.percentUsed);
+                const tone = budgetUsageTone(b.percentUsed, b.category);
                 return (
                   <TableRow key={b.id}>
                     <TableCell className="text-sm font-medium">{b.areaName}</TableCell>

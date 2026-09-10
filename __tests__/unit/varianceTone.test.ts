@@ -1,18 +1,37 @@
 import { budgetUsageTone, invoicingVarianceTone, invoicingVarianceVariant } from '@/lib/varianceTone';
 
 describe('budgetUsageTone', () => {
-  it('is red when over 100% used', () => {
-    expect(budgetUsageTone(101)).toEqual({ bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' });
+  describe('COST budgets (higher usage is worse)', () => {
+    it('is red when over 100% used', () => {
+      expect(budgetUsageTone(101, 'COST')).toEqual({ bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' });
+    });
+
+    it('is amber between 80% and 100% used', () => {
+      expect(budgetUsageTone(80, 'COST')).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
+      expect(budgetUsageTone(100, 'COST')).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
+    });
+
+    it('is green under 80% used', () => {
+      expect(budgetUsageTone(0, 'COST')).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
+      expect(budgetUsageTone(79, 'COST')).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
+    });
   });
 
-  it('is amber between 80% and 100% used', () => {
-    expect(budgetUsageTone(80)).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
-    expect(budgetUsageTone(100)).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
-  });
+  describe('REVENUE budgets (higher achievement is better)', () => {
+    it('is green at or above 100% achieved, including well over target', () => {
+      expect(budgetUsageTone(100, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
+      expect(budgetUsageTone(127, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
+    });
 
-  it('is green under 80% used', () => {
-    expect(budgetUsageTone(0)).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
-    expect(budgetUsageTone(79)).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
+    it('is amber between 80% and 100% achieved', () => {
+      expect(budgetUsageTone(80, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
+      expect(budgetUsageTone(99, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
+    });
+
+    it('is red under 80% achieved', () => {
+      expect(budgetUsageTone(0, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' });
+      expect(budgetUsageTone(79, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' });
+    });
   });
 });
 

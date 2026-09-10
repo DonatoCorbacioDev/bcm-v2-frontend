@@ -718,6 +718,13 @@ describe('InvoicesTab', () => {
     expect(await screen.findByText('Fornitore non corrisponde')).toBeInTheDocument();
   });
 
+  it('falls back to the "N/D" badge for an unrecognized matchStatus value', async () => {
+    const invoiceUnknownStatus = { ...invoice, id: 11, fileName: 'stato-sconosciuto.xml', matchStatus: 'SOME_FUTURE_STATUS' };
+    mockApiGet({ invoices: [invoiceUnknownStatus] });
+    renderTab();
+    expect(await screen.findByText('N/D')).toBeInTheDocument();
+  });
+
   it('confirms a suggested match and shows a success toast', async () => {
     mockApiGet({ invoices: [invoiceSuggested] });
     (api.post as jest.Mock).mockResolvedValue({ data: { ...invoiceSuggested, matchStatus: 'CONFIRMED' } });

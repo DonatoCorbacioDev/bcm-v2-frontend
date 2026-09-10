@@ -6,88 +6,17 @@
  */
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
-import { organizationService } from "@/services/organization.service";
 import { LogoMark } from "@/components/layout/Logo";
-import { LogOut } from "lucide-react";
-import { navGroups, type NavItem } from "@/components/layout/sidebarNavConfig";
-import { tierLabel } from "@/lib/tierLabels";
+import { navGroups } from "@/components/layout/sidebarNavConfig";
+import { NavLink } from "@/components/layout/NavLink";
+import { OrgSwitcher } from "@/components/layout/OrgSwitcher";
+import { SidebarLogoutButton } from "@/components/layout/SidebarLogoutButton";
 
 interface SidebarProps {
   readonly collapsed: boolean;
-}
-
-function NavLink({
-  item,
-  isActive,
-  collapsed,
-}: {
-  readonly item: NavItem;
-  readonly isActive: boolean;
-  readonly collapsed: boolean;
-}) {
-  return (
-    <Link
-      href={item.href}
-      aria-current={isActive ? "page" : undefined}
-      title={collapsed ? item.label : undefined}
-      className={cn(
-        "flex items-center gap-2.5 px-2.5 py-[9px] rounded-lg text-[13px] font-medium transition-colors duration-100",
-        isActive
-          ? "bg-[var(--sidebar-accent)] text-[var(--accent-foreground)] font-semibold"
-          : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-foreground",
-        collapsed && "justify-center px-2"
-      )}
-    >
-      <item.icon
-        aria-hidden="true"
-        className={cn(
-          "shrink-0",
-          collapsed ? "h-[18px] w-[18px]" : "h-[16px] w-[16px]",
-          isActive ? "text-[var(--accent-foreground)]" : "text-[var(--muted-foreground)]"
-        )}
-      />
-      {!collapsed && <span className="truncate">{item.label}</span>}
-    </Link>
-  );
-}
-
-function OrgSwitcherContent({
-  isAdmin,
-  orgInitials,
-  children,
-}: {
-  readonly isAdmin: boolean;
-  readonly orgInitials: string;
-  readonly children: React.ReactNode;
-}) {
-  const avatar = (
-    <span className="h-7 w-7 rounded-md bg-[var(--primary)] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
-      {orgInitials}
-    </span>
-  );
-
-  if (!isAdmin) {
-    return (
-      <div className="w-full flex items-center gap-2.5 px-2 py-1.5">
-        {avatar}
-        <div className="flex-1 min-w-0 text-left">{children}</div>
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      href="/organization"
-      className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-[var(--muted)] transition-colors group"
-    >
-      {avatar}
-      <div className="flex-1 min-w-0 text-left">{children}</div>
-    </Link>
-  );
 }
 
 export default function Sidebar({ collapsed }: SidebarProps) {
@@ -97,27 +26,10 @@ export default function Sidebar({ collapsed }: SidebarProps) {
   const { logout } = useAuth();
   const isAdmin = user?.role === "ADMIN";
 
-  const { data: organization } = useQuery({
-    queryKey: ["organization", "me"],
-    queryFn: organizationService.getMine,
-    enabled: isAdmin,
-  });
-
   const handleLogout = () => {
     logout();
     router.push("/login");
   };
-
-  const orgName = organization?.name ?? user?.organizationName;
-  const orgInitials = orgName
-    ? orgName
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((word) => word[0])
-        .join("")
-        .toUpperCase()
-    : "OR";
 
   return (
     <aside
@@ -154,16 +66,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
       {/* Org switcher */}
       {!collapsed && (
         <div className="px-3 py-2.5 border-b border-[var(--sidebar-border)] shrink-0">
-          <OrgSwitcherContent isAdmin={isAdmin} orgInitials={orgInitials}>
-            <p className="text-[12px] font-semibold text-foreground truncate">
-              {orgName ?? "Organizzazione"}
-            </p>
-            {organization && (
-              <p className="text-[11px] text-[var(--muted-foreground)] truncate">
-                Piano {tierLabel(organization.subscriptionTier)}
-              </p>
-            )}
-          </OrgSwitcherContent>
+          <OrgSwitcher />
         </div>
       )}
 
@@ -211,18 +114,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
             </Link>
           </div>
         )}
-        <button
-          type="button"
-          onClick={handleLogout}
-          title={collapsed ? "Esci" : undefined}
-          className={cn(
-            "w-full flex items-center gap-2.5 px-2.5 py-[9px] rounded-lg text-[13px] font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-destructive transition-colors duration-100",
-            collapsed && "justify-center px-2"
-          )}
-        >
-          <LogOut className={cn("shrink-0", collapsed ? "h-[18px] w-[18px]" : "h-[16px] w-[16px]")} aria-hidden="true" />
-          {!collapsed && <span>Esci</span>}
-        </button>
+        <SidebarLogoutButton onLogout={handleLogout} collapsed={collapsed} />
       </div>
     </aside>
   );

@@ -10,8 +10,11 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { LogoMark } from "@/components/layout/Logo";
-import { LogOut, X } from "lucide-react";
+import { X } from "lucide-react";
 import { navGroups } from "@/components/layout/sidebarNavConfig";
+import { NavLink } from "@/components/layout/NavLink";
+import { OrgSwitcher } from "@/components/layout/OrgSwitcher";
+import { SidebarLogoutButton } from "@/components/layout/SidebarLogoutButton";
 
 interface MobileSidebarProps {
   readonly isOpen: boolean;
@@ -57,6 +60,11 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         </button>
       </div>
 
+      {/* Org switcher */}
+      <div className="px-3 py-2.5 border-b border-[var(--sidebar-border)] shrink-0">
+        <OrgSwitcher />
+      </div>
+
       {/* Nav */}
       <nav aria-label="Navigazione principale" className="flex-1 overflow-y-auto py-3">
         {navGroups.map((group) => {
@@ -68,26 +76,14 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                 {group.title}
               </p>
               <div className="px-2 space-y-0.5">
-                {visibleItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={onClose}
-                      aria-current={isActive ? "page" : undefined}
-                      className={cn(
-                        "flex items-center gap-2.5 px-2.5 py-[9px] rounded-lg text-[13px] font-medium transition-colors",
-                        isActive
-                          ? "bg-[var(--sidebar-accent)] text-[var(--accent-foreground)] font-semibold"
-                          : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-foreground"
-                      )}
-                    >
-                      <item.icon className="h-[16px] w-[16px] shrink-0" aria-hidden="true" />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
+                {visibleItems.map((item) => (
+                  <NavLink
+                    key={item.href}
+                    item={item}
+                    isActive={pathname === item.href}
+                    onClick={onClose}
+                  />
+                ))}
               </div>
             </div>
           );
@@ -96,14 +92,16 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
       {/* Footer */}
       <div className="border-t border-[var(--sidebar-border)] px-2 py-3 shrink-0">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2.5 px-2.5 py-[9px] rounded-lg text-[13px] font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-destructive transition-colors"
-        >
-          <LogOut className="h-[16px] w-[16px] shrink-0" aria-hidden="true" />
-          <span>Esci</span>
-        </button>
+        <div className="flex items-center gap-2 px-2.5 pb-2 text-[10.5px] text-[var(--muted-foreground)]">
+          <Link href="/privacy" onClick={onClose} className="hover:text-foreground hover:underline">
+            Privacy
+          </Link>
+          <span aria-hidden="true">·</span>
+          <Link href="/trasparenza-ai" onClick={onClose} className="hover:text-foreground hover:underline">
+            Trasparenza AI
+          </Link>
+        </div>
+        <SidebarLogoutButton onLogout={handleLogout} />
       </div>
     </aside>
   );

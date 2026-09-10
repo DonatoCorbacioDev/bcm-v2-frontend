@@ -4,7 +4,7 @@
  */
 
 import api from "@/lib/api";
-import type { Counterparty, CounterpartyType } from "@/types";
+import type { Counterparty, CounterpartyInvoicingSummary, CounterpartyType } from "@/types";
 
 export type CounterpartyUpsertPayload = {
   name: string;
@@ -21,6 +21,16 @@ export type CounterpartyUpsertPayload = {
 export const counterpartiesService = {
   list: async (): Promise<Counterparty[]> => {
     const res = await api.get<Counterparty[]>("/counterparties");
+    return res.data;
+  },
+
+  getById: async (id: number): Promise<Counterparty> => {
+    const res = await api.get<Counterparty>(`/counterparties/${id}`);
+    return res.data;
+  },
+
+  getInvoicingSummary: async (id: number): Promise<CounterpartyInvoicingSummary> => {
+    const res = await api.get<CounterpartyInvoicingSummary>(`/counterparties/${id}/invoicing-summary`);
     return res.data;
   },
 

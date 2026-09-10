@@ -13,6 +13,7 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('@/hooks/useDashboardStats', () => ({
   useDashboardStats: jest.fn(),
+  useInvoicingSummary: jest.fn(),
 }));
 
 jest.mock('@/hooks/useExpiringContracts', () => ({
@@ -31,7 +32,7 @@ jest.mock('@/lib/api', () => {
   return { __esModule: true, api: shared, default: shared };
 });
 
-import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useDashboardStats, useInvoicingSummary } from '@/hooks/useDashboardStats';
 import { useExpiringContracts } from '@/hooks/useExpiringContracts';
 import { api } from '@/lib/api';
 
@@ -87,6 +88,11 @@ describe('DashboardPage', () => {
     });
     (useExpiringContracts as jest.Mock).mockReturnValue({
       data: [],
+      isLoading: false,
+      isError: false,
+    });
+    (useInvoicingSummary as jest.Mock).mockReturnValue({
+      data: { year: 2026, expectedYtd: 0, invoicedYtd: 0, variance: 0, variancePercent: 0 },
       isLoading: false,
       isError: false,
     });

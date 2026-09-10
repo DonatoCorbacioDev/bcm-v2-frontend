@@ -4,6 +4,7 @@
  */
 
 import api from "@/lib/api";
+import type { OrganizationInvoicingSummary } from "@/types";
 
 /**
  * Dashboard stats response from backend
@@ -24,6 +25,15 @@ export const dashboardService = {
    */
   getStats: async (): Promise<DashboardStats> => {
     const response = await api.get<DashboardStats>("/contracts/stats");
+    return response.data;
+  },
+
+  /**
+   * Fetch expected-vs-invoiced summary for the current year
+   * GET /api/v1/contracts/stats/invoicing-summary
+   */
+  getInvoicingSummary: async (): Promise<OrganizationInvoicingSummary> => {
+    const response = await api.get<OrganizationInvoicingSummary>("/contracts/stats/invoicing-summary");
     return response.data;
   },
 };

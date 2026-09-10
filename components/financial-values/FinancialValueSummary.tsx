@@ -8,6 +8,7 @@ import { useMemo } from "react";
 import Link from "next/link";
 import KPICard from "@/components/dashboard/KPICard";
 import { Badge } from "@/components/ui/badge";
+import { budgetUsageTone } from "@/lib/varianceTone";
 import type { Budget, FinancialValue } from "@/types";
 
 const EUR_FORMATTER = new Intl.NumberFormat("it-IT", {
@@ -15,12 +16,6 @@ const EUR_FORMATTER = new Intl.NumberFormat("it-IT", {
   currency: "EUR",
   maximumFractionDigits: 0,
 });
-
-function usageTone(percentUsed: number): { bar: string; text: string } {
-  if (percentUsed > 100) return { bar: "bg-[var(--status-red-fg)]", text: "text-[var(--status-red-fg)]" };
-  if (percentUsed >= 80) return { bar: "bg-[var(--status-amber-fg)]", text: "text-[var(--status-amber-fg)]" };
-  return { bar: "bg-[var(--status-green-fg)]", text: "text-[var(--status-green-fg)]" };
-}
 
 interface FinancialValueSummaryProps {
   readonly financialValues: FinancialValue[];
@@ -74,7 +69,7 @@ export default function FinancialValueSummary({
           </div>
           <div className="space-y-3">
             {yearBudgets.map((b) => {
-              const tone = usageTone(b.percentUsed);
+              const tone = budgetUsageTone(b.percentUsed);
               return (
                 <div key={b.id} className="flex items-center gap-3">
                   <span className="w-32 sm:w-40 shrink-0 truncate text-sm text-secondary-foreground" title={b.areaName}>

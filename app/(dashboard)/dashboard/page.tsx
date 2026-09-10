@@ -23,6 +23,7 @@ import { ContractsTimelineChart } from "@/components/dashboard/ContractsTimeline
 import { TopManagersChart } from "@/components/dashboard/TopManagersChart";
 import { FinancialForecastChart } from "@/components/dashboard/FinancialForecastChart";
 import { RiskScoreWidget } from "@/components/dashboard/RiskScoreWidget";
+import { InvoicingSummaryWidget } from "@/components/dashboard/InvoicingSummaryWidget";
 import { AnomalyWidget } from "@/components/dashboard/AnomalyWidget";
 import { AgentInsightsWidget } from "@/components/dashboard/AgentInsightsWidget";
 import { RecommendedActions, CRITICAL_RENEWAL_DAYS } from "@/components/dashboard/RecommendedActions";
@@ -263,6 +264,11 @@ export default function DashboardPage() {
         {/* Row 4: Financial Forecast + Risk Score Widget */}
         <FinancialForecastChart />
         <RiskScoreWidget />
+
+        {/* Row 4.5: Invoicing summary (full width — three KPI tiles read better wide) */}
+        <div className="lg:col-span-2">
+          <InvoicingSummaryWidget />
+        </div>
 
         {/* Row 5: Financial anomalies (full width — table benefits from wider layout) */}
         <div className="lg:col-span-2">

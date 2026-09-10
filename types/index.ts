@@ -51,6 +51,25 @@ export interface Counterparty {
   notes?: string | null;
 }
 
+export interface CounterpartyInvoicingSummary {
+  counterpartyId: number;
+  counterpartyName: string;
+  activeContracts: number;
+  contractedValue: number;
+  invoicedYtd: number;
+  variancePercent: number;
+  invoiceCount: number;
+  lastInvoiceDate: string | null;
+}
+
+export interface OrganizationInvoicingSummary {
+  year: number;
+  expectedYtd: number;
+  invoicedYtd: number;
+  variance: number;
+  variancePercent: number;
+}
+
 export type FinancialCategory = "REVENUE" | "COST";
 
 export interface FinancialType {

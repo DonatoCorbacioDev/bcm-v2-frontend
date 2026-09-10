@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useBudgets } from "@/hooks/useBudgets";
 import { budgetsService } from "@/services/budgets.service";
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
+import { budgetUsageTone } from "@/lib/varianceTone";
 import type { Budget } from "@/types";
 
 import {
@@ -37,12 +38,6 @@ const EUR_FORMATTER = new Intl.NumberFormat("it-IT", { style: "currency", curren
 
 interface BudgetTableProps {
   readonly onEditClick: (budget: Budget) => void;
-}
-
-function usageTone(percentUsed: number): { bar: string; text: string } {
-  if (percentUsed > 100) return { bar: "bg-[var(--status-red-fg)]", text: "text-[var(--status-red-fg)]" };
-  if (percentUsed >= 80) return { bar: "bg-[var(--status-amber-fg)]", text: "text-[var(--status-amber-fg)]" };
-  return { bar: "bg-[var(--status-green-fg)]", text: "text-[var(--status-green-fg)]" };
 }
 
 export default function BudgetTable({ onEditClick }: BudgetTableProps) {
@@ -135,7 +130,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
             </TableHeader>
             <TableBody>
               {filtered.map((b) => {
-                const tone = usageTone(b.percentUsed);
+                const tone = budgetUsageTone(b.percentUsed);
                 return (
                   <TableRow key={b.id}>
                     <TableCell className="text-sm font-medium">{b.areaName}</TableCell>

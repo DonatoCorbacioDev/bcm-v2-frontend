@@ -5,6 +5,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCounterparties } from "@/hooks/useCounterparties";
@@ -169,7 +170,11 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
             <TableBody>
               {filteredCounterparties.map((cp) => (
                 <TableRow key={cp.id}>
-                  <TableCell className="text-sm font-medium">{cp.name}</TableCell>
+                  <TableCell className="text-sm font-medium">
+                    <Link href={`/counterparties/${cp.id}`} className="text-primary hover:underline dark:text-[var(--accent-foreground)]">
+                      {cp.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="text-xs">{TYPE_LABELS[cp.type]}</Badge>
                   </TableCell>

@@ -136,6 +136,13 @@ describe('CounterpartyTable', () => {
     expect(screen.getByText('Fornitore')).toBeInTheDocument();
   });
 
+  it('links the counterparty name to its detail page', () => {
+    render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByRole('link', { name: 'Alfa Srl' })).toHaveAttribute('href', '/counterparties/1');
+    expect(screen.getByRole('link', { name: 'Beta Srl' })).toHaveAttribute('href', '/counterparties/2');
+  });
+
   it('shows the counterparty count', () => {
     render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 

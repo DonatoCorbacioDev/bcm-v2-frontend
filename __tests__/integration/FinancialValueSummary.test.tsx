@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FinancialValueSummary from '@/components/financial-values/FinancialValueSummary';
 import type { Budget, FinancialValue } from '@/types';
@@ -238,28 +238,6 @@ describe('FinancialValueSummary', () => {
     );
 
     await userEvent.click(screen.getByRole('button', { name: /IT/ }));
-    expect(onAreaClick).toHaveBeenCalledWith({ id: 42, name: 'IT' });
-  });
-
-  it('calls onAreaClick when Enter or Space is pressed on a budget row, but not on other keys', () => {
-    const onAreaClick = jest.fn();
-    render(
-      <FinancialValueSummary
-        financialValues={[]}
-        budgets={[budget({ id: 7, businessAreaId: 42, areaName: 'IT', percentUsed: 50 })]}
-        year={2026}
-        isAdmin={false}
-        onAreaClick={onAreaClick}
-      />
-    );
-
-    const row = screen.getByRole('button', { name: /IT/ });
-    fireEvent.keyDown(row, { key: 'Tab' });
-    expect(onAreaClick).not.toHaveBeenCalled();
-
-    fireEvent.keyDown(row, { key: 'Enter' });
-    fireEvent.keyDown(row, { key: ' ' });
-    expect(onAreaClick).toHaveBeenCalledTimes(2);
     expect(onAreaClick).toHaveBeenCalledWith({ id: 42, name: 'IT' });
   });
 

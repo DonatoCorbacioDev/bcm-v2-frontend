@@ -31,23 +31,10 @@ function BudgetRow({ budget, isSelected, onClick }: BudgetRowProps) {
   const tone = budgetUsageTone(budget.percentUsed, budget.category);
   const clickable = !!onClick;
 
-  return (
-    <div
-      role={clickable ? "button" : undefined}
-      tabIndex={clickable ? 0 : undefined}
-      onClick={clickable ? () => onClick!({ id: budget.businessAreaId, name: budget.areaName }) : undefined}
-      onKeyDown={
-        clickable
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onClick!({ id: budget.businessAreaId, name: budget.areaName });
-              }
-            }
-          : undefined
-      }
-      className={`flex items-center gap-3 rounded-md -mx-2 px-2 py-1 ${clickable ? "cursor-pointer hover:bg-muted/60" : ""} ${isSelected ? "bg-muted ring-1 ring-inset ring-primary/40" : ""}`}
-    >
+  const rowClassName = `flex items-center gap-3 rounded-md -mx-2 px-2 py-1 w-full text-left ${clickable ? "cursor-pointer hover:bg-muted/60" : ""} ${isSelected ? "bg-muted ring-1 ring-inset ring-primary/40" : ""}`;
+
+  const content = (
+    <>
       <span className="w-28 sm:w-36 shrink-0 truncate text-sm text-secondary-foreground" title={budget.areaName}>
         {budget.areaName}
       </span>
@@ -60,8 +47,22 @@ function BudgetRow({ budget, isSelected, onClick }: BudgetRowProps) {
       <span className={`w-12 shrink-0 text-right text-xs font-mono tabular-nums ${tone.text}`}>
         {budget.percentUsed.toFixed(0)}%
       </span>
-    </div>
+    </>
   );
+
+  if (clickable) {
+    return (
+      <button
+        type="button"
+        onClick={() => onClick!({ id: budget.businessAreaId, name: budget.areaName })}
+        className={`${rowClassName} appearance-none bg-transparent border-0`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={rowClassName}>{content}</div>;
 }
 
 interface FinancialValueSummaryProps {

@@ -115,10 +115,10 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   });
 
   const paymentDetailsMutation = useMutation({
-    mutationFn: async (params: { invoiceId: number; supplierIban: string; supplierBic: string | null; paymentDueDate: string | null }) => {
+    mutationFn: async (params: { invoiceId: number; supplierIban?: string; supplierBic?: string; paymentDueDate: string | null }) => {
       await api.patch(`/contracts/${contractId}/invoices/${params.invoiceId}/payment-details`, {
         supplierIban: params.supplierIban,
-        supplierBic: params.supplierBic || null,
+        supplierBic: params.supplierBic,
         paymentDueDate: params.paymentDueDate || null,
       });
     },
@@ -187,24 +187,30 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
     );
   };
 
+  // The API returns supplierIban/supplierBic masked (e.g. "IT...3456"), never
+  // the full value -- these inputs are "set a NEW value" fields, always
+  // blank, not an editable copy of the current one (pre-filling with the
+  // masked string would let someone save it back as if it were real).
   const openPaymentDetailsDialog = (invoice: ElectronicInvoice) => {
     setPaymentDetailsInvoice(invoice);
-    setIbanInput(invoice.supplierIban ?? "");
-    setBicInput(invoice.supplierBic ?? "");
+    setIbanInput("");
+    setBicInput("");
     setDueDateInput(invoice.paymentDueDate ? invoice.paymentDueDate.slice(0, 10) : "");
   };
 
   const handleSavePaymentDetails = () => {
     /* istanbul ignore next -- Save button only renders while paymentDetailsInvoice is set */
     if (!paymentDetailsInvoice) return;
-    if (!ibanInput.trim()) {
+    // A blank IBAN is only an error the first time (nothing on record yet);
+    // once one exists, leaving it blank just means "keep the current one".
+    if (!ibanInput.trim() && !paymentDetailsInvoice.supplierIban) {
       toast.error("L'IBAN è obbligatorio");
       return;
     }
     paymentDetailsMutation.mutate({
       invoiceId: paymentDetailsInvoice.id,
-      supplierIban: ibanInput.trim(),
-      supplierBic: bicInput.trim() || null,
+      supplierIban: ibanInput.trim() || undefined,
+      supplierBic: bicInput.trim() || undefined,
       paymentDueDate: dueDateInput || null,
     });
   };
@@ -665,9 +671,19 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           </DialogHeader>
 
           <div className="space-y-4">
+            <div className="rounded-md bg-muted/50 px-3 py-2 text-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">IBAN attuale</span>
+                <span className="font-mono">{paymentDetailsInvoice?.supplierIban ?? "Nessuno"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">BIC attuale</span>
+                <span className="font-mono">{paymentDetailsInvoice?.supplierBic ?? "Nessuno"}</span>
+              </div>
+            </div>
             <div>
               <label htmlFor="supplier-iban" className="block text-sm font-medium mb-2">
-                IBAN *
+                Nuovo IBAN{!paymentDetailsInvoice?.supplierIban && " *"}
               </label>
               <Input
                 id="supplier-iban"
@@ -675,10 +691,13 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                 onChange={(e) => setIbanInput(e.target.value)}
                 placeholder="IT60X0542811101000000123456"
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Lascia vuoto per non modificare quello attuale.
+              </p>
             </div>
             <div>
               <label htmlFor="supplier-bic" className="block text-sm font-medium mb-2">
-                BIC / SWIFT
+                Nuovo BIC / SWIFT
               </label>
               <Input
                 id="supplier-bic"

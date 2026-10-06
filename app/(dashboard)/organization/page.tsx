@@ -44,6 +44,11 @@ export default function OrganizationPage() {
     enabled: isAdmin,
   });
 
+  // The API returns iban/bic masked (e.g. "IT...3456"), never the full
+  // value -- so these inputs are "set a NEW value" fields, not an editable
+  // copy of the current one. They always start blank: pre-filling with the
+  // masked string would let someone accidentally save "IT...3456" back as
+  // if it were a real IBAN.
   const {
     register,
     handleSubmit,
@@ -51,10 +56,7 @@ export default function OrganizationPage() {
     formState: { errors, isSubmitting },
   } = useForm<OrganizationBankDetailsFormData>({
     resolver: zodResolver(organizationBankDetailsSchema),
-    values: {
-      iban: organization?.iban ?? "",
-      bic: organization?.bic ?? "",
-    },
+    defaultValues: { iban: "", bic: "" },
   });
 
   const updateMutation = useMutation({
@@ -62,13 +64,33 @@ export default function OrganizationPage() {
     onSuccess: (updated) => {
       queryClient.setQueryData(["organization", "me"], updated);
       toast.success("Dati bancari aggiornati");
-      reset({ iban: updated.iban ?? "", bic: updated.bic ?? "" });
+      reset({ iban: "", bic: "" });
     },
     onError: () => toast.error("Aggiornamento dei dati bancari non riuscito"),
   });
 
+  const removeMutation = useMutation({
+    mutationFn: organizationService.update,
+    onSuccess: (updated) => {
+      queryClient.setQueryData(["organization", "me"], updated);
+      toast.success("Rimosso");
+    },
+    onError: () => toast.error("Rimozione non riuscita"),
+  });
+
+  // A blank field means "leave it as is": only non-empty inputs are sent,
+  // so the backend's own null-means-unchanged rule for this endpoint holds.
   const onSubmit = (data: OrganizationBankDetailsFormData) => {
-    updateMutation.mutate({ iban: data.iban, bic: data.bic });
+    const payload: { iban?: string; bic?: string } = {};
+    if (data.iban !== "") payload.iban = data.iban;
+    if (data.bic !== "") payload.bic = data.bic;
+    updateMutation.mutate(payload);
+  };
+
+  const handleRemove = (field: "iban" | "bic") => {
+    const label = field === "iban" ? "l'IBAN" : "il BIC";
+    if (!window.confirm(`Rimuovere ${label} salvato per questa organizzazione?`)) return;
+    removeMutation.mutate({ [field]: "" });
   };
 
   if (!isAdmin) return null;
@@ -112,11 +134,48 @@ export default function OrganizationPage() {
             IBAN e BIC usati come conto debitore quando generi un pagamento SEPA per una fattura fornitore
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">IBAN attuale</span>
+              <span className="flex items-center gap-2">
+                <span className="font-mono">{organization?.iban ?? "Non impostato"}</span>
+                {organization?.iban && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemove("iban")}
+                    className="text-xs text-muted-foreground underline hover:text-destructive"
+                  >
+                    Rimuovi
+                  </button>
+                )}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-1">
+              <span className="text-muted-foreground">BIC attuale</span>
+              <span className="flex items-center gap-2">
+                <span className="font-mono">{organization?.bic ?? "Non impostato"}</span>
+                {organization?.bic && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemove("bic")}
+                    className="text-xs text-muted-foreground underline hover:text-destructive"
+                  >
+                    Rimuovi
+                  </button>
+                )}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground pt-1">
+              Per motivi di sicurezza l&apos;IBAN/BIC completo non viene più mostrato — inserisci un valore
+              nuovo qui sotto solo se vuoi sostituirlo.
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label htmlFor="iban" className="block text-sm font-medium mb-2">
-                IBAN
+                Nuovo IBAN
               </label>
               <Input
                 id="iban"
@@ -131,7 +190,7 @@ export default function OrganizationPage() {
 
             <div>
               <label htmlFor="bic" className="block text-sm font-medium mb-2">
-                BIC / SWIFT
+                Nuovo BIC / SWIFT
               </label>
               <Input
                 id="bic"

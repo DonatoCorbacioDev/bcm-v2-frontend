@@ -545,7 +545,7 @@ describe('InvoicesTab', () => {
     expect(api.patch).not.toHaveBeenCalled();
   });
 
-  it('opens the payment details dialog from the actions column, prefilled with existing data, and updates the BIC and due date', async () => {
+  it('opens the payment details dialog showing the masked current IBAN/BIC, with blank inputs for a new value, and updates the BIC and due date', async () => {
     mockApiGet({ invoices: [invoice] });
     (api.patch as jest.Mock).mockResolvedValue({ data: invoice });
     renderTab();
@@ -553,13 +553,14 @@ describe('InvoicesTab', () => {
     await userEvent.click(screen.getByTitle('Modifica dati di pagamento'));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
-    expect(screen.getByLabelText(/IBAN \*/i)).toHaveValue(invoice.supplierIban);
-    expect(screen.getByLabelText(/BIC \/ SWIFT/i)).toHaveValue(invoice.supplierBic);
+    // Current (masked) values are shown as read-only text, not in the inputs.
+    expect(screen.getByText(invoice.supplierIban as string)).toBeInTheDocument();
+    expect(screen.getByText(invoice.supplierBic as string)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Nuovo IBAN/i)).toHaveValue('');
+    expect(screen.getByLabelText(/Nuovo BIC \/ SWIFT/i)).toHaveValue('');
     expect(screen.getByLabelText(/Scadenza pagamento/i)).toHaveValue('2024-04-01');
 
-    const bicField = screen.getByLabelText(/BIC \/ SWIFT/i);
-    await userEvent.clear(bicField);
-    await userEvent.type(bicField, 'BCITITMM');
+    await userEvent.type(screen.getByLabelText(/Nuovo BIC \/ SWIFT/i), 'BCITITMM');
     const dueDateField = screen.getByLabelText(/Scadenza pagamento/i);
     fireEvent.change(dueDateField, { target: { value: '2024-05-01' } });
 
@@ -568,7 +569,7 @@ describe('InvoicesTab', () => {
     await waitFor(() =>
       expect(api.patch).toHaveBeenCalledWith(
         '/contracts/1/invoices/1/payment-details',
-        expect.objectContaining({ supplierBic: 'BCITITMM', paymentDueDate: '2024-05-01' }),
+        expect.objectContaining({ supplierIban: undefined, supplierBic: 'BCITITMM', paymentDueDate: '2024-05-01' }),
       ),
     );
   });
@@ -627,7 +628,7 @@ describe('InvoicesTab', () => {
     await waitFor(() =>
       expect(api.patch).toHaveBeenCalledWith(
         '/contracts/1/invoices/6/payment-details',
-        expect.objectContaining({ supplierBic: null, paymentDueDate: null }),
+        expect.objectContaining({ supplierBic: undefined, paymentDueDate: null }),
       ),
     );
   });

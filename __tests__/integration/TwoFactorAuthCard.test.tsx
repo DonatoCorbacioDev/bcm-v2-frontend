@@ -253,4 +253,35 @@ describe('TwoFactorAuthCard', () => {
     unmount();
     resolveQr!('data:image/png;base64,fake');
   });
+
+  it('shows an error toast when QR code generation fails', async () => {
+    mockGetStatus.mockResolvedValue(false);
+    mockSetup.mockResolvedValue({ secret: 'ABCD1234', otpAuthUri: 'otpauth://totp/BCM:admin?secret=ABCD1234' });
+    (QRCode.toDataURL as jest.Mock).mockRejectedValue(new Error('qr generation failed'));
+
+    renderCard();
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Generazione del codice QR non riuscita')
+    );
+  });
+
+  it('does not show an error toast if the component unmounts before QR generation rejects', async () => {
+    mockGetStatus.mockResolvedValue(false);
+    mockSetup.mockResolvedValue({ secret: 'ABCD1234', otpAuthUri: 'otpauth://totp/BCM:admin?secret=ABCD1234' });
+    let rejectQr: (reason: Error) => void;
+    (QRCode.toDataURL as jest.Mock).mockReturnValue(new Promise((_resolve, reject) => { rejectQr = reject; }));
+
+    const { unmount } = renderCard();
+    expect(await screen.findByRole('button', { name: /attiva 2fa/i })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /attiva 2fa/i }));
+    expect(await screen.findByText('ABCD1234')).toBeInTheDocument();
+
+    unmount();
+    rejectQr!(new Error('qr generation failed'));
+    await Promise.resolve();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
 });

@@ -51,9 +51,13 @@ export default function TwoFactorAuthCard() {
   useEffect(() => {
     if (step !== "setup" || !otpAuthUri) return;
     let cancelled = false;
-    QRCode.toDataURL(otpAuthUri).then((url) => {
-      if (!cancelled) setQrDataUrl(url);
-    });
+    QRCode.toDataURL(otpAuthUri)
+      .then((url) => {
+        if (!cancelled) setQrDataUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("Generazione del codice QR non riuscita");
+      });
     return () => { cancelled = true; };
   }, [step, otpAuthUri]);
 

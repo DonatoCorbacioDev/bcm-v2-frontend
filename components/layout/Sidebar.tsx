@@ -26,8 +26,8 @@ export default function Sidebar({ collapsed }: SidebarProps) {
   const { logout } = useAuth();
   const isAdmin = user?.role === "ADMIN";
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/login");
   };
 

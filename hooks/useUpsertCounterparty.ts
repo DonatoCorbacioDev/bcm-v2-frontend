@@ -22,7 +22,7 @@ export function useUpsertCounterparty() {
         : counterpartiesService.create(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.counterparties });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.counterparties });
     },
   });
 }

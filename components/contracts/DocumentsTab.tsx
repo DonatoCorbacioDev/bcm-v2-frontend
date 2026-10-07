@@ -104,7 +104,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
       toast.success("Documento caricato");
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -122,8 +122,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
-      queryClient.invalidateQueries({ queryKey: ["document-versions", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["document-versions", contractId] });
       toast.success("Nuova versione caricata");
       /* istanbul ignore next */
       if (versionInputRef.current) versionInputRef.current.value = "";
@@ -136,7 +136,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       await api.delete(`/contracts/${contractId}/documents/${documentId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["documents", contractId] });
       toast.success("Documento eliminato");
     },
     onError: () => toast.error("Eliminazione del documento non riuscita"),

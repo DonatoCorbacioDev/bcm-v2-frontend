@@ -89,7 +89,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       toast.success("Fattura caricata");
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -108,7 +108,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       await api.delete(`/contracts/${contractId}/invoices/${invoiceId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       toast.success("Fattura eliminata");
     },
     onError: () => toast.error("Eliminazione della fattura non riuscita"),
@@ -123,7 +123,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       toast.success("Dati di pagamento aggiornati");
       setPaymentDetailsInvoice(null);
     },
@@ -133,7 +133,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   const confirmMatchMutation = useMutation({
     mutationFn: (invoiceId: number) => invoiceMatchingService.confirm(contractId, invoiceId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       toast.success("Abbinamento confermato");
     },
     onError: () => toast.error("Conferma dell'abbinamento non riuscita"),
@@ -142,7 +142,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   const rejectMatchMutation = useMutation({
     mutationFn: (invoiceId: number) => invoiceMatchingService.reject(contractId, invoiceId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       toast.success("Abbinamento rifiutato");
     },
     onError: () => toast.error("Rifiuto dell'abbinamento non riuscito"),
@@ -159,8 +159,8 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       a.download = `sepa-${contractId}.xml`;
       a.click();
       URL.revokeObjectURL(url);
-      queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
-      queryClient.invalidateQueries({ queryKey: ["sepa-payments", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["sepa-payments", contractId] });
       setSelectedIds([]);
       toast.success("Pagamento SEPA generato");
     },

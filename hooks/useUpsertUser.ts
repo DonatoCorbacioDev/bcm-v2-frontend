@@ -22,7 +22,7 @@ export function useUpsertUser() {
         : usersService.create(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
     },
   });
 }

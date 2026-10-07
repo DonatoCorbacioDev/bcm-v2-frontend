@@ -112,7 +112,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
       await usersService.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
       toast.success("Utente eliminato");
       setDeleteDialog({ open: false, user: null });
     },

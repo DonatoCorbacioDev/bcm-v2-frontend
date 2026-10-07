@@ -80,7 +80,7 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
       await counterpartiesService.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.counterparties });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.counterparties });
       toast.success("Controparte eliminata");
       setDeleteDialog({ open: false, counterparty: null });
     },

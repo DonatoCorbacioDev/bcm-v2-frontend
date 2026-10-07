@@ -14,7 +14,7 @@ export function useCreateReminder() {
       await api.post("/notifications", { contractId, message });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 }

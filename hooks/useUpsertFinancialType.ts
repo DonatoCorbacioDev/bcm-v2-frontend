@@ -22,7 +22,7 @@ export function useUpsertFinancialType() {
         : financialTypesService.create(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.financialTypes });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.financialTypes });
     },
   });
 }

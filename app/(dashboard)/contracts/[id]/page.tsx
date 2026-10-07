@@ -73,8 +73,8 @@ export default function ContractDetailPage() {
   });
 
   const invalidateWorkflow = () => {
-    queryClient.invalidateQueries({ queryKey: contractsQueryKeys.detail(contractId) });
-    queryClient.invalidateQueries({ queryKey: ["contract-workflow-events", contractId] });
+    void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.detail(contractId) });
+    void queryClient.invalidateQueries({ queryKey: ["contract-workflow-events", contractId] });
   };
 
   const submitMutation = useMutation({
@@ -125,7 +125,7 @@ export default function ContractDetailPage() {
       toast.success(
         `${result.created} creati, ${result.regenerated} rigenerati, ${result.skippedManual} saltati (manuali)`
       );
-      queryClient.invalidateQueries({ queryKey: ["financial-values", "by-contract", contractId] });
+      void queryClient.invalidateQueries({ queryKey: ["financial-values", "by-contract", contractId] });
     },
     onError: () => toast.error("Rigenerazione dei valori finanziari non riuscita"),
   });
@@ -144,7 +144,7 @@ export default function ContractDetailPage() {
       await contractsService.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: contractsQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.all });
       toast.success("Contratto eliminato");
       router.push("/contracts");
     },
@@ -161,8 +161,8 @@ export default function ContractDetailPage() {
   const handleEditSuccess = () => {
     setEditDialogOpen(false);
     setPrefilledContract(null);
-    queryClient.invalidateQueries({ queryKey: ["contracts", contractId] });
-    queryClient.invalidateQueries({ queryKey: ["contract-history", "by-contract", contractId] });
+    void queryClient.invalidateQueries({ queryKey: ["contracts", contractId] });
+    void queryClient.invalidateQueries({ queryKey: ["contract-history", "by-contract", contractId] });
   };
 
   const handleApplyAnalysis = (detected: Partial<Contract>) => {

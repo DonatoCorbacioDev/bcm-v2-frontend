@@ -23,7 +23,7 @@ export function useUpsertManager() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.managers });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.managers });
     },
   });
 }

@@ -61,7 +61,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
   const deleteMutation = useMutation({
     mutationFn: (id: number) => financialTypesService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.financialTypes });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.financialTypes });
       toast.success("Tipo finanziario eliminato");
       setDeleteDialog({ open: false, financialType: null });
     },

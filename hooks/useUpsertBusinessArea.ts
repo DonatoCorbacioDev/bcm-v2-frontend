@@ -22,7 +22,7 @@ export function useUpsertBusinessArea() {
         : businessAreasService.create(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.businessAreas });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.businessAreas });
     },
   });
 }

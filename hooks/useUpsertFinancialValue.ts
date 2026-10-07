@@ -23,7 +23,7 @@ export function useUpsertFinancialValue() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: financialValuesQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: financialValuesQueryKeys.all });
     },
   });
 }

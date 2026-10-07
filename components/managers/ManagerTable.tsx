@@ -82,7 +82,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
       await managersService.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.managers });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.managers });
       toast.success("Responsabile eliminato");
       setDeleteDialog({ open: false, manager: null });
     },

@@ -77,7 +77,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       await businessAreasService.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.businessAreas });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.businessAreas });
       toast.success("Area di business eliminata");
       setDeleteDialog({ open: false, businessArea: null });
     },

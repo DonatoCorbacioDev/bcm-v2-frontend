@@ -52,7 +52,7 @@ export default function NotificationBell() {
       await api.patch(`/notifications/${id}/read`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 
@@ -62,7 +62,7 @@ export default function NotificationBell() {
       await Promise.all(unread.map((n) => api.patch(`/notifications/${n.id}/read`)));
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 

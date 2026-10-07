@@ -37,7 +37,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
   const mutation = useMutation({
     mutationFn: () => usersService.invite(form),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: usersQueryKeys.all });
       toast.success("Invito inviato");
       onClose();
     },

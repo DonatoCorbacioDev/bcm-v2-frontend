@@ -208,7 +208,7 @@ export default function FinancialValueTable({ onEditClick, year = null, areaId =
       await financialValuesService.delete(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: financialValuesQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: financialValuesQueryKeys.all });
       toast.success("Valore finanziario eliminato");
       setDeleteDialog({ open: false, financialValue: null });
     },

@@ -303,7 +303,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => contractsService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
       toast.success("Contratto eliminato");
       setDeleteDialog({ open: false, contract: null });
     },
@@ -330,7 +330,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
     const failed = results.filter((r) => r.status === "rejected").length;
     const succeeded = ids.length - failed;
 
-    queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
+    void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
     setIsBulkDeleting(false);
     setBulkDeleteDialogOpen(false);
     setSelectedIds(new Set());

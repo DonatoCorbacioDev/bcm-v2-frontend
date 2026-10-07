@@ -22,7 +22,7 @@ export function useUpsertBudget() {
         : budgetsService.create(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: referenceQueryKeys.budgets });
+      void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.budgets });
     },
   });
 }

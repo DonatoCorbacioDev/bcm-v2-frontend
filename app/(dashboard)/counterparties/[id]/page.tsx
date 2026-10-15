@@ -4,13 +4,16 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, TrendingUp } from "lucide-react";
+import { ArrowLeft, Loader2, ShieldCheck, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import KPICard from "@/components/dashboard/KPICard";
+import VerifyIbanDialog from "@/components/counterparties/VerifyIbanDialog";
 import { useCounterparty, useCounterpartyInvoicingSummary } from "@/hooks/useCounterparty";
+import { useAuthStore } from "@/store/authStore";
 import { invoicingVarianceVariant } from "@/lib/varianceTone";
 
 const TYPE_LABELS: Record<string, string> = {
@@ -35,6 +38,8 @@ export default function CounterpartyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const counterpartyId = Number(params.id);
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
+  const [ibanDialogOpen, setIbanDialogOpen] = useState(false);
 
   const { data: counterparty, isLoading, isError } = useCounterparty(counterpartyId);
   const { data: summary, isLoading: isSummaryLoading, isError: isSummaryError } =
@@ -128,6 +133,45 @@ export default function CounterpartyDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-[var(--status-blue-fg)]" aria-hidden="true" />
+            IBAN verificato (pagamenti SEPA)
+          </CardTitle>
+          <CardDescription>
+            L&apos;IBAN a cui questa controparte è autorizzata a essere pagata. Un cambio non confermato qui blocca la generazione del pagamento SEPA.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <p className="text-muted-foreground text-sm">IBAN verificato</p>
+              <p className="text-base font-mono text-foreground">
+                {counterparty.verifiedIban || "Non impostato"}
+              </p>
+              {counterparty.verifiedBic && (
+                <p className="text-sm text-muted-foreground font-mono mt-1">{counterparty.verifiedBic}</p>
+              )}
+            </div>
+            {isAdmin && (
+              <Button variant="outline" size="sm" onClick={() => setIbanDialogOpen(true)}>
+                {counterparty.verifiedIban ? "Conferma nuovo IBAN" : "Imposta IBAN verificato"}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {isAdmin && (
+        <VerifyIbanDialog
+          open={ibanDialogOpen}
+          onOpenChange={setIbanDialogOpen}
+          counterpartyId={counterpartyId}
+          currentIbanMasked={counterparty.verifiedIban}
+        />
+      )}
     </div>
   );
 }

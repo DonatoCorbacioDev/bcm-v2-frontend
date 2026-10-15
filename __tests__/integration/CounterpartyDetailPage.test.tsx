@@ -13,10 +13,25 @@ jest.mock('@/hooks/useCounterparty', () => ({
   useCounterpartyInvoicingSummary: jest.fn(),
 }));
 
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(),
+}));
+
 import { useCounterparty, useCounterpartyInvoicingSummary } from '@/hooks/useCounterparty';
+import { useAuthStore } from '@/store/authStore';
 import CounterpartyDetailPage from '@/app/(dashboard)/counterparties/[id]/page';
 
-beforeEach(() => jest.clearAllMocks());
+const mockAuthAs = (role: string | null) => {
+  (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
+    const state = { user: role ? { id: 1, username: 'user', role } : null };
+    return selector ? selector(state) : state;
+  });
+};
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockAuthAs('ADMIN');
+});
 
 describe('CounterpartyDetailPage', () => {
   it('shows a loading spinner while the counterparty is loading', () => {
@@ -80,5 +95,56 @@ describe('CounterpartyDetailPage', () => {
 
     expect(screen.getByText('P.IVA non indicata')).toBeInTheDocument();
     expect(screen.getByText(/riepilogo non disponibile/i)).toBeInTheDocument();
+  });
+
+  it('shows "Non impostato" and lets an admin set the verified IBAN for the first time', () => {
+    (useCounterparty as jest.Mock).mockReturnValue({
+      data: { id: 1, name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567890', verifiedIban: null },
+      isLoading: false,
+      isError: false,
+    });
+    (useCounterpartyInvoicingSummary as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
+
+    render(<CounterpartyDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('Non impostato')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Imposta IBAN verificato' })).toBeInTheDocument();
+  });
+
+  it('shows the masked IBAN/BIC and lets an admin confirm a change when already verified', () => {
+    (useCounterparty as jest.Mock).mockReturnValue({
+      data: {
+        id: 1,
+        name: 'Alfa Srl',
+        type: 'CUSTOMER',
+        vatNumber: 'IT01234567890',
+        verifiedIban: 'IT...3456',
+        verifiedBic: 'BPPIITRRXXX',
+      },
+      isLoading: false,
+      isError: false,
+    });
+    (useCounterpartyInvoicingSummary as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
+
+    render(<CounterpartyDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('IT...3456')).toBeInTheDocument();
+    expect(screen.getByText('BPPIITRRXXX')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Conferma nuovo IBAN' })).toBeInTheDocument();
+  });
+
+  it('hides the verified-IBAN action for a non-admin user', () => {
+    mockAuthAs('MANAGER');
+    (useCounterparty as jest.Mock).mockReturnValue({
+      data: { id: 1, name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567890', verifiedIban: 'IT...3456' },
+      isLoading: false,
+      isError: false,
+    });
+    (useCounterpartyInvoicingSummary as jest.Mock).mockReturnValue({ data: undefined, isLoading: true, isError: false });
+
+    render(<CounterpartyDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('IT...3456')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Conferma nuovo IBAN' })).not.toBeInTheDocument();
   });
 });

@@ -49,6 +49,9 @@ export interface Counterparty {
   contactEmail?: string | null;
   contactPhone?: string | null;
   notes?: string | null;
+  /** Masked (e.g. "IT...3456") — never the full value. Null until learned/set. */
+  verifiedIban?: string | null;
+  verifiedBic?: string | null;
 }
 
 export interface CounterpartyInvoicingSummary {

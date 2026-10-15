@@ -18,6 +18,11 @@ export type CounterpartyUpsertPayload = {
   notes?: string;
 };
 
+export type VerifyIbanPayload = {
+  iban: string;
+  bic?: string;
+};
+
 export const counterpartiesService = {
   list: async (): Promise<Counterparty[]> => {
     const res = await api.get<Counterparty[]>("/counterparties");
@@ -46,5 +51,10 @@ export const counterpartiesService = {
 
   delete: async (id: number): Promise<void> => {
     await api.delete(`/counterparties/${id}`);
+  },
+
+  confirmVerifiedIban: async (id: number, payload: VerifyIbanPayload): Promise<Counterparty> => {
+    const res = await api.patch<Counterparty>(`/counterparties/${id}/verified-iban`, payload);
+    return res.data;
   },
 };

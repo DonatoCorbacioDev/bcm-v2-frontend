@@ -197,7 +197,7 @@ Before deploying to production:
 
 - [x] **Dependencies** - `npm audit`: 0 vulnerabilities (checked 2026-09-06)
 - [ ] **Error Tracking** - No Sentry/LogRocket yet
-- [ ] **Uptime Monitoring** - No external uptime alerting yet
+- [x] **Uptime Monitoring** - UptimeRobot on backend health + frontend (added 2026-10-08, verified live with a real tested incident — see `bcm-v2-backend/docs/SECURITY.md`)
 
 Where the headers actually live, if you're checking: `proxy.ts` (CSP, frame-ancestors, permissions-policy, referrer-policy) and `bcm-v2-docker/Caddyfile` (HSTS, TLS termination, routing). Don't reintroduce a static header list in `next.config.ts` — it can't issue a per-request CSP nonce, which is why `proxy.ts` exists.
 
@@ -254,6 +254,7 @@ We follow **coordinated disclosure**:
 
 ### Version 2.0.x (Current)
 
+- **2026-10-16:** Marked external uptime monitoring as done (UptimeRobot, added 2026-10-08) — was still listed as a gap from before that shipped.
 - **2026-09-06:** Full audit against production — CSP/HSTS/header claims corrected to match what's actually deployed, `next` bumped to 16.3.4 (0 known vulnerabilities, was 4 high), `X-Powered-By` disabled, HSTS added at the Caddy layer, this document rewritten to stop describing a 2025 snapshot
 - **2025-02-05:** Initial security policy published
 - **2025-02-05:** HTTP-only cookies implemented for JWT storage
@@ -264,7 +265,7 @@ We follow **coordinated disclosure**:
 
 - [ ] Self-service GDPR data export/deletion
 - [ ] Session timeout warning in the UI
-- [ ] External uptime monitoring + error tracking
+- [ ] Error tracking (Sentry/LogRocket) — uptime monitoring is done (2026-10-08)
 
 ---
 

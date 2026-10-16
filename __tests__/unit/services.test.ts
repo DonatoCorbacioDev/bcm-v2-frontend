@@ -6,6 +6,7 @@ jest.mock('@/lib/api', () => ({
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
+    patch: jest.fn(),
     delete: jest.fn(),
   },
 }));
@@ -33,6 +34,7 @@ import { invoiceMatchingService } from '@/services/invoiceMatching.service';
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
 const mockPut = api.put as jest.Mock;
+const mockPatch = api.patch as jest.Mock;
 const mockDelete = api.delete as jest.Mock;
 
 beforeEach(() => jest.clearAllMocks());
@@ -125,6 +127,15 @@ describe('counterpartiesService', () => {
     mockGet.mockResolvedValue({ data });
     const result = await counterpartiesService.getInvoicingSummary(1);
     expect(mockGet).toHaveBeenCalledWith('/counterparties/1/invoicing-summary');
+    expect(result).toEqual(data);
+  });
+
+  it('confirmVerifiedIban() calls PATCH /counterparties/:id/verified-iban with payload', async () => {
+    const payload = { iban: 'IT60X0542811101000000123456', bic: 'BPPIITRRXXX' };
+    const data = { id: 1, name: 'Alfa Srl', type: 'CUSTOMER', verifiedIban: 'IT...3456' };
+    mockPatch.mockResolvedValue({ data });
+    const result = await counterpartiesService.confirmVerifiedIban(1, payload);
+    expect(mockPatch).toHaveBeenCalledWith('/counterparties/1/verified-iban', payload);
     expect(result).toEqual(data);
   });
 });

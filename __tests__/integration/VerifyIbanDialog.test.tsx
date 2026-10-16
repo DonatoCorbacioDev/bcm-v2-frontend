@@ -97,4 +97,64 @@ describe('VerifyIbanDialog', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(mockConfirmVerifiedIban).not.toHaveBeenCalled();
   });
+
+  it('omits the BIC from the payload when left blank', async () => {
+    mockConfirmVerifiedIban.mockResolvedValue({ id: 1, verifiedIban: 'IT...3456' });
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.type(screen.getByLabelText('Nuovo IBAN *'), 'IT60X0542811101000000123456');
+    await user.click(screen.getByRole('button', { name: 'Conferma' }));
+
+    await waitFor(() =>
+      expect(mockConfirmVerifiedIban).toHaveBeenCalledWith(1, {
+        iban: 'IT60X0542811101000000123456',
+        bic: undefined,
+      })
+    );
+  });
+
+  it('falls back to a generic error message when the backend sends a response with no message', async () => {
+    mockConfirmVerifiedIban.mockRejectedValue({ response: { status: 500, data: {} } });
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.type(screen.getByLabelText('Nuovo IBAN *'), 'IT60X0542811101000000123456');
+    await user.click(screen.getByRole('button', { name: 'Conferma' }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Aggiornamento dell'IBAN verificato non riuscito")
+    );
+  });
+
+  it('falls back to a generic error message on a network error with no response at all', async () => {
+    mockConfirmVerifiedIban.mockRejectedValue(new Error('Network Error'));
+    const user = userEvent.setup();
+    renderDialog();
+
+    await user.type(screen.getByLabelText('Nuovo IBAN *'), 'IT60X0542811101000000123456');
+    await user.click(screen.getByRole('button', { name: 'Conferma' }));
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith("Aggiornamento dell'IBAN verificato non riuscito")
+    );
+  });
+
+  it('ignores Escape (which would close the dialog) while the mutation is pending', async () => {
+    let resolveMutation: (value: { id: number }) => void = () => {};
+    mockConfirmVerifiedIban.mockImplementation(
+      () => new Promise((resolve) => { resolveMutation = resolve; })
+    );
+    const user = userEvent.setup();
+    const { onOpenChange } = renderDialog();
+
+    await user.type(screen.getByLabelText('Nuovo IBAN *'), 'IT60X0542811101000000123456');
+    await user.click(screen.getByRole('button', { name: 'Conferma' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Annulla' })).toBeDisabled());
+
+    await user.keyboard('{Escape}');
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    resolveMutation({ id: 1 });
+  });
 });

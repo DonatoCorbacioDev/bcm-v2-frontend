@@ -38,10 +38,10 @@ export default function VerifyIbanDialog({
 
   const handleOpenChange = (next: boolean) => {
     if (mutation.isPending) return;
-    if (!next) {
-      setIban("");
-      setBic("");
-    }
+    // Always reset: Radix only ever invokes this to close (no DialogTrigger
+    // lives inside this component), so `next` is never actually `true` here.
+    setIban("");
+    setBic("");
     onOpenChange(next);
   };
 

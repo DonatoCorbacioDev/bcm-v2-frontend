@@ -38,6 +38,13 @@ describe('RiskScoreWidget', () => {
     expect(screen.getByText(/verifica che il backend e il servizio di previsione/i)).toBeInTheDocument();
   });
 
+  it('shows an upgrade message when the FREE tier blocks ML access (403)', async () => {
+    (api.get as jest.Mock).mockRejectedValue({ isAxiosError: true, response: { status: 403 } });
+    render(<RiskScoreWidget />, { wrapper: createWrapper() });
+    expect(await screen.findByText(/non disponibile nel piano free/i)).toBeInTheDocument();
+    expect(screen.queryByText(/^analisi del rischio non disponibile$/i)).not.toBeInTheDocument();
+  });
+
   it('shows empty state when no risk scores', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });

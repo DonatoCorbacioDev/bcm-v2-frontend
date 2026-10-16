@@ -6,11 +6,12 @@
  */
 import { useState } from "react";
 import Link from "next/link";
-import { AlertOctagon, CheckCircle2, Loader2, WifiOff } from "lucide-react";
+import { AlertOctagon, CheckCircle2, Loader2, Lock, WifiOff } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAnomalies } from "@/hooks/useAnomalies";
 import { RISK_LEVEL_VARIANT } from "@/lib/statusConfig";
+import { isMlTierForbidden } from "@/lib/mlAccess";
 
 const VISIBLE_COUNT = 5;
 const MONTHS_IT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
@@ -26,7 +27,7 @@ function formatAmount(n: number): string {
 }
 
 export function AnomalyWidget() {
-  const { data: anomalies, isLoading, isError } = useAnomalies();
+  const { data: anomalies, isLoading, isError, error } = useAnomalies();
   const [showAll, setShowAll] = useState(false);
   const visibleAnomalies = showAll ? anomalies : anomalies?.slice(0, VISIBLE_COUNT);
 
@@ -50,7 +51,19 @@ export function AnomalyWidget() {
           </div>
         )}
 
-        {isError && (
+        {isError && isMlTierForbidden(error) && (
+          <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+            <Lock className="h-6 w-6 text-[var(--status-amber-fg)]" aria-hidden="true" />
+            <p className="text-sm font-medium text-foreground">
+              Funzionalità non disponibile nel piano Free
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Passa al piano Pro per abilitare il rilevamento anomalie
+            </p>
+          </div>
+        )}
+
+        {isError && !isMlTierForbidden(error) && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <WifiOff className="h-6 w-6 text-[var(--status-amber-fg)]" aria-hidden="true" />
             <p className="text-sm font-medium text-foreground">

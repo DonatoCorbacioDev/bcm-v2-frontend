@@ -6,12 +6,13 @@
  */
 import { useState } from "react";
 import Link from "next/link";
-import { ShieldAlert, WifiOff, Loader2, ThumbsUp, ThumbsDown } from "lucide-react";
+import { ShieldAlert, WifiOff, Loader2, Lock, ThumbsUp, ThumbsDown } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRiskScores } from "@/hooks/useRiskScores";
 import { useRiskFeedback, useSubmitRiskFeedback } from "@/hooks/useRiskFeedback";
 import { RISK_LEVEL_VARIANT } from "@/lib/statusConfig";
+import { isMlTierForbidden } from "@/lib/mlAccess";
 import type { RiskScore } from "@/types";
 
 const VISIBLE_COUNT = 5;
@@ -34,7 +35,7 @@ function anomalyLabel(code: string): string {
 }
 
 export function RiskScoreWidget() {
-  const { data: riskScores, isLoading, isError } = useRiskScores();
+  const { data: riskScores, isLoading, isError, error } = useRiskScores();
   const { data: feedbackList } = useRiskFeedback();
   const submitFeedback = useSubmitRiskFeedback();
   const [showAll, setShowAll] = useState(false);
@@ -82,7 +83,19 @@ export function RiskScoreWidget() {
           </div>
         )}
 
-        {isError && (
+        {isError && isMlTierForbidden(error) && (
+          <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+            <Lock className="h-6 w-6 text-[var(--status-amber-fg)]" />
+            <p className="text-sm font-medium text-foreground">
+              Funzionalità non disponibile nel piano Free
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Passa al piano Pro per abilitare l&apos;analisi del rischio
+            </p>
+          </div>
+        )}
+
+        {isError && !isMlTierForbidden(error) && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <WifiOff className="h-6 w-6 text-[var(--status-amber-fg)]" />
             <p className="text-sm font-medium text-foreground">

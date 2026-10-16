@@ -26,6 +26,13 @@ describe('AgentInsightsWidget', () => {
     expect(await screen.findByText(/suggerimenti ai non disponibili/i)).toBeInTheDocument();
   });
 
+  it('shows an upgrade message when the FREE tier blocks ML access (403)', async () => {
+    (api.get as jest.Mock).mockRejectedValue({ isAxiosError: true, response: { status: 403 } });
+    render(<AgentInsightsWidget />, { wrapper: createWrapper() });
+    expect(await screen.findByText(/non disponibile nel piano free/i)).toBeInTheDocument();
+    expect(screen.queryByText(/suggerimenti ai non disponibili/i)).not.toBeInTheDocument();
+  });
+
   it('shows the ML-reported error when Ollama itself is unavailable', async () => {
     (api.get as jest.Mock).mockResolvedValue({
       data: { report: null, error: 'Servizio AI non disponibile: connection refused' },

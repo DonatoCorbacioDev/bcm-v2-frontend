@@ -34,6 +34,13 @@ describe('AnomalyWidget', () => {
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
+  it('shows an upgrade message when the FREE tier blocks ML access (403)', async () => {
+    (api.get as jest.Mock).mockRejectedValue({ isAxiosError: true, response: { status: 403 } });
+    render(<AnomalyWidget />, { wrapper: createWrapper() });
+    expect(await screen.findByText(/non disponibile nel piano free/i)).toBeInTheDocument();
+    expect(screen.queryByText(/rilevamento anomalie non disponibile/i)).not.toBeInTheDocument();
+  });
+
   it('shows offline message when ML service is unavailable', async () => {
     (api.get as jest.Mock).mockRejectedValue(new Error('Network Error'));
     render(<AnomalyWidget />, { wrapper: createWrapper() });

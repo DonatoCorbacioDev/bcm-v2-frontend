@@ -12,8 +12,9 @@ import {
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { WifiOff, Loader2, AlertTriangle } from "lucide-react";
+import { WifiOff, Loader2, Lock, AlertTriangle } from "lucide-react";
 import { api } from "@/lib/api";
+import { isMlTierForbidden } from "@/lib/mlAccess";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
 import type { ForecastResponse, ForecastPoint, FinancialValue } from "@/types";
 import {
@@ -123,6 +124,7 @@ export function FinancialForecastChart() {
     data: forecastData,
     isLoading: isLoadingForecast,
     isError: isForecastOffline,
+    error: forecastError,
   } = useQuery<ForecastResponse>({
     queryKey: ["forecast", horizon],
     queryFn: async () => {
@@ -134,6 +136,7 @@ export function FinancialForecastChart() {
   });
 
   const isLoading = isLoadingHist || isLoadingForecast;
+  const isForecastTierForbidden = isForecastOffline && isMlTierForbidden(forecastError);
 
   const historical =
     forecastData?.historical && forecastData.historical.length > 0
@@ -156,7 +159,13 @@ export function FinancialForecastChart() {
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            {isForecastOffline && (
+            {isForecastTierForbidden && (
+              <span className="flex items-center gap-1.5 text-xs text-[var(--status-amber-fg)] bg-[var(--status-amber-bg)] px-2 py-1 rounded-full">
+                <Lock className="h-3 w-3" />
+                Non incluso nel piano Free
+              </span>
+            )}
+            {isForecastOffline && !isForecastTierForbidden && (
               <span className="flex items-center gap-1.5 text-xs text-[var(--status-amber-fg)] bg-[var(--status-amber-bg)] px-2 py-1 rounded-full">
                 <WifiOff className="h-3 w-3" />
                 Previsione non disponibile

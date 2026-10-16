@@ -5,16 +5,17 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useState } from "react";
-import { Sparkles, Loader2, WifiOff, Send } from "lucide-react";
+import { Sparkles, Loader2, WifiOff, Lock, Send } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAgentInsights } from "@/hooks/useAgentInsights";
 import { useAskAgent } from "@/hooks/useAskAgent";
 import { useCreateReminder } from "@/hooks/useCreateReminder";
+import { isMlTierForbidden } from "@/lib/mlAccess";
 
 export function AgentInsightsWidget() {
-  const { data, isLoading, isError } = useAgentInsights();
+  const { data, isLoading, isError, error } = useAgentInsights();
   // Every read below happens only once isLoading/isError have already
   // gated it, so `data` is always defined by then in practice — react-query
   // just can't express that in its own return type. Falling back to {} here
@@ -54,7 +55,19 @@ export function AgentInsightsWidget() {
           </div>
         )}
 
-        {isError && (
+        {isError && isMlTierForbidden(error) && (
+          <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+            <Lock className="h-6 w-6 text-[var(--status-amber-fg)]" aria-hidden="true" />
+            <p className="text-sm font-medium text-foreground">
+              Funzionalità non disponibile nel piano Free
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Passa al piano Pro per abilitare i suggerimenti AI
+            </p>
+          </div>
+        )}
+
+        {isError && !isMlTierForbidden(error) && (
           <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
             <WifiOff className="h-6 w-6 text-[var(--status-amber-fg)]" aria-hidden="true" />
             <p className="text-sm font-medium text-foreground">

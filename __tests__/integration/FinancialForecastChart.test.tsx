@@ -89,6 +89,14 @@ describe('FinancialForecastChart', () => {
     expect(await screen.findByText(/previsione non disponibile/i)).toBeInTheDocument();
   });
 
+  it('shows an upgrade badge instead of the offline badge when the FREE tier blocks ML access (403)', async () => {
+    (useFinancialValues as jest.Mock).mockReturnValue({ data: financialValues, isLoading: false });
+    (api.get as jest.Mock).mockRejectedValue({ isAxiosError: true, response: { status: 403 } });
+    render(<FinancialForecastChart />, { wrapper: createWrapper() });
+    expect(await screen.findByText(/non incluso nel piano free/i)).toBeInTheDocument();
+    expect(screen.queryByText(/previsione non disponibile/i)).not.toBeInTheDocument();
+  });
+
   it('renders chart with historical + forecast data from FastAPI', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({ data: [], isLoading: false });
     (api.get as jest.Mock).mockResolvedValue({ data: forecastResponse });

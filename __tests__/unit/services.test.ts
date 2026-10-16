@@ -617,6 +617,14 @@ describe('organizationService', () => {
     expect(mockPut).toHaveBeenCalledWith('/organizations/me', payload);
     expect(result).toEqual(updated);
   });
+
+  it('getUsage() calls GET /organizations/me/usage', async () => {
+    const usage = { contractsUsed: 8, contractsLimit: 15 };
+    mockGet.mockResolvedValue({ data: usage });
+    const result = await organizationService.getUsage();
+    expect(mockGet).toHaveBeenCalledWith('/organizations/me/usage');
+    expect(result).toEqual(usage);
+  });
 });
 
 // ─── twoFactorAuthService ────────────────────────────────────────────────────

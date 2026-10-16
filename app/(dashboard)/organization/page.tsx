@@ -44,6 +44,12 @@ export default function OrganizationPage() {
     enabled: isAdmin,
   });
 
+  const { data: usage } = useQuery({
+    queryKey: ["organization", "me", "usage"],
+    queryFn: organizationService.getUsage,
+    enabled: isAdmin,
+  });
+
   // The API returns iban/bic masked (e.g. "IT...3456"), never the full
   // value -- so these inputs are "set a NEW value" fields, not an editable
   // copy of the current one. They always start blank: pre-filling with the
@@ -118,10 +124,20 @@ export default function OrganizationPage() {
                 <span className="text-sm text-muted-foreground">Nome</span>
                 <span className="text-sm font-medium">{organization?.name}</span>
               </div>
-              <div className="flex items-center justify-between py-2">
+              <div className="flex items-center justify-between py-2 border-b border-border">
                 <span className="text-sm text-muted-foreground">Piano</span>
                 <Badge variant="secondary">{organization?.subscriptionTier ? tierLabel(organization.subscriptionTier) : ""}</Badge>
               </div>
+              {usage && (
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-muted-foreground">Contratti</span>
+                  <span className="text-sm font-medium">
+                    {usage.contractsLimit === null
+                      ? `${usage.contractsUsed} (illimitati)`
+                      : `${usage.contractsUsed} / ${usage.contractsLimit}`}
+                  </span>
+                </div>
+              )}
             </>
           )}
         </CardContent>

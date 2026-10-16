@@ -21,9 +21,20 @@ export interface UpdateOrganizationPayload {
   bic?: string;
 }
 
+export interface OrganizationUsage {
+  contractsUsed: number;
+  /** null means the tier has no limit (ENTERPRISE). */
+  contractsLimit: number | null;
+}
+
 export const organizationService = {
   getMine: async (): Promise<Organization> => {
     const res = await api.get<Organization>("/organizations/me");
+    return res.data;
+  },
+
+  getUsage: async (): Promise<OrganizationUsage> => {
+    const res = await api.get<OrganizationUsage>("/organizations/me/usage");
     return res.data;
   },
 

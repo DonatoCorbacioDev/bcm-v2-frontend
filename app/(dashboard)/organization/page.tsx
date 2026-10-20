@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
 import { organizationService } from "@/services/organization.service";
 import { tierLabel } from "@/lib/tierLabels";
+import { redirectToExternal } from "@/lib/externalRedirect";
 import {
   organizationBankDetailsSchema,
   type OrganizationBankDetailsFormData,
@@ -48,6 +49,27 @@ export default function OrganizationPage() {
     queryKey: ["organization", "me", "usage"],
     queryFn: organizationService.getUsage,
     enabled: isAdmin,
+  });
+
+  // Stripe redirects back here with ?checkout=success|cancel. The tier itself
+  // only changes when Stripe's webhook reaches the backend, which can land a
+  // moment after this redirect -- so refetch rather than assume it's done.
+  useEffect(() => {
+    if (!isAdmin) return;
+    const checkout = new URLSearchParams(window.location.search).get("checkout");
+    if (checkout === "success") {
+      toast.success("Pagamento completato: il piano PRO si attiva entro pochi secondi");
+      queryClient.invalidateQueries({ queryKey: ["organization", "me"] });
+    } else if (checkout === "cancel") {
+      toast("Pagamento annullato, nessun addebito effettuato");
+    }
+    if (checkout) router.replace("/organization");
+  }, [isAdmin, queryClient, router]);
+
+  const checkoutMutation = useMutation({
+    mutationFn: organizationService.startProCheckout,
+    onSuccess: (url) => redirectToExternal(url),
+    onError: () => toast.error("Impossibile avviare il pagamento, riprova più tardi"),
   });
 
   // The API returns iban/bic masked (e.g. "IT...3456"), never the full
@@ -126,7 +148,18 @@ export default function OrganizationPage() {
               </div>
               <div className="flex items-center justify-between py-2 border-b border-border">
                 <span className="text-sm text-muted-foreground">Piano</span>
-                <Badge variant="secondary">{organization?.subscriptionTier ? tierLabel(organization.subscriptionTier) : ""}</Badge>
+                <span className="flex items-center gap-3">
+                  <Badge variant="secondary">{organization?.subscriptionTier ? tierLabel(organization.subscriptionTier) : ""}</Badge>
+                  {organization?.subscriptionTier === "FREE" && (
+                    <Button
+                      size="sm"
+                      onClick={() => checkoutMutation.mutate()}
+                      disabled={checkoutMutation.isPending || checkoutMutation.isSuccess}
+                    >
+                      {checkoutMutation.isPending || checkoutMutation.isSuccess ? "Reindirizzamento..." : "Passa a PRO"}
+                    </Button>
+                  )}
+                </span>
               </div>
               {usage && (
                 <div className="flex items-center justify-between py-2">

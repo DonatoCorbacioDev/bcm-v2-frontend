@@ -625,6 +625,13 @@ describe('organizationService', () => {
     expect(mockGet).toHaveBeenCalledWith('/organizations/me/usage');
     expect(result).toEqual(usage);
   });
+
+  it('startProCheckout() calls POST /billing/checkout-session and returns the URL', async () => {
+    mockPost.mockResolvedValue({ data: { url: 'https://checkout.stripe.com/c/pay/cs_test_1' } });
+    const result = await organizationService.startProCheckout();
+    expect(mockPost).toHaveBeenCalledWith('/billing/checkout-session');
+    expect(result).toBe('https://checkout.stripe.com/c/pay/cs_test_1');
+  });
 });
 
 // ─── twoFactorAuthService ────────────────────────────────────────────────────

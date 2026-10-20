@@ -16,11 +16,24 @@ jest.mock('@/services/organization.service', () => ({
     getMine: jest.fn(),
     getUsage: jest.fn(),
     update: jest.fn(),
+    startProCheckout: jest.fn(),
   },
 }));
 
+jest.mock('@/lib/externalRedirect', () => ({
+  redirectToExternal: jest.fn(),
+}));
+
+jest.mock('sonner', () => ({
+  toast: Object.assign(jest.fn(), { success: jest.fn(), error: jest.fn() }),
+}));
+
+import userEvent from '@testing-library/user-event';
+import { waitFor } from '@testing-library/react';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { organizationService } from '@/services/organization.service';
+import { redirectToExternal } from '@/lib/externalRedirect';
 import OrganizationPage from '@/app/(dashboard)/organization/page';
 
 const mockAuthAs = (role: string | null) => {
@@ -78,5 +91,67 @@ describe('OrganizationPage', () => {
     render(<OrganizationPage />, { wrapper: createWrapper() });
 
     expect(screen.queryByText(/^\d+ \/ \d+$/)).not.toBeInTheDocument();
+  });
+
+  describe('upgrade to PRO', () => {
+    beforeEach(() => {
+      (organizationService.getUsage as jest.Mock).mockResolvedValue({ contractsUsed: 8, contractsLimit: 15 });
+    });
+
+    afterEach(() => {
+      window.history.replaceState({}, '', '/');
+    });
+
+    it('redirects to the Stripe checkout URL when a FREE org clicks "Passa a PRO"', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue(organization);
+      (organizationService.startProCheckout as jest.Mock).mockResolvedValue('https://checkout.stripe.com/c/pay/cs_test_1');
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+      await userEvent.click(await screen.findByRole('button', { name: 'Passa a PRO' }));
+
+      await waitFor(() =>
+        expect(redirectToExternal).toHaveBeenCalledWith('https://checkout.stripe.com/c/pay/cs_test_1'),
+      );
+    });
+
+    it('shows an error toast and does not redirect when checkout cannot start', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue(organization);
+      (organizationService.startProCheckout as jest.Mock).mockRejectedValue(new Error('503'));
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+      await userEvent.click(await screen.findByRole('button', { name: 'Passa a PRO' }));
+
+      await waitFor(() => expect(toast.error).toHaveBeenCalled());
+      expect(redirectToExternal).not.toHaveBeenCalled();
+    });
+
+    it('does not offer the upgrade to an org already on a paid plan', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue({ ...organization, subscriptionTier: 'PRO' });
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      expect(await screen.findByText('8 / 15')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Passa a PRO' })).not.toBeInTheDocument();
+    });
+
+    it('confirms a completed payment on return from Stripe and cleans the URL', async () => {
+      window.history.replaceState({}, '', '/organization?checkout=success');
+      (organizationService.getMine as jest.Mock).mockResolvedValue(organization);
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => expect(toast.success).toHaveBeenCalled());
+      expect(mockReplace).toHaveBeenCalledWith('/organization');
+    });
+
+    it('tells the user nothing was charged when they cancel on Stripe', async () => {
+      window.history.replaceState({}, '', '/organization?checkout=cancel');
+      (organizationService.getMine as jest.Mock).mockResolvedValue(organization);
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      await waitFor(() => expect(toast).toHaveBeenCalledWith('Pagamento annullato, nessun addebito effettuato'));
+      expect(mockReplace).toHaveBeenCalledWith('/organization');
+    });
   });
 });

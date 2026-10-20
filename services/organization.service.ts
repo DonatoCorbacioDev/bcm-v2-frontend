@@ -42,4 +42,10 @@ export const organizationService = {
     const res = await api.put<Organization>("/organizations/me", payload);
     return res.data;
   },
+
+  /** Returns the Stripe-hosted checkout URL to redirect the browser to. */
+  startProCheckout: async (): Promise<string> => {
+    const res = await api.post<{ url: string }>("/billing/checkout-session");
+    return res.data.url;
+  },
 };

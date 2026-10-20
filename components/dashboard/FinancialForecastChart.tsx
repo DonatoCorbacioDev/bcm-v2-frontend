@@ -174,7 +174,7 @@ export function FinancialForecastChart() {
             {!isForecastOffline && !isReliable && forecast.length > 0 && (
               <span className="flex items-center gap-1.5 text-xs text-[var(--status-amber-fg)] bg-[var(--status-amber-bg)] px-2 py-1 rounded-full">
                 <AlertTriangle className="h-3 w-3" />
-                Dati insufficienti (&lt;12 mesi)
+                Dati insufficienti (&lt;24 mesi)
               </span>
             )}
             {[3, 6].map((m) => (

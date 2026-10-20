@@ -59,7 +59,7 @@ export default function OrganizationPage() {
     const checkout = new URLSearchParams(window.location.search).get("checkout");
     if (checkout === "success") {
       toast.success("Pagamento completato: il piano PRO si attiva entro pochi secondi");
-      queryClient.invalidateQueries({ queryKey: ["organization", "me"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization", "me"] });
     } else if (checkout === "cancel") {
       toast("Pagamento annullato, nessun addebito effettuato");
     }

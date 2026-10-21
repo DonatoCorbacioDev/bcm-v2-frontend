@@ -7,9 +7,12 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Every claim here must match what the backend actually enforces
+// (TierLimitService: contract limits, ML gating) — the public price list is
+// a promise to customers, not marketing copy. Change both together.
 const PLANS = [
   {
-    name: "Starter",
+    name: "Free",
     price: "Gratis",
     period: "per sempre",
     description: "Per chi vuole provare BCM senza impegno.",
@@ -18,11 +21,12 @@ const PLANS = [
     ctaVariant: "outline" as const,
     highlighted: false,
     features: [
-      "Fino a 10 contratti",
-      "1 utente admin",
-      "Alert email scadenze",
+      "Fino a 15 contratti",
+      "Alert email sulle scadenze",
       "Dashboard e KPI",
-      "Risk scoring AI",
+      "Fatture elettroniche FatturaPA",
+      "Pagamenti SEPA con controllo frode IBAN",
+      "Export Excel",
     ],
   },
   {
@@ -30,35 +34,34 @@ const PLANS = [
     price: "€29",
     period: "/ mese",
     badge: "Presto disponibile",
-    description: "Per team che gestiscono decine di contratti.",
+    description: "Per chi gestisce decine di contratti e vuole l'AI.",
     cta: "Presto disponibile",
     ctaHref: "#",
     ctaVariant: "default" as const,
     highlighted: true,
     features: [
-      "Contratti illimitati",
-      "Fino a 5 utenti",
-      "Export Excel e PDF",
-      "Fatture elettroniche FatturaPA",
-      "Storico completo modifiche",
-      "Supporto prioritario",
+      "Tutto del piano Free",
+      "Fino a 200 contratti",
+      "Previsioni finanziarie AI",
+      "Risk scoring dei contratti",
+      "Assistente AI sui tuoi dati",
+      "Disdici quando vuoi",
     ],
   },
   {
     name: "Enterprise",
     price: "Su misura",
     period: "",
-    description: "Per grandi organizzazioni con esigenze specifiche.",
+    description: "Per organizzazioni con volumi o esigenze specifiche.",
     cta: "Contattaci",
     ctaHref: "mailto:donatocorbacio92@gmail.com",
     ctaVariant: "outline" as const,
     highlighted: false,
     features: [
-      "Tutto di Pro",
-      "SLA dedicato",
+      "Tutto del piano Pro",
+      "Contratti illimitati",
       "Onboarding assistito",
-      "Integrazioni custom",
-      "Formazione del team",
+      "Integrazioni su misura",
     ],
   },
 ];

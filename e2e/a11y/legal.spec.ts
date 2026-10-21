@@ -20,6 +20,14 @@ test.describe("Accessibility: legal pages", () => {
     expect(results.violations).toEqual([]);
   });
 
+  test("terms of service page has no detectable axe violations", async ({ page }) => {
+    await page.goto("/termini");
+    await expect(page.getByRole("heading", { name: "Termini di servizio" })).toBeVisible();
+
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test("cookie policy page has no detectable axe violations", async ({ page }) => {
     await page.goto("/cookie-policy");
     await expect(page.getByRole("heading", { name: "Cookie Policy" })).toBeVisible();

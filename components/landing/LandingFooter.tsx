@@ -82,6 +82,7 @@ export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
             <HeadingTag className="text-sm font-semibold text-foreground mb-3">Legale</HeadingTag>
             <ul className="space-y-2">
               {[
+                { href: "/termini", label: "Termini di servizio" },
                 { href: "/privacy", label: "Informativa Privacy" },
                 { href: "/cookie-policy", label: "Cookie Policy" },
                 { href: "/trasparenza-ai", label: "Trasparenza sull'AI" },

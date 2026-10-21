@@ -20,14 +20,24 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
+import { ONEROUS_CLAUSES, TERMS_VERSION } from "@/lib/legal";
 
-interface RegisterOrgRequest {
+interface RegisterOrgForm {
   organizationName: string;
   adminUsername: string;
   adminPassword: string;
   adminEmail: string;
   adminFirstName: string;
   adminLastName: string;
+}
+
+// The three declarations are separate on purpose: the specific approval of
+// onerous clauses (arts. 1341-1342 c.c.) is only valid as its own, distinct
+// act — folding it into the general "I accept the Terms" box would void it.
+interface Declarations {
+  termsAccepted: boolean;
+  professionalUse: boolean;
+  onerousClausesApproved: boolean;
 }
 
 interface AuthTokenResponse {
@@ -49,7 +59,7 @@ export default function RegisterOrgPage() {
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<RegisterOrgRequest>({
+  const [form, setForm] = useState<RegisterOrgForm>({
     organizationName: "",
     adminUsername: "",
     adminPassword: "",
@@ -57,9 +67,20 @@ export default function RegisterOrgPage() {
     adminFirstName: "",
     adminLastName: "",
   });
+  const [declarations, setDeclarations] = useState<Declarations>({
+    termsAccepted: false,
+    professionalUse: false,
+    onerousClausesApproved: false,
+  });
+  const allDeclared = Object.values(declarations).every(Boolean);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleDeclaration = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setDeclarations((prev) => ({ ...prev, [name]: checked }));
   };
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -68,7 +89,11 @@ export default function RegisterOrgPage() {
     setError(null);
 
     try {
-      const { data } = await api.post<AuthTokenResponse>("/organizations/register", form);
+      const { data } = await api.post<AuthTokenResponse>("/organizations/register", {
+        ...form,
+        ...declarations,
+        termsVersion: TERMS_VERSION,
+      });
       const { token } = data;
 
       const { data: userProfile } = await api.get<UserProfile>("/auth/me", {
@@ -183,13 +208,63 @@ export default function RegisterOrgPage() {
             />
           </div>
 
+          <fieldset className="space-y-3 pt-1">
+            <legend className="sr-only">Dichiarazioni obbligatorie</legend>
+            <label className="flex items-start gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                checked={declarations.termsAccepted}
+                onChange={handleDeclaration}
+                required
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>
+                Accetto i{" "}
+                <Link href="/termini" target="_blank" className="text-primary underline dark:text-[var(--accent-foreground)]">
+                  Termini di servizio
+                </Link>{" "}
+                e ho letto l&apos;
+                <Link href="/privacy" target="_blank" className="text-primary underline dark:text-[var(--accent-foreground)]">
+                  Informativa privacy
+                </Link>
+                .
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                name="professionalUse"
+                checked={declarations.professionalUse}
+                onChange={handleDeclaration}
+                required
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>Dichiaro di agire per scopi imprenditoriali o professionali, e non come consumatore.</span>
+            </label>
+            <label className="flex items-start gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                name="onerousClausesApproved"
+                checked={declarations.onerousClausesApproved}
+                onChange={handleDeclaration}
+                required
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              />
+              <span>
+                Ai sensi degli artt. 1341 e 1342 c.c. approvo specificamente le clausole dei Termini
+                n. {ONEROUS_CLAUSES}.
+              </span>
+            </label>
+          </fieldset>
+
           {error && (
             <div role="alert" className="text-sm text-destructive text-center">
               {error}
             </div>
           )}
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button type="submit" className="w-full" disabled={isLoading || !allDeclared}>
             {isLoading ? "Creazione in corso…" : "Crea organizzazione"}
           </Button>
 

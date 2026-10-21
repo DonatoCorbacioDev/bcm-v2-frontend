@@ -16,7 +16,7 @@ const CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 
 export default function PrivacyPage() {
   return (
-    <LegalPageShell title="Informativa sulla privacy" lastUpdated="20 luglio 2026">
+    <LegalPageShell title="Informativa sulla privacy" lastUpdated="21 ottobre 2026">
       <section>
         <h2>1. Titolare e responsabile del trattamento</h2>
         <p>
@@ -60,27 +60,40 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2>4. Sub-responsabili e trasferimenti extra-UE</h2>
+        <h2>4. Dove sono i dati e sub-responsabili</h2>
         <p>
-          BCM non si appoggia a servizi SaaS di terze parti per l&apos;elaborazione dei
-          documenti: nessun servizio cloud esterno di intelligenza artificiale, nessun
-          trasferimento di dati fuori dall&apos;Unione Europea.
+          I dati di BCM sono conservati <strong>in Italia</strong>. Per i documenti non si usano
+          servizi di intelligenza artificiale di terze parti. I sub-responsabili del trattamento
+          sono i seguenti:
         </p>
         <ul>
           <li>
-            <strong>Estrazione clausole a rischio e analisi assistita</strong>: eseguita da
-            un modello linguistico ospitato internamente (self-hosted), nella stessa
-            infrastruttura del titolare/responsabile. Il testo del documento non lascia mai
-            questo perimetro.
+            <strong>Oracle Cloud Infrastructure</strong>, regione di Milano (Italia): hosting del
+            servizio, database, documenti caricati e backup. Contiene tutti i dati del Servizio.
+          </li>
+          <li>
+            <strong>Brevo</strong> (Sendinblue SAS, Francia, UE): invio delle email transazionali
+            (inviti, avvisi di scadenza, riepiloghi, reset password). Riceve solo l&apos;indirizzo del
+            destinatario e il contenuto della singola notifica.
+          </li>
+          <li>
+            <strong>Stripe</strong> (Stripe Payments Europe Ltd, Irlanda, UE): solo per i piani a
+            pagamento, gestione dell&apos;abbonamento e dei pagamenti. Riceve i dati di fatturazione
+            dell&apos;organizzazione; i dati della carta sono gestiti esclusivamente da Stripe e non
+            arrivano a BCM. Stripe può trasferire dati negli Stati Uniti con le garanzie previste
+            dal GDPR (Data Privacy Framework e clausole contrattuali standard).
+          </li>
+        </ul>
+        <p className="mt-3">Elaborazioni eseguite direttamente sull&apos;infrastruttura di BCM, senza terzi:</p>
+        <ul>
+          <li>
+            <strong>Estrazione clausole a rischio e analisi assistita</strong>: eseguita da un
+            modello linguistico ospitato internamente (self-hosted). Il testo del documento non
+            lascia mai questo perimetro.
           </li>
           <li>
             <strong>Riconoscimento testo su documenti scansionati (OCR)</strong>: eseguito
             localmente, nessuna chiamata a servizi esterni.
-          </li>
-          <li>
-            <strong>Invio email</strong> (inviti, notifiche, riepiloghi periodici): tramite il
-            provider SMTP configurato per l&apos;installazione — indirizzo e contenuto della
-            notifica sono gli unici dati coinvolti.
           </li>
         </ul>
         <p className="mt-3">Per approfondire l&apos;uso dell&apos;intelligenza artificiale, vedi la pagina{" "}
@@ -96,6 +109,11 @@ export default function PrivacyPage() {
           <li>I documenti restano archiviati finché non vengono eliminati esplicitamente dall&apos;organizzazione titolare.</li>
           <li>Utenti e responsabili possono essere rimossi su richiesta dell&apos;organizzazione titolare, salvo obblighi di conservazione fiscale o contrattuale su dati storici collegati.</li>
           <li>I refresh token di accesso hanno una durata limitata e vengono ruotati automaticamente per motivi di sicurezza.</li>
+          <li>
+            Alla chiusura dell&apos;account dell&apos;organizzazione i dati restano esportabili per 30
+            giorni, poi vengono cancellati definitivamente. Le copie di backup sono eliminate
+            automaticamente entro 35 giorni dalla loro creazione.
+          </li>
         </ul>
       </section>
 

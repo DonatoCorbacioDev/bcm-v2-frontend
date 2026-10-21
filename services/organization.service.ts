@@ -13,6 +13,8 @@ export interface Organization {
   iban: string | null;
   bic: string | null;
   createdAt: string;
+  /** true when the org has a Stripe subscription its admin can manage in the Customer Portal. */
+  billingPortalAvailable: boolean;
 }
 
 export interface UpdateOrganizationPayload {
@@ -46,6 +48,12 @@ export const organizationService = {
   /** Returns the Stripe-hosted checkout URL to redirect the browser to. */
   startProCheckout: async (): Promise<string> => {
     const res = await api.post<{ url: string }>("/billing/checkout-session");
+    return res.data.url;
+  },
+
+  /** Returns the Stripe Customer Portal URL (cancel, change card, invoices). */
+  openBillingPortal: async (): Promise<string> => {
+    const res = await api.post<{ url: string }>("/billing/portal-session");
     return res.data.url;
   },
 };

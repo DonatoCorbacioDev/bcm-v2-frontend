@@ -72,6 +72,17 @@ export default function OrganizationPage() {
     onError: () => toast.error("Impossibile avviare il pagamento, riprova più tardi"),
   });
 
+  const portalMutation = useMutation({
+    mutationFn: organizationService.openBillingPortal,
+    onSuccess: (url) => redirectToExternal(url),
+    onError: () => toast.error("Impossibile aprire la gestione dell'abbonamento, riprova più tardi"),
+  });
+
+  // Only orgs that subscribed through Stripe have something to manage there:
+  // a plan granted by hand (internal tier endpoint) has no Stripe customer.
+  const canManageSubscription =
+    organization?.subscriptionTier !== "FREE" && organization?.billingPortalAvailable === true;
+
   // The API returns iban/bic masked (e.g. "IT...3456"), never the full
   // value -- so these inputs are "set a NEW value" fields, not an editable
   // copy of the current one. They always start blank: pre-filling with the
@@ -157,6 +168,16 @@ export default function OrganizationPage() {
                       disabled={checkoutMutation.isPending || checkoutMutation.isSuccess}
                     >
                       {checkoutMutation.isPending || checkoutMutation.isSuccess ? "Reindirizzamento..." : "Passa a PRO"}
+                    </Button>
+                  )}
+                  {canManageSubscription && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => portalMutation.mutate()}
+                      disabled={portalMutation.isPending || portalMutation.isSuccess}
+                    >
+                      {portalMutation.isPending || portalMutation.isSuccess ? "Reindirizzamento..." : "Gestisci abbonamento"}
                     </Button>
                   )}
                 </span>

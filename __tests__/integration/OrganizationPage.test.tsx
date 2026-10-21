@@ -17,6 +17,7 @@ jest.mock('@/services/organization.service', () => ({
     getUsage: jest.fn(),
     update: jest.fn(),
     startProCheckout: jest.fn(),
+    openBillingPortal: jest.fn(),
   },
 }));
 
@@ -45,7 +46,7 @@ const mockAuthAs = (role: string | null) => {
 
 const organization = {
   id: 1, name: 'Acme', slug: 'acme', subscriptionTier: 'FREE',
-  iban: null, bic: null, createdAt: '2024-01-01',
+  iban: null, bic: null, createdAt: '2024-01-01', billingPortalAvailable: false,
 };
 
 beforeEach(() => {
@@ -132,6 +133,44 @@ describe('OrganizationPage', () => {
 
       expect(await screen.findByText('8 / 15')).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Passa a PRO' })).not.toBeInTheDocument();
+    });
+
+    it('lets a Stripe-subscribed org open the Customer Portal', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue({
+        ...organization, subscriptionTier: 'PRO', billingPortalAvailable: true,
+      });
+      (organizationService.openBillingPortal as jest.Mock).mockResolvedValue('https://billing.stripe.com/p/session/test_1');
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+      await userEvent.click(await screen.findByRole('button', { name: 'Gestisci abbonamento' }));
+
+      await waitFor(() =>
+        expect(redirectToExternal).toHaveBeenCalledWith('https://billing.stripe.com/p/session/test_1'),
+      );
+    });
+
+    it('does not offer the portal for a paid plan granted by hand (no Stripe customer)', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue({
+        ...organization, subscriptionTier: 'PRO', billingPortalAvailable: false,
+      });
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      expect(await screen.findByText('8 / 15')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Gestisci abbonamento' })).not.toBeInTheDocument();
+    });
+
+    it('shows an error toast and does not redirect when the portal cannot open', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue({
+        ...organization, subscriptionTier: 'PRO', billingPortalAvailable: true,
+      });
+      (organizationService.openBillingPortal as jest.Mock).mockRejectedValue(new Error('502'));
+
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+      await userEvent.click(await screen.findByRole('button', { name: 'Gestisci abbonamento' }));
+
+      await waitFor(() => expect(toast.error).toHaveBeenCalled());
+      expect(redirectToExternal).not.toHaveBeenCalled();
     });
 
     it('confirms a completed payment on return from Stripe and cleans the URL', async () => {

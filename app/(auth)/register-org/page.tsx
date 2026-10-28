@@ -235,9 +235,9 @@ export default function RegisterOrgPage() {
               </div>
             )}
             {notice && (
-              <div role="status" className="text-sm text-muted-foreground text-center">
+              <output className="block text-sm text-muted-foreground text-center">
                 {notice}
-              </div>
+              </output>
             )}
 
             <Button type="submit" className="w-full" disabled={isLoading || code.length !== 6}>

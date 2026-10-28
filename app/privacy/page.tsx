@@ -16,7 +16,7 @@ const CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 
 export default function PrivacyPage() {
   return (
-    <LegalPageShell title="Informativa sulla privacy" lastUpdated="21 ottobre 2026">
+    <LegalPageShell title="Informativa sulla privacy" lastUpdated="28 ottobre 2026">
       <section>
         <h2>1. Titolare e responsabile del trattamento</h2>
         <p>
@@ -41,6 +41,11 @@ export default function PrivacyPage() {
           <li>Coordinate bancarie dell&apos;organizzazione (IBAN/BIC), non di singole persone fisiche</li>
           <li>Contenuto dei documenti contrattuali caricati — può includere qualunque dato personale presente nel contratto stesso</li>
           <li>Log applicativi di sicurezza (azione, tipo di operazione, utente, organizzazione — mai il contenuto dei documenti)</li>
+          <li>
+            Prova dell&apos;accettazione dei Termini di servizio alla registrazione: versione accettata,
+            data e ora, email a cui è stato inviato il codice di conferma, indirizzo IP e browser
+            utilizzati
+          </li>
         </ul>
         <p className="mt-3">
           Non trattiamo categorie particolari di dati (art. 9 GDPR — salute, origine etnica,
@@ -56,6 +61,7 @@ export default function PrivacyPage() {
           <li>Dati di dipendenti/responsabili e credenziali: esecuzione del rapporto con l&apos;organizzazione cliente (art. 6.1.b GDPR)</li>
           <li>Documenti contrattuali: esecuzione del contratto tra l&apos;organizzazione cliente e la propria controparte — BCM è lo strumento di gestione, non parte del contratto (art. 6.1.b GDPR)</li>
           <li>Log di sicurezza: legittimo interesse alla sicurezza e alla tracciabilità (art. 6.1.f GDPR)</li>
+          <li>Prova dell&apos;accettazione dei Termini: legittimo interesse a poter dimostrare il contratto concluso e a difendersi in caso di contestazione (art. 6.1.f GDPR)</li>
         </ul>
       </section>
 
@@ -113,6 +119,12 @@ export default function PrivacyPage() {
             Alla chiusura dell&apos;account dell&apos;organizzazione i dati restano esportabili per 30
             giorni, poi vengono cancellati definitivamente. Le copie di backup sono eliminate
             automaticamente entro 35 giorni dalla loro creazione.
+          </li>
+          <li>
+            Una registrazione non confermata con il codice inviato via email viene cancellata entro
+            un&apos;ora dalla scadenza del codice. La prova dell&apos;accettazione dei Termini è
+            conservata per 10 anni dalla fine del rapporto, il termine di prescrizione ordinario
+            (art. 2946 c.c.), anche dopo la cancellazione dell&apos;account.
           </li>
         </ul>
       </section>

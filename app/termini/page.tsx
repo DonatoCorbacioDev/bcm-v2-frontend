@@ -131,10 +131,19 @@ export default function TerminiPage() {
           essi contenuti, il Cliente è <strong>titolare del trattamento</strong> e il Fornitore è{" "}
           <strong>responsabile del trattamento</strong> ai sensi dell&apos;art. 28 del Regolamento
           (UE) 2016/679 (&quot;GDPR&quot;). Con l&apos;accettazione dei presenti Termini il Cliente
-          nomina il Fornitore responsabile del trattamento, alle condizioni seguenti:
+          nomina il Fornitore responsabile del trattamento, alle condizioni seguenti.
         </p>
+        <p>Oggetto e caratteristiche del trattamento:</p>
         <ul>
-          <li>il Fornitore tratta i dati solo per erogare il Servizio e secondo le istruzioni del Cliente, che consistono nell&apos;uso delle funzionalità del Servizio;</li>
+          <li><strong>oggetto e finalità</strong>: erogazione del Servizio, cioè archiviazione, gestione e analisi di contratti, scadenze, controparti, documenti, fatture e pagamenti del Cliente;</li>
+          <li><strong>durata</strong>: per tutta la durata del rapporto, e fino alla cancellazione dei dati prevista alla sezione 13;</li>
+          <li><strong>natura</strong>: raccolta, conservazione, consultazione, elaborazione anche automatizzata, invio di notifiche, esportazione e cancellazione;</li>
+          <li><strong>tipi di dati personali</strong>: dati identificativi e di contatto (nome, cognome, email, telefono, ruolo), credenziali di accesso, dati presenti nei contratti e nei documenti caricati dal Cliente, dati di fatturazione e coordinate bancarie;</li>
+          <li><strong>categorie di interessati</strong>: utenti e dipendenti del Cliente, referenti delle controparti e altre persone menzionate nei contratti e nei documenti.</li>
+        </ul>
+        <p>Obblighi del Fornitore:</p>
+        <ul>
+          <li>il Fornitore tratta i dati solo per erogare il Servizio e secondo le istruzioni documentate del Cliente, che consistono nell&apos;uso delle funzionalità del Servizio, anche per quanto riguarda i trasferimenti verso paesi terzi, salvo che lo richieda il diritto dell&apos;Unione o nazionale: in tal caso ne informa il Cliente prima del trattamento, se la legge lo consente. Il Fornitore informa subito il Cliente se ritiene che un&apos;istruzione violi la normativa sulla protezione dei dati;</li>
           <li>le persone autorizzate al trattamento sono vincolate alla riservatezza;</li>
           <li>il Fornitore adotta misure tecniche e organizzative adeguate ai sensi dell&apos;art. 32 GDPR, tra cui cifratura delle comunicazioni, isolamento dei dati tra organizzazioni, backup giornalieri e controllo degli accessi;</li>
           <li>
@@ -142,13 +151,15 @@ export default function TerminiPage() {
             regione di Milano). Il Cliente autorizza i sotto-responsabili elencati
             nell&apos;<Link href="/privacy" className={LINK}>Informativa privacy</Link>; il Fornitore
             comunica in anticipo l&apos;aggiunta o la sostituzione di sotto-responsabili, e il Cliente
-            può opporsi recedendo;
+            può opporsi recedendo. Ai sotto-responsabili il Fornitore impone per contratto obblighi
+            di protezione dei dati equivalenti a quelli di questa sezione, e resta responsabile
+            verso il Cliente del loro adempimento;
           </li>
           <li>le funzionalità di intelligenza artificiale sono eseguite su infrastruttura del Fornitore: i contenuti del Cliente non vengono inviati a fornitori di AI terzi;</li>
           <li>il Fornitore assiste il Cliente nel rispondere alle richieste degli interessati e negli adempimenti previsti dagli artt. 32-36 GDPR;</li>
           <li>il Fornitore notifica al Cliente, senza ingiustificato ritardo, le violazioni dei dati personali di cui venga a conoscenza;</li>
-          <li>alla cessazione del rapporto il Fornitore cancella i dati secondo quanto previsto alla sezione 12;</li>
-          <li>il Fornitore mette a disposizione le informazioni necessarie a dimostrare il rispetto di questi obblighi.</li>
+          <li>alla cessazione del rapporto il Fornitore, a scelta del Cliente, restituisce i dati tramite esportazione e poi li cancella, secondo quanto previsto alla sezione 13, salvo che la legge ne imponga la conservazione;</li>
+          <li>il Fornitore mette a disposizione le informazioni necessarie a dimostrare il rispetto di questi obblighi e consente e contribuisce alle attività di revisione, comprese le ispezioni, svolte dal Cliente o da un revisore da questi incaricato, con un preavviso ragionevole e senza compromettere la riservatezza dei dati degli altri clienti.</li>
         </ul>
         <p>
           Per il trattamento dei dati degli utenti del Servizio da parte del Fornitore si rinvia
@@ -217,16 +228,80 @@ export default function TerminiPage() {
             degli altri clienti. In caso di violazione grave può risolvere il rapporto.
           </li>
           <li>
-            Alla cessazione del rapporto il Cliente ha <strong>30 giorni</strong> per esportare i
-            propri dati. Trascorso tale termine i dati vengono cancellati definitivamente; le copie
-            di backup sono eliminate al termine del loro ciclo di conservazione. Restano esclusi i
-            dati che il Fornitore è tenuto a conservare per obbligo di legge.
+            Alla cessazione del rapporto il Cliente ha <strong>almeno 30 giorni</strong> per
+            esportare i propri dati, secondo quanto previsto alla sezione 13.
           </li>
         </ul>
       </section>
 
       <section>
-        <h2>13. Modifiche ai Termini</h2>
+        <h2>13. Cambio di fornitore e portabilità dei dati</h2>
+        <p>
+          In conformità al Regolamento (UE) 2023/2854 (&quot;Data Act&quot;), il Cliente può passare a
+          un altro fornitore o a un&apos;infrastruttura propria, portando con sé i propri dati, alle
+          condizioni seguenti:
+        </p>
+        <ul>
+          <li>
+            <strong>richiesta</strong>: il Cliente può chiedere in qualsiasi momento, via email
+            all&apos;indirizzo indicato alla sezione 2, il passaggio a un altro fornitore (indicandolo), a un&apos;infrastruttura
+            propria oppure la sola cancellazione dei dati. Non è richiesto alcun preavviso, e in ogni
+            caso il preavviso non può superare i due mesi;
+          </li>
+          <li>
+            <strong>periodo di transizione</strong>: il passaggio si completa senza ritardo e
+            comunque entro <strong>30 giorni</strong> dalla richiesta. In questo periodo il Servizio
+            resta pienamente attivo e sicuro, e il Fornitore assiste il Cliente, fornisce le
+            informazioni utili alla sua strategia di uscita e segnala gli eventuali rischi noti per
+            la continuità. Il Cliente può prorogare questo periodo una volta. Se i 30 giorni non
+            fossero tecnicamente sufficienti, il Fornitore lo comunica entro 14 giorni lavorativi
+            dalla richiesta, con le motivazioni e un periodo alternativo non superiore a sette mesi,
+            durante il quale il Servizio resta attivo;
+          </li>
+          <li>
+            <strong>dati esportabili</strong>: tutti i dati inseriti o generati dal Cliente con
+            l&apos;uso del Servizio, compresi i relativi metadati: contratti e loro storico,
+            controparti, valori finanziari e budget, scadenze, documenti e fatture caricati (nei file
+            originali), pagamenti SEPA generati, utenti e responsabili, punteggi di rischio, analisi
+            e notifiche prodotte dal Servizio. Sono esclusi solo il software, i modelli di
+            intelligenza artificiale e gli altri beni del Fornitore protetti da diritti di proprietà
+            intellettuale o segreto commerciale, purché ciò non ostacoli né ritardi il passaggio;
+          </li>
+          <li>
+            <strong>modalità e formati</strong>: tramite le funzioni di esportazione del Servizio e,
+            per i dati non coperti da esse, su richiesta via email, entro 10 giorni lavorativi, in
+            formati strutturati, di uso comune e leggibili da dispositivo automatico (CSV o JSON),
+            insieme ai file originali;
+          </li>
+          <li>
+            <strong>periodo di recupero</strong>: terminato il periodo di transizione, il Cliente
+            dispone di <strong>almeno 30 giorni</strong> per recuperare i dati;
+          </li>
+          <li>
+            <strong>fine del contratto e cancellazione</strong>: il contratto cessa quando il
+            passaggio è completato oppure, se il Cliente ha chiesto la sola cancellazione, al termine
+            del periodo indicato. Concluso il periodo di recupero, il Fornitore cancella
+            definitivamente tutti i dati esportabili del Cliente e ne dà conferma. Le copie di backup
+            sono eliminate al termine del loro ciclo di conservazione, al massimo entro 35 giorni.
+            Restano esclusi i dati che il Fornitore è tenuto a conservare per obbligo di legge e la
+            prova dell&apos;accettazione dei presenti Termini, conservata come indicato
+            nell&apos;<Link href="/privacy" className={LINK}>Informativa privacy</Link>;
+          </li>
+          <li>
+            <strong>costi</strong>: il passaggio e l&apos;esportazione dei dati sono{" "}
+            <strong>gratuiti</strong>.
+          </li>
+        </ul>
+        <p>
+          L&apos;infrastruttura del Servizio si trova in Italia, nell&apos;Unione europea (Oracle Cloud,
+          regione di Milano). Le misure adottate contro l&apos;accesso non autorizzato ai dati, anche
+          da parte di autorità di paesi terzi, sono descritte alla sezione 7 e
+          nell&apos;<Link href="/privacy" className={LINK}>Informativa privacy</Link>.
+        </p>
+      </section>
+
+      <section>
+        <h2>14. Modifiche ai Termini</h2>
         <p>
           Il Fornitore può modificare i presenti Termini comunicandolo via email con almeno 30 giorni
           di preavviso. Le modifiche sostanziali richiedono una nuova accettazione nel Servizio. Il
@@ -236,7 +311,7 @@ export default function TerminiPage() {
       </section>
 
       <section>
-        <h2>14. Comunicazioni</h2>
+        <h2>15. Comunicazioni</h2>
         <p>
           Le comunicazioni tra le parti avvengono via email: per il Fornitore all&apos;indirizzo
           indicato alla sezione 2, per il Cliente all&apos;indirizzo dell&apos;amministratore
@@ -245,7 +320,7 @@ export default function TerminiPage() {
       </section>
 
       <section>
-        <h2>15. Legge applicabile e foro competente</h2>
+        <h2>16. Legge applicabile e foro competente</h2>
         <p>
           I presenti Termini sono regolati dalla legge italiana. Per qualsiasi controversia relativa
           alla loro interpretazione, esecuzione o cessazione è competente in via esclusiva il{" "}
@@ -254,7 +329,7 @@ export default function TerminiPage() {
       </section>
 
       <section>
-        <h2>16. Disposizioni finali</h2>
+        <h2>17. Disposizioni finali</h2>
         <ul>
           <li>I presenti Termini, l&apos;Informativa privacy e la pagina dei prezzi costituiscono l&apos;intero accordo tra le parti relativo al Servizio.</li>
           <li>L&apos;eventuale nullità di una clausola non comporta la nullità delle altre.</li>
@@ -263,11 +338,13 @@ export default function TerminiPage() {
       </section>
 
       <section>
-        <h2>17. Approvazione specifica</h2>
+        <h2>18. Approvazione specifica</h2>
         <p>
           Ai sensi degli artt. 1341 e 1342 c.c., al momento della registrazione il Cliente approva
           specificamente, con un&apos;apposita dichiarazione separata, le seguenti clausole:{" "}
-          {ONEROUS_CLAUSES}.
+          {ONEROUS_CLAUSES}. La dichiarazione è sottoscritta con firma elettronica, inserendo il
+          codice inviato all&apos;indirizzo email dell&apos;amministratore; il Fornitore conserva
+          versione dei Termini, data e ora, indirizzo email, indirizzo IP e browser utilizzati.
         </p>
       </section>
     </LegalPageShell>

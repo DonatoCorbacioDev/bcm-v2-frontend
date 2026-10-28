@@ -10,10 +10,10 @@
  * backend's LegalTerms.CURRENT_VERSION, which must match) whenever the
  * Terms change in substance.
  */
-export const TERMS_VERSION = "2026-10-21";
+export const TERMS_VERSION = "2026-10-28";
 
 /** Human-readable date of TERMS_VERSION, shown on the page. */
-export const TERMS_LAST_UPDATED = "21 ottobre 2026";
+export const TERMS_LAST_UPDATED = "28 ottobre 2026";
 
 /**
  * Clauses that, under arts. 1341-1342 of the Italian Civil Code, are only
@@ -23,5 +23,5 @@ export const TERMS_LAST_UPDATED = "21 ottobre 2026";
 export const ONEROUS_CLAUSES =
   "5 (rinnovo automatico, assenza di rimborsi per periodi parziali, modifica dei prezzi), " +
   "9 (disponibilità del servizio), 11 (limitazione di responsabilità), " +
-  "12 (recesso, sospensione e cancellazione dei dati), 13 (modifiche ai Termini), " +
-  "15 (legge applicabile e foro esclusivo di Bari)";
+  "12 (recesso, sospensione e cancellazione dei dati), 14 (modifiche ai Termini), " +
+  "16 (legge applicabile e foro esclusivo di Bari)";

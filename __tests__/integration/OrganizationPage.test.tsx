@@ -18,7 +18,12 @@ jest.mock('@/services/organization.service', () => ({
     update: jest.fn(),
     startProCheckout: jest.fn(),
     openBillingPortal: jest.fn(),
+    exportAll: jest.fn(),
   },
+}));
+
+jest.mock('@/lib/download', () => ({
+  downloadBlob: jest.fn(),
 }));
 
 jest.mock('@/lib/externalRedirect', () => ({
@@ -35,6 +40,8 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
 import { organizationService } from '@/services/organization.service';
 import { redirectToExternal } from '@/lib/externalRedirect';
+import { downloadBlob } from '@/lib/download';
+import { AxiosError, AxiosHeaders } from 'axios';
 import OrganizationPage from '@/app/(dashboard)/organization/page';
 
 const mockAuthAs = (role: string | null) => {
@@ -191,6 +198,59 @@ describe('OrganizationPage', () => {
 
       await waitFor(() => expect(toast).toHaveBeenCalledWith('Pagamento annullato, nessun addebito effettuato'));
       expect(mockReplace).toHaveBeenCalledWith('/organization');
+    });
+  });
+
+  describe('data export', () => {
+    beforeEach(() => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue(organization);
+      (organizationService.getUsage as jest.Mock).mockResolvedValue({ contractsUsed: 0, contractsLimit: 15 });
+    });
+
+    it('downloads the archive under the name the server chose', async () => {
+      const blob = new Blob(['zip']);
+      (organizationService.exportAll as jest.Mock).mockResolvedValue({
+        blob, filename: 'bcm-export-acme-2026-10-29.zip',
+      });
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Esporta tutti i dati' }));
+
+      await waitFor(() => expect(downloadBlob).toHaveBeenCalledWith(blob, 'bcm-export-acme-2026-10-29.zip'));
+      expect(toast.success).toHaveBeenCalledWith('Archivio scaricato');
+    });
+
+    it('disables the button while the archive is being prepared', async () => {
+      (organizationService.exportAll as jest.Mock).mockReturnValue(new Promise(() => {}));
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Esporta tutti i dati' }));
+
+      expect(await screen.findByRole('button', { name: "Preparazione dell'archivio..." })).toBeDisabled();
+    });
+
+    it('explains a rate-limited export instead of a generic error', async () => {
+      const tooMany = new AxiosError('Too Many Requests', 'ERR_BAD_REQUEST', undefined, undefined, {
+        status: 429, statusText: 'Too Many Requests', data: {}, headers: {},
+        config: { headers: new AxiosHeaders() },
+      });
+      (organizationService.exportAll as jest.Mock).mockRejectedValue(tooMany);
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Esporta tutti i dati' }));
+
+      await waitFor(() =>
+        expect(toast.error).toHaveBeenCalledWith('Troppe esportazioni ravvicinate, riprova tra un minuto'));
+      expect(downloadBlob).not.toHaveBeenCalled();
+    });
+
+    it('shows a generic error when the export fails', async () => {
+      (organizationService.exportAll as jest.Mock).mockRejectedValue(new Error('network'));
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Esporta tutti i dati' }));
+
+      await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Esportazione non riuscita, riprova più tardi'));
     });
   });
 });

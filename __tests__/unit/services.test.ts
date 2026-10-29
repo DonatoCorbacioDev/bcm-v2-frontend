@@ -2,6 +2,7 @@
 
 jest.mock('@/lib/api', () => ({
   __esModule: true,
+  EXPORT_REQUEST_TIMEOUT_MS: 900_000,
   default: {
     get: jest.fn(),
     post: jest.fn(),
@@ -638,6 +639,26 @@ describe('organizationService', () => {
     const result = await organizationService.openBillingPortal();
     expect(mockPost).toHaveBeenCalledWith('/billing/portal-session');
     expect(result).toBe('https://billing.stripe.com/p/session/test_1');
+  });
+
+  it('exportAll() downloads the ZIP as a blob with the long export timeout', async () => {
+    const blob = new Blob(['zip']);
+    mockGet.mockResolvedValue({
+      data: blob,
+      headers: { 'content-disposition': 'attachment; filename="bcm-export-acme-2026-10-29.zip"' },
+    });
+    const result = await organizationService.exportAll();
+    expect(mockGet).toHaveBeenCalledWith('/organizations/me/export', {
+      responseType: 'blob',
+      timeout: 900_000,
+    });
+    expect(result).toEqual({ blob, filename: 'bcm-export-acme-2026-10-29.zip' });
+  });
+
+  it('exportAll() falls back to a dated name when Content-Disposition is not readable', async () => {
+    mockGet.mockResolvedValue({ data: new Blob(['zip']), headers: {} });
+    const result = await organizationService.exportAll();
+    expect(result.filename).toMatch(/^bcm-export-\d{4}-\d{2}-\d{2}\.zip$/);
   });
 });
 

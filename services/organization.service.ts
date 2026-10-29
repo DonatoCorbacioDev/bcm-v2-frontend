@@ -3,7 +3,8 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 
-import api from "@/lib/api";
+import api, { EXPORT_REQUEST_TIMEOUT_MS } from "@/lib/api";
+import { filenameFromContentDisposition } from "@/lib/download";
 
 export interface Organization {
   id: number;
@@ -29,6 +30,11 @@ export interface OrganizationUsage {
   contractsLimit: number | null;
 }
 
+export interface OrganizationExport {
+  blob: Blob;
+  filename: string;
+}
+
 export const organizationService = {
   getMine: async (): Promise<Organization> => {
     const res = await api.get<Organization>("/organizations/me");
@@ -43,6 +49,18 @@ export const organizationService = {
   update: async (payload: UpdateOrganizationPayload): Promise<Organization> => {
     const res = await api.put<Organization>("/organizations/me", payload);
     return res.data;
+  },
+
+  /** All of the organization's data and files as a ZIP (Terms sez. 13, GDPR art. 20). */
+  exportAll: async (): Promise<OrganizationExport> => {
+    const res = await api.get<Blob>("/organizations/me/export", {
+      responseType: "blob",
+      timeout: EXPORT_REQUEST_TIMEOUT_MS,
+    });
+    const filename =
+      filenameFromContentDisposition(res.headers["content-disposition"]) ??
+      `bcm-export-${new Date().toISOString().split("T")[0]}.zip`;
+    return { blob: res.data, filename };
   },
 
   /** Returns the Stripe-hosted checkout URL to redirect the browser to. */

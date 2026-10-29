@@ -5,15 +5,18 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { isAxiosError } from "axios";
 import { useAuthStore } from "@/store/authStore";
 import { organizationService } from "@/services/organization.service";
 import { tierLabel } from "@/lib/tierLabels";
 import { redirectToExternal } from "@/lib/externalRedirect";
+import { downloadBlob } from "@/lib/download";
 import {
   organizationBankDetailsSchema,
   type OrganizationBankDetailsFormData,
@@ -115,6 +118,20 @@ export default function OrganizationPage() {
       toast.success("Rimosso");
     },
     onError: () => toast.error("Rimozione non riuscita"),
+  });
+
+  const exportMutation = useMutation({
+    mutationFn: organizationService.exportAll,
+    onSuccess: ({ blob, filename }) => {
+      downloadBlob(blob, filename);
+      toast.success("Archivio scaricato");
+    },
+    onError: (error) =>
+      toast.error(
+        isAxiosError(error) && error.response?.status === 429
+          ? "Troppe esportazioni ravvicinate, riprova tra un minuto"
+          : "Esportazione non riuscita, riprova più tardi",
+      ),
   });
 
   // A blank field means "leave it as is": only non-empty inputs are sent,
@@ -279,6 +296,37 @@ export default function OrganizationPage() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>I tuoi dati</CardTitle>
+          <CardDescription>
+            Scarica in un unico archivio ZIP tutti i dati dell&apos;organizzazione, per conservarli o
+            portarli a un altro fornitore
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            L&apos;archivio contiene contratti e loro storico, controparti, valori finanziari e budget,
+            utenti e responsabili, fatture, pagamenti SEPA, analisi, notifiche e registro attività in
+            formato JSON, insieme ai documenti e alle fatture caricati nei file originali. Le password e
+            gli altri dati di accesso non sono inclusi. Vedi la{" "}
+            <Link href="/termini" target="_blank" className="underline hover:text-foreground">
+              sezione 13 dei Termini
+            </Link>
+            .
+          </p>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              onClick={() => exportMutation.mutate()}
+              disabled={exportMutation.isPending}
+            >
+              {exportMutation.isPending ? "Preparazione dell'archivio..." : "Esporta tutti i dati"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

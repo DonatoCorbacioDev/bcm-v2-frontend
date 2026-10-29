@@ -43,6 +43,11 @@ export const api = axios.create({
 // on those two calls specifically, never change the instance default.
 export const AGENT_REQUEST_TIMEOUT_MS = 140_000;
 
+// The organization data export streams a ZIP of every record and uploaded
+// file, which can take minutes on a large org or a slow connection. Matches
+// the backend's spring.mvc.async.request-timeout (15m).
+export const EXPORT_REQUEST_TIMEOUT_MS = 15 * 60_000;
+
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().getToken();

@@ -1,4 +1,32 @@
-import { filenameFromContentDisposition } from '@/lib/download';
+import { downloadBlob, filenameFromContentDisposition } from '@/lib/download';
+
+describe('downloadBlob', () => {
+  const createObjectURL = jest.fn(() => 'blob:fake-url');
+  const revokeObjectURL = jest.fn();
+
+  beforeEach(() => {
+    Object.assign(globalThis.URL, { createObjectURL, revokeObjectURL });
+    createObjectURL.mockClear();
+    revokeObjectURL.mockClear();
+  });
+
+  it('clicks a temporary link named after the file, then cleans up', () => {
+    const blob = new Blob(['zip']);
+    const click = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+      expect(this.href).toBe('blob:fake-url');
+      expect(this.download).toBe('bcm-export.zip');
+      expect(document.body.contains(this)).toBe(true);
+    });
+
+    downloadBlob(blob, 'bcm-export.zip');
+
+    expect(createObjectURL).toHaveBeenCalledWith(blob);
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('a[download]')).toBeNull();
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:fake-url');
+    click.mockRestore();
+  });
+});
 
 describe('filenameFromContentDisposition', () => {
   it.each([

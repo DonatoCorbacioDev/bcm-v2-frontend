@@ -5,7 +5,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useEffect } from "react";
-import { api } from "@/lib/api";
+import { refreshAccessToken } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 
 /**
@@ -28,10 +28,9 @@ export function useSessionGuard() {
   useEffect(() => {
     if (!isAuthenticated || accessToken) return;
     let cancelled = false;
-    api
-      .post<{ token: string }>("/auth/refresh")
-      .then((res) => {
-        if (!cancelled) setAccessToken(res.data.token);
+    refreshAccessToken()
+      .then((token) => {
+        if (!cancelled) setAccessToken(token);
       })
       .catch(() => {
         if (!cancelled) clearAuth();

@@ -7,7 +7,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { api } from "@/lib/api";
+import { refreshAccessToken } from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileSidebar from "@/components/layout/MobileSidebar";
@@ -40,13 +40,18 @@ export default function DashboardLayout({
       return;
     }
     if (!accessToken) {
-      api
-        .post<{ token: string }>("/auth/refresh")
-        .then((res) => setAccessToken(res.data.token))
+      let cancelled = false;
+      refreshAccessToken()
+        .then((token) => {
+          if (!cancelled) setAccessToken(token);
+        })
         .catch(() => {
-          clearAuth();
-          router.push("/login");
+          if (!cancelled) {
+            clearAuth();
+            router.push("/login");
+          }
         });
+      return () => { cancelled = true; };
     }
   }, [hasMounted, isAuthenticated, accessToken, router, setAccessToken, clearAuth]);
 

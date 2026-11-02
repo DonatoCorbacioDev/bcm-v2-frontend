@@ -59,7 +59,7 @@ describe('lib/api', () => {
     }));
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return { mod: require('@/lib/api') as { api: typeof mockInstance; default: typeof mockInstance }, instance: mockInstance };
+    return { mod: require('@/lib/api') as { api: typeof mockInstance; default: typeof mockInstance; refreshAccessToken: () => Promise<string> }, instance: mockInstance };
   }
 
   beforeEach(() => {
@@ -94,6 +94,53 @@ describe('lib/api', () => {
   });
 
   // ── Request interceptor ────────────────────────────────────────────────────
+
+  it('shares one refresh across session restoration and concurrent 401 recovery', async () => {
+    const { mod, instance } = loadModule('http://localhost:8080');
+    let resolveRefresh!: (value: unknown) => void;
+    mockAxiosPost.mockReturnValue(new Promise((resolve) => { resolveRefresh = resolve; }));
+    instance.request.mockResolvedValue({ data: 'retried' });
+    const restoration = mod.refreshAccessToken();
+    const duplicateRestoration = mod.refreshAccessToken();
+    const config = { headers: {}, _retry: false };
+    const recovery = resErrorFn!({ response: { status: 401 }, config });
+    expect(mockAxiosPost).toHaveBeenCalledTimes(1);
+    expect(duplicateRestoration).toBe(restoration);
+    resolveRefresh({ data: { token: 'shared-token' } });
+    await expect(restoration).resolves.toBe('shared-token');
+    await recovery;
+    expect(config._retry).toBe(true);
+    expect(instance.request).toHaveBeenCalledWith(expect.objectContaining({
+      headers: { Authorization: 'Bearer shared-token' },
+    }));
+  });
+
+  it('allows a later refresh after a shared request fails or succeeds', async () => {
+    const { mod } = loadModule('http://localhost:8080');
+    mockAxiosPost.mockRejectedValueOnce(new Error('expired'))
+      .mockResolvedValueOnce({ data: { token: 'second' } })
+      .mockResolvedValueOnce({ data: { token: 'third' } });
+    const first = mod.refreshAccessToken();
+    const duplicate = mod.refreshAccessToken();
+    await expect(first).rejects.toThrow('expired');
+    await expect(duplicate).rejects.toThrow('expired');
+    await expect(mod.refreshAccessToken()).resolves.toBe('second');
+    await expect(mod.refreshAccessToken()).resolves.toBe('third');
+    expect(mockAxiosPost).toHaveBeenCalledTimes(3);
+  });
+
+  it('marks every concurrent request as retried to prevent a second refresh loop', async () => {
+    const { instance } = loadModule('http://localhost:8080');
+    mockAxiosPost.mockResolvedValue({ data: { token: 'new-token' } });
+    instance.request.mockResolvedValue({ data: 'retried' });
+    const errors = [1, 2].map(() => ({ response: { status: 401 }, config: { headers: {}, _retry: false } }));
+    await Promise.all(errors.map((error) => resErrorFn!(error)));
+    for (const error of errors) {
+      expect(error.config._retry).toBe(true);
+      await expect(resErrorFn!(error)).rejects.toBe(error);
+    }
+    expect(mockAxiosPost).toHaveBeenCalledTimes(1);
+  });
 
   it('request interceptor adds Authorization header when token exists', () => {
     loadModule('http://localhost:8080');
@@ -143,13 +190,13 @@ describe('lib/api', () => {
     expect(mockAxiosPost).toHaveBeenCalledWith(
       'http://localhost:8080/auth/refresh',
       {},
-      { withCredentials: true }
+      { withCredentials: true, timeout: 10000 }
     );
     expect(mockSetAccessToken).toHaveBeenCalledWith('new-token');
     expect(instance.request).toHaveBeenCalled();
   });
 
-  it('processQueue rejects queued requests when refresh fails', async () => {
+  it('rejects all concurrent requests when their shared refresh fails', async () => {
     const { instance } = loadModule('http://localhost:8080');
 
     let rejectRefresh!: (e: unknown) => void;
@@ -161,7 +208,7 @@ describe('lib/api', () => {
     const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
 
     const promise1 = resErrorFn!(error1);
-    const promise2 = resErrorFn!(error2); // queued — will hit reject(error) when refresh fails
+    const promise2 = resErrorFn!(error2);
 
     const refreshErr = new Error('refresh failed');
     rejectRefresh(refreshErr);
@@ -179,7 +226,7 @@ describe('lib/api', () => {
     expect(mockClearAuth).toHaveBeenCalled();
   });
 
-  it('queues concurrent 401 requests when refresh is already in progress', async () => {
+  it('shares the refresh between concurrent 401 requests', async () => {
     const { instance } = loadModule('http://localhost:8080');
 
     let resolveRefresh!: (v: unknown) => void;
@@ -187,8 +234,6 @@ describe('lib/api', () => {
     mockAxiosPost.mockReturnValueOnce(refreshPending);
     instance.request.mockResolvedValue({ data: 'retried' });
 
-    // error1 has NO headers → direct refresh path covers `headers ?? {}` "undefined" branch
-    // error2 HAS headers → queue path covers `headers ?? {}` "defined" branch
     const error1 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { _retry: false } };
     const error2 = { response: { status: 401, data: null }, message: 'Unauthorized', config: { headers: {}, _retry: false } };
 
@@ -225,7 +270,7 @@ describe('lib/api', () => {
 
   // ── Auth endpoints where 401 is a domain error, not session expiry ────────
 
-  it.each(['/auth/login', '/auth/2fa/verify'])(
+  it.each(['/auth/login', '/auth/2fa/verify', '/auth/refresh'])(
     'response error handler on 401 from %s does not attempt refresh or redirect',
     async (url) => {
       loadModule('http://localhost:8080');

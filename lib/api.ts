@@ -59,21 +59,22 @@ api.interceptors.request.use(
   (error: unknown) => { throw error; }
 );
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (err: unknown) => void;
-}> = [];
+let refreshInFlight: Promise<string> | null = null;
 
-function processQueue(error: unknown, token: string | null) {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token!);
-    }
-  });
-  failedQueue = [];
+// Session restoration and 401 recovery share one request per browser tab.
+// Raw axios prevents recursive refresh when the refresh cookie has expired.
+// Callers own state updates, including ignoring results after unmount.
+export function refreshAccessToken(): Promise<string> {
+  if (!refreshInFlight) {
+    refreshInFlight = axios.post<{ token: string }>(
+      `${API_URL}/auth/refresh`,
+      {},
+      { withCredentials: true, timeout: 10000 }
+    ).then((response) => response.data.token).finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
 }
 
 function redirectToLogin() {
@@ -87,7 +88,8 @@ function redirectToLogin() {
 // code) the caller must see as-is — not a signal that the access token
 // expired, which would otherwise trigger a doomed refresh attempt (no session
 // exists yet) followed by a hard redirect that wipes in-progress login state.
-const AUTH_ENDPOINTS_WITHOUT_SESSION = ["/auth/login", "/auth/2fa/verify"];
+// A rejected refresh itself must also propagate without another refresh attempt.
+const AUTH_ENDPOINTS_WITHOUT_SESSION = ["/auth/login", "/auth/2fa/verify", "/auth/refresh"];
 
 function isAuthEndpointWithoutSession(url: string | undefined): boolean {
   return AUTH_ENDPOINTS_WITHOUT_SESSION.some((path) => url?.endsWith(path));
@@ -125,41 +127,20 @@ async function handle401(
   error: AxiosError,
   originalRequest: NonNullable<typeof error.config> & { _retry?: boolean }
 ) {
-  if (isRefreshing) {
-    return new Promise<string>((resolve, reject) => {
-      failedQueue.push({ resolve, reject });
-    }).then((token) => {
-      /* istanbul ignore next */
-      originalRequest.headers = originalRequest.headers ?? {};
-      originalRequest.headers.Authorization = `Bearer ${token}`;
-      return api.request(originalRequest);
-    });
-  }
-
   originalRequest._retry = true;
-  isRefreshing = true;
 
   try {
     // No body needed: the refresh_token cookie (HttpOnly, set by the backend
     // on login) is sent automatically because withCredentials is true.
-    const response = await axios.post<{ token: string }>(
-      `${API_URL}/auth/refresh`,
-      {},
-      { withCredentials: true }
-    );
-    const { token } = response.data;
+    const token = await refreshAccessToken();
     useAuthStore.getState().setAccessToken(token);
-    processQueue(null, token);
     originalRequest.headers = originalRequest.headers ?? {};
     originalRequest.headers.Authorization = `Bearer ${token}`;
     return api.request(originalRequest);
   } catch (refreshError) {
-    processQueue(refreshError, null);
     useAuthStore.getState().clearAuth();
     redirectToLogin();
     throw refreshError;
-  } finally {
-    isRefreshing = false;
   }
 }
 

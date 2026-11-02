@@ -12,9 +12,9 @@ jest.mock('@/store/authStore', () => ({
   useAuthStore: jest.fn(),
 }));
 
-const mockApiPost = jest.fn();
+const mockRefreshAccessToken = jest.fn();
 jest.mock('@/lib/api', () => ({
-  api: { post: (...args: unknown[]) => mockApiPost(...args) },
+  refreshAccessToken: (...args: unknown[]) => mockRefreshAccessToken(...args),
 }));
 
 jest.mock('@/components/layout/Header', () => ({
@@ -82,23 +82,23 @@ describe('DashboardLayout', () => {
     mockAuthState({ isAuthenticated: true, accessToken: 'in-memory-token' });
     render(<DashboardLayout>content</DashboardLayout>);
     expect(screen.getByText('content')).toBeInTheDocument();
-    expect(mockApiPost).not.toHaveBeenCalled();
+    expect(mockRefreshAccessToken).not.toHaveBeenCalled();
   });
 
   it('silently restores the session via /auth/refresh when accessToken is missing after reload', async () => {
     mockAuthState({ isAuthenticated: true, accessToken: null });
-    mockApiPost.mockResolvedValue({ data: { token: 'restored-token' } });
+    mockRefreshAccessToken.mockResolvedValue('restored-token');
 
     render(<DashboardLayout>content</DashboardLayout>);
     expect(screen.getByText(/verifica autenticazione/i)).toBeInTheDocument();
 
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith('/auth/refresh'));
+    await waitFor(() => expect(mockRefreshAccessToken).toHaveBeenCalledWith());
     await waitFor(() => expect(mockSetAccessToken).toHaveBeenCalledWith('restored-token'));
   });
 
   it('clears auth and redirects to /login when the silent refresh fails', async () => {
     mockAuthState({ isAuthenticated: true, accessToken: null });
-    mockApiPost.mockRejectedValue(new Error('no valid refresh cookie'));
+    mockRefreshAccessToken.mockRejectedValue(new Error('no valid refresh cookie'));
 
     render(<DashboardLayout>content</DashboardLayout>);
 

@@ -6,9 +6,9 @@ jest.mock('@/store/authStore', () => ({
   useAuthStore: jest.fn(),
 }));
 
-const mockApiPost = jest.fn();
+const mockRefreshAccessToken = jest.fn();
 jest.mock('@/lib/api', () => ({
-  api: { post: (...args: unknown[]) => mockApiPost(...args) },
+  refreshAccessToken: (...args: unknown[]) => mockRefreshAccessToken(...args),
 }));
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
@@ -40,29 +40,29 @@ describe('useSessionGuard', () => {
   it('does nothing when not authenticated', () => {
     mockAuthState({ isAuthenticated: false, accessToken: null });
     renderHook(() => useSessionGuard());
-    expect(mockApiPost).not.toHaveBeenCalled();
+    expect(mockRefreshAccessToken).not.toHaveBeenCalled();
   });
 
   it('does nothing when an access token is already in memory', () => {
     mockAuthState({ isAuthenticated: true, accessToken: 'in-memory-token' });
     renderHook(() => useSessionGuard());
-    expect(mockApiPost).not.toHaveBeenCalled();
+    expect(mockRefreshAccessToken).not.toHaveBeenCalled();
   });
 
   it('restores the access token via /auth/refresh when authenticated but no token in memory', async () => {
     mockAuthState({ isAuthenticated: true, accessToken: null });
-    mockApiPost.mockResolvedValue({ data: { token: 'restored-token' } });
+    mockRefreshAccessToken.mockResolvedValue('restored-token');
 
     renderHook(() => useSessionGuard());
 
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalledWith('/auth/refresh'));
+    await waitFor(() => expect(mockRefreshAccessToken).toHaveBeenCalledWith());
     await waitFor(() => expect(mockSetAccessToken).toHaveBeenCalledWith('restored-token'));
     expect(mockClearAuth).not.toHaveBeenCalled();
   });
 
   it('clears the stale auth state when the silent refresh fails', async () => {
     mockAuthState({ isAuthenticated: true, accessToken: null });
-    mockApiPost.mockRejectedValue(new Error('no valid refresh cookie'));
+    mockRefreshAccessToken.mockRejectedValue(new Error('no valid refresh cookie'));
 
     renderHook(() => useSessionGuard());
 
@@ -72,13 +72,13 @@ describe('useSessionGuard', () => {
 
   it('ignores a refresh that resolves after unmount', async () => {
     mockAuthState({ isAuthenticated: true, accessToken: null });
-    let resolveRefresh!: (value: { data: { token: string } }) => void;
-    mockApiPost.mockReturnValue(new Promise((resolve) => { resolveRefresh = resolve; }));
+    let resolveRefresh!: (value: string) => void;
+    mockRefreshAccessToken.mockReturnValue(new Promise((resolve) => { resolveRefresh = resolve; }));
 
     const { unmount } = renderHook(() => useSessionGuard());
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalled());
+    await waitFor(() => expect(mockRefreshAccessToken).toHaveBeenCalled());
     unmount();
-    resolveRefresh({ data: { token: 'too-late' } });
+    resolveRefresh('too-late');
 
     await new Promise((r) => setTimeout(r, 0));
     expect(mockSetAccessToken).not.toHaveBeenCalled();
@@ -87,10 +87,10 @@ describe('useSessionGuard', () => {
   it('ignores a refresh that rejects after unmount', async () => {
     mockAuthState({ isAuthenticated: true, accessToken: null });
     let rejectRefresh!: (reason: Error) => void;
-    mockApiPost.mockReturnValue(new Promise((_resolve, reject) => { rejectRefresh = reject; }));
+    mockRefreshAccessToken.mockReturnValue(new Promise((_resolve, reject) => { rejectRefresh = reject; }));
 
     const { unmount } = renderHook(() => useSessionGuard());
-    await waitFor(() => expect(mockApiPost).toHaveBeenCalled());
+    await waitFor(() => expect(mockRefreshAccessToken).toHaveBeenCalled());
     unmount();
     rejectRefresh(new Error('too late'));
 

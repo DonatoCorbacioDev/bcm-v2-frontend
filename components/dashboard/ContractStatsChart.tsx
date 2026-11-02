@@ -38,8 +38,8 @@ function distributePercentages(values: number[], total: number): number[] {
 }
 
 const SEGMENTS = [
-  { key: "active",    name: "Attivi",      fill: "var(--status-green-fg)" },
-  { key: "expiring",  name: "In scadenza", fill: "var(--status-amber-fg)" },
+  { key: "active",    name: "Attivi oltre 30 giorni", fill: "var(--status-green-fg)" },
+  { key: "expiring",  name: "In scadenza entro 30 giorni", fill: "var(--status-amber-fg)" },
   { key: "expired",   name: "Scaduti",     fill: "var(--status-red-fg)" },
   { key: "draft",     name: "Bozza",       fill: "var(--status-blue-fg)" },
   { key: "cancelled", name: "Annullati",   fill: "var(--status-slate-fg)" },

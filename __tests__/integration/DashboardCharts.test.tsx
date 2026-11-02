@@ -102,7 +102,7 @@ describe('ContractStatsChart', () => {
     render(<ContractStatsChart total={10} active={5} expiring={2} expired={3} draft={0} />);
     expect(screen.getByText('10')).toBeInTheDocument();
     expect(screen.getByText('Annullati')).toBeInTheDocument();
-    // Attivi=3 (30%), In scadenza=2 (20%), Scaduti=3 (30%), Annullati=2 (20%) — sums to 10 / 100%.
+    // Attivi oltre 30 giorni=3 (30%), In scadenza entro 30 giorni=2 (20%), Scaduti=3 (30%), Annullati=2 (20%) — sums to 10 / 100%.
     expect(screen.getAllByText('30%')).toHaveLength(2);
     expect(screen.getAllByText('20%')).toHaveLength(2);
   });
@@ -123,7 +123,7 @@ describe('ContractStatsChart', () => {
 
   it('renders a single segment without padding between arcs when only one status is present', () => {
     render(<ContractStatsChart total={5} active={5} expiring={0} expired={0} draft={0} />);
-    expect(screen.getByText('Attivi')).toBeInTheDocument();
+    expect(screen.getByText('Attivi oltre 30 giorni')).toBeInTheDocument();
     expect(screen.getByText('100%')).toBeInTheDocument();
   });
 

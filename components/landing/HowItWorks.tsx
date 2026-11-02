@@ -11,21 +11,21 @@ const STEPS = [
     icon: Settings,
     title: "Registra la tua organizzazione",
     description:
-      "Crea l'account admin, configura la tua prima area di business e aggiungi i responsabili contratti. Il wizard guidato lo fa in meno di due minuti.",
+      "Crei l'account dell'amministratore e lo confermi con il codice che ricevi per email. Poi aggiungi le aree di business e le persone che seguono i contratti.",
   },
   {
     number: "02",
     icon: ClipboardList,
     title: "Carica i tuoi contratti",
     description:
-      "Inserisci manualmente i contratti esistenti o creane di nuovi. Collega fatture elettroniche e documenti PDF direttamente al contratto.",
+      "Inserisci i contratti che hai già, uno alla volta o da un file Excel, e collega a ognuno i suoi documenti PDF e le fatture.",
   },
   {
     number: "03",
     icon: BellRing,
-    title: "Ricevi alert e analisi",
+    title: "Ricevi avvisi e analisi",
     description:
-      "Il sistema monitora le scadenze e notifica per email a soglie precise (30/14/7/1 gg). Il risk scoring AI aggiorna il profilo di rischio ogni notte.",
+      "BCM controlla le scadenze ogni giorno e ti scrive quando serve. Ogni mattina aggiorna anche la valutazione del rischio dei contratti.",
   },
 ];
 
@@ -36,7 +36,7 @@ export function HowItWorks() {
         <div className="text-center mb-14 space-y-3">
           <h2 className="text-3xl font-bold text-foreground">Come funziona</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Operativo in pochi minuti, senza installazioni né configurazioni complesse.
+            Si usa dal browser, senza installare niente.
           </p>
         </div>
 

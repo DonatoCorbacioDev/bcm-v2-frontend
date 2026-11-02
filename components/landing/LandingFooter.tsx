@@ -35,7 +35,7 @@ export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
           <div className="space-y-3">
             <Logo />
             <p className="text-sm text-muted-foreground max-w-xs">
-              Software SaaS per la gestione dei contratti aziendali con AI integrata.
+              Gestione dei contratti per piccole e medie imprese.
             </p>
           </div>
 

@@ -15,39 +15,39 @@ import {
 const FEATURES = [
   {
     icon: FileText,
-    title: "Gestione contratti",
+    title: "Tutti i contratti in un archivio",
     description:
-      "Crea, modifica e monitora tutti i contratti in un unico posto. Ricerca per cliente, numero o stato con paginazione server-side.",
+      "Trovi ogni contratto per cliente, numero o stato, e per ognuno vedi documenti, fatture e storico delle modifiche.",
   },
   {
     icon: Bell,
-    title: "Alert scadenze",
+    title: "Avvisi di scadenza",
     description:
-      "Notifiche email automatiche a 30, 14, 7 e 1 giorno dalla scadenza. Zero spam: una notifica per soglia, non una al giorno.",
+      "Ricevi un'email 30, 14, 7 e 1 giorno prima della scadenza, una sola per volta. Ogni lunedì arriva anche il riepilogo della settimana.",
   },
   {
     icon: ShieldCheck,
-    title: "Risk scoring con AI",
+    title: "Contratti da tenere d'occhio",
     description:
-      "Algoritmo ML (Random Forest, F1 0.96) che calcola il rischio di ogni contratto in tempo reale su 7 feature chiave.",
+      "Un modello di machine learning indica i contratti più a rischio, in base a scadenze, stato e andamento dei valori. Ti aiuta a scegliere le priorità, la decisione resta tua.",
   },
   {
     icon: BarChart2,
-    title: "Dashboard finanziaria",
+    title: "Ricavi, costi e budget",
     description:
-      "Monitora i valori economici per area di business e tipo di finanziamento. Forecast con Facebook Prophet (trend + stagionalità).",
+      "Vedi ricavi e costi per contratto e per area di business, confrontati con il budget dell'anno, con una previsione dei mesi successivi.",
   },
   {
     icon: Receipt,
-    title: "Fatture elettroniche",
+    title: "Fatture e bonifici",
     description:
-      "Gestione fatture con supporto FatturaPA (XML). Visualizzazione, validazione e storico allegato ai contratti.",
+      "Carichi le fatture elettroniche FatturaPA: BCM le controlla e le confronta con il contratto. Da lì prepari anche il bonifico SEPA.",
   },
   {
     icon: Building2,
-    title: "Multi-organizzazione",
+    title: "I tuoi dati restano tuoi",
     description:
-      "Ogni azienda ha il suo spazio completamente isolato. Tenant scoping rigoroso a ogni livello API e ML.",
+      "Ogni azienda ha il suo spazio separato e nessun altro cliente può vedere i tuoi contratti. I server sono in Italia.",
   },
 ];
 
@@ -57,11 +57,10 @@ export function Features() {
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="text-center mb-14 space-y-3">
           <h2 className="text-3xl font-bold text-foreground">
-            Tutto quello che ti serve, niente di superfluo
+            Cosa puoi fare con BCM
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Progettato per uffici acquisti, legal e amministrazione che gestiscono decine o centinaia
-            di contratti.
+            Pensato per chi in azienda segue acquisti, contratti e amministrazione.
           </p>
         </div>
 

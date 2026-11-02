@@ -34,7 +34,7 @@ const PLANS = [
     price: "€29",
     period: "/ mese",
     badge: "Presto disponibile",
-    description: "Per chi gestisce decine di contratti e vuole l'AI.",
+    description: "Per chi gestisce molti contratti e vuole le analisi.",
     cta: "Presto disponibile",
     ctaHref: "#",
     ctaVariant: "default" as const,
@@ -73,7 +73,7 @@ export function Pricing() {
         <div className="text-center mb-14 space-y-3">
           <h2 className="text-3xl font-bold text-foreground">Prezzi semplici e trasparenti</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Inizia gratis, scala quando ne hai bisogno. Nessun costo nascosto.
+            Il piano gratuito resta sempre disponibile. Il piano Pro arriverà presto.
           </p>
         </div>
 

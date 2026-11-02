@@ -86,8 +86,8 @@ function LoginContent() {
             <span className="opacity-90">semplice e sicura.</span>
           </h1>
           <p className="text-[15px] leading-relaxed opacity-75">
-            Tieni sotto controllo scadenze, valori e documenti di ogni contratto,
-            con notifiche intelligenti e analisi in tempo reale.
+            Scadenze, valori e documenti di tutti i tuoi contratti, sempre sotto
+            controllo.
           </p>
         </div>
 
@@ -95,13 +95,13 @@ function LoginContent() {
         <div className="flex items-center gap-2 relative z-10 opacity-60">
           <Lock className="h-4 w-4 shrink-0" aria-hidden="true" />
           <span className="text-[12px]">
+            Dati conservati in Italia, nel rispetto del{" "}
             <Link
               href="/privacy"
               className="underline underline-offset-2 decoration-white/40 hover:decoration-white hover:opacity-80"
             >
-              Conforme GDPR
-            </Link>{" "}
-            · AgID · ISO&nbsp;27001 — dati ospitati in Italia
+              GDPR
+            </Link>
           </span>
         </div>
       </aside>
@@ -295,26 +295,6 @@ function LoginContent() {
                 )}
               </Button>
 
-              <div className="relative my-5">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-3 bg-card text-[12px] text-muted-foreground">oppure</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full h-[42px] text-[13px] gap-2"
-                disabled
-              >
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded bg-primary text-white text-[10px] font-bold shrink-0">
-                  ID
-                </span>{" "}
-                Entra con SPID / CIE
-              </Button>
             </form>
           )}
 
@@ -326,9 +306,7 @@ function LoginContent() {
           </p>
 
           <p className="mt-4 text-center text-[12px] text-muted-foreground">
-            <Link href="/register-org" className="hover:underline">
-              Contatta l&apos;amministratore
-            </Link>
+            Non riesci ad accedere? Chiedi all&apos;amministratore della tua organizzazione.
           </p>
         </div>
       </main>

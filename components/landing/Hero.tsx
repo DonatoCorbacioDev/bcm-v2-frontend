@@ -106,7 +106,7 @@ export function Hero() {
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-sm text-muted-foreground">
               <TrendingUp className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
-              Risk scoring assistito da ML
+              Scadenze, fatture e pagamenti in un unico posto
             </div>
 
             <h1 className="text-4xl md:text-5xl font-bold leading-tight text-foreground">
@@ -115,9 +115,8 @@ export function Hero() {
             </h1>
 
             <p className="text-lg text-muted-foreground leading-relaxed">
-              BCM è il software SaaS per gestire contratti commerciali: alert intelligenti a soglie
-              fisse, risk scoring con machine learning e reportistica integrata — tutto in un unico
-              posto.
+              BCM raccoglie i contratti della tua azienda insieme a documenti, fatture e pagamenti.
+              Ti avvisa prima che un contratto scada e ti indica quelli che meritano più attenzione.
             </p>
 
             {isAuthenticated ? (
@@ -150,8 +149,8 @@ export function Hero() {
                 </div>
 
                 <p className="text-sm text-muted-foreground">
-                  Nessuna carta di credito richiesta · Setup in 2 minuti · la demo non richiede
-                  registrazione
+                  Puoi provare la demo senza registrarti. Per iniziare non serve la carta di
+                  credito.
                 </p>
               </>
             )}

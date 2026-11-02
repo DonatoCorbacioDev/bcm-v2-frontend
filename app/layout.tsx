@@ -23,7 +23,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Social crawlers (LinkedIn, X, WhatsApp) only accept absolute URLs in
+// og:image/og:url; relative metadata URLs are resolved against this base.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://bcm.donatocorbacio.dev";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "BCM - Business Contracts Manager",
   description:
     "Gestione contratti aziendali con monitoraggio finanziario, scadenze e reportistica.",

@@ -29,6 +29,7 @@
 *.pem
 *.png
 !docs/screenshots/*.png
+!public/og-image.png
 
 # debug
 npm-debug.log*

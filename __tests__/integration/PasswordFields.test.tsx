@@ -18,6 +18,12 @@ describe("PasswordFields", () => {
     expect(screen.getByLabelText("Conferma password")).toBeInTheDocument();
   });
 
+  it("marks both fields as a new password, so browsers suggest one instead of filling the old", () => {
+    render(<PasswordFields {...defaultProps} />);
+    expect(screen.getByLabelText("Nuova password")).toHaveAttribute("autocomplete", "new-password");
+    expect(screen.getByLabelText("Conferma password")).toHaveAttribute("autocomplete", "new-password");
+  });
+
   it("renders custom passwordLabel", () => {
     render(<PasswordFields {...defaultProps} passwordLabel="Password" />);
     expect(screen.getByLabelText("Password")).toBeInTheDocument();

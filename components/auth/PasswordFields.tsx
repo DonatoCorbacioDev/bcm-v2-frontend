@@ -31,6 +31,7 @@ export function PasswordFields({
         <Input
           id="password"
           type="password"
+          autoComplete="new-password"
           placeholder="••••••••"
           value={password}
           onChange={(e) => onPasswordChange(e.target.value)}
@@ -42,6 +43,7 @@ export function PasswordFields({
         <Input
           id="confirm"
           type="password"
+          autoComplete="new-password"
           placeholder="••••••••"
           value={confirm}
           onChange={(e) => onConfirmChange(e.target.value)}

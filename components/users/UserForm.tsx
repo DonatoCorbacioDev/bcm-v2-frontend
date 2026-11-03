@@ -127,6 +127,8 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
         <Input
           id="password"
           type="password"
+          // Another user's password: never let the browser fill in the admin's own.
+          autoComplete="new-password"
           {...register("password")}
           placeholder={isEditing ? "Inserisci la nuova password (opzionale)" : "Inserisci la password"}
           className={errors.password ? "border-destructive" : ""}

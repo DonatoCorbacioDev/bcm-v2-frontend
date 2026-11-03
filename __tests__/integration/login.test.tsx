@@ -46,6 +46,13 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: /accedi/i })).toBeInTheDocument();
   });
 
+  it('lets password managers fill the saved credentials', () => {
+    render(<LoginPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByLabelText(/nome utente/i)).toHaveAttribute('autocomplete', 'username');
+    expect(screen.getByLabelText(/password/i)).toHaveAttribute('autocomplete', 'current-password');
+  });
+
   it('shows error message returned by the server on invalid credentials', async () => {
     mockPost.mockRejectedValueOnce({
       response: { status: 401, data: { message: 'Invalid credentials' } },

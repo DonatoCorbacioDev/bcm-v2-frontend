@@ -343,6 +343,7 @@ export default function RegisterOrgPage() {
               id="adminUsername"
               name="adminUsername"
               type="text"
+              autoComplete="username"
               placeholder="admin"
               value={form.adminUsername}
               onChange={handleChange}
@@ -356,6 +357,7 @@ export default function RegisterOrgPage() {
               id="adminPassword"
               name="adminPassword"
               type="password"
+              autoComplete="new-password"
               placeholder="••••••••"
               value={form.adminPassword}
               onChange={handleChange}

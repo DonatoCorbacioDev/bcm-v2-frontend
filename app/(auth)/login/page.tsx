@@ -243,6 +243,7 @@ function LoginContent() {
                 <Input
                   id="username"
                   type="text"
+                  autoComplete="username"
                   placeholder="nome.utente"
                   value={credentials.username}
                   onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
@@ -266,6 +267,7 @@ function LoginContent() {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={credentials.password}
                   onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}

@@ -10,6 +10,8 @@ interface KPICardProps {
   readonly value: number | string;
   readonly icon?: React.ReactNode;
   readonly variant?: "default" | "success" | "warning" | "danger";
+  /** Shows a placeholder instead of the value, so a "0" never flashes before the data arrives. */
+  readonly isLoading?: boolean;
 }
 
 const variantConfig = {
@@ -40,6 +42,7 @@ export default function KPICard({
   value,
   icon,
   variant = "default",
+  isLoading = false,
 }: KPICardProps) {
   const config = variantConfig[variant];
 
@@ -53,7 +56,15 @@ export default function KPICard({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="text-3xl font-bold text-foreground mt-2 tabular-nums">{value}</p>
+          {isLoading ? (
+            <div
+              className="h-9 w-32 mt-2 rounded bg-muted-foreground/20 animate-pulse"
+              role="status"
+              aria-label={`${title}: caricamento`}
+            />
+          ) : (
+            <p className="text-3xl font-bold text-foreground mt-2 tabular-nums">{value}</p>
+          )}
         </div>
         {icon && (
           <div className={cn("p-3 rounded-xl", config.iconBg, config.iconColor)}>

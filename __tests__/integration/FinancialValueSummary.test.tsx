@@ -42,7 +42,32 @@ function budget(overrides: Partial<Budget>): Budget {
   };
 }
 
+// Most tests check the yearly-target behaviour, so "today" sits after 2026:
+// the 2026 budgets are then due in full (pace = 100%). The pace tests below
+// set their own date. Only Date is faked, timers stay real for userEvent.
+const REAL_TIMERS = ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate', 'clearImmediate', 'queueMicrotask', 'nextTick'] as const;
+const setToday = (date: Date) => {
+  jest.useFakeTimers({ now: date, doNotFake: [...REAL_TIMERS] });
+};
+
+beforeEach(() => setToday(new Date(2027, 0, 15)));
+afterEach(() => jest.useRealTimers());
+
 describe('FinancialValueSummary', () => {
+  it('never shows 0 € while the values are still loading', () => {
+    render(<FinancialValueSummary financialValues={[]} budgets={[]} year={2026} isAdmin={false} isLoading />);
+
+    expect(screen.queryByText(eur(0))).not.toBeInTheDocument();
+    expect(screen.getAllByRole('status')).toHaveLength(3);
+  });
+
+  it('shows N/D instead of 0 € when the values failed to load', () => {
+    render(<FinancialValueSummary financialValues={[]} budgets={[]} year={2026} isAdmin={false} isError />);
+
+    expect(screen.queryByText(eur(0))).not.toBeInTheDocument();
+    expect(screen.getAllByText('N/D')).toHaveLength(3);
+  });
+
   it('sums revenue and cost for the selected year only', () => {
     const values = [
       fv({ id: 1, year: 2026, category: 'REVENUE', financialAmount: 1000 }),
@@ -150,7 +175,7 @@ describe('FinancialValueSummary', () => {
     ];
     render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
 
-    const names = screen.getAllByTitle(/On track|Behind/).map((el) => el.textContent);
+    const names = screen.getAllByTitle(/^(On track|Behind)$/).map((el) => el.textContent);
     expect(names).toEqual(['Behind', 'On track']);
   });
 
@@ -161,7 +186,7 @@ describe('FinancialValueSummary', () => {
     ];
     render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
 
-    const names = screen.getAllByTitle(/Under budget|Over budget/).map((el) => el.textContent);
+    const names = screen.getAllByTitle(/^(Under budget|Over budget)$/).map((el) => el.textContent);
     expect(names).toEqual(['Over budget', 'Under budget']);
   });
 
@@ -278,5 +303,65 @@ describe('FinancialValueSummary', () => {
 
     rerender(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
     expect(screen.queryByRole('link', { name: 'Gestisci budget' })).not.toBeInTheDocument();
+  });
+});
+
+describe('FinancialValueSummary — pace within the year', () => {
+  beforeEach(() => setToday(new Date(2026, 10, 3))); // ~84% of 2026 gone
+
+  it("explains the pace marker and places it at today's share of the year", () => {
+    render(<FinancialValueSummary financialValues={[]} budgets={[budget({ percentUsed: 62 })]} year={2026} isAdmin={false} />);
+
+    expect(screen.getByText(/La tacca indica dove dovresti essere oggi: 84% dell.anno trascorso/)).toBeInTheDocument();
+    expect(screen.getByTestId('budget-pace-marker').style.left).toMatch(/^84\./);
+  });
+
+  it('colours revenue against the pace, not the whole yearly target', () => {
+    render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[
+          budget({ id: 1, areaName: 'Ahead', percentUsed: 90 }),
+          budget({ id: 2, areaName: 'Slightly behind', percentUsed: 70 }),
+          budget({ id: 3, areaName: 'Far behind', percentUsed: 18 }),
+        ]}
+        year={2026}
+        isAdmin={false}
+      />
+    );
+
+    expect(screen.getByText('90%')).toHaveClass('text-[var(--status-green-fg)]');
+    expect(screen.getByText('70%')).toHaveClass('text-[var(--status-amber-fg)]');
+    expect(screen.getByText('18%')).toHaveClass('text-[var(--status-red-fg)]');
+  });
+
+  it('describes each row for screen readers, including the expected share', () => {
+    render(<FinancialValueSummary financialValues={[]} budgets={[budget({ areaName: 'Legale', percentUsed: 18 })]} year={2026} isAdmin={false} />);
+
+    expect(screen.getByRole('group', { name: 'Legale: 18% del budget annuale, atteso ad oggi 84%' })).toBeInTheDocument();
+  });
+
+  it('shows "Nessun costo registrato" instead of a green 0% for a cost budget with no costs', () => {
+    render(
+      <FinancialValueSummary
+        financialValues={[]}
+        budgets={[budget({ areaName: 'Legale', category: 'COST', actualAmount: 0, percentUsed: 0 })]}
+        year={2026}
+        isAdmin={false}
+      />
+    );
+
+    expect(screen.getByText('Nessun costo registrato')).toBeInTheDocument();
+    expect(screen.queryByText('0%')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('budget-pace-marker')).not.toBeInTheDocument();
+  });
+});
+
+describe('FinancialValueSummary — closed year', () => {
+  it('shows no pace marker once the year is over', () => {
+    render(<FinancialValueSummary financialValues={[]} budgets={[budget({ percentUsed: 62 })]} year={2026} isAdmin={false} />);
+
+    expect(screen.queryByTestId('budget-pace-marker')).not.toBeInTheDocument();
+    expect(screen.queryByText(/La tacca indica/)).not.toBeInTheDocument();
   });
 });

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { useBudgets } from "@/hooks/useBudgets";
 import { budgetsService } from "@/services/budgets.service";
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
-import { budgetUsageTone } from "@/lib/varianceTone";
+import { budgetUsageTone, expectedBudgetPercent } from "@/lib/varianceTone";
 import type { Budget } from "@/types";
 
 import {
@@ -130,7 +130,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
             </TableHeader>
             <TableBody>
               {filtered.map((b) => {
-                const tone = budgetUsageTone(b.percentUsed, b.category);
+                const tone = budgetUsageTone(b.percentUsed, b.category, expectedBudgetPercent(b.year));
                 return (
                   <TableRow key={b.id}>
                     <TableCell className="text-sm font-medium">{b.areaName}</TableCell>

@@ -61,7 +61,11 @@ export default function FinancialValuesPage() {
     missingAreas && isAdmin ? { label: "Crea un'area di business", href: "/business-areas" } : null,
   ].filter((action): action is { label: string; href: string } => action !== null);
 
-  const { data: financialValues = [] } = useFinancialValues();
+  const {
+    data: financialValues = [],
+    isLoading: financialValuesLoading,
+    isError: financialValuesError,
+  } = useFinancialValues();
   const { data: budgets = [] } = useBudgets();
 
   const currentYear = new Date().getFullYear();
@@ -133,6 +137,8 @@ export default function FinancialValuesPage() {
         budgets={budgets}
         year={selectedYear}
         isAdmin={isAdmin}
+        isLoading={financialValuesLoading}
+        isError={financialValuesError}
         selectedAreaId={areaFilter?.id ?? null}
         onAreaClick={handleAreaClick}
       />

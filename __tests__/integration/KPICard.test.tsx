@@ -58,4 +58,11 @@ describe('KPICard', () => {
 
     expect(screen.getByText('24')).toHaveClass('tabular-nums');
   });
+
+  it('shows a placeholder instead of the value while loading', () => {
+    render(<KPICard title="Ricavi 2026" value="0 €" isLoading />);
+
+    expect(screen.queryByText('0 €')).not.toBeInTheDocument();
+    expect(screen.getByRole('status', { name: 'Ricavi 2026: caricamento' })).toBeInTheDocument();
+  });
 });

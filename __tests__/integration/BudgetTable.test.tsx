@@ -128,16 +128,32 @@ describe('BudgetTable', () => {
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
-  it('uses the amber tone when usage is between 80% and 100%', () => {
-    const nearLimitBudget: Budget = {
+  it("uses the amber tone for a cost budget spending ahead of the year's pace", () => {
+    jest.useFakeTimers({ now: new Date(2026, 6, 2), doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate', 'clearImmediate', 'queueMicrotask', 'nextTick'] });
+    try {
+      const aheadOfPace: Budget = {
+        id: 3, businessAreaId: 3, areaName: 'Marketing', category: 'COST',
+        year: 2026, targetAmount: 10000, actualAmount: 8500, percentUsed: 85,
+      };
+      (useBudgets as jest.Mock).mockReturnValue({ data: [aheadOfPace], isLoading: false, isError: false });
+      const { container } = render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('85%')).toBeInTheDocument();
+      expect(container.querySelector('.bg-\\[var\\(--status-amber-fg\\)\\]')).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("uses the green tone for a closed year's cost budget within its target", () => {
+    const closedYear: Budget = {
       id: 3, businessAreaId: 3, areaName: 'Marketing', category: 'COST',
       year: 2025, targetAmount: 10000, actualAmount: 8500, percentUsed: 85,
     };
-    (useBudgets as jest.Mock).mockReturnValue({ data: [nearLimitBudget], isLoading: false, isError: false });
+    (useBudgets as jest.Mock).mockReturnValue({ data: [closedYear], isLoading: false, isError: false });
     const { container } = render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('85%')).toBeInTheDocument();
-    expect(container.querySelector('.bg-\\[var\\(--status-amber-fg\\)\\]')).toBeInTheDocument();
+    expect(container.querySelector('.bg-\\[var\\(--status-green-fg\\)\\]')).toBeInTheDocument();
   });
 
   it('uses the green tone for a revenue budget that exceeds 100% (target beaten is good news)', () => {

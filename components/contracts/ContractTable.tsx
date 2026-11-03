@@ -761,7 +761,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
 
       {/* Save View Dialog */}
       <Dialog open={saveViewDialogOpen} onOpenChange={setSaveViewDialogOpen}>
-        <DialogContent>
+        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Salva vista corrente</DialogTitle>
             <DialogDescription>

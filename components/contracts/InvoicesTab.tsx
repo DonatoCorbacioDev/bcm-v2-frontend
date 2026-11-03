@@ -669,7 +669,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           (open) => { if (!open) setPaymentDetailsInvoice(null); }
         }
       >
-        <DialogContent>
+        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Dati di pagamento fornitore</DialogTitle>
             <DialogDescription>

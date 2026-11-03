@@ -629,7 +629,7 @@ export default function ContractDetailPage() {
         open={rejectDialogOpen}
         onOpenChange={(open) => !rejectMutation.isPending && setRejectDialogOpen(open)}
       >
-        <DialogContent>
+        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Rifiuta contratto</DialogTitle>
             <DialogDescription>

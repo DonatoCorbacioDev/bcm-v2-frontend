@@ -66,7 +66,7 @@ export default function VerifyIbanDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Conferma IBAN verificato</DialogTitle>
           <DialogDescription>

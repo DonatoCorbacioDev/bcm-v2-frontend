@@ -55,7 +55,7 @@ export default function ContractTemplatesPage() {
 
       {/* Create / Edit Dialog */}
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.template ? "Modifica template" : "Nuovo template"}

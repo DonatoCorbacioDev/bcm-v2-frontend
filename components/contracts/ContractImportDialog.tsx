@@ -103,7 +103,7 @@ export default function ContractImportDialog({ open, onOpenChange }: ContractImp
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>Importa contratti da Excel</DialogTitle>
           <DialogDescription>

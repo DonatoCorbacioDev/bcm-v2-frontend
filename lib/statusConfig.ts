@@ -28,6 +28,26 @@ export function getContractStatusVariant(status: string): BadgeVariant {
   return CONTRACT_STATUS_CONFIG[status]?.variant ?? "default";
 }
 
+/**
+ * Same window as the backend's "In scadenza" dashboard counter: ACTIVE
+ * contracts ending today or within the next 30 days. The backend only sends
+ * daysUntilExpiry for ACTIVE contracts; the status check keeps that explicit.
+ */
+export const EXPIRING_SOON_DAYS = 30;
+
+/** Days left when the contract is expiring soon, otherwise null. */
+export function getExpiringSoonDays(contract: { status: string; daysUntilExpiry?: number | null }): number | null {
+  const days = contract.daysUntilExpiry;
+  if (contract.status !== "ACTIVE" || days == null || days < 0 || days > EXPIRING_SOON_DAYS) return null;
+  return days;
+}
+
+/** "Scade oggi", "Scade tra 1 giorno", "Scade tra 12 giorni". */
+export function formatExpiresIn(days: number): string {
+  if (days === 0) return "Scade oggi";
+  return `Scade tra ${days} ${days === 1 ? "giorno" : "giorni"}`;
+}
+
 /** Contract workflow stage → badge variant + Italian label. */
 export const WORKFLOW_STAGE_CONFIG: Record<string, StatusConfig> = {
   DRAFT: { variant: "secondary", label: "Bozza" },

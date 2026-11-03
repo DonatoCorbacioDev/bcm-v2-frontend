@@ -31,6 +31,7 @@ import DocumentsTab from "@/components/contracts/DocumentsTab";
 import InvoicesTab from "@/components/contracts/InvoicesTab";
 import api from "@/lib/api";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
+import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent } from "@/types";
 
 const FINANCIAL_VALUE_SOURCE_LABELS: Record<string, string> = {
@@ -508,6 +509,7 @@ export default function ContractDetailPage() {
             <p className="text-sm text-muted-foreground">Stato</p>
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
+              <ExpiringSoonBadge contract={contract} showDays />
               {contract.workflowStage && contract.workflowStage !== "DRAFT" && (
                 <Badge variant={(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).variant}>
                   {(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).label}

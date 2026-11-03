@@ -14,6 +14,7 @@ import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { contractsService } from "@/services/contracts.service";
 import { useAuthStore } from "@/store/authStore";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant } from "@/lib/utils";
+import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import type { Contract } from "@/types";
 
 import {
@@ -564,9 +565,12 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                 <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode || "N/D"}</TableCell>
                 <TableCell className="hidden lg:table-cell text-sm">{c.managerName || "Non assegnato"}</TableCell>
                 <TableCell>
-                  <Badge variant={getContractStatusVariant(c.status)} className="text-xs">
-                    {CONTRACT_STATUS_LABELS[c.status] ?? c.status}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1">
+                    <Badge variant={getContractStatusVariant(c.status)} className="text-xs">
+                      {CONTRACT_STATUS_LABELS[c.status] ?? c.status}
+                    </Badge>
+                    <ExpiringSoonBadge contract={c} className="text-xs" />
+                  </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm">
                   {new Date(c.startDate).toLocaleDateString("it-IT")}

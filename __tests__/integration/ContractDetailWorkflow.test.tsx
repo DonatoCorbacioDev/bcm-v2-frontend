@@ -92,6 +92,7 @@ const baseContract = {
   financialTypeId: null as number | null,
   annualValue: null as number | null,
   billingFrequency: null as string | null,
+  daysUntilExpiry: undefined as number | undefined,
 };
 
 const mockAuthAs = (overrides: Partial<{ role: string; managerId: number; canApproveContracts: boolean }>) => {
@@ -233,6 +234,27 @@ describe('ContractDetailPage — approval workflow', () => {
     // Both the contract status and the workflow stage translate to "Bozza" —
     // only the status badge should render, not two identical badges side by side.
     expect(screen.getAllByText('Bozza')).toHaveLength(1);
+  });
+});
+
+describe('ContractDetailPage — expiry badge', () => {
+  it('shows how many days are left next to "Attivo" when the contract ends within 30 days', () => {
+    mockContract({ status: 'ACTIVE', workflowStage: 'APPROVED', daysUntilExpiry: 12 });
+    mockAuthAs({ role: 'ADMIN' });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('Attivo')).toBeInTheDocument();
+    expect(screen.getByText('Scade tra 12 giorni')).toBeInTheDocument();
+  });
+
+  it('shows no expiry badge when the end date is further away', () => {
+    mockContract({ status: 'ACTIVE', workflowStage: 'APPROVED', daysUntilExpiry: 90 });
+    mockAuthAs({ role: 'ADMIN' });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.queryByText(/^Scade (tra|oggi)/)).not.toBeInTheDocument();
   });
 });
 

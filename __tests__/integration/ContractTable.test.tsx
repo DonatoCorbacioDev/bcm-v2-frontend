@@ -230,6 +230,27 @@ describe('ContractTable', () => {
     expect(screen.getByText('Scaduto')).toBeInTheDocument();
   });
 
+  it('adds an "In scadenza" badge only to ACTIVE contracts ending within 30 days', () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([
+        { ...activeContract, daysUntilExpiry: 12 },
+        { ...activeContract, id: 3, contractNumber: 'CNT-003', daysUntilExpiry: 90 },
+        expiredContract,
+      ]),
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const badges = screen.getAllByText('In scadenza');
+    expect(badges).toHaveLength(1);
+    expect(badges[0]).toHaveAttribute('title', 'Scade tra 12 giorni');
+    const row = screen.getByText('CNT-001').closest('tr') as HTMLElement;
+    expect(within(row).getByText('In scadenza')).toBeInTheDocument();
+    expect(within(row).getByText('Attivo')).toBeInTheDocument();
+  });
+
   it('shows fallback text for a contract missing WBS code or assigned manager', () => {
     const unassignedContract: Contract = {
       ...activeContract,

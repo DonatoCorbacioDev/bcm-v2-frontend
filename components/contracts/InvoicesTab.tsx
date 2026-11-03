@@ -335,13 +335,13 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted">
               <tr>
-                <th className="px-4 py-3 w-10">
+                <th className="px-3 py-3 w-10">
                   <span className="sr-only">Seleziona</span>
                 </th>
-                {["File", "Fornitore", "N. fattura", "Data", "Totale", "Abbinamento", "Pagamento", "Azioni"].map((h) => (
+                {["Fattura", "Fornitore", "Totale", "Abbinamento", "Pagamento", "Azioni"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                    className="px-3 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
                   >
                     {h}
                   </th>
@@ -355,7 +355,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   className="hover:bg-accent cursor-pointer"
                   onClick={() => handleRowClick(invoice)}
                 >
-                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selectedIds.includes(invoice.id)}
                       disabled={!invoice.supplierIban || invoice.sepaBatchId != null}
@@ -363,34 +363,46 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                       aria-label={`Seleziona fattura ${invoice.fileName}`}
                     />
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground">
-                    <div className="flex items-center gap-2">
-                      <Receipt className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate max-w-[180px]" title={invoice.fileName}>
-                        {invoice.fileName}
-                      </span>
+                  {/* Number, date and file in one cell: nine separate columns
+                      made the table scroll sideways even on a laptop. */}
+                  <td className="px-3 py-3 text-sm text-foreground">
+                    <div className="flex items-start gap-2">
+                      <Receipt className="h-4 w-4 mt-0.5 text-muted-foreground flex-shrink-0" aria-hidden="true" />
+                      <div className="min-w-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleRowClick(invoice);
+                          }}
+                          className="font-medium text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                        >
+                          {invoice.invoiceNumber || invoice.fileName}
+                        </button>
+                        <p className="text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(invoice.invoiceDate).toLocaleDateString("it-IT", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </p>
+                        <p className="text-xs text-muted-foreground flex gap-1">
+                          <span className="truncate max-w-[160px]" title={invoice.fileName}>
+                            {invoice.fileName}
+                          </span>
+                          <span aria-hidden="true">·</span>
+                          <span className="whitespace-nowrap">{formatBytes(invoice.fileSize)}</span>
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground ml-6">
-                      {formatBytes(invoice.fileSize)}
-                    </p>
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
+                  <td className="px-3 py-3 text-sm text-foreground min-w-[140px]">
                     {invoice.supplierName}
                   </td>
-                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
-                    {invoice.invoiceNumber}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                    {new Date(invoice.invoiceDate).toLocaleDateString("it-IT", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </td>
-                  <td className="px-4 py-3 text-sm font-bold text-foreground whitespace-nowrap">
+                  <td className="px-3 py-3 text-sm font-bold text-foreground whitespace-nowrap">
                     {formatAmount(invoice.totalAmount, invoice.currency)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-3 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1.5">
                       <Badge variant={(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).variant}>
                         {(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).label}
@@ -426,7 +438,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-3 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     {(() => {
                       if (invoice.sepaBatchId != null) {
                         return <Badge variant={PAYMENT_STATUS_CONFIG.PAID.variant}>{PAYMENT_STATUS_CONFIG.PAID.label}</Badge>;
@@ -448,7 +460,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                     })()}
                   </td>
                   <td
-                    className="px-4 py-3 whitespace-nowrap"
+                    className="px-3 py-3 whitespace-nowrap"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <div className="flex items-center gap-1">

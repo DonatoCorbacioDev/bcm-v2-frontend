@@ -372,6 +372,21 @@ describe('InvoicesTab', () => {
     expect(within(dialog).getByText('22%')).toBeInTheDocument();
   });
 
+  it('opens the detail dialog from the invoice number, which is reachable by keyboard', async () => {
+    mockApiGet({ invoices: [invoice], detail: invoice });
+    renderTab();
+    const open = await screen.findByRole('button', { name: 'FT-2024-001' });
+    open.focus();
+    await userEvent.keyboard('{Enter}');
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('falls back to the file name when the invoice has no number', async () => {
+    mockApiGet({ invoices: [{ ...invoice, invoiceNumber: '' }] });
+    renderTab();
+    expect(await screen.findByRole('button', { name: 'fattura.xml' })).toBeInTheDocument();
+  });
+
   it('does not render line items section when lineItems is empty', async () => {
     const invoiceNoItems = { ...invoice, lineItems: [] };
     mockApiGet({ invoices: [invoiceNoItems], detail: invoiceNoItems });

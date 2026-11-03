@@ -258,6 +258,59 @@ describe('ContractDetailPage — expiry badge', () => {
   });
 });
 
+describe('ContractDetailPage — section tabs', () => {
+  beforeEach(() => {
+    mockContract({ workflowStage: 'DRAFT' });
+    mockAuthAs({ role: 'ADMIN' });
+  });
+
+  it('exposes the sections as a labelled tablist with one selected tab and its panel', () => {
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByRole('tablist', { name: 'Sezioni del contratto' })).toBeInTheDocument();
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.map((t) => t.textContent)).toEqual(['Documenti', 'Valori finanziari', 'Cronologia modifiche', 'Fatture']);
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
+    expect(tabs[1]).toHaveAttribute('aria-selected', 'false');
+    // Only the active tab is in the Tab order (roving tabindex).
+    expect(tabs[0]).toHaveAttribute('tabindex', '0');
+    expect(tabs[1]).toHaveAttribute('tabindex', '-1');
+    expect(screen.getByRole('tabpanel', { name: 'Documenti' })).toBeInTheDocument();
+  });
+
+  it('moves between tabs with the arrow, Home and End keys', async () => {
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    const tab = (name: string) => screen.getByRole('tab', { name });
+
+    tab('Documenti').focus();
+    await userEvent.keyboard('{ArrowRight}');
+    expect(tab('Valori finanziari')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Valori finanziari')).toHaveFocus();
+
+    await userEvent.keyboard('{End}');
+    expect(tab('Fatture')).toHaveFocus();
+    expect(screen.getByRole('tabpanel', { name: 'Fatture' })).toBeInTheDocument();
+
+    await userEvent.keyboard('{ArrowRight}');
+    expect(tab('Documenti')).toHaveFocus();
+
+    await userEvent.keyboard('{ArrowLeft}');
+    expect(tab('Fatture')).toHaveFocus();
+
+    await userEvent.keyboard('{Home}');
+    expect(tab('Documenti')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('ignores other keys on the tablist', async () => {
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    screen.getByRole('tab', { name: 'Documenti' }).focus();
+
+    await userEvent.keyboard('{ArrowDown}');
+
+    expect(screen.getByRole('tab', { name: 'Documenti' })).toHaveAttribute('aria-selected', 'true');
+  });
+});
+
 describe('ContractDetailPage — financial values tab', () => {
   it('totals revenue and cost separately instead of blending them together', async () => {
     mockContract({ workflowStage: 'DRAFT' });
@@ -275,7 +328,7 @@ describe('ContractDetailPage — financial values tab', () => {
     });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
 
     // Computed with the component's own formatting rather than hardcoded,
     // so the assertion doesn't depend on the host's ICU separators for it-IT.
@@ -304,7 +357,7 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     mockAuthAs({ role: 'ADMIN' });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
 
     expect(await screen.findByRole('button', { name: /rigenera valori finanziari/i })).toBeInTheDocument();
   });
@@ -314,7 +367,7 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     mockAuthAs({ role: 'ADMIN' });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
 
     expect(screen.queryByRole('button', { name: /rigenera valori finanziari/i })).not.toBeInTheDocument();
   });
@@ -324,7 +377,7 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     mockAuthAs({ role: 'MANAGER', managerId: 5 });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
 
     expect(screen.queryByRole('button', { name: /rigenera valori finanziari/i })).not.toBeInTheDocument();
   });
@@ -337,7 +390,7 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
     await userEvent.click(await screen.findByRole('button', { name: /rigenera valori finanziari/i }));
 
     await waitFor(() => expect(contractsService.generateFinancialValues).toHaveBeenCalledWith(1));
@@ -352,7 +405,7 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     (contractsService.generateFinancialValues as jest.Mock).mockRejectedValue(new Error('fail'));
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
     await userEvent.click(await screen.findByRole('button', { name: /rigenera valori finanziari/i }));
 
     await waitFor(() =>

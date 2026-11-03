@@ -107,9 +107,13 @@ export default function DashboardLayout({
           onMenuClick={() => setIsMobileMenuOpen((o) => !o)}
           isMenuOpen={isMobileMenuOpen}
         />
+        {/* relative: absolutely positioned descendants (sr-only labels, ...)
+            must be contained by this scroll container. Without it they were
+            placed against the page itself, stretched it below the viewport
+            and added a second, page-level scrollbar next to this one. */}
         <main
           id="main-content"
-          className="flex-1 overflow-y-auto p-6 md:p-8 max-w-[1320px] mx-auto w-full"
+          className="relative flex-1 overflow-y-auto p-6 md:p-8 max-w-[1320px] mx-auto w-full"
         >
           {children}
         </main>

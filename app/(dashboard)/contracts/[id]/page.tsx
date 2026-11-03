@@ -4,7 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -178,6 +178,23 @@ export default function ContractDetailPage() {
     { id: "history", label: "Cronologia modifiche", icon: <History className="h-4 w-4" /> },
     { id: "invoices", label: "Fatture", icon: <Receipt className="h-4 w-4" /> },
   ];
+
+  const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const ids = tabs.map((tab) => tab.id);
+    const current = ids.indexOf(activeTab);
+    const targets: Record<string, number> = {
+      ArrowRight: (current + 1) % ids.length,
+      ArrowLeft: (current - 1 + ids.length) % ids.length,
+      Home: 0,
+      End: ids.length - 1,
+    };
+    if (!(event.key in targets)) return;
+    event.preventDefault();
+    const next = ids[targets[event.key]];
+    setActiveTab(next);
+    tabRefs.current[next]?.focus();
+  };
 
   const hasFinancialTerms = Boolean(
     contract?.financialTypeId && contract?.annualValue && contract?.billingFrequency
@@ -491,14 +508,14 @@ export default function ContractDetailPage() {
             Informazioni generali
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
           {[
             { label: "Controparte", value: contract.counterparty?.name ?? "N/D" },
             { label: "Numero contratto", value: contract.contractNumber },
             { label: "Nome progetto", value: contract.projectName },
             { label: "Codice WBS", value: contract.wbsCode },
-            { label: "Data inizio", value: new Date(contract.startDate).toLocaleDateString() },
-            { label: "Data fine", value: new Date(contract.endDate).toLocaleDateString() },
+            { label: "Data inizio", value: new Date(contract.startDate).toLocaleDateString("it-IT") },
+            { label: "Data fine", value: new Date(contract.endDate).toLocaleDateString("it-IT") },
           ].map(({ label, value }) => (
             <div key={label}>
               <p className="text-sm text-muted-foreground">{label}</p>
@@ -532,29 +549,48 @@ export default function ContractDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Tabs */}
+      {/* Tabs (WAI-ARIA tabs pattern: arrow keys move between tabs, only the
+          active one is in the Tab order, the panel is labelled by its tab). */}
       <div className="bg-card rounded-lg border border-border">
-        {/* Tab bar */}
-        <div className="flex border-b border-border">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
+        <div
+          role="tablist"
+          aria-label="Sezioni del contratto"
+          className="flex overflow-x-auto border-b border-border"
+          onKeyDown={handleTabKeyDown}
+        >
+          {tabs.map((tab) => {
+            const selected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                ref={(el) => { tabRefs.current[tab.id] = el; }}
+                type="button"
+                role="tab"
+                id={`contract-tab-${tab.id}`}
+                aria-selected={selected}
+                aria-controls={`contract-tabpanel-${tab.id}`}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
+                  selected
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span aria-hidden="true">{tab.icon}</span>
+                {tab.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Tab content */}
-        <div className="p-6">
+        <div
+          role="tabpanel"
+          id={`contract-tabpanel-${activeTab}`}
+          aria-labelledby={`contract-tab-${activeTab}`}
+          tabIndex={0}
+          className="p-4 sm:p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring rounded-b-lg"
+        >
           {activeTab === "documents" && (
             <DocumentsTab
               contractId={contractId}

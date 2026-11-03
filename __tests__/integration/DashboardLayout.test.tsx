@@ -31,6 +31,9 @@ jest.mock('@/components/layout/MobileSidebar', () => ({
   __esModule: true,
   default: () => null,
 }));
+jest.mock('@/components/organization/DeletionScheduledBanner', () => ({
+  DeletionScheduledBanner: () => null,
+}));
 
 // ─── Imports that reference mocked modules ───────────────────────────────────
 

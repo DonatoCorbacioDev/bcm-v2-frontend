@@ -19,6 +19,9 @@ jest.mock('@/services/organization.service', () => ({
     startProCheckout: jest.fn(),
     openBillingPortal: jest.fn(),
     exportAll: jest.fn(),
+    requestDeletion: jest.fn(),
+    confirmDeletion: jest.fn(),
+    cancelDeletion: jest.fn(),
   },
 }));
 
@@ -251,6 +254,28 @@ describe('OrganizationPage', () => {
       await userEvent.click(await screen.findByRole('button', { name: 'Esporta tutti i dati' }));
 
       await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Esportazione non riuscita, riprova più tardi'));
+    });
+  });
+
+  describe('deletion', () => {
+    it('offers the danger zone at the bottom of the page', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue({ ...organization, deletionScheduledFor: null });
+      (organizationService.getUsage as jest.Mock).mockResolvedValue({ contractsUsed: 0, contractsLimit: 15 });
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      expect(await screen.findByText('Zona pericolosa')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Cancella organizzazione' })).toBeInTheDocument();
+    });
+
+    it('shows the scheduled date and the cancel button instead once confirmed', async () => {
+      (organizationService.getMine as jest.Mock).mockResolvedValue({
+        ...organization, deletionScheduledFor: '2026-12-03T02:00:00',
+      });
+      (organizationService.getUsage as jest.Mock).mockResolvedValue({ contractsUsed: 0, contractsLimit: 15 });
+      render(<OrganizationPage />, { wrapper: createWrapper() });
+
+      expect(await screen.findByRole('button', { name: 'Annulla la cancellazione' })).toBeInTheDocument();
+      expect(screen.queryByText('Zona pericolosa')).not.toBeInTheDocument();
     });
   });
 });

@@ -11,6 +11,7 @@ jest.mock('next/navigation', () => ({ useRouter: () => mockRouter }));
 jest.mock('@/components/layout/Header', () => ({ __esModule: true, default: () => null }));
 jest.mock('@/components/layout/Sidebar', () => ({ __esModule: true, default: () => null }));
 jest.mock('@/components/layout/MobileSidebar', () => ({ __esModule: true, default: () => null }));
+jest.mock('@/components/organization/DeletionScheduledBanner', () => ({ DeletionScheduledBanner: () => null }));
 
 describe('shared session restoration', () => {
   beforeEach(() => {

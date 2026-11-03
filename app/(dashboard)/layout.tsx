@@ -11,6 +11,7 @@ import { refreshAccessToken } from "@/lib/api";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileSidebar from "@/components/layout/MobileSidebar";
+import { DeletionScheduledBanner } from "@/components/organization/DeletionScheduledBanner";
 
 export default function DashboardLayout({
   children,
@@ -115,6 +116,7 @@ export default function DashboardLayout({
           id="main-content"
           className="relative flex-1 overflow-y-auto p-6 md:p-8 max-w-[1320px] mx-auto w-full"
         >
+          <DeletionScheduledBanner />
           {children}
         </main>
       </div>

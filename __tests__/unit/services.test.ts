@@ -641,6 +641,26 @@ describe('organizationService', () => {
     expect(result).toBe('https://billing.stripe.com/p/session/test_1');
   });
 
+  it('requestDeletion() posts password and retyped name, returns the code timings', async () => {
+    mockPost.mockResolvedValue({ data: { expiresInMinutes: 15, resendCooldownSeconds: 60 } });
+    const result = await organizationService.requestDeletion({ password: 'p', organizationName: 'Acme' });
+    expect(mockPost).toHaveBeenCalledWith('/organizations/me/deletion', { password: 'p', organizationName: 'Acme' });
+    expect(result).toEqual({ expiresInMinutes: 15, resendCooldownSeconds: 60 });
+  });
+
+  it('confirmDeletion() posts the code and returns the scheduled date', async () => {
+    mockPost.mockResolvedValue({ data: { scheduledFor: '2026-12-03T02:00:00' } });
+    const result = await organizationService.confirmDeletion('123456');
+    expect(mockPost).toHaveBeenCalledWith('/organizations/me/deletion/confirm', { code: '123456' });
+    expect(result.scheduledFor).toBe('2026-12-03T02:00:00');
+  });
+
+  it('cancelDeletion() calls DELETE /organizations/me/deletion', async () => {
+    mockDelete.mockResolvedValue({ data: undefined });
+    await organizationService.cancelDeletion();
+    expect(mockDelete).toHaveBeenCalledWith('/organizations/me/deletion');
+  });
+
   it('exportAll() downloads the ZIP as a blob with the long export timeout', async () => {
     const blob = new Blob(['zip']);
     mockGet.mockResolvedValue({

@@ -31,6 +31,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { DeleteOrganizationCard } from "@/components/organization/DeleteOrganizationCard";
 
 export default function OrganizationPage() {
   const router = useRouter();
@@ -329,6 +330,13 @@ export default function OrganizationPage() {
           </div>
         </CardContent>
       </Card>
+
+      {organization && (
+        <DeleteOrganizationCard
+          organizationName={organization.name}
+          deletionScheduledFor={organization.deletionScheduledFor}
+        />
+      )}
     </div>
   );
 }

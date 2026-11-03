@@ -16,6 +16,8 @@ export interface Organization {
   createdAt: string;
   /** true when the org has a Stripe subscription its admin can manage in the Customer Portal. */
   billingPortalAvailable: boolean;
+  /** When a confirmed self-service deletion will run (ISO local date-time); null when none is pending. */
+  deletionScheduledFor: string | null;
 }
 
 export interface UpdateOrganizationPayload {
@@ -28,6 +30,11 @@ export interface OrganizationUsage {
   contractsUsed: number;
   /** null means the tier has no limit (ENTERPRISE). */
   contractsLimit: number | null;
+}
+
+export interface DeletionCodeSent {
+  expiresInMinutes: number;
+  resendCooldownSeconds: number;
 }
 
 export interface OrganizationExport {
@@ -61,6 +68,23 @@ export const organizationService = {
       filenameFromContentDisposition(res.headers["content-disposition"]) ??
       `bcm-export-${new Date().toISOString().split("T")[0]}.zip`;
     return { blob: res.data, filename };
+  },
+
+  /** Deletion step 1: password + retyped name; the backend emails a 6-digit code. */
+  requestDeletion: async (payload: { password: string; organizationName: string }): Promise<DeletionCodeSent> => {
+    const res = await api.post<DeletionCodeSent>("/organizations/me/deletion", payload);
+    return res.data;
+  },
+
+  /** Deletion step 2: the emailed code schedules the deletion 30 days ahead. */
+  confirmDeletion: async (code: string): Promise<{ scheduledFor: string }> => {
+    const res = await api.post<{ scheduledFor: string }>("/organizations/me/deletion/confirm", { code });
+    return res.data;
+  },
+
+  /** Calls off a scheduled deletion (any admin). */
+  cancelDeletion: async (): Promise<void> => {
+    await api.delete("/organizations/me/deletion");
   },
 
   /** Returns the Stripe-hosted checkout URL to redirect the browser to. */

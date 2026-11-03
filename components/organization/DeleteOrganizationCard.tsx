@@ -209,15 +209,25 @@ export function DeleteOrganizationCard({ organizationName, deletionScheduledFor 
                   required
                 />
               </div>
-              <Button
-                type="button"
-                variant="link"
-                className="px-0"
-                disabled={resendIn > 0 || requestMutation.isPending}
-                onClick={() => requestMutation.mutate()}
-              >
-                {resendIn > 0 ? `Invia un nuovo codice (${resendIn}s)` : "Invia un nuovo codice"}
-              </Button>
+              {/* During the cooldown a plain sentence, not a faded disabled
+                  link: in the live test it read as broken. Not aria-live, a
+                  per-second announcement would be noise. */}
+              {resendIn > 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Non è arrivato? Potrai chiedere un nuovo codice tra {resendIn}{" "}
+                  {resendIn === 1 ? "secondo" : "secondi"}.
+                </p>
+              ) : (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto px-0"
+                  disabled={requestMutation.isPending}
+                  onClick={() => requestMutation.mutate()}
+                >
+                  {requestMutation.isPending ? "Invio del codice..." : "Non è arrivato? Invia un nuovo codice"}
+                </Button>
+              )}
             </form>
           ) : (
             <form

@@ -119,18 +119,19 @@ describe('DeleteOrganizationCard — no deletion scheduled', () => {
     await fillRequest();
     await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Invia un nuovo codice' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Non è arrivato? Invia un nuovo codice' }));
 
     await waitFor(() => expect(service.requestDeletion).toHaveBeenCalledTimes(2));
   });
 
-  it('counts down the cooldown on the resend button', async () => {
+  it('says in plain words how long to wait, with no resend button meanwhile', async () => {
     renderCard();
     await fillRequest();
     await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
 
-    expect(await screen.findByRole('button', { name: 'Invia un nuovo codice (60s)' })).toBeDisabled();
-    expect(await screen.findByRole('button', { name: 'Invia un nuovo codice (59s)' }, { timeout: 2000 })).toBeDisabled();
+    expect(await screen.findByText('Non è arrivato? Potrai chiedere un nuovo codice tra 60 secondi.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /nuovo codice/ })).not.toBeInTheDocument();
+    expect(await screen.findByText(/tra 59 secondi/, {}, { timeout: 2000 })).toBeInTheDocument();
   });
 
   it('reports rate limiting and network failures without the backend message', async () => {

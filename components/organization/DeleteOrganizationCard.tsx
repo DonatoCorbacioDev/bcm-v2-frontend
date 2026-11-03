@@ -173,7 +173,10 @@ export function DeleteOrganizationCard({ organizationName, deletionScheduledFor 
           if (!next) reset();
         }}
       >
-        <DialogContent>
+        {/* A click on the backdrop must not throw away what was typed (or the
+            pending code step), as in the app's other form dialogs: only
+            Annulla, the close button or Esc close it. */}
+        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>Cancella {organizationName}</DialogTitle>
             <DialogDescription>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AxiosError, AxiosHeaders } from 'axios';
 import { createWrapper } from '../mocks/wrapper';
@@ -143,6 +143,19 @@ describe('DeleteOrganizationCard — no deletion scheduled', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Richiesta non riuscita'));
+  });
+
+  it('stays open, with what was typed, when clicking outside it', async () => {
+    renderCard();
+    await fillRequest();
+
+    // What Radix listens to for "outside": a pointerdown outside the content.
+    // (A user-event click can't reach the page behind a modal: pointer-events: none.)
+    fireEvent.pointerDown(document.body);
+    fireEvent.click(document.body);
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByLabelText('La tua password')).toHaveValue('secret');
   });
 
   it('forgets what was typed when the dialog is closed', async () => {

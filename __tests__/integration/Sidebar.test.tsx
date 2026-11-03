@@ -56,15 +56,15 @@ describe('Sidebar', () => {
     mockUser('ADMIN');
   });
 
-  it('renders all navigation links for ADMIN', () => {
+  // The menu is deliberately short (Home, Contratti, Controparti, Impostazioni):
+  // every other page is reached from Impostazioni or from the page it belongs to.
+  const navLinks = () =>
+    screen.getAllByRole('link').filter((link) => link.closest('nav')).map((link) => link.textContent);
+
+  it('shows ADMIN the four main entries, Impostazioni included', () => {
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /contratti/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /valori finanziari/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /tipi finanziari/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /aree di business/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /responsabili/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /utenti/i })).toBeInTheDocument();
+    expect(navLinks()).toEqual(['Home', 'Contratti', 'Controparti', 'Impostazioni']);
+    expect(screen.getByRole('link', { name: 'Impostazioni' })).toHaveAttribute('href', '/settings');
   });
 
   it('shows only public links when user is not yet loaded', () => {
@@ -72,26 +72,36 @@ describe('Sidebar', () => {
       selector({ user: null, isAuthenticated: false })
     );
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /tipi finanziari/i })).not.toBeInTheDocument();
+    expect(navLinks()).toEqual(['Home', 'Contratti', 'Controparti']);
   });
 
-  it('hides admin-only links for MANAGER role', () => {
+  it('shows MANAGER the three main entries, without Impostazioni', () => {
     mockUser('MANAGER');
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /contratti/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /valori finanziari/i })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /tipi finanziari/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /aree di business/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /responsabili/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /^utenti$/i })).not.toBeInTheDocument();
+    expect(navLinks()).toEqual(['Home', 'Contratti', 'Controparti']);
+    expect(screen.queryByText('AMMINISTRAZIONE')).not.toBeInTheDocument();
   });
+
+  it('keeps Contratti highlighted on a contract detail page', () => {
+    (usePathname as jest.Mock).mockReturnValue('/contracts/12');
+    render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
+    expect(screen.getByRole('link', { name: 'Contratti' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it.each(['/users', '/organization', '/financial-values', '/audit-logs'])(
+    'keeps Impostazioni highlighted on %s, reached from it',
+    (pathname) => {
+      (usePathname as jest.Mock).mockReturnValue(pathname);
+      render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
+      expect(screen.getByRole('link', { name: 'Impostazioni' })).toHaveAttribute('aria-current', 'page');
+      expect(screen.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current');
+    }
+  );
 
   it('marks the active route with aria-current="page"', () => {
     (usePathname as jest.Mock).mockReturnValue('/dashboard');
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
   });
 
   it('does not mark inactive routes with aria-current', () => {

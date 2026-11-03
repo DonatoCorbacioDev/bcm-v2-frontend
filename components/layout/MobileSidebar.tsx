@@ -11,7 +11,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { LogoMark } from "@/components/layout/Logo";
 import { X } from "lucide-react";
-import { navGroups } from "@/components/layout/sidebarNavConfig";
+import { navGroups, isNavItemActive } from "@/components/layout/sidebarNavConfig";
 import { NavLink } from "@/components/layout/NavLink";
 import { OrgSwitcher } from "@/components/layout/OrgSwitcher";
 import { SidebarLogoutButton } from "@/components/layout/SidebarLogoutButton";
@@ -80,7 +80,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                   <NavLink
                     key={item.href}
                     item={item}
-                    isActive={pathname === item.href}
+                    isActive={isNavItemActive(item, pathname)}
                     onClick={onClose}
                   />
                 ))}

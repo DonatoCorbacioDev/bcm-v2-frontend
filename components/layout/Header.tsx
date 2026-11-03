@@ -18,8 +18,10 @@ import Link from "next/link";
 // scrolls out of view under this sticky header) is the source of truth for
 // the page's title and description, so this must not duplicate that text.
 const PAGE_TITLES: Record<string, string> = {
-  "/dashboard":          "Dashboard",
+  "/dashboard":          "Home",
   "/contracts":          "Contratti",
+  "/counterparties":     "Controparti",
+  "/settings":           "Impostazioni",
   "/contract-templates": "Modelli di contratto",
   "/financial-values":   "Valori finanziari",
   "/financial-types":    "Tipi finanziari",
@@ -36,6 +38,7 @@ function getPageTitle(pathname: string) {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
   // Contract detail page
   if (pathname.startsWith("/contracts/")) return "Dettaglio contratto";
+  if (pathname.startsWith("/counterparties/")) return "Dettaglio controparte";
   return "Business Contracts Manager";
 }
 

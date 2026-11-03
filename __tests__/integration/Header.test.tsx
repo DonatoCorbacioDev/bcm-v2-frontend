@@ -59,7 +59,7 @@ describe('Header', () => {
 
   it('renders the page title for the current route', () => {
     render(<Header {...defaultProps} />);
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Home')).toBeInTheDocument();
   });
 
   it('renders the mobile menu toggle button', () => {

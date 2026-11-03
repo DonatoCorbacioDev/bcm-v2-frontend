@@ -48,18 +48,16 @@ beforeEach(() => {
 });
 
 describe('MobileSidebar', () => {
-  it('renders nav links when open', () => {
+  it('renders the same short menu as the desktop sidebar', () => {
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
-    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /contratti$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /valori finanziari/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Home' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Contratti' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Controparti' })).toBeInTheDocument();
   });
 
-  it('shows admin-only links for ADMIN', () => {
+  it('shows Impostazioni for ADMIN', () => {
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
-    expect(screen.getByRole('link', { name: /tipi finanziari/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /aree di business/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /responsabili/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Impostazioni' })).toHaveAttribute('href', '/settings');
   });
 
   it('hides admin-only links when user is not yet loaded', () => {
@@ -67,7 +65,7 @@ describe('MobileSidebar', () => {
       selector({ user: null, isAuthenticated: false })
     );
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
-    expect(screen.queryByRole('link', { name: /tipi finanziari/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Impostazioni' })).not.toBeInTheDocument();
   });
 
   it('hides admin-only links for MANAGER', () => {
@@ -75,7 +73,7 @@ describe('MobileSidebar', () => {
       selector({ user: { id: 2, username: 'mgr', role: 'MANAGER' }, isAuthenticated: true })
     );
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
-    expect(screen.queryByRole('link', { name: /tipi finanziari/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Impostazioni' })).not.toBeInTheDocument();
   });
 
   it('is visually hidden when isOpen is false', () => {
@@ -112,8 +110,8 @@ describe('MobileSidebar', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('marks the active route with aria-current="page"', () => {
-    (usePathname as jest.Mock).mockReturnValue('/contracts');
+  it('marks the active route with aria-current="page", sub-pages included', () => {
+    (usePathname as jest.Mock).mockReturnValue('/contracts/12');
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
     expect(screen.getByRole('link', { name: /contratti$/i })).toHaveAttribute('aria-current', 'page');
   });

@@ -33,8 +33,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { formatMoney } from "@/lib/formatMoney";
 
-const EUR_FORMATTER = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
 interface BudgetTableProps {
   readonly onEditClick: (budget: Budget) => void;
@@ -140,8 +140,8 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm font-mono tabular-nums">{b.year}</TableCell>
-                    <TableCell className="text-sm font-mono tabular-nums">{EUR_FORMATTER.format(b.targetAmount)}</TableCell>
-                    <TableCell className="text-sm font-mono tabular-nums">{EUR_FORMATTER.format(b.actualAmount)}</TableCell>
+                    <TableCell className="text-sm font-mono tabular-nums">{formatMoney(b.targetAmount)}</TableCell>
+                    <TableCell className="text-sm font-mono tabular-nums">{formatMoney(b.actualAmount)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="w-full h-1.5 bg-muted rounded-full">

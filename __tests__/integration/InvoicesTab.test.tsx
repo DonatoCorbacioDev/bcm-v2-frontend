@@ -183,8 +183,8 @@ describe('InvoicesTab', () => {
     renderTab();
     expect(await screen.findByText('Fornitore SRL')).toBeInTheDocument();
     expect(screen.getByText('FT-2024-001')).toBeInTheDocument();
-    // totalAmount + currency via formatAmount
-    expect(screen.getByText(/1\.?220,00 EUR/)).toBeInTheDocument();
+    // Italian format with the thousands grouped and the euro sign after the amount.
+    expect(screen.getByText('1.220,00 €')).toBeInTheDocument();
   });
 
   // ── admin guard ────────────────────────────────────────────────────────────

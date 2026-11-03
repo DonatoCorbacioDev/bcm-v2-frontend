@@ -41,8 +41,8 @@ import {
 } from "@/components/ui/select";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { formatMoney } from "@/lib/formatMoney";
 
-const EUR_FORMATTER = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
 
 const MONTH_NAMES = [
   "Gen", "Feb", "Mar", "Apr", "Mag", "Giu",
@@ -235,7 +235,7 @@ function CategorySection({
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-sm">{group.areaName || "N/D"}</TableCell>
                       <TableCell className="text-right text-sm font-semibold tabular-nums">
-                        {EUR_FORMATTER.format(group.total)}
+                        {formatMoney(group.total)}
                       </TableCell>
                       <TableCell />
                     </TableRow>
@@ -249,7 +249,7 @@ function CategorySection({
                           {group.areaName === MIXED_AREAS ? fv.areaName : null}
                         </TableCell>
                         <TableCell className="text-right text-sm tabular-nums">
-                          {EUR_FORMATTER.format(fv.financialAmount)}
+                          {formatMoney(fv.financialAmount)}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1 justify-end">
@@ -282,7 +282,7 @@ function CategorySection({
                 <TableCell className="text-sm font-semibold text-foreground">Totale</TableCell>
                 <TableCell className="hidden md:table-cell" />
                 <TableCell className={`text-right text-sm font-bold tabular-nums ${totalVariantClass}`}>
-                  {EUR_FORMATTER.format(total)}
+                  {formatMoney(total)}
                 </TableCell>
                 <TableCell />
               </TableRow>

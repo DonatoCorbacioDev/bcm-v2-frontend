@@ -27,6 +27,7 @@ import {
   CHART_LEGEND_STYLE,
   formatMonthLabel,
 } from "@/lib/chartTheme";
+import { formatMoney } from "@/lib/formatMoney";
 
 // Historical and forecast share the same institutional blue; the line
 // style (solid vs dashed) is what tells them apart, not a second hue.
@@ -107,13 +108,7 @@ function buildChartData(
   return [...histPoints, ...forePoints];
 }
 
-const EUR_FORMATTER = new Intl.NumberFormat("it-IT", {
-  style: "currency",
-  currency: "EUR",
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
-});
-const formatEur = (v: number) => EUR_FORMATTER.format(v);
+const formatEur = (v: number) => formatMoney(v, { decimals: 0 });
 
 export function FinancialForecastChart() {
   const [horizon, setHorizon] = useState<Horizon>(3);

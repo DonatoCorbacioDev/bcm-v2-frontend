@@ -10,7 +10,7 @@ import type { Budget, FinancialValue } from '@/types';
 // normalized to a regular space to match Testing Library's own text
 // normalization (which collapses it before comparing).
 const eur = (n: number) =>
-  new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+  new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0, useGrouping: 'always' })
     .format(n)
     .replace(/ /g, ' ');
 

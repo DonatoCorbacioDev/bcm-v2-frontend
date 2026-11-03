@@ -330,10 +330,11 @@ describe('ContractDetailPage — financial values tab', () => {
     render(<ContractDetailPage />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
 
-    // Computed with the component's own formatting rather than hardcoded,
-    // so the assertion doesn't depend on the host's ICU separators for it-IT.
+    // Italian accounting format, thousands always grouped ("1.000,00 €").
     const eur = (n: number) =>
-      `€${n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', useGrouping: 'always' })
+        .format(n)
+        .replace(/ /g, ' ');
 
     expect(await screen.findByText('Totale ricavi')).toBeInTheDocument();
     expect(screen.getByText('Totale costi')).toBeInTheDocument();

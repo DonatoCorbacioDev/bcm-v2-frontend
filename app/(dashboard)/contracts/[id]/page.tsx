@@ -33,6 +33,7 @@ import api from "@/lib/api";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
 import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent } from "@/types";
+import { formatMoney } from "@/lib/formatMoney";
 
 const FINANCIAL_VALUE_SOURCE_LABELS: Record<string, string> = {
   MANUAL: "Manuale",
@@ -262,7 +263,7 @@ export default function ContractDetailPage() {
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.typeName || "N/D"}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.areaName || "N/D"}</td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-foreground">
-                  €{fv.financialAmount?.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  {formatMoney(fv.financialAmount ?? 0)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                   {fv.month}/{fv.year}
@@ -282,7 +283,7 @@ export default function ContractDetailPage() {
                 .filter((fv: FinancialValue) => fv.category === "COST")
                 .reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0);
               const formatEuro = (n: number) =>
-                `€${n.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                formatMoney(n);
               return (
                 <>
                   <tr className="bg-muted font-bold">

@@ -9,12 +9,8 @@ import Link from "next/link";
 import KPICard from "@/components/dashboard/KPICard";
 import { budgetUsageTone, expectedBudgetPercent } from "@/lib/varianceTone";
 import type { Budget, FinancialValue } from "@/types";
+import { formatMoney } from "@/lib/formatMoney";
 
-const EUR_FORMATTER = new Intl.NumberFormat("it-IT", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
 
 export interface BudgetAreaSelection {
   readonly id: number;
@@ -125,7 +121,7 @@ export default function FinancialValueSummary({
   }, [financialValues, year]);
 
   const netMargin = revenueTotal - costTotal;
-  const formatTotal = (amount: number) => (isError ? "N/D" : EUR_FORMATTER.format(amount));
+  const formatTotal = (amount: number) => (isError ? "N/D" : formatMoney(amount, { decimals: 0 }));
 
   const expectedPercent = year === null ? 100 : expectedBudgetPercent(year);
   const yearUnderWay = expectedPercent > 0 && expectedPercent < 100;

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAnomalies } from "@/hooks/useAnomalies";
 import { RISK_LEVEL_VARIANT } from "@/lib/statusConfig";
 import { isMlTierForbidden } from "@/lib/mlAccess";
+import { formatMoney } from "@/lib/formatMoney";
 
 const VISIBLE_COUNT = 5;
 const MONTHS_IT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
@@ -23,7 +24,7 @@ const SEVERITY_CONFIG = {
 };
 
 function formatAmount(n: number): string {
-  return n.toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  return formatMoney(n, { decimals: 0 });
 }
 
 export function AnomalyWidget() {

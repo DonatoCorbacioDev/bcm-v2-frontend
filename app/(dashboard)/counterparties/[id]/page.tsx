@@ -15,6 +15,7 @@ import VerifyIbanDialog from "@/components/counterparties/VerifyIbanDialog";
 import { useCounterparty, useCounterpartyInvoicingSummary } from "@/hooks/useCounterparty";
 import { useAuthStore } from "@/store/authStore";
 import { invoicingVarianceVariant } from "@/lib/varianceTone";
+import { formatMoney } from "@/lib/formatMoney";
 
 const TYPE_LABELS: Record<string, string> = {
   CUSTOMER: "Cliente",
@@ -22,11 +23,6 @@ const TYPE_LABELS: Record<string, string> = {
   BOTH: "Entrambi",
 };
 
-const EUR_FORMATTER = new Intl.NumberFormat("it-IT", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
 
 const PERCENT_FORMATTER = new Intl.NumberFormat("it-IT", {
   style: "percent",
@@ -106,7 +102,7 @@ export default function CounterpartyDetailPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <KPICard title="Contratti attivi" value={summary.activeContracts} />
-                <KPICard title="Valore contrattato" value={EUR_FORMATTER.format(summary.contractedValue)} />
+                <KPICard title="Valore contrattato" value={formatMoney(summary.contractedValue, { decimals: 0 })} />
                 <KPICard
                   title="Scostamento"
                   value={PERCENT_FORMATTER.format(summary.variancePercent / 100)}
@@ -117,7 +113,7 @@ export default function CounterpartyDetailPage() {
                 <div>
                   <p className="text-muted-foreground">Fatturato confermato</p>
                   <p className="text-base font-medium text-foreground">
-                    {EUR_FORMATTER.format(summary.invoicedYtd)}
+                    {formatMoney(summary.invoicedYtd, { decimals: 0 })}
                   </p>
                 </div>
                 <div>

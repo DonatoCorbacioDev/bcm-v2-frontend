@@ -9,12 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import KPICard from "@/components/dashboard/KPICard";
 import { useInvoicingSummary } from "@/hooks/useDashboardStats";
 import { invoicingVarianceVariant } from "@/lib/varianceTone";
+import { formatMoney } from "@/lib/formatMoney";
 
-const EUR_FORMATTER = new Intl.NumberFormat("it-IT", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0,
-});
 
 const PERCENT_FORMATTER = new Intl.NumberFormat("it-IT", {
   style: "percent",
@@ -54,8 +50,8 @@ export function InvoicingSummaryWidget() {
 
         {!isLoading && !isError && summary && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <KPICard title="Valore atteso" value={EUR_FORMATTER.format(summary.expectedYtd)} />
-            <KPICard title="Fatturato confermato" value={EUR_FORMATTER.format(summary.invoicedYtd)} />
+            <KPICard title="Valore atteso" value={formatMoney(summary.expectedYtd, { decimals: 0 })} />
+            <KPICard title="Fatturato confermato" value={formatMoney(summary.invoicedYtd, { decimals: 0 })} />
             <KPICard
               title="Scostamento"
               value={PERCENT_FORMATTER.format(summary.variancePercent / 100)}

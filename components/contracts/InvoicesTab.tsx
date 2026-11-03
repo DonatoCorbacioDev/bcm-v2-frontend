@@ -36,6 +36,7 @@ import { sepaPaymentsService, type SepaPaymentBatch } from "@/services/sepaPayme
 import { invoiceMatchingService } from "@/services/invoiceMatching.service";
 import { MATCH_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from "@/lib/statusConfig";
 import type { ElectronicInvoice } from "@/types";
+import { formatMoney, formatNumber } from "@/lib/formatMoney";
 
 interface InvoicesTabProps {
   readonly contractId: number;
@@ -49,7 +50,7 @@ function formatBytes(bytes: number) {
 }
 
 function formatAmount(amount: number, currency: string) {
-  return `${amount.toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+  return formatMoney(amount, { currency });
 }
 
 export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
@@ -640,16 +641,10 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                               {item.unitOfMeasure}
                             </td>
                             <td className="px-3 py-2 text-foreground whitespace-nowrap">
-                              {item.unitPrice.toLocaleString("it-IT", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
+                              {formatNumber(item.unitPrice)}
                             </td>
                             <td className="px-3 py-2 font-medium text-foreground whitespace-nowrap">
-                              {item.totalPrice.toLocaleString("it-IT", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
+                              {formatNumber(item.totalPrice)}
                             </td>
                             <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
                               {item.vatRate}%

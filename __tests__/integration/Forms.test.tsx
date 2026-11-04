@@ -832,6 +832,50 @@ describe('ContractForm', () => {
       expect.objectContaining({ autoRenew: true, noticeDays: 90, renewalMonths: 12 }));
   });
 
+  it('warns, without blocking, when the last day to give notice has already passed', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    // validContract ends on 2024-12-31: any notice puts the deadline in the past.
+    render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova tacitamente/i }));
+    expect(screen.queryByText(/il termine per disdire è già passato/i)).not.toBeInTheDocument();
+
+    await userEvent.type(screen.getByLabelText(/preavviso per la disdetta/i), '90');
+    await userEvent.type(screen.getByLabelText(/durata del rinnovo/i), '12');
+
+    expect(screen.getByRole('status')).toHaveTextContent(/il termine per disdire è già passato/i);
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+  });
+
+  // ── Optional fields: oggetto and WBS ────────────────────────────────────
+
+  it('labels the project name "Oggetto" and keeps the WBS code under "Altri dati"', () => {
+    render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
+    expect(screen.getByLabelText(/^oggetto$/i)).toBeInTheDocument();
+    expect(screen.getByText(/altri dati \(opzionale\)/i).closest('details')).not.toHaveAttribute('open');
+    expect(screen.getByLabelText(/codice wbs/i)).toBeInTheDocument();
+  });
+
+  it('opens "Altri dati" when the contract already has a WBS code', () => {
+    render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
+    expect(screen.getByText(/altri dati \(opzionale\)/i).closest('details')).toHaveAttribute('open');
+  });
+
+  it('sends an emptied oggetto and WBS code as not set, not as empty strings', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
+    await userEvent.clear(screen.getByLabelText(/^oggetto$/i));
+    await userEvent.clear(screen.getByLabelText(/codice wbs/i));
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    const payload = mutateAsync.mock.calls[0][0].payload;
+    expect(payload.projectName).toBeUndefined();
+    expect(payload.wbsCode).toBeUndefined();
+  });
+
   it('pre-fills the stated renewal terms in edit mode', () => {
     render(
       <ContractForm onClose={onClose} contract={{ ...validContract, autoRenew: true, noticeDays: 60, renewalMonths: 12 }} />,
@@ -846,7 +890,7 @@ describe('ContractForm', () => {
 
   it('renders the optional financial terms section with all three fields', () => {
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/termini finanziari \(opzionale\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/valori economici \(opzionale\)/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/tipo finanziario/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/valore annuo/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/frequenza fatturazione/i)).toBeInTheDocument();

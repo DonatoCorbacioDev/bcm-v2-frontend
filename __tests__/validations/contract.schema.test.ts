@@ -177,4 +177,55 @@ describe("contractSchema", () => {
       expect(result.success).toBe(false);
     });
   });
+  describe("optional fields (WBS, oggetto)", () => {
+    it("accepts a contract without WBS code or oggetto", () => {
+      const { wbsCode: _w, projectName: _p, ...minimal } = validContract;
+      expect(contractSchema.safeParse(minimal).success).toBe(true);
+      expect(contractSchema.safeParse({ ...validContract, wbsCode: "", projectName: "" }).success).toBe(true);
+    });
+
+    it("rejects an oggetto of one or two letters", () => {
+      const result = contractSchema.safeParse({ ...validContract, projectName: "a" });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  // Specification for the rule Donato writes in contract.schema.ts (TODO there).
+  describe("notice deadline", () => {
+    const renewing = {
+      ...validContract,
+      startDate: "2026-01-01",
+      endDate: "2026-12-31",
+      autoRenew: true,
+      renewalMonths: 12,
+    };
+    const noticeError = (input: object) => {
+      const result = contractSchema.safeParse(input);
+      return result.success ? undefined : result.error.issues.find((issue) => issue.path[0] === "noticeDays");
+    };
+
+    it("accepts a notice that ends inside the contract", () => {
+      expect(noticeError({ ...renewing, noticeDays: 90 })).toBeUndefined();
+    });
+
+    it("accepts a deadline falling exactly on the start date", () => {
+      // 2026-12-31 minus 364 days is 2026-01-01
+      expect(noticeError({ ...renewing, noticeDays: 364 })).toBeUndefined();
+    });
+
+    it("rejects a notice longer than the contract", () => {
+      expect(noticeError({ ...renewing, noticeDays: 400 })?.message).toBe(
+        "Il preavviso è più lungo del contratto: la disdetta cadrebbe prima della data di inizio",
+      );
+    });
+
+    it("ignores the notice when the contract doesn't renew tacitly", () => {
+      expect(noticeError({ ...renewing, autoRenew: false, noticeDays: 400 })).toBeUndefined();
+    });
+
+    it("doesn't reject a deadline that has already passed: that is a warning, not an error", () => {
+      expect(noticeError({ ...renewing, startDate: "2020-01-01", endDate: "2021-01-01", noticeDays: 30 }))
+        .toBeUndefined();
+    });
+  });
 });

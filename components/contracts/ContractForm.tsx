@@ -33,6 +33,11 @@ import { SelectField } from "@/components/shared/SelectField";
 
 import { contractSchema, type ContractFormData } from "@/lib/validations/contract.schema";
 
+function startOfToday(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 interface ContractFormProps {
   readonly onClose: () => void;
   readonly onSuccess?: () => void;
@@ -102,8 +107,15 @@ export default function ContractForm({
   const watchedEndDate = useWatch({ control, name: "endDate" });
   const watchedNoticeDays = useWatch({ control, name: "noticeDays" });
   const noticeDeadline = autoRenew ? computeNoticeDeadline(watchedEndDate, watchedNoticeDays) : null;
+  const noticeDeadlinePassed = noticeDeadline !== null && noticeDeadline < startOfToday();
 
-  const onSubmit = async (data: ContractFormData) => {
+  const onSubmit = async (formData: ContractFormData) => {
+    // An emptied optional text field means "not set", not an empty string.
+    const data = {
+      ...formData,
+      wbsCode: formData.wbsCode || undefined,
+      projectName: formData.projectName || undefined,
+    };
     try {
       /* istanbul ignore else */
       if (contract) {
@@ -191,30 +203,13 @@ export default function ContractForm({
         )}
       </div>
 
-      {/* WBS Code */}
+      {/* Oggetto: what the contract is about (projectName in the API) */}
       <div className="space-y-2">
-        <Label htmlFor="wbsCode">
-          Codice WBS <span className="text-destructive">*</span>
-        </Label>
-        <Input
-          id="wbsCode"
-          {...register("wbsCode")}
-          placeholder="es. WBS-001"
-        />
-        {errors.wbsCode && (
-          <p className="text-sm text-destructive">{errors.wbsCode.message}</p>
-        )}
-      </div>
-
-      {/* Project Name */}
-      <div className="space-y-2">
-        <Label htmlFor="projectName">
-          Nome progetto <span className="text-destructive">*</span>
-        </Label>
+        <Label htmlFor="projectName">Oggetto</Label>
         <Input
           id="projectName"
           {...register("projectName")}
-          placeholder="Inserisci il nome del progetto"
+          placeholder="es. Manutenzione impianti"
         />
         {errors.projectName && (
           <p className="text-sm text-destructive">{errors.projectName.message}</p>
@@ -369,6 +364,16 @@ export default function ContractForm({
                 </strong>
               </p>
             )}
+            {/* A warning, not an error: a deadline already gone is a real
+                situation worth recording, BCM just says what it means. */}
+            {noticeDeadlinePassed && (
+              <p
+                role="status"
+                className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
+              >
+                Il termine per disdire è già passato: salvo accordi con la controparte, il contratto si rinnoverà.
+              </p>
+            )}
           </>
         )}
       </div>
@@ -378,7 +383,7 @@ export default function ContractForm({
           requiring them to be entered one row at a time. */}
       <div className="space-y-4 rounded-lg border border-border p-4">
         <div>
-          <p className="text-sm font-medium text-foreground">Termini finanziari (opzionale)</p>
+          <p className="text-sm font-medium text-foreground">Valori economici (opzionale)</p>
           <p className="text-xs text-muted-foreground mt-1">
             Se compilati, i valori finanziari del contratto vengono generati automaticamente.
           </p>
@@ -440,6 +445,25 @@ export default function ContractForm({
           />
         </div>
       </div>
+
+      {/* Bookkeeping data few contracts have: out of the way, but open when
+          the contract already has some. */}
+      <details className="rounded-lg border border-border p-4" open={Boolean(contract?.wbsCode)}>
+        <summary className="cursor-pointer text-sm font-medium text-foreground">
+          Altri dati (opzionale)
+        </summary>
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="wbsCode">Codice WBS</Label>
+          <Input
+            id="wbsCode"
+            {...register("wbsCode")}
+            placeholder="es. WBS-001"
+          />
+          {errors.wbsCode && (
+            <p className="text-sm text-destructive">{errors.wbsCode.message}</p>
+          )}
+        </div>
+      </details>
 
       {/* Buttons */}
       <div className="flex justify-end gap-2 pt-4">

@@ -11,8 +11,8 @@ export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT";
 export type ContractUpsertPayload = {
   counterpartyId: number;
   contractNumber: string;
-  wbsCode: string;
-  projectName: string;
+  wbsCode?: string;
+  projectName?: string;
   startDate: string;
   endDate: string;
   status: ContractStatus;

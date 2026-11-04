@@ -63,7 +63,7 @@ type SortDirection = "asc" | "desc";
 const COLUMNS: { key: SortableColumn; label: string; className?: string }[] = [
   { key: "contractNumber", label: "Numero" },
   { key: "counterpartyName", label: "Controparte" },
-  { key: "projectName", label: "Progetto", className: "hidden md:table-cell" },
+  { key: "projectName", label: "Oggetto", className: "hidden md:table-cell" },
   { key: "managerName", label: "Responsabile", className: "hidden lg:table-cell" },
   { key: "status", label: "Stato" },
   // The date to act on: the last day to give notice for a tacit renewal,

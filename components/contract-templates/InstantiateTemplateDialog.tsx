@@ -193,8 +193,8 @@ export default function InstantiateTemplateDialog({
               <Input id="inst-wbsCode" {...register("wbsCode")} placeholder="es. WBS-001" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="inst-projectName">Nome progetto</Label>
-              <Input id="inst-projectName" {...register("projectName")} placeholder="Nome progetto" />
+              <Label htmlFor="inst-projectName">Oggetto</Label>
+              <Input id="inst-projectName" {...register("projectName")} placeholder="es. Manutenzione impianti" />
             </div>
           </div>
 

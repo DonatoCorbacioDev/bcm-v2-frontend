@@ -672,7 +672,7 @@ describe('ContractTable', () => {
   it('sorts by every other sortable column without error', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    for (const name of [/progetto/i, /responsabile/i, /^stato/i, /prossima scadenza/i]) {
+    for (const name of [/oggetto/i, /responsabile/i, /^stato/i, /prossima scadenza/i]) {
       const header = screen.getByRole('button', { name });
       await userEvent.click(header);
       expect(header.closest('th')).toHaveAttribute('aria-sort', 'ascending');

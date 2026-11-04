@@ -5,6 +5,8 @@
 
 import { z } from "zod";
 
+import { computeNoticeDeadline } from "@/lib/statusConfig";
+
 /**
  * Zod validation schema for contracts
  * Used for both CREATE and UPDATE operations
@@ -27,19 +29,22 @@ export const contractSchema = z.object({
     )
     .trim(),
 
-  // WBS code (Work Breakdown Structure)
+  // WBS code (Work Breakdown Structure), optional: most contracts have none.
+  // An empty input stays "" here; ContractForm sends it as "not set".
   wbsCode: z
-    .string({ message: "Il codice WBS è obbligatorio" })
-    .min(1, "Il codice WBS è obbligatorio")
+    .string()
+    .trim()
     .max(50, "Il codice WBS non può superare i 50 caratteri")
-    .trim(),
+    .optional(),
 
-  // Project name
+  // What the contract is about ("Oggetto" in the UI; projectName in the API,
+  // where it was born as a project name). Optional, but not a stray letter.
   projectName: z
-    .string({ message: "Il nome del progetto è obbligatorio" })
-    .min(3, "Il nome del progetto deve contenere almeno 3 caratteri")
-    .max(200, "Il nome del progetto non può superare i 200 caratteri")
-    .trim(),
+    .string()
+    .trim()
+    .max(200, "L'oggetto non può superare i 200 caratteri")
+    .refine((value) => value === "" || value.length >= 3, "L'oggetto deve contenere almeno 3 caratteri")
+    .optional(),
 
   // Start date (ISO format: YYYY-MM-DD)
   startDate: z
@@ -142,6 +147,24 @@ export const contractSchema = z.object({
     message: "Indica per quanti mesi si rinnova",
     path: ["renewalMonths"],
   })
+  // The last day to give notice (endDate minus noticeDays) can't fall before
+  // startDate: the notice would be longer than the contract itself, an
+  // impossible term, so it blocks saving. A deadline already passed is real
+  // and only gets a warning in ContractForm.
+  .refine(
+    (data) => {
+      if (!data.autoRenew || data.noticeDays == null) return true;
+      const deadline = computeNoticeDeadline(data.endDate, data.noticeDays);
+      const start = computeNoticeDeadline(data.startDate, 0);
+      // Unreadable dates are the date fields' own errors, not this one.
+      if (!deadline || !start) return true;
+      return deadline >= start;
+    },
+    {
+      message: "Il preavviso è più lungo del contratto: la disdetta cadrebbe prima della data di inizio",
+      path: ["noticeDays"],
+    }
+  )
   .refine(
     (data) => {
       const fields = [data.financialTypeId, data.annualValue, data.billingFrequency];

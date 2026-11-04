@@ -215,10 +215,13 @@ export interface ElectronicInvoice {
 export interface ContractHistory {
   id: number;
   contractId: number;
-  modifiedById: number;
+  modifiedById: number | null;
   modificationDate: string;
   previousStatus: string;
   newStatus: string;
+  // Display name of who made the change; null = no author (the scheduler,
+  // or a user since deleted), shown as "Sistema".
+  modifiedByName?: string | null;
 }
 
 export interface ContractImportRowError {

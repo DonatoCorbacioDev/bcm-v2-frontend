@@ -369,6 +369,40 @@ describe('ContractDetailPage — financial values tab', () => {
   });
 });
 
+describe('ContractDetailPage — history tab', () => {
+  it('names who changed the status, "Sistema" when nobody did, and lists the approval workflow after', async () => {
+    mockContract({ workflowStage: 'IN_REVIEW' });
+    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/contract-history/contract/1') {
+        return Promise.resolve({
+          data: [
+            { id: 1, contractId: 1, modifiedById: 7, modifiedByName: 'Marco Bellini', modificationDate: '2026-01-10T10:00:00',
+              previousStatus: 'DRAFT', newStatus: 'ACTIVE' },
+            { id: 2, contractId: 1, modifiedById: null, modifiedByName: null, modificationDate: '2026-02-10T04:00:00',
+              previousStatus: 'ACTIVE', newStatus: 'EXPIRED' },
+          ],
+        });
+      }
+      return Promise.resolve({ data: [] });
+    });
+    (contractWorkflowService.getEvents as jest.Mock).mockResolvedValue([
+      { id: 1, fromStage: 'DRAFT', toStage: 'IN_REVIEW', action: 'SUBMIT', actorUsername: 'demo', comment: null,
+        createdAt: '2026-01-05T09:00:00' },
+    ]);
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('tab', { name: /cronologia modifiche/i }));
+
+    const named = await screen.findByText('Da: Marco Bellini');
+    expect(screen.getByText('Da: Sistema')).toBeInTheDocument();
+    expect(screen.queryByText(/utente ID/i)).not.toBeInTheDocument();
+    const workflow = await screen.findByText('Workflow di approvazione');
+    // Status changes first, the approval workflow below them.
+    expect(named.compareDocumentPosition(workflow) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
 describe('ContractDetailPage — regenerate financial values button', () => {
   const contractWithFinancialTerms = {
     financialTypeId: 1,

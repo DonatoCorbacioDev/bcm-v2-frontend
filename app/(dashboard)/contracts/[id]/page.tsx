@@ -324,7 +324,7 @@ export default function ContractDetailPage() {
   const renderWorkflowEvents = () => {
     if (!workflowEvents || workflowEvents.length === 0) return null;
     return (
-      <div className="mb-6">
+      <div className="mt-8 border-t border-border pt-6">
         <h3 className="text-sm font-semibold text-foreground mb-3">Workflow di approvazione</h3>
         <div className="space-y-4">
           {workflowEvents.map((event, index) => (
@@ -369,7 +369,6 @@ export default function ContractDetailPage() {
     if (!contractHistory || contractHistory.length === 0) {
       return (
         <div>
-          {renderWorkflowEvents()}
           <div className="text-center py-12">
             <div className="flex justify-center mb-4">
               <div className="p-4 rounded-full bg-muted">
@@ -379,12 +378,14 @@ export default function ContractDetailPage() {
             <h2 className="text-lg font-semibold text-foreground mb-2">Nessuna modifica registrata</h2>
             <p className="text-sm text-muted-foreground">Le modifiche di stato verranno tracciate qui.</p>
           </div>
+          {renderWorkflowEvents()}
         </div>
       );
     }
     return (
+      // Status changes first: they are what one looks for here. The approval
+      // workflow, which few contracts go through, follows below.
       <div>
-        {renderWorkflowEvents()}
         <div className="space-y-4">
           {contractHistory.map((history, index) => (
             <div key={history.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
@@ -409,12 +410,13 @@ export default function ContractDetailPage() {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Modificato da utente ID: {history.modifiedById}
+                  Da: {history.modifiedByName ?? "Sistema"}
                 </p>
               </div>
             </div>
           ))}
         </div>
+        {renderWorkflowEvents()}
       </div>
     );
   };

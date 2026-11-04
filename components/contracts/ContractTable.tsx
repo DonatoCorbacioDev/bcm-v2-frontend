@@ -54,11 +54,9 @@ type SortableColumn =
   | "contractNumber"
   | "counterpartyName"
   | "projectName"
-  | "wbsCode"
   | "managerName"
   | "status"
-  | "startDate"
-  | "endDate";
+  | "nextDeadline";
 
 type SortDirection = "asc" | "desc";
 
@@ -66,12 +64,17 @@ const COLUMNS: { key: SortableColumn; label: string; className?: string }[] = [
   { key: "contractNumber", label: "Numero" },
   { key: "counterpartyName", label: "Controparte" },
   { key: "projectName", label: "Progetto", className: "hidden md:table-cell" },
-  { key: "wbsCode", label: "Codice WBS", className: "hidden lg:table-cell" },
   { key: "managerName", label: "Responsabile", className: "hidden lg:table-cell" },
   { key: "status", label: "Stato" },
-  { key: "startDate", label: "Data inizio", className: "hidden md:table-cell" },
-  { key: "endDate", label: "Data fine", className: "hidden lg:table-cell" },
+  // The date to act on: the last day to give notice for a tacit renewal,
+  // otherwise the end date. WBS code and start date live in the detail page.
+  { key: "nextDeadline", label: "Prossima scadenza", className: "hidden md:table-cell" },
 ];
+
+/** The date to act on: notice deadline for a tacit renewal, otherwise the end date (YYYY-MM-DD). */
+function nextDeadline(c: Contract): string | null {
+  return c.noticeDeadline ?? c.endDate ?? null;
+}
 
 // counterpartyName has no flat property on Contract (only the nested
 // counterparty object) -- every other column is a plain string field, so a
@@ -81,11 +84,9 @@ const SORT_VALUE: Record<SortableColumn, (c: Contract) => string> = {
   contractNumber: (c) => c.contractNumber,
   counterpartyName: (c) => c.counterparty?.name ?? "",
   projectName: (c) => c.projectName,
-  wbsCode: (c) => c.wbsCode,
   managerName: (c) => c.managerName,
   status: (c) => c.status,
-  startDate: (c) => c.startDate,
-  endDate: (c) => c.endDate,
+  nextDeadline: (c) => nextDeadline(c) ?? "",
 };
 
 /**
@@ -100,8 +101,9 @@ function sortContracts(
   sortKey: SortableColumn | null,
   direction: SortDirection
 ): Contract[] {
-  if (!sortKey) return contracts;
-  const getValue = SORT_VALUE[sortKey];
+  const getValue = sortKey ? SORT_VALUE[sortKey] : undefined;
+  // A view saved before a column was removed (e.g. "wbsCode") sorts by nothing.
+  if (!getValue) return contracts;
   const sorted = [...contracts].sort((a, b) => {
     /* istanbul ignore next */
     const aVal = getValue(a) ?? "";
@@ -562,7 +564,6 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                 </TableCell>
                 <TableCell className="text-sm">{c.counterparty?.name ?? "N/D"}</TableCell>
                 <TableCell className="hidden md:table-cell text-sm">{c.projectName}</TableCell>
-                <TableCell className="hidden lg:table-cell text-sm">{c.wbsCode || "N/D"}</TableCell>
                 <TableCell className="hidden lg:table-cell text-sm">{c.managerName || "Non assegnato"}</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
@@ -572,11 +573,11 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                     <ExpiringSoonBadge contract={c} className="text-xs" />
                   </div>
                 </TableCell>
-                <TableCell className="hidden md:table-cell text-sm">
-                  {new Date(c.startDate).toLocaleDateString("it-IT")}
-                </TableCell>
-                <TableCell className="hidden lg:table-cell text-sm">
-                  {/* istanbul ignore next */c.endDate ? new Date(c.endDate).toLocaleDateString("it-IT") : "N/D"}
+                <TableCell className="hidden md:table-cell text-sm whitespace-nowrap">
+                  {nextDeadline(c) ? new Date(nextDeadline(c)!).toLocaleDateString("it-IT") : "N/D"}
+                  {c.noticeDeadline && (
+                    <span className="block text-xs text-muted-foreground">ultimo giorno per disdire</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">

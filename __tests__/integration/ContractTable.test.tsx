@@ -251,12 +251,11 @@ describe('ContractTable', () => {
     expect(within(row).getByText('Attivo')).toBeInTheDocument();
   });
 
-  it('shows fallback text for a contract missing WBS code or assigned manager', () => {
+  it('shows fallback text for a contract without an assigned manager', () => {
     const unassignedContract: Contract = {
       ...activeContract,
       id: 3,
       contractNumber: 'CNT-003',
-      wbsCode: '',
       managerName: '',
     };
     (useContractsPaged as jest.Mock).mockReturnValue({
@@ -266,8 +265,28 @@ describe('ContractTable', () => {
     });
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('N/D')).toBeInTheDocument();
     expect(screen.getByText('Non assegnato')).toBeInTheDocument();
+  });
+
+  it('shows the date to act on: the last day to give notice for a tacit renewal, otherwise the end date', () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([
+        { ...activeContract, id: 4, contractNumber: 'CNT-TACIT', endDate: '2026-12-31', autoRenew: true,
+          noticeDays: 90, renewalMonths: 12, noticeDeadline: '2026-10-02' },
+        { ...activeContract, id: 5, contractNumber: 'CNT-PLAIN', endDate: '2026-12-31' },
+      ]),
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const tacit = screen.getByText('CNT-TACIT').closest('tr')!;
+    const plain = screen.getByText('CNT-PLAIN').closest('tr')!;
+    expect(tacit).toHaveTextContent('2/10/2026');
+    expect(tacit).toHaveTextContent('ultimo giorno per disdire');
+    expect(plain).toHaveTextContent('31/12/2026');
+    expect(plain).not.toHaveTextContent('ultimo giorno per disdire');
+    expect(screen.queryByRole('button', { name: /codice wbs/i })).not.toBeInTheDocument();
   });
 
   it('shows fallback text and sorts correctly for a contract with no counterparty', async () => {
@@ -653,7 +672,7 @@ describe('ContractTable', () => {
   it('sorts by every other sortable column without error', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    for (const name of [/progetto/i, /codice wbs/i, /responsabile/i, /^stato/i, /data inizio/i, /data fine/i]) {
+    for (const name of [/progetto/i, /responsabile/i, /^stato/i, /prossima scadenza/i]) {
       const header = screen.getByRole('button', { name });
       await userEvent.click(header);
       expect(header.closest('th')).toHaveAttribute('aria-sort', 'ascending');

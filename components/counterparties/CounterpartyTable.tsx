@@ -176,7 +176,14 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs">{TYPE_LABELS[cp.type]}</Badge>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="outline" className="text-xs">{TYPE_LABELS[cp.type]}</Badge>
+                      {/* Reassuring at a glance: payments to this supplier are
+                          checked against an IBAN already confirmed. */}
+                      {cp.type !== "CUSTOMER" && cp.verifiedIban && (
+                        <Badge variant="success" className="text-xs">IBAN verificato</Badge>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{cp.vatNumber || "N/D"}</TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">{cp.contactName || "N/D"}</TableCell>

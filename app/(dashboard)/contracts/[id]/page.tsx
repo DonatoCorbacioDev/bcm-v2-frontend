@@ -32,6 +32,7 @@ import InvoicesTab from "@/components/contracts/InvoicesTab";
 import api from "@/lib/api";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
 import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
+import { NextActionCard } from "@/components/contracts/NextActionCard";
 import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent } from "@/types";
 import { formatMoney } from "@/lib/formatMoney";
 
@@ -449,7 +450,11 @@ export default function ContractDetailPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Torna ai contratti
           </Button>
-          <h1 className="text-3xl font-bold text-foreground">Dettagli contratto</h1>
+          {/* Says which contract this is: number and project, then the counterparty. */}
+          <h1 className="text-3xl font-bold text-foreground">
+            {contract.contractNumber}
+            {contract.projectName && <span className="font-normal text-muted-foreground"> · {contract.projectName}</span>}
+          </h1>
           <p className="text-muted-foreground mt-1">{contract.counterparty?.name ?? "N/D"}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -507,6 +512,8 @@ export default function ContractDetailPage() {
         </div>
       </div>
 
+      <NextActionCard contract={contract} />
+
       {/* General Information */}
       <Card>
         <CardHeader>
@@ -518,9 +525,6 @@ export default function ContractDetailPage() {
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
           {[
             { label: "Controparte", value: contract.counterparty?.name ?? "N/D" },
-            { label: "Numero contratto", value: contract.contractNumber },
-            { label: "Nome progetto", value: contract.projectName },
-            { label: "Codice WBS", value: contract.wbsCode },
             { label: "Data inizio", value: new Date(contract.startDate).toLocaleDateString("it-IT") },
             { label: "Data fine", value: new Date(contract.endDate).toLocaleDateString("it-IT") },
           ].map(({ label, value }) => (
@@ -542,15 +546,9 @@ export default function ContractDetailPage() {
             </div>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Manager</p>
+            <p className="text-sm text-muted-foreground">Responsabile</p>
             <p className="text-base font-medium text-foreground">
               {contract.manager ? `${contract.manager.firstName} ${contract.manager.lastName}` : "Non assegnato"}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Area di business</p>
-            <p className="text-base font-medium text-foreground">
-              {contract.area?.name || "Non assegnato"}
             </p>
           </div>
           {/* Shown only when stated: "not stated" is the default for every
@@ -587,6 +585,11 @@ export default function ContractDetailPage() {
               <p className="text-base font-medium text-foreground">Non si rinnova</p>
             </div>
           )}
+          {/* Bookkeeping data, rarely what one looks for: kept, but quieter. */}
+          <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3 border-t border-border pt-3">
+            Area: {contract.area?.name || "non assegnata"}
+            {contract.wbsCode && <> · Codice WBS: {contract.wbsCode}</>}
+          </p>
         </CardContent>
       </Card>
 

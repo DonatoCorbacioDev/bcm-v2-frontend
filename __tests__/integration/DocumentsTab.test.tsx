@@ -5,6 +5,10 @@ import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 
+// The AI actions are hidden by default (see DocumentsTabAiHidden.test); switched
+// on here so they keep working for when they come back.
+jest.mock('@/lib/featureFlags', () => ({ SHOW_EXPERIMENTAL_AI: true }));
+
 jest.mock('@/lib/api', () => ({
   __esModule: true,
   default: {

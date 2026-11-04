@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import api from "@/lib/api";
 import DocumentVersionsDialog from "@/components/contracts/DocumentVersionsDialog";
 import type { Contract, ContractDocument, DocumentAnalysis, ClauseRiskAnalysis } from "@/types";
+import { SHOW_EXPERIMENTAL_AI } from "@/lib/featureFlags";
 
 const RISK_LEVEL_CONFIG = {
   HIGH: { badge: "destructive" as const, label: "Alto" },
@@ -359,6 +360,10 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       <Download className="h-4 w-4" />
                     </Button>
 
+                    {/* Field extraction (keyword rules) and clause risk (a very
+                        small AI model) aren't reliable yet: hidden until they are. */}
+                    {SHOW_EXPERIMENTAL_AI && (
+                      <>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -421,6 +426,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                           <ChevronDown className="h-4 w-4" />
                         )}
                       </Button>
+                    )}
+                      </>
                     )}
 
                     {isAdmin && (

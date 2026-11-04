@@ -89,6 +89,23 @@ describe('CounterpartyTable', () => {
 
   // ── States ────────────────────────────────────────────────────────────────
 
+  it('marks a supplier whose IBAN is verified, and only a supplier', () => {
+    (useCounterparties as jest.Mock).mockReturnValue({
+      data: [
+        { ...beta, verifiedIban: 'IT...6789' },
+        { ...alfa, verifiedIban: 'IT...1111' },
+        { id: 3, name: 'Gamma Srl', type: 'SUPPLIER' },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('Beta Srl').closest('tr')).toHaveTextContent('IBAN verificato');
+    expect(screen.getByText('Alfa Srl').closest('tr')).not.toHaveTextContent('IBAN verificato');
+    expect(screen.getByText('Gamma Srl').closest('tr')).not.toHaveTextContent('IBAN verificato');
+  });
+
   it('shows skeleton while loading', () => {
     (useCounterparties as jest.Mock).mockReturnValue({
       data: undefined,

@@ -5,80 +5,48 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import Link from "next/link";
-import { ArrowRight, PlayCircle, ShieldCheck, Bell, TrendingUp } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, FileText, Landmark, PlayCircle, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
 import { LogoMark } from "@/components/layout/Logo";
 
-/** Abstract dashboard mockup — shows the app's feel without a real screenshot. */
+/**
+ * A miniature of the real home page: what BCM shows first, so a visitor sees
+ * the product's point (what to do, by when) instead of made-up totals.
+ */
 function DashboardMockup() {
+  const rows = [
+    { icon: Landmark, tone: "text-[var(--status-red-fg)] bg-[var(--status-red-bg)]",
+      title: "IBAN cambiato: verifica prima di pagare", detail: "Fattura di Ferri & Associati" },
+    { icon: CalendarClock, tone: "text-[var(--status-amber-fg)] bg-[var(--status-amber-bg)]",
+      title: "Disdici entro il 24 novembre", detail: "Manutenzione impianti · poi si rinnova per 12 mesi" },
+    { icon: AlertTriangle, tone: "text-[var(--status-amber-fg)] bg-[var(--status-amber-bg)]",
+      title: "Scade il 16 novembre", detail: "Audit di Conformità · Vertice Legal" },
+    { icon: FileText, tone: "text-primary bg-primary/10",
+      title: "Fattura da abbinare", detail: "Nuvola Cloud · 4.800,00 € + IVA · in linea con il previsto" },
+  ];
   return (
-    <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden">
+    <div className="relative rounded-2xl border border-border bg-card shadow-2xl overflow-hidden" aria-hidden="true">
       {/* Fake top bar */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/40">
         <LogoMark size={16} />
-        <span className="text-xs text-muted-foreground font-mono">BCM — Dashboard</span>
+        <span className="text-xs text-muted-foreground font-mono">BCM — Home</span>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* KPI row */}
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { label: "Totali", value: "48", color: "text-foreground" },
-            { label: "Attivi", value: "35", color: "text-[var(--status-green-fg)]" },
-            { label: "In scadenza", value: "7", color: "text-[var(--status-amber-fg)]" },
-            { label: "Scaduti", value: "6", color: "text-[var(--status-red-fg)]" },
-          ].map((kpi) => (
-            <div
-              key={kpi.label}
-              className="rounded-lg border border-border bg-background p-2 text-center"
-            >
-              <p className={`text-lg font-bold ${kpi.color}`}>{kpi.value}</p>
-              <p className="text-[10px] text-muted-foreground">{kpi.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Alert bar */}
-        <div className="flex items-center gap-2 rounded-lg bg-[var(--status-amber-bg)] border border-[var(--status-amber-fg)]/30 px-3 py-2">
-          <Bell className="h-3.5 w-3.5 text-[var(--status-amber-fg)] shrink-0" />
-          <span className="text-[11px] text-[var(--status-amber-fg)]">
-            3 contratti scadono nei prossimi 7 giorni
-          </span>
-        </div>
-
-        {/* Contract rows */}
-        <div className="space-y-1.5">
-          {[
-            { num: "CNT-2025-001", client: "Acme Corp Srl", days: "28 gg", color: "text-[var(--status-green-fg)]", bg: "bg-[var(--status-green-bg)]" },
-            { num: "CNT-2025-002", client: "Beta Systems SpA", days: "6 gg", color: "text-[var(--status-amber-fg)]", bg: "bg-[var(--status-amber-bg)]" },
-            { num: "CNT-2025-003", client: "Gamma Holdings", days: "1 gg", color: "text-[var(--status-red-fg)]", bg: "bg-[var(--status-red-bg)]" },
-          ].map((row) => (
-            <div
-              key={row.num}
-              className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2"
-            >
-              <div>
-                <p className="text-[11px] font-medium text-foreground">{row.num}</p>
-                <p className="text-[10px] text-muted-foreground">{row.client}</p>
-              </div>
-              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${row.bg} ${row.color}`}>
-                {row.days}
+      <div className="p-4 space-y-3">
+        <p className="text-[11px] text-muted-foreground">Cosa richiede attenzione nei prossimi 30 giorni</p>
+        <div className="divide-y divide-border rounded-lg border border-border bg-background">
+          {rows.map(({ icon: Icon, tone, title, detail }) => (
+            <div key={title} className="flex items-start gap-2.5 px-3 py-2.5">
+              <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${tone}`}>
+                <Icon className="h-3.5 w-3.5" />
               </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium text-foreground">{title}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{detail}</p>
+              </div>
             </div>
           ))}
-        </div>
-
-        {/* Risk score mini-widget */}
-        <div className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2">
-          <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-          <div className="flex-1">
-            <p className="text-[10px] text-muted-foreground">Valutazione rischio</p>
-            <div className="w-full h-1.5 bg-muted rounded-full mt-1">
-              <div className="h-1.5 bg-[var(--status-green-fg)] rounded-full" style={{ width: "62%" }} />
-            </div>
-          </div>
-          <span className="text-[11px] font-bold text-[var(--status-green-fg)]">Basso</span>
         </div>
       </div>
     </div>

@@ -11,6 +11,7 @@ import ContractTable from "@/components/contracts/ContractTable";
 import ContractForm from "@/components/contracts/ContractForm";
 import ContractImportDialog from "@/components/contracts/ContractImportDialog";
 import { SemanticSearchBar } from "@/components/contracts/SemanticSearchBar";
+import { SHOW_EXPERIMENTAL_AI } from "@/lib/featureFlags";
 import { MissingPrerequisiteBanner } from "@/components/shared/MissingPrerequisiteBanner";
 import {
   Dialog,
@@ -25,7 +26,13 @@ import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
 import { useCounterparties } from "@/hooks/useCounterparties";
 import { toast } from "sonner";
-import { FileSpreadsheet, FileText, Upload } from "lucide-react";
+import { ChevronDown, Download, FileSpreadsheet, FileText, Upload } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type MissingPrerequisiteFlags = {
   missingAreas: boolean;
@@ -145,24 +152,27 @@ function ContractsPageContent() {
           <p className="text-muted-foreground mt-2">Gestisci tutti i contratti aziendali</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => handleExport("excel")}
-            disabled={isExporting}
-            className="hidden sm:flex"
-          >
-            <FileSpreadsheet className="mr-2 h-4 w-4" />
-            {isExporting ? "Esportazione..." : "Excel"}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleExport("pdf")}
-            disabled={isExporting}
-            className="hidden sm:flex"
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            {isExporting ? "Esportazione..." : "PDF"}
-          </Button>
+          {/* One "Esporta" menu instead of two buttons: exporting is occasional,
+              it shouldn't compete with creating a contract. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" disabled={isExporting} className="hidden sm:flex">
+                <Download className="mr-2 h-4 w-4" aria-hidden="true" />
+                {isExporting ? "Esportazione..." : "Esporta"}
+                <ChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => handleExport("excel")}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" aria-hidden="true" />
+                Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleExport("pdf")}>
+                <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
+                PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {isAdmin && (
             <Button
               variant="outline"
@@ -185,7 +195,7 @@ function ContractsPageContent() {
         <MissingPrerequisiteBanner message={prerequisiteMessage} actions={prerequisiteActions} />
       )}
 
-      <SemanticSearchBar />
+      {SHOW_EXPERIMENTAL_AI && <SemanticSearchBar />}
 
       <ContractTable onEditClick={handleEditClick} initialSearchQuery={initialSearchQuery} />
 

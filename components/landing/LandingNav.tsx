@@ -20,7 +20,7 @@ export function LandingNav() {
   const navLinks = [
     { href: "#features", label: "Funzionalità" },
     { href: "#how-it-works", label: "Come funziona" },
-    { href: "#pricing", label: "Prezzi" },
+    { href: "#pricing", label: "Piani" },
   ];
 
   return (

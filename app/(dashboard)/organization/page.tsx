@@ -33,6 +33,8 @@ import {
 } from "@/components/ui/card";
 import { DeleteOrganizationCard } from "@/components/organization/DeleteOrganizationCard";
 
+const PRO_INFO_HREF = `mailto:donatocorbacio92@gmail.com?subject=${encodeURIComponent("Informazioni sul piano Pro di BCM")}`;
+
 export default function OrganizationPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
@@ -69,12 +71,6 @@ export default function OrganizationPage() {
     }
     if (checkout) router.replace("/organization");
   }, [isAdmin, queryClient, router]);
-
-  const checkoutMutation = useMutation({
-    mutationFn: organizationService.startProCheckout,
-    onSuccess: (url) => redirectToExternal(url),
-    onError: () => toast.error("Impossibile avviare il pagamento, riprova più tardi"),
-  });
 
   const portalMutation = useMutation({
     mutationFn: organizationService.openBillingPortal,
@@ -179,13 +175,11 @@ export default function OrganizationPage() {
                 <span className="text-sm text-muted-foreground">Piano</span>
                 <span className="flex items-center gap-3">
                   <Badge variant="secondary">{organization?.subscriptionTier ? tierLabel(organization.subscriptionTier) : ""}</Badge>
+                  {/* The Pro plan is not for sale yet (the backend refuses the
+                      checkout, billing.checkout-enabled): ask instead of buy. */}
                   {organization?.subscriptionTier === "FREE" && (
-                    <Button
-                      size="sm"
-                      onClick={() => checkoutMutation.mutate()}
-                      disabled={checkoutMutation.isPending || checkoutMutation.isSuccess}
-                    >
-                      {checkoutMutation.isPending || checkoutMutation.isSuccess ? "Reindirizzamento..." : "Passa a PRO"}
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={PRO_INFO_HREF}>Richiedi informazioni sul Pro</a>
                     </Button>
                   )}
                   {canManageSubscription && (

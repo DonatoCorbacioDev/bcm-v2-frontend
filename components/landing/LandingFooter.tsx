@@ -46,7 +46,7 @@ export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
               {[
                 { href: "#features", label: "Funzionalità" },
                 { href: "#how-it-works", label: "Come funziona" },
-                { href: "#pricing", label: "Prezzi" },
+                { href: "#pricing", label: "Piani" },
               ].map((link) => (
                 <li key={link.href}>
                   <a

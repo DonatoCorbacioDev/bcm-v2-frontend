@@ -17,6 +17,13 @@ const CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 export default function TrasparenzaAiPage() {
   return (
     <LegalPageShell title="Trasparenza sull'uso dell'intelligenza artificiale" lastUpdated="20 luglio 2026">
+      <p className="rounded-md border border-border bg-muted px-4 py-3">
+        <strong>
+          Le funzionalità di analisi AI descritte in questa pagina non sono attualmente disponibili
+          nell&apos;interfaccia pubblica di BCM.
+        </strong>
+      </p>
+
       <section>
         <h2>1. Perché questa pagina</h2>
         <p>

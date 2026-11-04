@@ -113,27 +113,15 @@ describe('OrganizationPage', () => {
       window.history.replaceState({}, '', '/');
     });
 
-    it('redirects to the Stripe checkout URL when a FREE org clicks "Passa a PRO"', async () => {
+    it('offers a FREE org to ask about Pro, without starting a payment (Pro is not for sale yet)', async () => {
       (organizationService.getMine as jest.Mock).mockResolvedValue(organization);
-      (organizationService.startProCheckout as jest.Mock).mockResolvedValue('https://checkout.stripe.com/c/pay/cs_test_1');
 
       render(<OrganizationPage />, { wrapper: createWrapper() });
-      await userEvent.click(await screen.findByRole('button', { name: 'Passa a PRO' }));
 
-      await waitFor(() =>
-        expect(redirectToExternal).toHaveBeenCalledWith('https://checkout.stripe.com/c/pay/cs_test_1'),
-      );
-    });
-
-    it('shows an error toast and does not redirect when checkout cannot start', async () => {
-      (organizationService.getMine as jest.Mock).mockResolvedValue(organization);
-      (organizationService.startProCheckout as jest.Mock).mockRejectedValue(new Error('503'));
-
-      render(<OrganizationPage />, { wrapper: createWrapper() });
-      await userEvent.click(await screen.findByRole('button', { name: 'Passa a PRO' }));
-
-      await waitFor(() => expect(toast.error).toHaveBeenCalled());
-      expect(redirectToExternal).not.toHaveBeenCalled();
+      const ask = await screen.findByRole('link', { name: 'Richiedi informazioni sul Pro' });
+      expect(ask.getAttribute('href')).toMatch(/^mailto:/);
+      expect(screen.queryByRole('button', { name: 'Passa a PRO' })).not.toBeInTheDocument();
+      expect(organizationService.startProCheckout).not.toHaveBeenCalled();
     });
 
     it('does not offer the upgrade to an org already on a paid plan', async () => {
@@ -142,7 +130,7 @@ describe('OrganizationPage', () => {
       render(<OrganizationPage />, { wrapper: createWrapper() });
 
       expect(await screen.findByText('8 / 15')).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Passa a PRO' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Richiedi informazioni sul Pro' })).not.toBeInTheDocument();
     });
 
     it('lets a Stripe-subscribed org open the Customer Portal', async () => {

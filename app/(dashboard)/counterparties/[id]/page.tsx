@@ -84,7 +84,9 @@ export default function CounterpartyDetailPage() {
             Fatturato vs previsto
           </CardTitle>
           <CardDescription>
-            Valore contrattato (contratti attivi) vs. fatture confermate nell&apos;anno corrente
+            {summary && !summary.comparable
+              ? "Le fatture emesse ai clienti non sono gestite in BCM: qui trovi il valore dei contratti"
+              : "Costi previsti da inizio anno a oggi e fatture confermate dello stesso periodo, IVA esclusa"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -102,20 +104,32 @@ export default function CounterpartyDetailPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <KPICard title="Contratti attivi" value={summary.activeContracts} />
-                <KPICard title="Valore contrattato" value={formatMoney(summary.contractedValue, { decimals: 0 })} />
-                <KPICard
-                  title="Scostamento"
-                  value={PERCENT_FORMATTER.format(summary.variancePercent / 100)}
-                  variant={invoicingVarianceVariant(summary.variancePercent)}
-                />
+                <KPICard title="Valore annuo contrattato" value={formatMoney(summary.contractedValue, { decimals: 0 })} />
+                {summary.comparable && (
+                  <KPICard
+                    title="Scostamento"
+                    value={PERCENT_FORMATTER.format(summary.variancePercent / 100)}
+                    variant={invoicingVarianceVariant(summary.variancePercent)}
+                  />
+                )}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Fatturato confermato</p>
-                  <p className="text-base font-medium text-foreground">
-                    {formatMoney(summary.invoicedYtd, { decimals: 0 })}
-                  </p>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                {summary.comparable && (
+                  <>
+                    <div>
+                      <p className="text-muted-foreground">Previsto da inizio anno</p>
+                      <p className="text-base font-medium text-foreground">
+                        {formatMoney(summary.expectedYtd, { decimals: 0 })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Fatturato confermato (imponibile)</p>
+                      <p className="text-base font-medium text-foreground">
+                        {formatMoney(summary.invoicedYtd, { decimals: 0 })}
+                      </p>
+                    </div>
+                  </>
+                )}
                 <div>
                   <p className="text-muted-foreground">Fatture totali</p>
                   <p className="text-base font-medium text-foreground">

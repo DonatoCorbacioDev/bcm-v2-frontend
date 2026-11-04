@@ -86,7 +86,7 @@ function present(item: HomeAttentionItem): Presentation {
       icon: FileText,
       tone: "info",
       title: `Fattura ${item.invoiceNumber ?? ""} da abbinare`,
-      detail: [item.counterpartyName, item.invoiceAmount != null ? formatMoney(item.invoiceAmount) : null]
+      detail: [item.counterpartyName, item.invoiceAmount != null ? `${formatMoney(item.invoiceAmount)} + IVA` : null]
         .filter(Boolean)
         .join(" · "),
       href: invoicesHref,

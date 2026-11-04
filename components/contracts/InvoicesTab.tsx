@@ -53,6 +53,28 @@ function formatAmount(amount: number, currency: string) {
   return formatMoney(amount, { currency });
 }
 
+/** TipoDocumento of a credit note. */
+const CREDIT_NOTE = "TD04";
+
+/**
+ * How the invoice compares with the instalment it is matched to, in words.
+ * A difference is "da verificare", never an error: it can be an agreed
+ * change, a variable fee or a mistake, and only a person can tell.
+ */
+function AmountDifferenceNote({ invoice }: { readonly invoice: ElectronicInvoice }) {
+  const diff = invoice.amountDifference;
+  if (diff == null || invoice.expectedAmount == null) return null;
+  if (Math.abs(diff) < 0.005) {
+    return <p className="text-xs text-muted-foreground">In linea con il previsto</p>;
+  }
+  const sign = diff > 0 ? "+" : "−";
+  return (
+    <p className="text-xs font-medium text-[var(--status-amber-fg)]" title={`Previsto ${formatAmount(invoice.expectedAmount, invoice.currency)}`}>
+      Differenza {sign}{formatAmount(Math.abs(diff), invoice.currency)} da verificare
+    </p>
+  );
+}
+
 export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -339,7 +361,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                 <th className="px-3 py-3 w-10">
                   <span className="sr-only">Seleziona</span>
                 </th>
-                {["Fattura", "Fornitore", "Totale", "Abbinamento", "Pagamento", "Azioni"].map((h) => (
+                {["Fattura", "Fornitore", "Imponibile", "Abbinamento", "Pagamento", "Azioni"].map((h) => (
                   <th
                     key={h}
                     className="px-3 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
@@ -380,6 +402,9 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                         >
                           {invoice.invoiceNumber || invoice.fileName}
                         </button>
+                        {invoice.documentType === CREDIT_NOTE && (
+                          <Badge variant="secondary" className="ml-2 align-middle">Nota di credito</Badge>
+                        )}
                         <p className="text-xs text-muted-foreground whitespace-nowrap">
                           {new Date(invoice.invoiceDate).toLocaleDateString("it-IT", {
                             year: "numeric",
@@ -400,11 +425,21 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   <td className="px-3 py-3 text-sm text-foreground min-w-[140px]">
                     {invoice.supplierName}
                   </td>
-                  <td className="px-3 py-3 text-sm font-bold text-foreground whitespace-nowrap">
-                    {formatAmount(invoice.totalAmount, invoice.currency)}
+                  {/* Contract amounts are IVA esclusa, so the taxable amount is
+                      the one that means something here; the total is the
+                      amount actually paid. */}
+                  <td className="px-3 py-3 text-sm whitespace-nowrap">
+                    <p className="font-bold text-foreground">
+                      {formatAmount(invoice.taxableAmount ?? invoice.totalAmount, invoice.currency)}
+                    </p>
+                    {invoice.taxableAmount != null && (
+                      <p className="text-xs text-muted-foreground">
+                        Totale {formatAmount(invoice.totalAmount, invoice.currency)} IVA inclusa
+                      </p>
+                    )}
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center gap-1.5">
+                    <div className="space-y-1"><div className="flex items-center gap-1.5">
                       <Badge variant={(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).variant}>
                         {(MATCH_STATUS_CONFIG[invoice.matchStatus] ?? MATCH_STATUS_CONFIG.UNMATCHED).label}
                         {invoice.matchStatus === "SUGGESTED" && invoice.matchConfidence != null
@@ -437,6 +472,8 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                           </Button>
                         </>
                       )}
+                    </div>
+                    <AmountDifferenceNote invoice={invoice} />
                     </div>
                   </td>
                   <td className="px-3 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
@@ -589,10 +626,21 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                       day: "numeric",
                     }),
                   },
+                  ...(selectedInvoice.taxableAmount != null
+                    ? [
+                        { label: "Imponibile", value: formatAmount(selectedInvoice.taxableAmount, selectedInvoice.currency) },
+                        ...(selectedInvoice.vatAmount != null
+                          ? [{ label: "IVA", value: formatAmount(selectedInvoice.vatAmount, selectedInvoice.currency) }]
+                          : []),
+                      ]
+                    : []),
                   {
                     label: "Importo totale",
                     value: formatAmount(selectedInvoice.totalAmount, selectedInvoice.currency),
                   },
+                  ...(selectedInvoice.expectedAmount != null
+                    ? [{ label: "Previsto dal contratto", value: formatAmount(selectedInvoice.expectedAmount, selectedInvoice.currency) }]
+                    : []),
                 ].map(({ label, value }) => (
                   <div key={label}>
                     <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">

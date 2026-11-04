@@ -405,7 +405,7 @@ export default function ContractForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="annualValue">Valore annuo (€)</Label>
+            <Label htmlFor="annualValue">Valore annuo (€, IVA esclusa)</Label>
             <Input
               id="annualValue"
               type="number"

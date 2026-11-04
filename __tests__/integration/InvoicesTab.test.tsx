@@ -187,6 +187,34 @@ describe('InvoicesTab', () => {
     expect(screen.getByText('1.220,00 €')).toBeInTheDocument();
   });
 
+  // ── imponibile vs contract ─────────────────────────────────────────────────
+
+  it('shows the taxable amount, the one compared with the contract, with the total below', async () => {
+    mockApiGet({ invoices: [{ ...invoice, taxableAmount: 1000, vatAmount: 220 }] });
+    renderTab();
+    expect(await screen.findByText('1.000,00 €')).toBeInTheDocument();
+    expect(screen.getByText('Totale 1.220,00 € IVA inclusa')).toBeInTheDocument();
+  });
+
+  it('says when the invoice is in line with the instalment, and when a difference needs checking', async () => {
+    mockApiGet({ invoices: [
+      { ...invoiceSuggested, taxableAmount: 1000, expectedAmount: 1000, amountDifference: 0 },
+      { ...invoiceConfirmed, taxableAmount: 1150, expectedAmount: 1000, amountDifference: 150 },
+      { ...invoiceRejected, taxableAmount: 900, expectedAmount: 1000, amountDifference: -100 },
+    ] });
+    renderTab();
+    expect(await screen.findByText('In linea con il previsto')).toBeInTheDocument();
+    expect(screen.getByText('Differenza +150,00 € da verificare')).toHaveAttribute('title', expect.stringMatching(/^Previsto 1\.000,00\s€$/));
+    expect(screen.getByText('Differenza −100,00 € da verificare')).toBeInTheDocument();
+  });
+
+  it('marks a credit note and says nothing about a difference without a matched instalment', async () => {
+    mockApiGet({ invoices: [{ ...invoice, documentType: 'TD04', taxableAmount: 200 }] });
+    renderTab();
+    expect(await screen.findByText('Nota di credito')).toBeInTheDocument();
+    expect(screen.queryByText(/da verificare|In linea/)).not.toBeInTheDocument();
+  });
+
   // ── admin guard ────────────────────────────────────────────────────────────
 
   it('hides delete button for non-admin users', async () => {

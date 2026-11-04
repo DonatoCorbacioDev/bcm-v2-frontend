@@ -63,6 +63,10 @@ export interface CounterpartyInvoicingSummary {
   variancePercent: number;
   invoiceCount: number;
   lastInvoiceDate: string | null;
+  /** Expected costs from January to this month (IVA esclusa). */
+  expectedYtd: number;
+  /** False for a customer: invoices issued to customers aren't in BCM, so there's nothing to compare. */
+  comparable: boolean;
 }
 
 export interface OrganizationInvoicingSummary {
@@ -199,6 +203,13 @@ export interface ElectronicInvoice {
   matchConfidence: number | null;
   matchedAt: string | null;
   matchedByUsername: string | null;
+  /** Imponibile (IVA esclusa): what contract amounts are compared with. Null for an invoice not re-read yet. */
+  taxableAmount?: number | null;
+  vatAmount?: number | null;
+  /** The instalment the invoice is matched (or suggested) to. */
+  expectedAmount?: number | null;
+  /** taxableAmount - expectedAmount, to be checked by a person; null for a credit note or without a match. */
+  amountDifference?: number | null;
 }
 
 export interface ContractHistory {

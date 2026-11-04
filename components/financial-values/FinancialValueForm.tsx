@@ -179,7 +179,7 @@ export default function FinancialValueForm({
       {/* Financial Amount */}
       <div className="space-y-2">
         <Label htmlFor="financialAmount">
-          Importo (€) <span className="text-destructive">*</span>
+          Importo (€, IVA esclusa) <span className="text-destructive">*</span>
         </Label>
         <Input
           id="financialAmount"

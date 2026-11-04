@@ -1,5 +1,11 @@
 import { cn, getContractStatusVariant } from '@/lib/utils';
-import { formatExpiresIn, getExpiringSoonDays } from '@/lib/statusConfig';
+import {
+  computeNoticeDeadline,
+  formatExpiresIn,
+  formatNoticeIn,
+  getExpiringSoonDays,
+  getNoticeDeadlineDays,
+} from '@/lib/statusConfig';
 
 describe('cn', () => {
   it('merges class names', () => {
@@ -71,5 +77,34 @@ describe('formatExpiresIn', () => {
 
   it('uses the plural otherwise', () => {
     expect(formatExpiresIn(12)).toBe('Scade tra 12 giorni');
+  });
+});
+
+describe('tacit renewal helpers', () => {
+  it('computes the last day to give notice like the backend: end date minus notice days', () => {
+    expect(computeNoticeDeadline('2026-12-31', 90)).toEqual(new Date(2026, 9, 2));
+    expect(computeNoticeDeadline('2026-03-01', 1)).toEqual(new Date(2026, 1, 28));
+    expect(computeNoticeDeadline('2026-12-31', 0)).toEqual(new Date(2026, 11, 31));
+  });
+
+  it('has no deadline without an end date or a notice period', () => {
+    expect(computeNoticeDeadline(undefined, 90)).toBeNull();
+    expect(computeNoticeDeadline('', 90)).toBeNull();
+    expect(computeNoticeDeadline('2026-12-31', undefined)).toBeNull();
+    expect(computeNoticeDeadline('2026-12-31', null)).toBeNull();
+  });
+
+  it('flags an ACTIVE contract within 30 days of its notice deadline', () => {
+    expect(getNoticeDeadlineDays({ status: 'ACTIVE', daysUntilNoticeDeadline: 12 })).toBe(12);
+    expect(getNoticeDeadlineDays({ status: 'ACTIVE', daysUntilNoticeDeadline: 0 })).toBe(0);
+    expect(getNoticeDeadlineDays({ status: 'ACTIVE', daysUntilNoticeDeadline: 31 })).toBeNull();
+    expect(getNoticeDeadlineDays({ status: 'ACTIVE', daysUntilNoticeDeadline: -1 })).toBeNull();
+    expect(getNoticeDeadlineDays({ status: 'CANCELLED', daysUntilNoticeDeadline: 5 })).toBeNull();
+  });
+
+  it('says how long is left to give notice', () => {
+    expect(formatNoticeIn(0)).toBe('Ultimo giorno per disdire: oggi');
+    expect(formatNoticeIn(1)).toBe('Disdici entro 1 giorno');
+    expect(formatNoticeIn(12)).toBe('Disdici entro 12 giorni');
   });
 });

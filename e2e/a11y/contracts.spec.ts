@@ -27,6 +27,20 @@ test.describe("Accessibility: contracts table and form", () => {
     expect(results.violations).toEqual([]);
   });
 
+  test("contract form with the tacit renewal terms open has no detectable axe violations", async ({ page }) => {
+    await page.goto("/contracts");
+    await page.getByRole("button", { name: "+ Nuovo contratto" }).click();
+
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Data fine").fill("2026-12-31");
+    await dialog.getByRole("checkbox", { name: "Si rinnova tacitamente" }).click();
+    await dialog.getByLabel("Preavviso per la disdetta (giorni)").fill("90");
+    await expect(dialog.getByText("Ultimo giorno per disdire:")).toContainText("2 ottobre 2026");
+
+    const results = await new AxeBuilder({ page }).include('[role="dialog"]').analyze();
+    expect(results.violations).toEqual([]);
+  });
+
   test("delete confirmation dialog has no detectable axe violations", async ({ page }) => {
     await page.goto("/contracts");
     const rows = page.getByRole("row");

@@ -48,6 +48,33 @@ export function formatExpiresIn(days: number): string {
   return `Scade tra ${days} ${days === 1 ? "giorno" : "giorni"}`;
 }
 
+/**
+ * Days left to the last day to give notice, when a tacitly renewing contract
+ * is within 30 days of it; otherwise null (no deadline, already passed, or
+ * still far).
+ */
+export function getNoticeDeadlineDays(contract: {
+  status: string;
+  daysUntilNoticeDeadline?: number | null;
+}): number | null {
+  const days = contract.daysUntilNoticeDeadline;
+  if (contract.status !== "ACTIVE" || days == null || days < 0 || days > EXPIRING_SOON_DAYS) return null;
+  return days;
+}
+
+/** "Ultimo giorno per disdire: oggi", "Disdici entro 1 giorno", "Disdici entro 12 giorni". */
+export function formatNoticeIn(days: number): string {
+  if (days === 0) return "Ultimo giorno per disdire: oggi";
+  return `Disdici entro ${days} ${days === 1 ? "giorno" : "giorni"}`;
+}
+
+/** The last day to give notice, computed like the backend: end date minus notice days. */
+export function computeNoticeDeadline(endDate: string | undefined, noticeDays: number | null | undefined): Date | null {
+  if (!endDate || noticeDays == null || !/^\d{4}-\d{2}-\d{2}$/.test(endDate)) return null;
+  const [y, m, d] = endDate.split("-").map(Number);
+  return new Date(y, m - 1, d - noticeDays);
+}
+
 /** Contract workflow stage → badge variant + Italian label. */
 export const WORKFLOW_STAGE_CONFIG: Record<string, StatusConfig> = {
   DRAFT: { variant: "secondary", label: "Bozza" },

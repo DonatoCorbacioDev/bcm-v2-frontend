@@ -5,7 +5,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
@@ -27,6 +27,8 @@ const BILLING_FREQUENCY_LABELS: Record<string, string> = {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { computeNoticeDeadline } from "@/lib/statusConfig";
 import { SelectField } from "@/components/shared/SelectField";
 
 import { contractSchema, type ContractFormData } from "@/lib/validations/contract.schema";
@@ -87,11 +89,19 @@ export default function ContractForm({
           financialTypeId: contract.financialTypeId ?? undefined,
           annualValue: contract.annualValue ?? undefined,
           billingFrequency: contract.billingFrequency ?? undefined,
+          autoRenew: contract.autoRenew ?? undefined,
+          noticeDays: contract.noticeDays ?? undefined,
+          renewalMonths: contract.renewalMonths ?? undefined,
         }
       : {
           status: "ACTIVE",
         },
   });
+
+  const autoRenew = useWatch({ control, name: "autoRenew" });
+  const watchedEndDate = useWatch({ control, name: "endDate" });
+  const watchedNoticeDays = useWatch({ control, name: "noticeDays" });
+  const noticeDeadline = autoRenew ? computeNoticeDeadline(watchedEndDate, watchedNoticeDays) : null;
 
   const onSubmit = async (data: ContractFormData) => {
     try {
@@ -284,6 +294,84 @@ export default function ContractForm({
           />
         )}
       />
+
+      {/* Tacit renewal (optional) — the date that matters is the last day to
+          give notice, not the end date: BCM warns before it. The user states
+          the terms; BCM only does the arithmetic. */}
+      <div className="space-y-4 rounded-lg border border-border p-4">
+        <div>
+          <p className="text-sm font-medium text-foreground">Rinnovo e disdetta (opzionale)</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Per i contratti che si rinnovano da soli se non vengono disdetti in tempo.
+          </p>
+        </div>
+
+        <Controller
+          control={control}
+          name="autoRenew"
+          render={({ field }) => (
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="autoRenew"
+                checked={field.value === true}
+                onCheckedChange={(checked) => field.onChange(checked === true)}
+              />
+              <Label htmlFor="autoRenew" className="font-normal">
+                Si rinnova tacitamente
+              </Label>
+            </div>
+          )}
+        />
+
+        {autoRenew && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="noticeDays">Preavviso per la disdetta (giorni)</Label>
+                <Input
+                  id="noticeDays"
+                  type="number"
+                  min={0}
+                  step={1}
+                  inputMode="numeric"
+                  aria-describedby="noticeDays-hint"
+                  {...register("noticeDays", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
+                  placeholder="es. 90"
+                />
+                <p id="noticeDays-hint" className="text-xs text-muted-foreground">
+                  Quelli indicati nel contratto
+                </p>
+                {errors.noticeDays && (
+                  <p className="text-sm text-destructive">{errors.noticeDays.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="renewalMonths">Durata del rinnovo (mesi)</Label>
+                <Input
+                  id="renewalMonths"
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  {...register("renewalMonths", { setValueAs: (v) => (v === "" ? undefined : Number(v)) })}
+                  placeholder="es. 12"
+                />
+                {errors.renewalMonths && (
+                  <p className="text-sm text-destructive">{errors.renewalMonths.message}</p>
+                )}
+              </div>
+            </div>
+            {noticeDeadline && (
+              <p className="rounded-md bg-muted px-3 py-2 text-sm text-foreground" aria-live="polite">
+                Ultimo giorno per disdire:{" "}
+                <strong>
+                  {noticeDeadline.toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" })}
+                </strong>
+              </p>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Financial terms (optional) — when all three are set, the backend
           auto-generates this contract's financial values instead of

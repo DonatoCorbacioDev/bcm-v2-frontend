@@ -119,6 +119,14 @@ export interface Contract {
   financialTypeId?: number | null;
   annualValue?: number | null;
   billingFrequency?: BillingFrequency | null;
+  // Tacit renewal terms, all optional (null = not stated). With a tacit
+  // renewal the date that matters is noticeDeadline (endDate - noticeDays),
+  // computed by the backend: miss it and the contract renews.
+  autoRenew?: boolean | null;
+  noticeDays?: number | null;
+  renewalMonths?: number | null;
+  noticeDeadline?: string | null;
+  daysUntilNoticeDeadline?: number | null;
 }
 
 export interface ContractWorkflowEvent {

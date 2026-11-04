@@ -98,6 +98,22 @@ export const contractSchema = z.object({
       message: "La frequenza di fatturazione non è valida",
     })
     .nullish(),
+
+  // Tacit renewal terms, optional: the user states them, BCM never infers
+  // them. Read with the same setValueAs as annualValue (empty -> undefined).
+  autoRenew: z.boolean().nullish(),
+  noticeDays: z
+    .number()
+    .int("Il preavviso deve essere un numero intero di giorni")
+    .min(0, "Il preavviso non può essere negativo")
+    .max(3650, "Il preavviso non può superare i 10 anni")
+    .nullish(),
+  renewalMonths: z
+    .number()
+    .int("La durata del rinnovo deve essere un numero intero di mesi")
+    .min(1, "La durata del rinnovo deve essere di almeno 1 mese")
+    .max(120, "La durata del rinnovo non può superare i 120 mesi")
+    .nullish(),
 })
   // Cross-field validation: endDate must be after or equal to startDate
   .refine(
@@ -115,6 +131,17 @@ export const contractSchema = z.object({
   // auto-generation or leaves it off entirely (matches the backend, which
   // only generates when financialTypeId + annualValue + billingFrequency
   // are ALL present).
+  // A tacit renewal is only useful with both terms: without the notice the
+  // deadline can't be computed, without the length the renewal can't be
+  // applied. (The backend accepts them missing, e.g. from an import.)
+  .refine((data) => !data.autoRenew || data.noticeDays != null, {
+    message: "Indica i giorni di preavviso previsti dal contratto",
+    path: ["noticeDays"],
+  })
+  .refine((data) => !data.autoRenew || data.renewalMonths != null, {
+    message: "Indica per quanti mesi si rinnova",
+    path: ["renewalMonths"],
+  })
   .refine(
     (data) => {
       const fields = [data.financialTypeId, data.annualValue, data.billingFrequency];

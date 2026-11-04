@@ -547,6 +547,40 @@ export default function ContractDetailPage() {
               {contract.area?.name || "Non assegnato"}
             </p>
           </div>
+          {/* Shown only when stated: "not stated" is the default for every
+              existing contract and isn't worth a row. */}
+          {contract.autoRenew === true && (
+            <>
+              <div>
+                <p className="text-sm text-muted-foreground">Rinnovo</p>
+                <p className="text-base font-medium text-foreground">
+                  {contract.renewalMonths
+                    ? `Tacito, per ${contract.renewalMonths} ${contract.renewalMonths === 1 ? "mese" : "mesi"}`
+                    : "Tacito, durata non indicata"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Preavviso per la disdetta</p>
+                <p className="text-base font-medium text-foreground">
+                  {contract.noticeDays != null ? `${contract.noticeDays} giorni` : "Non indicato"}
+                </p>
+              </div>
+              {contract.noticeDeadline && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Ultimo giorno per disdire</p>
+                  <p className="text-base font-semibold text-foreground">
+                    {new Date(contract.noticeDeadline).toLocaleDateString("it-IT")}
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+          {contract.autoRenew === false && (
+            <div>
+              <p className="text-sm text-muted-foreground">Rinnovo</p>
+              <p className="text-base font-medium text-foreground">Non si rinnova</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

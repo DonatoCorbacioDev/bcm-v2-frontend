@@ -21,6 +21,9 @@ export type ContractUpsertPayload = {
   financialTypeId?: number | null;
   annualValue?: number | null;
   billingFrequency?: BillingFrequency | null;
+  autoRenew?: boolean | null;
+  noticeDays?: number | null;
+  renewalMonths?: number | null;
 };
 
 // Pagination types

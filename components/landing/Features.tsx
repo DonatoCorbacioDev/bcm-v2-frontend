@@ -6,7 +6,7 @@
 import {
   FileText,
   Bell,
-  ShieldCheck,
+  ListChecks,
   BarChart2,
   Receipt,
   Building2,
@@ -21,27 +21,27 @@ const FEATURES = [
   },
   {
     icon: Bell,
-    title: "Avvisi di scadenza",
+    title: "Avvisi di scadenza e disdetta",
     description:
-      "Ricevi un'email 30, 14, 7 e 1 giorno prima della scadenza, una sola per volta. Ogni lunedì arriva anche il riepilogo della settimana.",
+      "Ricevi un'email 30, 14, 7 e 1 giorno prima della scadenza o, per i contratti che si rinnovano da soli, prima dell'ultimo giorno per disdirli. Ogni lunedì arriva anche il riepilogo della settimana.",
   },
   {
-    icon: ShieldCheck,
-    title: "Contratti da tenere d'occhio",
+    icon: ListChecks,
+    title: "Cosa fare questa settimana",
     description:
-      "Un modello di machine learning indica i contratti più a rischio, in base a scadenze, stato e andamento dei valori. Ti aiuta a scegliere le priorità, la decisione resta tua.",
+      "Appena entri vedi cosa richiede attenzione: disdette da inviare, contratti in scadenza, fatture da abbinare, IBAN cambiati. Ogni voce ti porta dove intervenire.",
   },
   {
     icon: BarChart2,
     title: "Ricavi, costi e budget",
     description:
-      "Vedi ricavi e costi per contratto e per area di business, confrontati con il budget dell'anno, con una previsione dei mesi successivi.",
+      "Vedi ricavi e costi per contratto e per area di business, confrontati con il budget dell'anno.",
   },
   {
     icon: Receipt,
     title: "Fatture e bonifici",
     description:
-      "Carichi le fatture elettroniche FatturaPA: BCM le controlla e le confronta con il contratto. Da lì prepari anche il bonifico SEPA.",
+      "Carichi le fatture elettroniche FatturaPA: BCM le controlla, le abbina al contratto e ti avvisa se il fornitore chiede il pagamento su un IBAN diverso. Da lì prepari anche il bonifico SEPA.",
   },
   {
     icon: Building2,

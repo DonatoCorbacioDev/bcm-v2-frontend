@@ -5,7 +5,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useContract } from "@/hooks/useContract";
@@ -47,6 +47,7 @@ const WORKFLOW_ACTION_LABELS: Record<string, string> = {
 };
 
 type Tab = "documents" | "financials" | "history" | "invoices";
+const TABS: readonly Tab[] = ["documents", "financials", "history", "invoices"];
 
 export default function ContractDetailPage() {
   const params = useParams();
@@ -58,7 +59,12 @@ export default function ContractDetailPage() {
   const isAdmin = user?.role === "ADMIN";
 
   const { data: contract, isLoading, isError } = useContract(contractId);
-  const [activeTab, setActiveTab] = useState<Tab>("documents");
+  // Deep link from the home page (?tab=invoices) opens that tab first.
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const requested = searchParams.get("tab");
+    return TABS.includes(requested as Tab) ? (requested as Tab) : "documents";
+  });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [prefilledContract, setPrefilledContract] = useState<Contract | null>(null);

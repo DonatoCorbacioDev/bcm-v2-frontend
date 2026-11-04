@@ -411,3 +411,36 @@ export interface TopManager {
   managerName: string;
   contractsCount: number;
 }
+
+/** Kind of thing to do on the home page (see backend HomeAttentionDTO.Type). */
+export type HomeAttentionType =
+  | "NOTICE_DEADLINE"
+  | "EXPIRY"
+  | "RENEWAL_TO_CHECK"
+  | "INVOICE_TO_MATCH"
+  | "IBAN_CHANGED";
+
+export interface HomeAttentionItem {
+  type: HomeAttentionType;
+  contractId: number;
+  contractNumber: string;
+  counterpartyName: string | null;
+  projectName: string | null;
+  /** The date that matters: notice deadline, end date or invoice date (YYYY-MM-DD). */
+  dueDate: string | null;
+  daysLeft: number | null;
+  managerName: string | null;
+  renewalMonths: number | null;
+  invoiceId: number | null;
+  invoiceNumber: string | null;
+  invoiceAmount: number | null;
+}
+
+/** GET /home/attention: the list, most urgent first, and counters computed from it. */
+export interface HomeAttention {
+  dueSoonCount: number;
+  invoicesToMatchCount: number;
+  ibanAlertsCount: number;
+  windowDays: number;
+  items: HomeAttentionItem[];
+}

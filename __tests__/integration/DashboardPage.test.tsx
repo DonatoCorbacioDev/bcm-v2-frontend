@@ -1,254 +1,127 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { createWrapper } from '../mocks/wrapper';
-import DashboardPage from '@/app/(dashboard)/dashboard/page';
-import type { Contract } from '@/types';
+import type { HomeAttention, HomeAttentionItem } from '@/types';
 
-// ─── Module mocks ────────────────────────────────────────────────────────────
-
-// DashboardPage now uses useRouter (for onboarding redirect check)
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 
-jest.mock('@/hooks/useDashboardStats', () => ({
-  useDashboardStats: jest.fn(),
-  useInvoicingSummary: jest.fn(),
+jest.mock('@/hooks/useHomeAttention', () => ({
+  useHomeAttention: jest.fn(),
 }));
 
-jest.mock('@/hooks/useExpiringContracts', () => ({
-  useExpiringContracts: jest.fn(),
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(),
 }));
 
-// Backs every other dashboard query (risk scores, chart data, forecast,
-// financial values) with an inert empty response by default, so the page
-// can render fully without each sub-chart needing its own mock. Some
-// modules `import api from` (default) and some `import { api } from`
-// (named) — both must resolve to the same mock object, or configuring one
-// (e.g. via the named import in this test) silently leaves the other
-// returning undefined instead of a promise.
 jest.mock('@/lib/api', () => {
-  const shared = { get: jest.fn() };
+  const shared = { get: jest.fn().mockResolvedValue({ data: [{ id: 1, name: 'IT' }] }) };
   return { __esModule: true, api: shared, default: shared };
 });
 
-import { useDashboardStats, useInvoicingSummary } from '@/hooks/useDashboardStats';
-import { useExpiringContracts } from '@/hooks/useExpiringContracts';
-import { api } from '@/lib/api';
+import DashboardPage from '@/app/(dashboard)/dashboard/page';
+import { useHomeAttention } from '@/hooks/useHomeAttention';
+import { useAuthStore } from '@/store/authStore';
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
+const item = (overrides: Partial<HomeAttentionItem>): HomeAttentionItem => ({
+  type: 'EXPIRY',
+  contractId: 1,
+  contractNumber: 'NRT-2024-004',
+  counterpartyName: 'Vertice Legal S.r.l.',
+  projectName: 'Audit di Conformità',
+  dueDate: '2026-11-16',
+  daysLeft: 12,
+  managerName: 'Marco Bellini',
+  renewalMonths: null,
+  invoiceId: null,
+  invoiceNumber: null,
+  invoiceAmount: null,
+  ...overrides,
+});
 
-const baseContract: Omit<Contract, 'id' | 'contractNumber' | 'counterpartyId' | 'counterparty' | 'daysUntilExpiry'> = {
-  wbsCode: 'WBS-001',
-  projectName: 'Project',
-  areaId: 1,
-  managerId: 1,
-  managerName: 'John Doe',
-  startDate: '2024-01-01',
-  endDate: '2024-12-31',
-  status: 'ACTIVE',
-  createdAt: '2024-01-01T00:00:00Z',
-};
+const home = (items: HomeAttentionItem[], counts: Partial<HomeAttention> = {}): HomeAttention => ({
+  dueSoonCount: items.filter((i) => !i.invoiceId).length,
+  invoicesToMatchCount: items.filter((i) => i.type === 'INVOICE_TO_MATCH').length,
+  ibanAlertsCount: items.filter((i) => i.type === 'IBAN_CHANGED').length,
+  windowDays: 30,
+  items,
+  ...counts,
+});
 
-const criticalContract: Contract = {
-  ...baseContract,
-  id: 1,
-  contractNumber: 'CNT-CRIT',
-  counterpartyId: 1,
-  counterparty: { id: 1, name: 'Urgent Corp', type: 'CUSTOMER' },
-  daysUntilExpiry: 3,
-};
+const showing = (data: HomeAttention | undefined, state: { isLoading?: boolean; isError?: boolean } = {}) =>
+  (useHomeAttention as jest.Mock).mockReturnValue({ data, isLoading: false, isError: false, ...state });
 
-const nonCriticalContract: Contract = {
-  ...baseContract,
-  id: 2,
-  contractNumber: 'CNT-SOON',
-  counterpartyId: 2,
-  counterparty: { id: 2, name: 'Later Corp', type: 'CUSTOMER' },
-  daysUntilExpiry: 20,
-};
+beforeEach(() => {
+  jest.clearAllMocks();
+  (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
+    selector({ user: { id: 4, username: 'demo', role: 'MANAGER' } }));
+});
 
-const highRiskScore = {
-  contractId: 3,
-  customerName: 'Risky SpA',
-  riskScore: 0.9,
-  level: 'HIGH' as const,
-  anomalies: ['LATE_PAYMENT'],
-};
-
-// ─── Test setup ───────────────────────────────────────────────────────────────
-
-describe('DashboardPage', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (useDashboardStats as jest.Mock).mockReturnValue({
-      data: { total: 10, active: 7, expiring: 2, expired: 1, draft: 0 },
-      isLoading: false,
-      isError: false,
-    });
-    (useExpiringContracts as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
-      isError: false,
-    });
-    (useInvoicingSummary as jest.Mock).mockReturnValue({
-      data: { year: 2026, expectedYtd: 0, invoicedYtd: 0, variance: 0, variancePercent: 0 },
-      isLoading: false,
-      isError: false,
-    });
-    (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/risk-scores') return Promise.resolve({ data: [] });
-      return Promise.resolve({ data: [] });
-    });
-  });
-
-  it('shows a reassuring empty state when there is nothing urgent', async () => {
-    render(<DashboardPage />, { wrapper: createWrapper() });
-
-    expect(await screen.findByText(/nessuna azione urgente/i)).toBeInTheDocument();
-  });
-
-  it('lists critical renewals (≤7 days) under Azioni consigliate', async () => {
-    (useExpiringContracts as jest.Mock).mockReturnValue({
-      data: [criticalContract, nonCriticalContract],
-      isLoading: false,
-      isError: false,
-    });
+describe('Home', () => {
+  it('says what to do, by when and who follows it, each linked to where it gets done', () => {
+    showing(home([
+      item({ type: 'IBAN_CHANGED', contractId: 8, counterpartyName: 'Ferri & Associati S.r.l.', invoiceId: 31, invoiceNumber: 'FA-2026-11', dueDate: '2026-11-01', daysLeft: -3 }),
+      item({ type: 'NOTICE_DEADLINE', contractId: 9, projectName: 'Manutenzione impianti', counterpartyName: 'Rossi Impianti S.r.l.', dueDate: '2026-11-24', daysLeft: 20, renewalMonths: 12 }),
+      item({}),
+      item({ type: 'INVOICE_TO_MATCH', contractId: 7, counterpartyName: 'Nuvola Cloud Services S.r.l.', invoiceId: 30, invoiceNumber: '2026/118', invoiceAmount: 4800, dueDate: '2026-11-01', daysLeft: -3 }),
+    ]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    const actionsCard = screen.getByText('Azioni consigliate').closest('div')!.parentElement!;
-    expect(within(actionsCard).getByText(/urgent corp/i)).toBeInTheDocument();
-    expect(within(actionsCard).queryByText(/later corp/i)).not.toBeInTheDocument();
+    const rows = within(screen.getByRole('region', { name: 'Da fare' })).getAllByRole('link');
+    expect(rows.map((r) => r.getAttribute('href'))).toEqual([
+      '/contracts/8?tab=invoices', '/contracts/9', '/contracts/1', '/contracts/7?tab=invoices',
+    ]);
+    expect(rows[0]).toHaveTextContent('IBAN cambiato: verifica prima di pagare');
+    expect(rows[0]).toHaveTextContent('La fattura FA-2026-11 di Ferri & Associati S.r.l.');
+    expect(rows[1]).toHaveTextContent('Disdici entro il 24 novembre se non vuoi rinnovarlo (tra 20 giorni)');
+    expect(rows[1]).toHaveTextContent('dopo si rinnova per altri 12 mesi');
+    expect(rows[2]).toHaveTextContent('Scade il 16 novembre (tra 12 giorni)');
+    expect(rows[2]).toHaveTextContent('Responsabile: Marco Bellini');
+    expect(rows[3]).toHaveTextContent('Fattura 2026/118 da abbinare');
+    expect(rows[3]).toHaveTextContent('4.800,00');
   });
 
-  it('keeps non-critical expiring contracts (>7 days) in the existing expiry banner', async () => {
-    (useExpiringContracts as jest.Mock).mockReturnValue({
-      data: [criticalContract, nonCriticalContract],
-      isLoading: false,
-      isError: false,
-    });
+  it('shows the counters of that same list', () => {
+    showing(home([item({}), item({ type: 'INVOICE_TO_MATCH', invoiceId: 30, invoiceNumber: '1' })]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/later corp/i)).toBeInTheDocument();
-    expect(screen.getByText(/1 contratto in scadenza/i)).toBeInTheDocument();
+    expect(screen.getByText('Da fare entro 30 giorni').closest('div')!.parentElement).toHaveTextContent('1');
+    expect(screen.getByText('Fatture da abbinare').closest('div')!.parentElement).toHaveTextContent('1');
+    expect(screen.getByText('Avvisi IBAN').closest('div')!.parentElement).toHaveTextContent('0');
   });
 
-  it('lists high-risk contracts under Azioni consigliate', async () => {
-    (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/risk-scores') return Promise.resolve({ data: [highRiskScore] });
-      return Promise.resolve({ data: [] });
-    });
+  it('reassures when there is nothing to do', () => {
+    showing(home([]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    expect(await screen.findAllByText('Risky SpA')).not.toHaveLength(0);
-    expect(screen.getByText(/alto rischio/i)).toBeInTheDocument();
+    expect(screen.getByText('Niente da fare nei prossimi 30 giorni.')).toBeInTheDocument();
   });
 
-  it('links each critical renewal to its contract detail page', async () => {
-    (useExpiringContracts as jest.Mock).mockReturnValue({
-      data: [criticalContract],
-      isLoading: false,
-      isError: false,
-    });
+  it('asks to check a tacit renewal with incomplete terms', () => {
+    showing(home([item({ type: 'RENEWAL_TO_CHECK' })]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/urgent corp/i).closest('a')).toHaveAttribute('href', '/contracts/1');
+    expect(screen.getByText('Verifica il rinnovo')).toBeInTheDocument();
   });
 
-  it('falls back to "N/D" for a critical renewal with no counterparty', async () => {
-    (useExpiringContracts as jest.Mock).mockReturnValue({
-      data: [{ ...criticalContract, counterparty: undefined }],
-      isLoading: false,
-      isError: false,
-    });
+  it('says when the list could not be loaded', () => {
+    showing(undefined, { isError: true });
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/N\/D/)).toBeInTheDocument();
+    expect(screen.getByText('Impossibile caricare le attività')).toBeInTheDocument();
   });
 
-  it('caps critical renewals at 3 and notes how many more there are', async () => {
-    const manyCritical = Array.from({ length: 5 }, (_, i) => ({
-      ...criticalContract,
-      id: i + 1,
-      contractNumber: `CNT-CRIT-${i}`,
-      counterpartyId: i + 1,
-      counterparty: { id: i + 1, name: `Urgent ${i}`, type: 'CUSTOMER' as const },
-    }));
-    (useExpiringContracts as jest.Mock).mockReturnValue({
-      data: manyCritical,
-      isLoading: false,
-      isError: false,
-    });
+  it('keeps the former charts and AI widgets off by default', () => {
+    showing(home([]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/\+ altri 2 rinnovi critici/i)).toBeInTheDocument();
-  });
-
-  it('uses singular phrasing when exactly one critical renewal is hidden', async () => {
-    const fourCritical = Array.from({ length: 4 }, (_, i) => ({
-      ...criticalContract,
-      id: i + 1,
-      contractNumber: `CNT-CRIT-${i}`,
-      counterpartyId: i + 1,
-      counterparty: { id: i + 1, name: `Urgent ${i}`, type: 'CUSTOMER' as const },
-    }));
-    (useExpiringContracts as jest.Mock).mockReturnValue({
-      data: fourCritical,
-      isLoading: false,
-      isError: false,
-    });
-
-    render(<DashboardPage />, { wrapper: createWrapper() });
-
-    expect(screen.getByText(/\+ 1 altro rinnovo critico/i)).toBeInTheDocument();
-  });
-
-  it('caps high-risk contracts at 3 and notes how many more there are', async () => {
-    const manyHighRisk = Array.from({ length: 5 }, (_, i) => ({
-      ...highRiskScore,
-      contractId: i + 1,
-      customerName: `Risky ${i}`,
-    }));
-    (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/risk-scores') return Promise.resolve({ data: manyHighRisk });
-      return Promise.resolve({ data: [] });
-    });
-
-    render(<DashboardPage />, { wrapper: createWrapper() });
-
-    expect(await screen.findByText(/\+ altri 2 contratti ad alto rischio/i)).toBeInTheDocument();
-  });
-
-  it('uses singular phrasing when exactly one high-risk contract is hidden', async () => {
-    const fourHighRisk = Array.from({ length: 4 }, (_, i) => ({
-      ...highRiskScore,
-      contractId: i + 1,
-      customerName: `Risky ${i}`,
-    }));
-    (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/risk-scores') return Promise.resolve({ data: fourHighRisk });
-      return Promise.resolve({ data: [] });
-    });
-
-    render(<DashboardPage />, { wrapper: createWrapper() });
-
-    expect(await screen.findByText(/\+ 1 altro contratto ad alto rischio/i)).toBeInTheDocument();
-  });
-
-  it('shows a note when the risk analysis is unavailable', async () => {
-    (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/risk-scores') return Promise.reject(new Error('unavailable'));
-      return Promise.resolve({ data: [] });
-    });
-
-    render(<DashboardPage />, { wrapper: createWrapper() });
-
-    expect(await screen.findByText(/analisi del rischio non disponibile al momento/i)).toBeInTheDocument();
+    expect(screen.queryByText('Azioni consigliate')).not.toBeInTheDocument();
   });
 });

@@ -98,6 +98,31 @@ const expiringContract = { ...sampleContract, id: 2, contractNumber: "CNT-2024-0
  * and contracts page can call, with `overrides` layered on top for
  * test-specific routes (e.g. an empty state).
  */
+/** The home page's to-do list: one item of each kind, as the demo shows them. */
+const homeAttention = {
+  dueSoonCount: 3,
+  invoicesToMatchCount: 1,
+  ibanAlertsCount: 1,
+  windowDays: 30,
+  items: [
+    { type: "IBAN_CHANGED", contractId: 8, contractNumber: "NRT-2025-008", counterpartyName: "Ferri & Associati S.r.l.",
+      projectName: "Consulenza fiscale e societaria", dueDate: "2026-11-01", daysLeft: -3, managerName: "Marco Bellini",
+      renewalMonths: null, invoiceId: 31, invoiceNumber: "FA-2026-11", invoiceAmount: 7930 },
+    { type: "EXPIRY", contractId: 1, contractNumber: "NRT-2024-004", counterpartyName: "Vertice Legal S.r.l.",
+      projectName: "Audit di Conformità", dueDate: "2026-11-16", daysLeft: 12, managerName: "Marco Bellini",
+      renewalMonths: null, invoiceId: null, invoiceNumber: null, invoiceAmount: null },
+    { type: "NOTICE_DEADLINE", contractId: 9, contractNumber: "NRT-2025-009", counterpartyName: "Rossi Impianti S.r.l.",
+      projectName: "Manutenzione impianti", dueDate: "2026-11-24", daysLeft: 20, managerName: "Marco Bellini",
+      renewalMonths: 12, invoiceId: null, invoiceNumber: null, invoiceAmount: null },
+    { type: "RENEWAL_TO_CHECK", contractId: 4, contractNumber: "NRT-2025-002", counterpartyName: "Manifattura Orion S.p.A.",
+      projectName: "Trasformazione Digitale", dueDate: "2026-11-29", daysLeft: 25, managerName: null,
+      renewalMonths: null, invoiceId: null, invoiceNumber: null, invoiceAmount: null },
+    { type: "INVOICE_TO_MATCH", contractId: 7, contractNumber: "NRT-2025-007", counterpartyName: "Nuvola Cloud Services S.r.l.",
+      projectName: "Hosting e servizi cloud", dueDate: "2026-11-01", daysLeft: -3, managerName: "Marco Bellini",
+      renewalMonths: null, invoiceId: 30, invoiceNumber: "2026/118", invoiceAmount: 5856 },
+  ],
+};
+
 export async function mockApi(
   page: Page,
   overrides: Record<string, (route: import("@playwright/test").Route) => Promise<void> | void> = {}
@@ -105,6 +130,7 @@ export async function mockApi(
   const routes: Record<string, unknown> = {
     "**/api/v1/auth/refresh": { token: "fake-access-token" },
     "**/api/v1/contracts/stats": { total: 12, active: 9, expiring: 2, expired: 1 },
+    "**/api/v1/home/attention": homeAttention,
     "**/api/v1/contracts/expiring*": [expiringContract],
     "**/api/v1/contracts/stats/by-area": [{ areaName: "Engineering", count: 7 }, { areaName: "Sales", count: 5 }],
     "**/api/v1/contracts/stats/timeline": [{ month: "2024-01", count: 3 }, { month: "2024-02", count: 5 }],

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { mockAuthenticatedSession, mockApi } from "../utils/mock-backend";
 
-test.describe("Accessibility: dashboard", () => {
+test.describe("Accessibility: home", () => {
   test.beforeEach(async ({ page }) => {
     await mockAuthenticatedSession(page);
     await mockApi(page);
@@ -11,9 +11,7 @@ test.describe("Accessibility: dashboard", () => {
   test("has no detectable axe violations", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: "Ciao, admin" })).toBeVisible();
-    // Wait for the async widgets (risk score, forecast) to settle past their
-    // loading spinners before running axe.
-    await expect(page.getByText("Rischi e anomalie")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Da fare" }).getByRole("link")).toHaveCount(5);
 
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);

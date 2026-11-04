@@ -21,6 +21,15 @@ jest.mock('@/hooks/useExpiringContracts', () => ({
   useExpiringContracts: jest.fn(),
 }));
 
+// The home list has its own tests (DashboardPage.test); here only the redirect matters.
+jest.mock('@/hooks/useHomeAttention', () => ({
+  useHomeAttention: () => ({
+    data: { dueSoonCount: 0, invoicesToMatchCount: 0, ibanAlertsCount: 0, windowDays: 30, items: [] },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('@/lib/api', () => {
   const shared = { get: jest.fn() };
   return { __esModule: true, api: shared, default: shared };

@@ -23,9 +23,9 @@ const STEPS = [
   {
     number: "03",
     icon: BellRing,
-    title: "Ricevi avvisi e analisi",
+    title: "Ricevi gli avvisi",
     description:
-      "BCM controlla le scadenze ogni giorno e ti scrive quando serve. Ogni mattina aggiorna anche la valutazione del rischio dei contratti.",
+      "BCM controlla ogni giorno scadenze e termini di disdetta e ti scrive quando serve. In Home trovi sempre cosa fare nei prossimi 30 giorni.",
   },
 ];
 

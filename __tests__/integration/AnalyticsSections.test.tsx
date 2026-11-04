@@ -1,0 +1,251 @@
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import { createWrapper } from '../mocks/wrapper';
+import { AnalyticsSections } from '@/components/dashboard/AnalyticsSections';
+import type { Contract } from '@/types';
+
+// ─── Module mocks ────────────────────────────────────────────────────────────
+
+jest.mock('@/hooks/useDashboardStats', () => ({
+  useDashboardStats: jest.fn(),
+  useInvoicingSummary: jest.fn(),
+}));
+
+jest.mock('@/hooks/useExpiringContracts', () => ({
+  useExpiringContracts: jest.fn(),
+}));
+
+// Backs every other dashboard query (risk scores, chart data, forecast,
+// financial values) with an inert empty response by default, so the page
+// can render fully without each sub-chart needing its own mock. Some
+// modules `import api from` (default) and some `import { api } from`
+// (named) — both must resolve to the same mock object, or configuring one
+// (e.g. via the named import in this test) silently leaves the other
+// returning undefined instead of a promise.
+jest.mock('@/lib/api', () => {
+  const shared = { get: jest.fn() };
+  return { __esModule: true, api: shared, default: shared };
+});
+
+import { useDashboardStats, useInvoicingSummary } from '@/hooks/useDashboardStats';
+import { useExpiringContracts } from '@/hooks/useExpiringContracts';
+import { api } from '@/lib/api';
+
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
+
+const baseContract: Omit<Contract, 'id' | 'contractNumber' | 'counterpartyId' | 'counterparty' | 'daysUntilExpiry'> = {
+  wbsCode: 'WBS-001',
+  projectName: 'Project',
+  areaId: 1,
+  managerId: 1,
+  managerName: 'John Doe',
+  startDate: '2024-01-01',
+  endDate: '2024-12-31',
+  status: 'ACTIVE',
+  createdAt: '2024-01-01T00:00:00Z',
+};
+
+const criticalContract: Contract = {
+  ...baseContract,
+  id: 1,
+  contractNumber: 'CNT-CRIT',
+  counterpartyId: 1,
+  counterparty: { id: 1, name: 'Urgent Corp', type: 'CUSTOMER' },
+  daysUntilExpiry: 3,
+};
+
+const nonCriticalContract: Contract = {
+  ...baseContract,
+  id: 2,
+  contractNumber: 'CNT-SOON',
+  counterpartyId: 2,
+  counterparty: { id: 2, name: 'Later Corp', type: 'CUSTOMER' },
+  daysUntilExpiry: 20,
+};
+
+const highRiskScore = {
+  contractId: 3,
+  customerName: 'Risky SpA',
+  riskScore: 0.9,
+  level: 'HIGH' as const,
+  anomalies: ['LATE_PAYMENT'],
+};
+
+// ─── Test setup ───────────────────────────────────────────────────────────────
+
+// The former dashboard, now behind NEXT_PUBLIC_HOME_ANALYTICS: kept working
+// so it can be switched back on.
+describe('AnalyticsSections', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useDashboardStats as jest.Mock).mockReturnValue({
+      data: { total: 10, active: 7, expiring: 2, expired: 1, draft: 0 },
+      isLoading: false,
+      isError: false,
+    });
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    });
+    (useInvoicingSummary as jest.Mock).mockReturnValue({
+      data: { year: 2026, expectedYtd: 0, invoicedYtd: 0, variance: 0, variancePercent: 0 },
+      isLoading: false,
+      isError: false,
+    });
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.resolve({ data: [] });
+      return Promise.resolve({ data: [] });
+    });
+  });
+
+  it('shows a reassuring empty state when there is nothing urgent', async () => {
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/nessuna azione urgente/i)).toBeInTheDocument();
+  });
+
+  it('lists critical renewals (≤7 days) under Azioni consigliate', async () => {
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: [criticalContract, nonCriticalContract],
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    const actionsCard = screen.getByText('Azioni consigliate').closest('div')!.parentElement!;
+    expect(within(actionsCard).getByText(/urgent corp/i)).toBeInTheDocument();
+    expect(within(actionsCard).queryByText(/later corp/i)).not.toBeInTheDocument();
+  });
+
+  it('keeps non-critical expiring contracts (>7 days) in the existing expiry banner', async () => {
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: [criticalContract, nonCriticalContract],
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/later corp/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 contratto in scadenza/i)).toBeInTheDocument();
+  });
+
+  it('lists high-risk contracts under Azioni consigliate', async () => {
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.resolve({ data: [highRiskScore] });
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(await screen.findAllByText('Risky SpA')).not.toHaveLength(0);
+    expect(screen.getByText(/alto rischio/i)).toBeInTheDocument();
+  });
+
+  it('links each critical renewal to its contract detail page', async () => {
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: [criticalContract],
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/urgent corp/i).closest('a')).toHaveAttribute('href', '/contracts/1');
+  });
+
+  it('falls back to "N/D" for a critical renewal with no counterparty', async () => {
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: [{ ...criticalContract, counterparty: undefined }],
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/N\/D/)).toBeInTheDocument();
+  });
+
+  it('caps critical renewals at 3 and notes how many more there are', async () => {
+    const manyCritical = Array.from({ length: 5 }, (_, i) => ({
+      ...criticalContract,
+      id: i + 1,
+      contractNumber: `CNT-CRIT-${i}`,
+      counterpartyId: i + 1,
+      counterparty: { id: i + 1, name: `Urgent ${i}`, type: 'CUSTOMER' as const },
+    }));
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: manyCritical,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/\+ altri 2 rinnovi critici/i)).toBeInTheDocument();
+  });
+
+  it('uses singular phrasing when exactly one critical renewal is hidden', async () => {
+    const fourCritical = Array.from({ length: 4 }, (_, i) => ({
+      ...criticalContract,
+      id: i + 1,
+      contractNumber: `CNT-CRIT-${i}`,
+      counterpartyId: i + 1,
+      counterparty: { id: i + 1, name: `Urgent ${i}`, type: 'CUSTOMER' as const },
+    }));
+    (useExpiringContracts as jest.Mock).mockReturnValue({
+      data: fourCritical,
+      isLoading: false,
+      isError: false,
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/\+ 1 altro rinnovo critico/i)).toBeInTheDocument();
+  });
+
+  it('caps high-risk contracts at 3 and notes how many more there are', async () => {
+    const manyHighRisk = Array.from({ length: 5 }, (_, i) => ({
+      ...highRiskScore,
+      contractId: i + 1,
+      customerName: `Risky ${i}`,
+    }));
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.resolve({ data: manyHighRisk });
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/\+ altri 2 contratti ad alto rischio/i)).toBeInTheDocument();
+  });
+
+  it('uses singular phrasing when exactly one high-risk contract is hidden', async () => {
+    const fourHighRisk = Array.from({ length: 4 }, (_, i) => ({
+      ...highRiskScore,
+      contractId: i + 1,
+      customerName: `Risky ${i}`,
+    }));
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.resolve({ data: fourHighRisk });
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/\+ 1 altro contratto ad alto rischio/i)).toBeInTheDocument();
+  });
+
+  it('shows a note when the risk analysis is unavailable', async () => {
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/risk-scores') return Promise.reject(new Error('unavailable'));
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/analisi del rischio non disponibile al momento/i)).toBeInTheDocument();
+  });
+});

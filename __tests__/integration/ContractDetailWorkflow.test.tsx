@@ -12,7 +12,10 @@ jest.mock('sonner', () => ({
 jest.mock('next/navigation', () => ({
   useParams: () => ({ id: '1' }),
   useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => mockSearchParams,
 }));
+
+let mockSearchParams = new URLSearchParams();
 
 jest.mock('@/hooks/useContract', () => ({
   useContract: jest.fn(),
@@ -276,6 +279,26 @@ describe('ContractDetailPage — section tabs', () => {
     expect(tabs[0]).toHaveAttribute('tabindex', '0');
     expect(tabs[1]).toHaveAttribute('tabindex', '-1');
     expect(screen.getByRole('tabpanel', { name: 'Documenti' })).toBeInTheDocument();
+  });
+
+  it('opens the tab named in the link, as the home page links invoices (?tab=invoices)', () => {
+    mockSearchParams = new URLSearchParams('tab=invoices');
+    try {
+      render(<ContractDetailPage />, { wrapper: createWrapper() });
+      expect(screen.getByRole('tab', { name: 'Fatture' })).toHaveAttribute('aria-selected', 'true');
+    } finally {
+      mockSearchParams = new URLSearchParams();
+    }
+  });
+
+  it('ignores an unknown tab in the link', () => {
+    mockSearchParams = new URLSearchParams('tab=nope');
+    try {
+      render(<ContractDetailPage />, { wrapper: createWrapper() });
+      expect(screen.getByRole('tab', { name: 'Documenti' })).toHaveAttribute('aria-selected', 'true');
+    } finally {
+      mockSearchParams = new URLSearchParams();
+    }
   });
 
   it('moves between tabs with the arrow, Home and End keys', async () => {

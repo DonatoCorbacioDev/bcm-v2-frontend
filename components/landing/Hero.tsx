@@ -110,13 +110,14 @@ export function Hero() {
             </div>
 
             <h1 className="text-4xl md:text-5xl font-bold leading-tight text-foreground">
-              Contratti sotto controllo,{" "}
-              <span className="text-primary">scadenze mai perse</span>
+              Scadenze e disdette dei contratti,{" "}
+              <span className="text-primary">sotto controllo</span>
             </h1>
 
             <p className="text-lg text-muted-foreground leading-relaxed">
               BCM raccoglie i contratti della tua azienda insieme a documenti, fatture e pagamenti.
-              Ti avvisa prima che un contratto scada e ti indica quelli che meritano più attenzione.
+              Ti avvisa prima che un contratto scada o che passi l&apos;ultimo giorno per disdirlo, e ti mostra
+              cosa fare ogni settimana.
             </p>
 
             {isAuthenticated ? (

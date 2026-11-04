@@ -354,6 +354,21 @@ export interface DocumentDiff {
   lines: DiffLine[];
 }
 
+/** A contract term read from a document by fixed rules, with the sentence it comes from. */
+export interface ContractTerm {
+  field: "AUTO_RENEW" | "NOTICE_DAYS" | "RENEWAL_MONTHS" | "START_DATE" | "END_DATE";
+  /** "true"/"false", a number of days or months, or an ISO date. */
+  value: string;
+  /** How the text says it, e.g. "3 mesi" for 90 days. */
+  asWritten: string;
+  sentence: string;
+}
+
+export interface ContractTerms {
+  documentId: number;
+  terms: ContractTerm[];
+}
+
 export interface DocumentAnalysis {
   documentId: number;
   rawText: string;

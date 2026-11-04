@@ -9,13 +9,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Upload, Download, Trash2, FileText, Loader2, FileSearch, ChevronDown, ChevronUp,
-  ShieldAlert, CheckCircle2, FilePlus2, History,
+  ShieldAlert, CheckCircle2, FilePlus2, History, CalendarClock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import api from "@/lib/api";
 import DocumentVersionsDialog from "@/components/contracts/DocumentVersionsDialog";
-import type { Contract, ContractDocument, DocumentAnalysis, ClauseRiskAnalysis } from "@/types";
+import ContractTermsPanel from "@/components/contracts/ContractTermsPanel";
+import type { Contract, ContractDocument, ContractTerms, DocumentAnalysis, ClauseRiskAnalysis } from "@/types";
 import { SHOW_EXPERIMENTAL_AI } from "@/lib/featureFlags";
 
 const RISK_LEVEL_CONFIG = {
@@ -86,6 +87,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   const [expandedRiskDoc, setExpandedRiskDoc] = useState<number | null>(null);
   const [versionUploadTarget, setVersionUploadTarget] = useState<ContractDocument | null>(null);
   const [historyDoc, setHistoryDoc] = useState<ContractDocument | null>(null);
+  const [termsMap, setTermsMap] = useState<Record<number, ContractTerms>>({});
+  const [expandedTermsDoc, setExpandedTermsDoc] = useState<number | null>(null);
 
   const { data: documents, isLoading } = useQuery<ContractDocument[]>({
     queryKey: ["documents", contractId],
@@ -157,6 +160,26 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     },
     onError: () => toast.error("Estrazione non riuscita"),
   });
+
+  const termsMutation = useMutation({
+    mutationFn: async (documentId: number) => {
+      const res = await api.get<ContractTerms>(`/contracts/${contractId}/documents/${documentId}/terms`);
+      return res.data;
+    },
+    onSuccess: (result) => {
+      setTermsMap((prev) => ({ ...prev, [result.documentId]: result }));
+      setExpandedTermsDoc(result.documentId);
+    },
+    onError: () => toast.error("Lettura del documento non riuscita"),
+  });
+
+  const toggleTerms = (documentId: number) => {
+    if (termsMap[documentId]) {
+      setExpandedTermsDoc(expandedTermsDoc === documentId ? null : documentId);
+    } else {
+      termsMutation.mutate(documentId);
+    }
+  };
 
   const clauseRiskMutation = useMutation({
     mutationFn: async (documentId: number) => {
@@ -290,6 +313,9 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
             const riskAnalysis = clauseRiskMap[doc.id];
             const isRiskExpanded = expandedRiskDoc === doc.id;
             const isAnalyzingRisk = clauseRiskMutation.isPending && clauseRiskMutation.variables === doc.id;
+            const terms = termsMap[doc.id];
+            const isTermsExpanded = expandedTermsDoc === doc.id;
+            const isReadingTerms = termsMutation.isPending && termsMutation.variables === doc.id;
 
             return (
               <div
@@ -358,6 +384,24 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       aria-label="Scarica documento"
                     >
                       <Download className="h-4 w-4" />
+                    </Button>
+
+                    {/* Rule-based reading of renewal, notice and dates: measured on a
+                        corpus (no wrong value), so shown to everyone. */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleTerms(doc.id)}
+                      disabled={isReadingTerms}
+                      title="Leggi rinnovo e scadenze"
+                      aria-label="Leggi rinnovo e scadenze dal documento"
+                      aria-expanded={Boolean(terms) && isTermsExpanded}
+                    >
+                      {isReadingTerms ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <CalendarClock className="h-4 w-4 text-primary" />
+                      )}
                     </Button>
 
                     {/* Field extraction (keyword rules) and clause risk (a very
@@ -445,6 +489,10 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                     )}
                   </div>
                 </div>
+
+                {terms && isTermsExpanded && (
+                  <ContractTermsPanel result={terms} isAdmin={isAdmin} onApply={onApply} />
+                )}
 
                 {/* Analysis panel */}
                 {analysis && isExpanded && (

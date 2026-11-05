@@ -81,7 +81,7 @@ export default function CounterpartyDetailPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-[var(--status-blue-fg)]" aria-hidden="true" />
-            Fatturato vs previsto
+            {summary && !summary.comparable ? "Valore dei contratti" : "Fatture ricevute vs previsto"}
           </CardTitle>
           <CardDescription>
             {summary && !summary.comparable
@@ -123,7 +123,7 @@ export default function CounterpartyDetailPage() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">Fatturato confermato (imponibile)</p>
+                      <p className="text-muted-foreground">Fatture confermate (imponibile)</p>
                       <p className="text-base font-medium text-foreground">
                         {formatMoney(summary.invoicedYtd, { decimals: 0 })}
                       </p>

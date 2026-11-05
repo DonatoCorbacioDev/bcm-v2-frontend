@@ -15,6 +15,7 @@ jest.mock('@/store/authStore', () => ({
 
 jest.mock('@/hooks/useDashboardStats', () => ({
   useDashboardStats: jest.fn(),
+  useInvoicingSummary: () => ({ data: undefined }),
 }));
 
 jest.mock('@/hooks/useExpiringContracts', () => ({

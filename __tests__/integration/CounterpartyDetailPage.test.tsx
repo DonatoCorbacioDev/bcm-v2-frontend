@@ -103,7 +103,7 @@ describe('CounterpartyDetailPage', () => {
 
     expect(screen.getByText(/IVA esclusa/)).toBeInTheDocument();
     expect(screen.getByText('Previsto da inizio anno')).toBeInTheDocument();
-    expect(screen.getByText('Fatturato confermato (imponibile)')).toBeInTheDocument();
+    expect(screen.getByText('Fatture confermate (imponibile)')).toBeInTheDocument();
     expect(screen.getByText('Scostamento')).toBeInTheDocument();
   });
 

@@ -32,9 +32,9 @@ describe('InvoicingSummaryWidget', () => {
     });
     render(<InvoicingSummaryWidget />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Fatturato vs previsto 2026')).toBeInTheDocument();
+    expect(screen.getByText('Fatture ricevute vs previsto 2026')).toBeInTheDocument();
     expect(screen.getByText('Valore atteso')).toBeInTheDocument();
-    expect(screen.getByText('Fatturato confermato')).toBeInTheDocument();
+    expect(screen.getByText('Fatture confermate')).toBeInTheDocument();
     expect(screen.getByText('-5,5%')).toBeInTheDocument();
   });
 

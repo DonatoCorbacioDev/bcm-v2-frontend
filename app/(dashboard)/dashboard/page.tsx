@@ -16,6 +16,7 @@ import { CalendarClock, FileText, Landmark } from "lucide-react";
 import KPICard from "@/components/dashboard/KPICard";
 import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
 import { HomeAttentionList } from "@/components/dashboard/HomeAttentionList";
+import { SupplierInvoicesSummary } from "@/components/dashboard/SupplierInvoicesSummary";
 import { AnalyticsSections } from "@/components/dashboard/AnalyticsSections";
 
 /** The former charts and AI widgets, off until their numbers are reliable (see AnalyticsSections). */
@@ -120,6 +121,8 @@ export default function DashboardPage() {
             <h2 id="home-todo" className="text-lg font-semibold text-foreground">Da fare</h2>
             <HomeAttentionList items={attention.items} windowDays={windowDays} />
           </section>
+
+          <SupplierInvoicesSummary invoicesToMatch={attention.invoicesToMatchCount} />
         </>
       )}
 

@@ -26,7 +26,7 @@ export function InvoicingSummaryWidget() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-[var(--status-blue-fg)]" aria-hidden="true" />
-          Fatturato vs previsto{summary ? ` ${summary.year}` : ""}
+          Fatture ricevute vs previsto{summary ? ` ${summary.year}` : ""}
         </CardTitle>
         <CardDescription>
           Valore atteso dai valori finanziari vs. fatture confermate (abbinamento verificato)
@@ -51,7 +51,7 @@ export function InvoicingSummaryWidget() {
         {!isLoading && !isError && summary && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <KPICard title="Valore atteso" value={formatMoney(summary.expectedYtd, { decimals: 0 })} />
-            <KPICard title="Fatturato confermato" value={formatMoney(summary.invoicedYtd, { decimals: 0 })} />
+            <KPICard title="Fatture confermate" value={formatMoney(summary.invoicedYtd, { decimals: 0 })} />
             <KPICard
               title="Scostamento"
               value={PERCENT_FORMATTER.format(summary.variancePercent / 100)}

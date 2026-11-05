@@ -162,6 +162,7 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Tipo</TableHead>
+                <TableHead className="hidden sm:table-cell">Comune</TableHead>
                 <TableHead className="hidden md:table-cell">Partita IVA</TableHead>
                 <TableHead className="hidden lg:table-cell">Referente</TableHead>
                 {isAdmin && <TableHead>Azioni</TableHead>}
@@ -184,6 +185,9 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
                         <Badge variant="success" className="text-xs">IBAN verificato</Badge>
                       )}
                     </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell text-sm">
+                    {cp.city ? `${cp.city}${cp.province ? ` (${cp.province})` : ""}` : "—"}
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{cp.vatNumber || "—"}</TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">{cp.contactName || "—"}</TableCell>

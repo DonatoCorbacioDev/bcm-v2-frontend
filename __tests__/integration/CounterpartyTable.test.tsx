@@ -89,6 +89,24 @@ describe('CounterpartyTable', () => {
 
   // ── States ────────────────────────────────────────────────────────────────
 
+  it('shows where each counterparty is based, with the province', () => {
+    (useCounterparties as jest.Mock).mockReturnValue({
+      data: [
+        { ...beta, city: 'Torino', province: 'TO' },
+        { ...alfa, city: 'Lugano' },
+        { id: 3, name: 'Gamma Srl', type: 'SUPPLIER' },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    expect(screen.getByRole('columnheader', { name: 'Comune' })).toBeInTheDocument();
+    expect(screen.getByText('Beta Srl').closest('tr')).toHaveTextContent('Torino (TO)');
+    expect(screen.getByText('Alfa Srl').closest('tr')).toHaveTextContent('Lugano');
+    expect(screen.getByText('Gamma Srl').closest('tr')).toHaveTextContent('—');
+  });
+
   it('marks a supplier whose IBAN is verified, and only a supplier', () => {
     (useCounterparties as jest.Mock).mockReturnValue({
       data: [

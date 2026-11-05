@@ -52,6 +52,10 @@ export default function CounterpartyForm({ onClose, onSuccess, counterparty }: C
           vatNumber: counterparty.vatNumber ?? "",
           taxCode: counterparty.taxCode ?? "",
           address: counterparty.address ?? "",
+          postalCode: counterparty.postalCode ?? "",
+          city: counterparty.city ?? "",
+          province: counterparty.province ?? "",
+          country: counterparty.country ?? "",
           contactName: counterparty.contactName ?? "",
           contactEmail: counterparty.contactEmail ?? "",
           contactPhone: counterparty.contactPhone ?? "",
@@ -129,9 +133,36 @@ export default function CounterpartyForm({ onClose, onSuccess, counterparty }: C
 
       <div className="space-y-2">
         <Label htmlFor="address">Indirizzo</Label>
-        <Input id="address" {...register("address")} />
+        <Input id="address" {...register("address")} placeholder="es. Via Roma 12" />
         {errors.address && <p className="text-sm text-destructive">{errors.address.message}</p>}
       </div>
+
+      {/* Filled in from the supplier's first electronic invoice when empty. */}
+      <div className="grid grid-cols-2 sm:grid-cols-[7rem_1fr_5rem_5rem] gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="postalCode">CAP</Label>
+          <Input id="postalCode" inputMode="numeric" {...register("postalCode")} placeholder="20121" />
+          {errors.postalCode && <p className="text-sm text-destructive">{errors.postalCode.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="city">Comune</Label>
+          <Input id="city" {...register("city")} placeholder="Milano" />
+          {errors.city && <p className="text-sm text-destructive">{errors.city.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="province">Provincia</Label>
+          <Input id="province" maxLength={2} {...register("province")} placeholder="MI" />
+          {errors.province && <p className="text-sm text-destructive">{errors.province.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="country">Nazione</Label>
+          <Input id="country" maxLength={2} {...register("country")} placeholder="IT" />
+          {errors.country && <p className="text-sm text-destructive">{errors.country.message}</p>}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground -mt-2">
+        Per i fornitori, se vuoti, si compilano dalla prima fattura elettronica.
+      </p>
 
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-2">

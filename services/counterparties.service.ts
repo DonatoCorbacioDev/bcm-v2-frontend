@@ -12,6 +12,10 @@ export type CounterpartyUpsertPayload = {
   vatNumber?: string;
   taxCode?: string;
   address?: string;
+  postalCode?: string;
+  city?: string;
+  province?: string;
+  country?: string;
   contactName?: string;
   contactEmail?: string;
   contactPhone?: string;

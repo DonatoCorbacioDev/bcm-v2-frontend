@@ -16,6 +16,7 @@ import { useCounterparty, useCounterpartyInvoicingSummary } from "@/hooks/useCou
 import { useAuthStore } from "@/store/authStore";
 import { invoicingVarianceVariant } from "@/lib/varianceTone";
 import { formatMoney } from "@/lib/formatMoney";
+import { formatAddress } from "@/lib/formatAddress";
 
 const TYPE_LABELS: Record<string, string> = {
   CUSTOMER: "Cliente",
@@ -75,6 +76,9 @@ export default function CounterpartyDetailPage() {
           <Badge variant="outline">{TYPE_LABELS[counterparty.type] ?? counterparty.type}</Badge>
         </div>
         <p className="text-muted-foreground mt-1">{counterparty.vatNumber || "P.IVA non indicata"}</p>
+        {formatAddress(counterparty) && (
+          <p className="text-sm text-muted-foreground">{formatAddress(counterparty)}</p>
+        )}
       </div>
 
       <Card>

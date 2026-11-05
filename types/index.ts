@@ -46,7 +46,14 @@ export interface Counterparty {
   type: CounterpartyType;
   vatNumber?: string | null;
   taxCode?: string | null;
+  /** Street and number; the rest of the address in the fields below. */
   address?: string | null;
+  postalCode?: string | null;
+  city?: string | null;
+  /** Province code, two letters ("MI"). */
+  province?: string | null;
+  /** ISO country code, two letters ("IT"). */
+  country?: string | null;
   contactName?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;

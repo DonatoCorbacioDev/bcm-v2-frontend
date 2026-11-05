@@ -386,23 +386,26 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
                       <Download className="h-4 w-4" />
                     </Button>
 
-                    {/* Rule-based reading of renewal, notice and dates: measured on a
-                        corpus (no wrong value), so shown to everyone. */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleTerms(doc.id)}
-                      disabled={isReadingTerms}
-                      title="Leggi rinnovo e scadenze"
-                      aria-label="Leggi rinnovo e scadenze dal documento"
-                      aria-expanded={Boolean(terms) && isTermsExpanded}
-                    >
-                      {isReadingTerms ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <CalendarClock className="h-4 w-4 text-primary" />
-                      )}
-                    </Button>
+                    {/* Rule-based reading of renewal, notice and dates. Hidden with the
+                        other document AI: on a blind test set it still misread some
+                        exclusions of the renewal (see ContractTermsExtractorEvaluationTest). */}
+                    {SHOW_EXPERIMENTAL_AI && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleTerms(doc.id)}
+                        disabled={isReadingTerms}
+                        title="Leggi rinnovo e scadenze"
+                        aria-label="Leggi rinnovo e scadenze dal documento"
+                        aria-expanded={Boolean(terms) && isTermsExpanded}
+                      >
+                        {isReadingTerms ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <CalendarClock className="h-4 w-4 text-primary" />
+                        )}
+                      </Button>
+                    )}
 
                     {/* Field extraction (keyword rules) and clause risk (a very
                         small AI model) aren't reliable yet: hidden until they are. */}

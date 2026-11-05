@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
-// No featureFlags mock: reading renewal and dates is not behind the AI flag.
+// Reading renewal and dates sits behind the document AI flag (see DocumentsTab).
+jest.mock('@/lib/featureFlags', () => ({ SHOW_EXPERIMENTAL_AI: true }));
 jest.mock('@/lib/api', () => ({
   __esModule: true,
   default: { get: jest.fn(), post: jest.fn(), delete: jest.fn() },

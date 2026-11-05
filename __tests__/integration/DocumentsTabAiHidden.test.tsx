@@ -28,5 +28,6 @@ describe('DocumentsTab — default, AI actions off', () => {
     expect(screen.getByRole('button', { name: 'Carica nuova versione' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Estrai campi dal documento' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Rileva clausole a rischio nel documento' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Leggi rinnovo e scadenze dal documento' })).not.toBeInTheDocument();
   });
 });

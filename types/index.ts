@@ -221,6 +221,8 @@ export interface ElectronicInvoice {
   amountDifference?: number | null;
   /** The invoice asks to be paid on an IBAN other than the supplier's verified one: SEPA is blocked. */
   ibanChanged?: boolean;
+  /** FatturaPA ModalitaPagamento (MP05 bonifico, MP12 RiBa...); null or "" when not stated. See lib/paymentMethod. */
+  paymentMethod?: string | null;
 }
 
 export interface ContractHistory {

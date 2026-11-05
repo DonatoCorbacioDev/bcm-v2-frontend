@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import api from "@/lib/api";
 import { sepaPaymentsService, type SepaPaymentBatch } from "@/services/sepaPayments.service";
+import { paymentKind, paymentMethodLabel } from "@/lib/paymentMethod";
 import { invoiceMatchingService } from "@/services/invoiceMatching.service";
 import { MATCH_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from "@/lib/statusConfig";
 import type { ElectronicInvoice } from "@/types";
@@ -41,6 +42,10 @@ import { formatMoney, formatNumber } from "@/lib/formatMoney";
 interface InvoicesTabProps {
   readonly contractId: number;
   readonly isAdmin: boolean;
+}
+
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 function formatBytes(bytes: number) {
@@ -381,7 +386,8 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selectedIds.includes(invoice.id)}
-                      disabled={!invoice.supplierIban || invoice.sepaBatchId != null || invoice.ibanChanged === true}
+                      disabled={!invoice.supplierIban || invoice.sepaBatchId != null || invoice.ibanChanged === true
+                        || paymentKind(invoice.paymentMethod) !== "TRANSFER"}
                       onCheckedChange={() => toggleSelected(invoice)}
                       aria-label={`Seleziona fattura ${invoice.fileName}`}
                     />
@@ -480,6 +486,28 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                     {(() => {
                       if (invoice.sepaBatchId != null) {
                         return <Badge variant={PAYMENT_STATUS_CONFIG.PAID.variant}>{PAYMENT_STATUS_CONFIG.PAID.label}</Badge>;
+                      }
+                      // Not a transfer: BCM doesn't pay it. With RiBa or a direct
+                      // debit the supplier collects it, and a SEPA transfer on
+                      // top would pay it twice; card, cash and the like are paid
+                      // outside BCM.
+                      const kind = paymentKind(invoice.paymentMethod);
+                      if (kind !== "TRANSFER") {
+                        const due = invoice.paymentDueDate
+                          ? ` · scadenza ${new Date(invoice.paymentDueDate).toLocaleDateString("it-IT")}`
+                          : "";
+                        return (
+                          <div>
+                            <Badge variant="outline">
+                              {kind === "COLLECTED_BY_SUPPLIER"
+                                ? `${capitalize(paymentMethodLabel(invoice.paymentMethod))}: incassa il fornitore`
+                                : `Si paga fuori da BCM (${paymentMethodLabel(invoice.paymentMethod)})`}
+                            </Badge>
+                            <p className="mt-1 text-xs text-muted-foreground whitespace-normal max-w-48">
+                              {kind === "COLLECTED_BY_SUPPLIER" ? `Nessun bonifico da fare${due}.` : `Non va nel pagamento SEPA${due}.`}
+                            </p>
+                          </div>
+                        );
                       }
                       // Before "ready": an invoice asking for a new bank account is
                       // the classic supplier-fraud scenario, never ready to pay.

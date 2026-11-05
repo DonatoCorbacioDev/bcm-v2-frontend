@@ -454,6 +454,22 @@ describe('InvoicesTab', () => {
     expect(screen.getByText('Pagata')).toBeInTheDocument();
   });
 
+  it('does not offer a RiBa invoice for SEPA: the supplier collects it, a transfer would pay it twice', async () => {
+    mockApiGet({ invoices: [{ ...invoice, paymentMethod: 'MP12', paymentDueDate: '2026-11-30' }] });
+    renderTab();
+    expect(await screen.findByText('RiBa: incassa il fornitore')).toBeInTheDocument();
+    expect(screen.getByText(/nessun bonifico da fare · scadenza 30\/11\/2026/i)).toBeInTheDocument();
+    expect(screen.queryByText('Pronta per SEPA')).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
+  });
+
+  it('says an invoice paid by card is paid outside BCM', async () => {
+    mockApiGet({ invoices: [{ ...invoice, paymentMethod: 'MP08' }] });
+    renderTab();
+    expect(await screen.findByText('Si paga fuori da BCM (carta di pagamento)')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
+  });
+
   it('blocks an invoice whose IBAN differs from the verified one instead of calling it ready', async () => {
     mockApiGet({ invoices: [{ ...invoice, ibanChanged: true }] });
     renderTab();

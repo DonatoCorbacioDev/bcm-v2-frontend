@@ -306,6 +306,34 @@ describe('ContractTable', () => {
     expect(late).not.toHaveTextContent('ultimo giorno per disdire');
   });
 
+  it('on a phone shows one card per contract with its status and next deadline, opening it on tap', async () => {
+    const original = window.matchMedia;
+    window.matchMedia = jest.fn().mockReturnValue({
+      matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn(),
+    }) as unknown as typeof window.matchMedia;
+    try {
+      (useContractsPaged as jest.Mock).mockReturnValue({
+        data: makePageResponse([
+          { ...activeContract, id: 4, contractNumber: 'CNT-TACIT', projectName: 'Manutenzione', endDate: '2026-12-31',
+            autoRenew: true, noticeDays: 90, renewalMonths: 12, noticeDeadline: '2026-10-02' },
+        ]),
+        isLoading: false,
+        isError: false,
+      });
+      render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+      expect(screen.queryByRole('table')).not.toBeInTheDocument();
+      const card = screen.getByRole('button', { name: /CNT-TACIT/ });
+      expect(card).toHaveTextContent('Manutenzione');
+      expect(card).toHaveTextContent(/Prossima scadenza: 0?2\/10\/2026/);
+      expect(card).toHaveTextContent('ultimo giorno per disdire');
+      await userEvent.click(card);
+      expect(mockPush).toHaveBeenCalledWith('/contracts/4');
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
   it('shows fallback text and sorts correctly for a contract with no counterparty', async () => {
     const noCounterpartyContract: Contract = {
       ...activeContract,

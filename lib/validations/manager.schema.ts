@@ -31,21 +31,25 @@ export const managerSchema = z.object({
     .max(100, "L'email non può superare i 100 caratteri")
     .trim(),
 
+  // Phone and department are optional (the database never required them):
+  // left empty they're simply not set; filled in, they're still checked.
   phoneNumber: z
-    .string({ message: "Il numero di telefono è obbligatorio" })
-    .min(7, "Il numero di telefono deve contenere almeno 7 caratteri")
+    .string()
+    .trim()
     .max(20, "Il numero di telefono non può superare i 20 caratteri")
-    .regex(
-      /^[0-9+\-\s()]+$/,
+    .refine((v) => v === "" || v.length >= 7, "Il numero di telefono deve contenere almeno 7 caratteri")
+    .refine(
+      (v) => v === "" || /^[0-9+\-\s()]+$/.test(v),
       "Il numero di telefono può contenere solo numeri, +, -, spazi e parentesi"
     )
-    .trim(),
+    .optional(),
 
   department: z
-    .string({ message: "Il reparto è obbligatorio" })
-    .min(2, "Il reparto deve contenere almeno 2 caratteri")
+    .string()
+    .trim()
     .max(100, "Il reparto non può superare i 100 caratteri")
-    .trim(),
+    .refine((v) => v === "" || v.length >= 2, "Il reparto deve contenere almeno 2 caratteri")
+    .optional(),
 });
 
 /**

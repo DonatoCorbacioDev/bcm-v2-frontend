@@ -44,13 +44,11 @@ interface ContractFormProps {
   readonly contract?: Contract | null;
 }
 
-export default function ContractForm({
-  onClose,
-  onSuccess,
-  contract,
-}: ContractFormProps) {
-  const upsertMutation = useUpsertContract();
-
+/**
+ * Loads the reference data, then mounts the form: only once it is here can the
+ * form's starting values include the single area or responsabile there is.
+ */
+export default function ContractForm(props: ContractFormProps) {
   // Reference data via React Query
   const businessAreasQuery = useBusinessAreas();
   const managersQuery = useManagers();
@@ -72,6 +70,51 @@ export default function ContractForm({
   const isReferenceError =
     businessAreasQuery.isError || managersQuery.isError || counterpartiesQuery.isError
     || financialTypesQuery.isError;
+
+  if (isReferenceLoading) {
+    return (
+      <div className="py-8 text-center text-sm text-muted-foreground">
+        Caricamento dati del form...
+      </div>
+    );
+  }
+
+  if (isReferenceError) {
+    return (
+      <div className="py-8 text-center text-sm text-destructive">
+        Impossibile caricare aree di business/responsabili/controparti.
+      </div>
+    );
+  }
+
+  return (
+    <ContractFormFields
+      {...props}
+      businessAreas={businessAreas}
+      managers={managers}
+      counterparties={counterparties}
+      financialTypes={financialTypes}
+    />
+  );
+}
+
+interface ContractFormFieldsProps extends ContractFormProps {
+  readonly businessAreas: { id: number; name: string }[];
+  readonly managers: { id: number; firstName: string; lastName: string }[];
+  readonly counterparties: { id: number; name: string }[];
+  readonly financialTypes: { id: number; name: string }[];
+}
+
+function ContractFormFields({
+  onClose,
+  onSuccess,
+  contract,
+  businessAreas,
+  managers,
+  counterparties,
+  financialTypes,
+}: ContractFormFieldsProps) {
+  const upsertMutation = useUpsertContract();
 
   const {
     register,
@@ -100,6 +143,9 @@ export default function ContractForm({
         }
       : {
           status: "ACTIVE",
+          // A single area or responsabile: nothing to choose, so it's chosen already.
+          areaId: businessAreas.length === 1 ? businessAreas[0].id : undefined,
+          managerId: managers.length === 1 ? managers[0].id : undefined,
         },
   });
 
@@ -151,22 +197,6 @@ export default function ContractForm({
     return contract?.id ? "Aggiorna contratto" : "Crea contratto";
   }, [upsertMutation.isPending, contract?.id]);
 
-  if (isReferenceLoading) {
-    return (
-      <div className="py-8 text-center text-sm text-muted-foreground">
-        Caricamento dati del form...
-      </div>
-    );
-  }
-
-  if (isReferenceError) {
-    return (
-      <div className="py-8 text-center text-sm text-destructive">
-        Impossibile caricare aree di business/responsabili/controparti.
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Counterparty (Controller) */}
@@ -194,7 +224,7 @@ export default function ContractForm({
         <Input
           id="contractNumber"
           {...register("contractNumber")}
-          placeholder="es. CNT-2024-001"
+          placeholder="es. CTR-001"
         />
         {errors.contractNumber && (
           <p className="text-sm text-destructive">

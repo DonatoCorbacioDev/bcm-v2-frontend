@@ -30,7 +30,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
-  const greeting = user?.username ? `Ciao, ${user.username}` : "Home";
+  // The person's name ("Ciao, Marco"), the username only as a fallback.
+  const name = user?.firstName || user?.username;
+  const greeting = name ? `Ciao, ${name}` : "Home";
 
   // Setup check: redirect new ADMIN orgs with no business area yet to the onboarding
   // wizard. Registering an organization always creates a Managers record for the admin
@@ -39,7 +41,7 @@ export default function DashboardPage() {
   // practically unreachable. Business areas are the actual gate: without one, Budgets
   // and Contracts can't be created either (see MissingPrerequisiteBanner).
   // Queries are disabled for non-admins; enabled queries share cache with the reference hooks.
-  const { data: businessAreas = [], isLoading: loadingAreas } = useQuery({
+  const { data: businessAreas = [], isLoading: loadingAreas, isFetching: fetchingAreas } = useQuery({
     queryKey: referenceQueryKeys.businessAreas,
     queryFn: businessAreasService.list,
     enabled: isAdmin,
@@ -53,12 +55,15 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    if (!isAdmin || loadingAreas || loadingManagers) return;
+    // isFetching too, not only isLoading: right after the setup wizard creates
+    // the first area, the cache still holds the old empty list while the fresh
+    // one is on its way, and acting on it sent the user back to the wizard.
+    if (!isAdmin || loadingAreas || fetchingAreas || loadingManagers) return;
     if (localStorage.getItem(`bcm-setup-skip-${user?.id}`)) return;
     if (businessAreas.length === 0) {
       router.push("/onboarding");
     }
-  }, [isAdmin, loadingAreas, loadingManagers, businessAreas, router, user?.id]);
+  }, [isAdmin, loadingAreas, fetchingAreas, loadingManagers, businessAreas, router, user?.id]);
 
   const { data: attention, isLoading, isError } = useHomeAttention();
 

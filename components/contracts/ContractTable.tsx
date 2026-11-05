@@ -47,6 +47,7 @@ import {
 import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Trash2, Save } from "lucide-react";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 type PageItem = number | "ellipsis-start" | "ellipsis-end";
 
@@ -84,6 +85,22 @@ function noticeDeadlinePassed(c: Contract): boolean {
 function nextDeadline(c: Contract): string | null {
   if (noticeDeadlinePassed(c)) return c.endDate ?? null;
   return c.noticeDeadline ?? c.endDate ?? null;
+}
+
+/** The date to act on with what it means, for the table cell and the phone card. */
+function NextDeadline({ contract: c }: { readonly contract: Contract }) {
+  const date = nextDeadline(c);
+  return (
+    <>
+      {date ? new Date(date).toLocaleDateString("it-IT") : "N/D"}
+      {c.noticeDeadline && !noticeDeadlinePassed(c) && (
+        <span className="block text-xs text-muted-foreground">ultimo giorno per disdire</span>
+      )}
+      {noticeDeadlinePassed(c) && (
+        <span className="block text-xs text-muted-foreground">si rinnova: termine di disdetta passato</span>
+      )}
+    </>
+  );
 }
 
 // counterpartyName has no flat property on Contract (only the nested
@@ -173,6 +190,7 @@ interface ContractTableProps {
 export default function ContractTable({ onEditClick, initialSearchQuery = "" }: ContractTableProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const isMobile = useIsMobile();
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
 
@@ -512,8 +530,37 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
         </div>
       )}
 
-      {/* Table with Responsive Columns */}
+      {/* Table with Responsive Columns; on a phone, one card per contract */}
       <div className="bg-card rounded-lg border border-border overflow-x-auto">
+        {isMobile ? (
+          <ul aria-label="Contratti" className="divide-y divide-border">
+            {contracts.map((c) => (
+              <li key={c.id}>
+                <button
+                  type="button"
+                  onClick={() => router.push(`/contracts/${c.id}`)}
+                  className="w-full text-left p-4 space-y-1.5 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-medium text-sm">{c.contractNumber}</span>
+                    <div className="flex flex-wrap justify-end gap-1">
+                      <Badge variant={getContractStatusVariant(c.status)} className="text-xs">
+                        {CONTRACT_STATUS_LABELS[c.status] ?? c.status}
+                      </Badge>
+                      <ExpiringSoonBadge contract={c} className="text-xs" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-foreground">{c.counterparty?.name ?? "N/D"}</p>
+                  {c.projectName && <p className="text-sm text-muted-foreground">{c.projectName}</p>}
+                  <div className="text-sm">
+                    <span className="text-muted-foreground">Prossima scadenza: </span>
+                    <NextDeadline contract={c} />
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
         <Table>
           <TableHeader>
             <TableRow>
@@ -584,13 +631,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                   </div>
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm whitespace-nowrap">
-                  {nextDeadline(c) ? new Date(nextDeadline(c)!).toLocaleDateString("it-IT") : "N/D"}
-                  {c.noticeDeadline && !noticeDeadlinePassed(c) && (
-                    <span className="block text-xs text-muted-foreground">ultimo giorno per disdire</span>
-                  )}
-                  {noticeDeadlinePassed(c) && (
-                    <span className="block text-xs text-muted-foreground">si rinnova: termine di disdetta passato</span>
-                  )}
+                  <NextDeadline contract={c} />
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
@@ -628,6 +669,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
             ))}
           </TableBody>
         </Table>
+        )}
 
         {/* Pagination Controls */}
         {totalPages > 1 && (

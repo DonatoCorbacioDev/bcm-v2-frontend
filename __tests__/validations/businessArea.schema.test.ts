@@ -39,9 +39,9 @@ describe("businessAreaSchema", () => {
   });
 
   describe("description", () => {
-    it("rejects descriptions shorter than 5 characters", () => {
+    it("accepts a short description: any text is fine", () => {
       const result = businessAreaSchema.safeParse({ ...validData, description: "Hi" });
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
 
     it("rejects descriptions longer than 500 characters", () => {
@@ -54,10 +54,10 @@ describe("businessAreaSchema", () => {
       expect(result.success).toBe(true);
     });
 
-    it("rejects missing description", () => {
+    it("accepts a missing description: it is optional", () => {
       const { description: _, ...withoutDesc } = validData;
       const result = businessAreaSchema.safeParse(withoutDesc);
-      expect(result.success).toBe(false);
+      expect(result.success).toBe(true);
     });
   });
 });

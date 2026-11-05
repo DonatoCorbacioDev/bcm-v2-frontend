@@ -86,7 +86,7 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
       {/* Description Field */}
       <div>
         <label htmlFor="description" className="block text-sm font-medium mb-2">
-          Descrizione *
+          Descrizione
         </label>
         <Textarea
           id="description"

@@ -185,8 +185,8 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">{cp.vatNumber || "N/D"}</TableCell>
-                  <TableCell className="hidden lg:table-cell text-sm">{cp.contactName || "N/D"}</TableCell>
+                  <TableCell className="hidden md:table-cell text-sm">{cp.vatNumber || "—"}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-sm">{cp.contactName || "—"}</TableCell>
                   {isAdmin && (
                     <TableCell>
                       <div className="flex gap-1">

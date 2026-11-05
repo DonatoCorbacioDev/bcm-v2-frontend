@@ -8,7 +8,7 @@ import type { BusinessArea } from "@/types";
 
 export type BusinessAreaUpsertPayload = {
   name: string;
-  description: string;
+  description?: string;
 };
 
 export const businessAreasService = {

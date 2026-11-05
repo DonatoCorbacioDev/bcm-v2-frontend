@@ -10,8 +10,8 @@ export type ManagerUpsertPayload = {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber: string;
-  department: string;
+  phoneNumber?: string;
+  department?: string;
 };
 
 export const managersService = {

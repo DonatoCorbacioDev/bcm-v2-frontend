@@ -14,6 +14,8 @@ export interface User {
   createdAt: string;
   canApproveContracts?: boolean;
   organizationName?: string | null;
+  /** First name from the manager profile; sessions from before it was added lack it. */
+  firstName?: string | null;
 }
 
 export interface Manager {

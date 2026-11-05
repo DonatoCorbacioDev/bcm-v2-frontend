@@ -12,11 +12,12 @@ export const businessAreaSchema = z.object({
     .max(100, "Il nome non può superare i 100 caratteri")
     .trim(),
 
+  // Optional: the name usually says it all ("Acquisti", "IT").
   description: z
-    .string({ message: "La descrizione è obbligatoria" })
-    .min(5, "La descrizione deve contenere almeno 5 caratteri")
+    .string()
+    .trim()
     .max(500, "La descrizione non può superare i 500 caratteri")
-    .trim(),
+    .optional(),
 });
 
 export type BusinessAreaFormData = z.infer<typeof businessAreaSchema>;

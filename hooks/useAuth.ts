@@ -31,6 +31,7 @@ interface UserProfile {
   createdAt: string;
   canApproveContracts: boolean;
   organizationName: string | null;
+  firstName?: string | null;
 }
 
 interface ApiError extends AxiosError<{ message?: string }> {

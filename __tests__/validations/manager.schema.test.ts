@@ -103,9 +103,10 @@ describe("managerSchema", () => {
       expect(result.success).toBe(false);
     });
 
-    it("rejects missing department", () => {
-      const { department: _, ...rest } = validData;
-      expect(managerSchema.safeParse(rest).success).toBe(false);
+    it("accepts a manager without department or phone: both are optional", () => {
+      const { department: _d, phoneNumber: _p, ...rest } = validData;
+      expect(managerSchema.safeParse(rest).success).toBe(true);
+      expect(managerSchema.safeParse({ ...validData, department: "", phoneNumber: "" }).success).toBe(true);
     });
   });
 });

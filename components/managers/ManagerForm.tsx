@@ -126,7 +126,7 @@ export default function ManagerForm({
       {/* Phone Number */}
       <div className="space-y-2">
         <Label htmlFor="phoneNumber">
-          Numero di telefono <span className="text-destructive">*</span>
+          Numero di telefono
         </Label>
         <Input
           id="phoneNumber"
@@ -141,7 +141,7 @@ export default function ManagerForm({
       {/* Department */}
       <div className="space-y-2">
         <Label htmlFor="department">
-          Reparto <span className="text-destructive">*</span>
+          Reparto
         </Label>
         <Input
           id="department"

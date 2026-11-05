@@ -9,10 +9,13 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Check, Building2, Users, CheckCircle2, LayoutDashboard } from "lucide-react";
+import { Check, Building2, Users, CheckCircle2, LayoutDashboard, Handshake } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useUpsertBusinessArea } from "@/hooks/useUpsertBusinessArea";
 import { useUpsertManager } from "@/hooks/useUpsertManager";
+import { useManagers } from "@/hooks/useManagers";
+import { useUpsertCounterparty } from "@/hooks/useUpsertCounterparty";
+import { SelectField } from "@/components/shared/SelectField";
 import {
   businessAreaSchema,
   type BusinessAreaFormData,
@@ -26,9 +29,11 @@ import { Card } from "@/components/ui/card";
 const STEPS = [
   { id: 0, label: "Benvenuto" },
   { id: 1, label: "Area" },
-  { id: 2, label: "Responsabile" },
-  { id: 3, label: "Pronto!" },
+  { id: 2, label: "Responsabili" },
+  { id: 3, label: "Controparte" },
+  { id: 4, label: "Pronto!" },
 ];
+const DONE_STEP = STEPS.length - 1;
 
 function stepCircleClass(index: number, currentStep: number): string {
   if (index < currentStep) return "bg-primary border-primary text-primary-foreground";
@@ -60,7 +65,7 @@ export function OnboardingWizard() {
             Pochi passi per iniziare a gestire i tuoi contratti
           </p>
         </div>
-        {currentStep < 3 && (
+        {currentStep < DONE_STEP && (
           <Button
             variant="ghost"
             size="sm"
@@ -115,7 +120,10 @@ export function OnboardingWizard() {
       {currentStep === 2 && (
         <ManagerStep onNext={goNext} onBack={goBack} onSkip={goNext} />
       )}
-      {currentStep === 3 && <DoneStep />}
+      {currentStep === 3 && (
+        <CounterpartyStep onNext={goNext} onBack={goBack} onSkip={goNext} />
+      )}
+      {currentStep === DONE_STEP && <DoneStep />}
     </div>
   );
 }
@@ -133,24 +141,29 @@ function WelcomeStep({ onNext }: { readonly onNext: () => void }) {
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Benvenuto in BCM</h2>
         <p className="text-muted-foreground">
-          Prima di iniziare, creiamo insieme le fondamenta della tua organizzazione:
-          un&apos;area di business e il primo responsabile contratti.
+          Prima di iniziare, prepariamo insieme quello che serve per il primo contratto.
         </p>
       </div>
       <ul className="text-left space-y-3 text-sm text-muted-foreground max-w-sm mx-auto">
         <li className="flex items-center gap-2">
           <Building2 className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
           <span>
-            Un&apos;{" "}
-            <strong className="text-foreground">area di business</strong> per raggruppare i
+            Un&apos;<strong className="text-foreground">area di business</strong> per raggruppare i
             contratti
           </span>
         </li>
         <li className="flex items-center gap-2">
           <Users className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
           <span>
-            Un <strong className="text-foreground">responsabile</strong> a cui assegnare i
+            I <strong className="text-foreground">responsabili</strong> a cui assegnare i
             contratti e inviare le notifiche
+          </span>
+        </li>
+        <li className="flex items-center gap-2">
+          <Handshake className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+          <span>
+            La prima <strong className="text-foreground">controparte</strong>: il cliente o il
+            fornitore del contratto
           </span>
         </li>
       </ul>
@@ -223,7 +236,7 @@ function BusinessAreaStep({
 
         <div>
           <label htmlFor="ba-description" className="block text-sm font-medium mb-1.5">
-            Descrizione <span className="text-destructive" aria-hidden="true">*</span>
+            Descrizione
           </label>
           <Textarea
             id="ba-description"
@@ -291,6 +304,12 @@ function ManagerStep({
     onNext();
   };
 
+  // Registering the organization already made its admin a responsabile: say
+  // so, and make adding another one a choice instead of a required step.
+  const { data: managers = [] } = useManagers();
+  const [adding, setAdding] = useState(false);
+  const showForm = managers.length === 0 || adding;
+
   return (
     <Card className="p-8 space-y-6">
       <div className="flex items-center gap-3">
@@ -298,13 +317,48 @@ function ManagerStep({
           <Users className="w-5 h-5 text-primary" aria-hidden="true" />
         </div>
         <div>
-          <h2 className="font-semibold">Aggiungi il primo responsabile</h2>
+          <h2 className="font-semibold">
+            {managers.length > 0 ? "Chi segue i contratti" : "Aggiungi il primo responsabile"}
+          </h2>
           <p className="text-sm text-muted-foreground">
             Il responsabile viene assegnato ai contratti e riceve le notifiche di scadenza
           </p>
         </div>
       </div>
 
+      {managers.length > 0 && (
+        <div className="space-y-3">
+          <ul className="space-y-1 text-sm">
+            {managers.map((m) => (
+              <li key={m.id} className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                <span>{m.firstName} {m.lastName}</span>
+                <span className="text-muted-foreground">· {m.email}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm text-muted-foreground">
+            Puoi già assegnare i contratti. Altri responsabili si aggiungono anche dopo, da Impostazioni.
+          </p>
+          {!adding && (
+            <div className="flex items-center justify-between pt-2">
+              <Button type="button" variant="ghost" onClick={onBack}>
+                Indietro
+              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => setAdding(true)}>
+                  Aggiungi un responsabile
+                </Button>
+                <Button type="button" onClick={onNext}>
+                  Continua
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {showForm && (
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -365,7 +419,7 @@ function ManagerStep({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="m-phone" className="block text-sm font-medium mb-1.5">
-              Telefono <span className="text-destructive" aria-hidden="true">*</span>
+              Telefono
             </label>
             <Input
               id="m-phone"
@@ -382,7 +436,7 @@ function ManagerStep({
           </div>
           <div>
             <label htmlFor="m-dept" className="block text-sm font-medium mb-1.5">
-              Dipartimento <span className="text-destructive" aria-hidden="true">*</span>
+              Dipartimento
             </label>
             <Input
               id="m-dept"
@@ -413,11 +467,118 @@ function ManagerStep({
           </div>
         </div>
       </form>
+      )}
     </Card>
   );
 }
 
-// ── Step 3: Done ───────────────────────────────────────────────────────────────
+// ── Step 3: Counterparty ───────────────────────────────────────────────────────
+
+const COUNTERPARTY_TYPE_OPTIONS = [
+  { value: "SUPPLIER", label: "Fornitore" },
+  { value: "CUSTOMER", label: "Cliente" },
+  { value: "BOTH", label: "Entrambi" },
+];
+
+/**
+ * A contract needs a counterparty: without this step the wizard ended on
+ * "create your first contract" and the contracts page answered that a
+ * counterparty was missing. Name and type only; the rest can wait.
+ */
+function CounterpartyStep({
+  onNext,
+  onBack,
+  onSkip,
+}: {
+  readonly onNext: () => void;
+  readonly onBack: () => void;
+  readonly onSkip: () => void;
+}) {
+  const upsert = useUpsertCounterparty();
+  const [name, setName] = useState("");
+  const [type, setType] = useState("SUPPLIER");
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim().length < 2) {
+      setError("Il nome deve contenere almeno 2 caratteri");
+      return;
+    }
+    setSaving(true);
+    try {
+      await upsert.mutateAsync({ payload: { name: name.trim(), type: type as "SUPPLIER" | "CUSTOMER" | "BOTH" } });
+      toast.success("Controparte creata!");
+      onNext();
+    } catch {
+      toast.error("Creazione della controparte non riuscita");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card className="p-8 space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
+          <Handshake className="w-5 h-5 text-primary" aria-hidden="true" />
+        </div>
+        <div>
+          <h2 className="font-semibold">Aggiungi la prima controparte</h2>
+          <p className="text-sm text-muted-foreground">
+            Il fornitore o il cliente del contratto. Partita IVA e referente si aggiungono dopo.
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+        <div>
+          <label htmlFor="c-name" className="block text-sm font-medium mb-1.5">
+            Nome <span className="text-destructive" aria-hidden="true">*</span>
+          </label>
+          <Input
+            id="c-name"
+            value={name}
+            onChange={(e) => { setName(e.target.value); setError(null); }}
+            placeholder="es. Rossi Impianti S.r.l."
+            aria-describedby={error ? "c-name-error" : undefined}
+            className={error ? "border-destructive" : ""}
+          />
+          {error && (
+            <p id="c-name-error" className="text-destructive text-sm mt-1" role="alert">
+              {error}
+            </p>
+          )}
+        </div>
+        <SelectField
+          id="c-type"
+          label="Tipo"
+          value={type}
+          onValueChange={setType}
+          placeholder="Seleziona il tipo"
+          options={COUNTERPARTY_TYPE_OPTIONS}
+        />
+
+        <div className="flex items-center justify-between pt-2">
+          <Button type="button" variant="ghost" onClick={onBack}>
+            Indietro
+          </Button>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onSkip}>
+              Salta
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Creazione…" : "Crea e continua"}
+            </Button>
+          </div>
+        </div>
+      </form>
+    </Card>
+  );
+}
+
+// ── Step 4: Done ───────────────────────────────────────────────────────────────
 
 function DoneStep() {
   const router = useRouter();

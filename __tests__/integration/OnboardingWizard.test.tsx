@@ -23,6 +23,17 @@ jest.mock('@/hooks/useUpsertManager', () => ({
   useUpsertManager: () => ({ mutateAsync: mockMgrMutateAsync }),
 }));
 
+const mockCpMutateAsync = jest.fn();
+jest.mock('@/hooks/useUpsertCounterparty', () => ({
+  useUpsertCounterparty: () => ({ mutateAsync: mockCpMutateAsync }),
+}));
+
+// The managers already in the organization (registration makes the admin one).
+let mockManagers: Array<{ id: number; firstName: string; lastName: string; email: string }> = [];
+jest.mock('@/hooks/useManagers', () => ({
+  useManagers: () => ({ data: mockManagers }),
+}));
+
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 
 // ─── Imports after mocks ─────────────────────────────────────────────────────
@@ -45,6 +56,7 @@ describe('OnboardingWizard', () => {
     jest.clearAllMocks();
     localStorage.clear();
     mockUser(1);
+    mockManagers = [];
   });
 
   it('renders the welcome step by default', () => {
@@ -128,13 +140,14 @@ describe('OnboardingWizard', () => {
         payload: expect.objectContaining({ firstName: 'Marco', lastName: 'Rossi' }),
       });
     });
-    expect(screen.getByText(/configurazione completata/i)).toBeInTheDocument();
+    expect(screen.getByText(/aggiungi la prima controparte/i)).toBeInTheDocument();
   });
 
   it('Done step renders both "Vai alla dashboard" and "Crea primo contratto" buttons', async () => {
     render(<OnboardingWizard />);
     // Navigate to done step by skipping both
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
 
@@ -147,6 +160,7 @@ describe('OnboardingWizard', () => {
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /vai alla dashboard/i }));
 
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
@@ -155,6 +169,7 @@ describe('OnboardingWizard', () => {
   it('"Crea primo contratto" from Done step navigates to /contracts', async () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /crea primo contratto/i }));
@@ -185,7 +200,8 @@ describe('OnboardingWizard', () => {
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
 
-    await waitFor(() => expect(screen.getAllByRole('alert').length).toBeGreaterThanOrEqual(5));
+    // Name, surname and email only: phone and department are optional.
+    await waitFor(() => expect(screen.getAllByRole('alert')).toHaveLength(3));
     expect(mockMgrMutateAsync).not.toHaveBeenCalled();
   });
 
@@ -194,8 +210,67 @@ describe('OnboardingWizard', () => {
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
 
     expect(screen.queryByRole('button', { name: /salta configurazione/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the admin who already follows the contracts and lets them continue without adding anyone', async () => {
+    mockManagers = [{ id: 1, firstName: 'Lucia', lastName: 'Verdi', email: 'lucia@acme.it' }];
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+
+    expect(screen.getByText('Chi segue i contratti')).toBeInTheDocument();
+    expect(screen.getByText('Lucia Verdi')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/cognome/i)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /^continua$/i }));
+
+    expect(mockMgrMutateAsync).not.toHaveBeenCalled();
+    expect(screen.getByText(/aggiungi la prima controparte/i)).toBeInTheDocument();
+  });
+
+  it('opens the manager form on request when one already exists', async () => {
+    mockManagers = [{ id: 1, firstName: 'Lucia', lastName: 'Verdi', email: 'lucia@acme.it' }];
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /aggiungi un responsabile/i }));
+
+    expect(screen.getByLabelText(/cognome/i)).toBeInTheDocument();
+  });
+
+  it('creates the first counterparty with name and type, then reaches the done step', async () => {
+    mockCpMutateAsync.mockResolvedValue({ id: 5 });
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+
+    await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Il nome deve contenere almeno 2 caratteri');
+    expect(mockCpMutateAsync).not.toHaveBeenCalled();
+
+    await userEvent.type(screen.getByLabelText(/^nome/i), 'Rossi Impianti S.r.l.');
+    await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
+
+    await waitFor(() => expect(mockCpMutateAsync).toHaveBeenCalledWith({
+      payload: { name: 'Rossi Impianti S.r.l.', type: 'SUPPLIER' },
+    }));
+    expect(screen.getByText(/configurazione completata/i)).toBeInTheDocument();
+  });
+
+  it('keeps the user on the counterparty step when creating it fails', async () => {
+    mockCpMutateAsync.mockRejectedValue(new Error('boom'));
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    await userEvent.type(screen.getByLabelText(/^nome/i), 'Rossi Impianti S.r.l.');
+    await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
+
+    await waitFor(() => expect(mockCpMutateAsync).toHaveBeenCalled());
+    expect(screen.getByText(/aggiungi la prima controparte/i)).toBeInTheDocument();
   });
 
   it('step indicator shows completed checkmarks for visited steps', async () => {

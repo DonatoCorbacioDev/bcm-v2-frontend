@@ -91,6 +91,30 @@ describe('DashboardPage — onboarding redirect', () => {
     expect(mockPush).not.toHaveBeenCalledWith('/onboarding');
   });
 
+  it('does NOT send the user back to the wizard on a stale empty list just after it created the first area', async () => {
+    mockAdmin(1);
+    // The cache still holds the list seen before the wizard (empty, stale);
+    // the refetch on mount returns the area the wizard just created.
+    const { QueryClient, QueryClientProvider } = await import('@tanstack/react-query');
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    client.setQueryData(['reference', 'business-areas'], []);
+    // The wizard's manager step leaves the managers in the cache as well.
+    client.setQueryData(['reference', 'managers'], [{ id: 1, firstName: 'Lucia', lastName: 'Verdi', email: 'l@v.it' }]);
+    await client.invalidateQueries({ queryKey: ['reference', 'business-areas'] });
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === '/business-areas') return Promise.resolve({ data: [{ id: 1, name: 'Acquisti', description: '' }] });
+      return Promise.resolve({ data: [] });
+    });
+
+    render(
+      <QueryClientProvider client={client}><DashboardPage /></QueryClientProvider>,
+    );
+
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/business-areas'));
+    await waitFor(() => expect(client.getQueryData(['reference', 'business-areas'])).toHaveLength(1));
+    expect(mockPush).not.toHaveBeenCalledWith('/onboarding');
+  });
+
   it('still redirects when ADMIN has a manager but no business area (registration always creates one manager)', async () => {
     mockAdmin(1);
     (api.get as jest.Mock).mockImplementation((url: string) => {

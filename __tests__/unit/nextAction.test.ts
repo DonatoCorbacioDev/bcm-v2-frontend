@@ -54,4 +54,33 @@ describe('nextAction: what to do about a contract now', () => {
     expect(nextAction({ ...base, status: 'DRAFT' }).title).toBe('Bozza: non ancora attiva');
     expect(nextAction({ ...base, status: 'CANCELLED' }).title).toBe('Contratto annullato');
   });
+
+  describe("with the contract's invoices, in the home page's order", () => {
+    const inv = (over: object) => ({ id: 1, invoiceNumber: 'FA-1', matchStatus: 'CONFIRMED', sepaBatchId: null, ibanChanged: false, ...over }) as never;
+
+    it('puts a changed IBAN before any deadline', () => {
+      const action = nextAction({ ...base, daysUntilExpiry: 3 }, [inv({ ibanChanged: true, invoiceNumber: 'FA-2026-4T' })]);
+
+      expect(action.title).toBe('IBAN cambiato: verifica prima di pagare');
+      expect(action.detail).toBe('La fattura FA-2026-4T chiede il pagamento su un conto diverso da quello verificato.');
+      expect(action.tone).toBe('danger');
+    });
+
+    it('ignores a changed IBAN once the invoice is paid', () => {
+      expect(nextAction({ ...base, daysUntilExpiry: 120 }, [inv({ ibanChanged: true, sepaBatchId: 7 })]).tone).toBe('ok');
+    });
+
+    it('keeps a near deadline before invoices to match', () => {
+      expect(nextAction({ ...base, daysUntilExpiry: 3 }, [inv({ matchStatus: 'SUGGESTED' })]).title)
+        .toBe('Scade il 31 dicembre 2026 (tra 3 giorni)');
+    });
+
+    it('names an invoice to match instead of saying there is nothing to do', () => {
+      expect(nextAction({ ...base, daysUntilExpiry: 120 }, [inv({ matchStatus: 'SUGGESTED', invoiceNumber: 'NCS-11' })]).title)
+        .toBe('Fattura NCS-11 da abbinare');
+      expect(nextAction({ ...base, daysUntilExpiry: 120 }, [
+        inv({ matchStatus: 'UNMATCHED' }), inv({ id: 2, matchStatus: 'COUNTERPARTY_MISMATCH' }),
+      ]).title).toBe('2 fatture da abbinare');
+    });
+  });
 });

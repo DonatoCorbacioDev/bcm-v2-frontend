@@ -33,7 +33,7 @@ import api from "@/lib/api";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
 import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import { NextActionCard } from "@/components/contracts/NextActionCard";
-import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent } from "@/types";
+import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent, ElectronicInvoice } from "@/types";
 import { formatMoney } from "@/lib/formatMoney";
 
 const FINANCIAL_VALUE_SOURCE_LABELS: Record<string, string> = {
@@ -137,6 +137,17 @@ export default function ContractDetailPage() {
       void queryClient.invalidateQueries({ queryKey: ["financial-values", "by-contract", contractId] });
     },
     onError: () => toast.error("Rigenerazione dei valori finanziari non riuscita"),
+  });
+
+  // Same query as the invoices tab (shared cache): the next-action card must
+  // see a changed IBAN or an invoice to match, as the home page does.
+  const { data: invoices } = useQuery<ElectronicInvoice[]>({
+    queryKey: ["invoices", contractId],
+    queryFn: async () => {
+      const res = await api.get(`/contracts/${contractId}/invoices`);
+      return res.data;
+    },
+    enabled: !!contractId,
   });
 
   const { data: contractHistory, isLoading: isLoadingHistory } = useQuery<ContractHistory[]>({
@@ -514,7 +525,7 @@ export default function ContractDetailPage() {
         </div>
       </div>
 
-      <NextActionCard contract={contract} />
+      <NextActionCard contract={contract} invoices={invoices} />
 
       {/* General Information */}
       <Card>

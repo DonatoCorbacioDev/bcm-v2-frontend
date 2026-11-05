@@ -454,6 +454,15 @@ describe('InvoicesTab', () => {
     expect(screen.getByText('Pagata')).toBeInTheDocument();
   });
 
+  it('blocks an invoice whose IBAN differs from the verified one instead of calling it ready', async () => {
+    mockApiGet({ invoices: [{ ...invoice, ibanChanged: true }] });
+    renderTab();
+    expect(await screen.findByText('IBAN cambiato: da verificare')).toBeInTheDocument();
+    expect(screen.queryByText('Pronta per SEPA')).not.toBeInTheDocument();
+    expect(screen.getByText(/conferma il cambio sulla controparte/i)).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
+  });
+
   it('allows selecting an eligible invoice and shows the generate button with the count', async () => {
     mockApiGet({ invoices: [invoice] });
     renderTab();

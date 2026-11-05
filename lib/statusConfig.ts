@@ -94,9 +94,11 @@ export const RISK_LEVEL_VARIANT: Record<"HIGH" | "MEDIUM" | "LOW", BadgeVariant>
 };
 
 /** Invoice payment status (derived from SEPA batch / IBAN presence) → badge variant + Italian label. */
-export const PAYMENT_STATUS_CONFIG: Record<"PAID" | "READY", StatusConfig> = {
+export const PAYMENT_STATUS_CONFIG: Record<"PAID" | "READY" | "IBAN_CHANGED", StatusConfig> = {
   PAID: { variant: "success", label: "Pagata" },
   READY: { variant: "secondary", label: "Pronta per SEPA" },
+  // Same wording as the home page alert: the two must tell the same story.
+  IBAN_CHANGED: { variant: "destructive", label: "IBAN cambiato: da verificare" },
 };
 
 /** Invoice ↔ financial-value match status → badge variant + Italian label. */

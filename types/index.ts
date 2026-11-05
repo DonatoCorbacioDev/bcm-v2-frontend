@@ -210,6 +210,8 @@ export interface ElectronicInvoice {
   expectedAmount?: number | null;
   /** taxableAmount - expectedAmount, to be checked by a person; null for a credit note or without a match. */
   amountDifference?: number | null;
+  /** The invoice asks to be paid on an IBAN other than the supplier's verified one: SEPA is blocked. */
+  ibanChanged?: boolean;
 }
 
 export interface ContractHistory {

@@ -71,8 +71,18 @@ const COLUMNS: { key: SortableColumn; label: string; className?: string }[] = [
   { key: "nextDeadline", label: "Prossima scadenza", className: "hidden md:table-cell" },
 ];
 
-/** The date to act on: notice deadline for a tacit renewal, otherwise the end date (YYYY-MM-DD). */
+/** A tacit renewal whose last day to give notice has gone by: it will renew at the end date. */
+function noticeDeadlinePassed(c: Contract): boolean {
+  return c.noticeDeadline != null && c.daysUntilNoticeDeadline != null && c.daysUntilNoticeDeadline < 0;
+}
+
+/**
+ * The date to act on (YYYY-MM-DD): the notice deadline for a tacit renewal,
+ * otherwise the end date. Once the notice deadline has passed, the end date
+ * again: that is when the contract renews.
+ */
 function nextDeadline(c: Contract): string | null {
+  if (noticeDeadlinePassed(c)) return c.endDate ?? null;
   return c.noticeDeadline ?? c.endDate ?? null;
 }
 
@@ -575,8 +585,11 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm whitespace-nowrap">
                   {nextDeadline(c) ? new Date(nextDeadline(c)!).toLocaleDateString("it-IT") : "N/D"}
-                  {c.noticeDeadline && (
+                  {c.noticeDeadline && !noticeDeadlinePassed(c) && (
                     <span className="block text-xs text-muted-foreground">ultimo giorno per disdire</span>
+                  )}
+                  {noticeDeadlinePassed(c) && (
+                    <span className="block text-xs text-muted-foreground">si rinnova: termine di disdetta passato</span>
                   )}
                 </TableCell>
                 <TableCell>

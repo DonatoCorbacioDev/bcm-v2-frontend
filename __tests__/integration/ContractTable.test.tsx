@@ -289,6 +289,23 @@ describe('ContractTable', () => {
     expect(screen.queryByRole('button', { name: /codice wbs/i })).not.toBeInTheDocument();
   });
 
+  it('once the notice deadline has passed, shows the renewal date instead of a deadline already gone', () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([
+        { ...activeContract, id: 6, contractNumber: 'CNT-LATE', endDate: '2026-12-31', autoRenew: true,
+          noticeDays: 60, renewalMonths: 12, noticeDeadline: '2026-11-01', daysUntilNoticeDeadline: -4 },
+      ]),
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    const late = screen.getByText('CNT-LATE').closest('tr')!;
+    expect(late).toHaveTextContent('31/12/2026');
+    expect(late).toHaveTextContent('si rinnova: termine di disdetta passato');
+    expect(late).not.toHaveTextContent('ultimo giorno per disdire');
+  });
+
   it('shows fallback text and sorts correctly for a contract with no counterparty', async () => {
     const noCounterpartyContract: Contract = {
       ...activeContract,

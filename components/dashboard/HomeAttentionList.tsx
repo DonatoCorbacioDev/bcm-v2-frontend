@@ -15,14 +15,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { formatMoney } from "@/lib/formatMoney";
+import { dayWithArticle } from "@/lib/italianDate";
 import type { HomeAttentionItem, HomeAttentionType } from "@/types";
 
 /** "2026-11-24" -> "24 novembre", read as a calendar day (no timezone shift). */
-function formatDay(isoDate: string | null): string {
-  if (!isoDate) return "";
-  const [y, m, d] = isoDate.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("it-IT", { day: "numeric", month: "long" });
-}
 
 function formatWhen(daysLeft: number | null): string | null {
   if (daysLeft == null) return null;
@@ -62,7 +58,7 @@ function present(item: HomeAttentionItem): Presentation {
     NOTICE_DEADLINE: () => ({
       icon: CalendarClock,
       tone: "warning",
-      title: `Disdici entro il ${formatDay(item.dueDate)} se non vuoi rinnovarlo`,
+      title: `Disdici entro ${item.dueDate ? dayWithArticle(item.dueDate) : ""} se non vuoi rinnovarlo`,
       detail: item.renewalMonths
         ? `${subject} — dopo si rinnova per altri ${item.renewalMonths} mesi`
         : subject,
@@ -71,7 +67,7 @@ function present(item: HomeAttentionItem): Presentation {
     EXPIRY: () => ({
       icon: AlertTriangle,
       tone: "warning",
-      title: `Scade il ${formatDay(item.dueDate)}`,
+      title: `Scade ${item.dueDate ? dayWithArticle(item.dueDate) : ""}`,
       detail: subject,
       href: contractHref,
     }),

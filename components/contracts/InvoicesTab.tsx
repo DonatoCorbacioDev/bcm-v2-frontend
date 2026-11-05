@@ -381,7 +381,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                   <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={selectedIds.includes(invoice.id)}
-                      disabled={!invoice.supplierIban || invoice.sepaBatchId != null}
+                      disabled={!invoice.supplierIban || invoice.sepaBatchId != null || invoice.ibanChanged === true}
                       onCheckedChange={() => toggleSelected(invoice)}
                       aria-label={`Seleziona fattura ${invoice.fileName}`}
                     />
@@ -480,6 +480,20 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                     {(() => {
                       if (invoice.sepaBatchId != null) {
                         return <Badge variant={PAYMENT_STATUS_CONFIG.PAID.variant}>{PAYMENT_STATUS_CONFIG.PAID.label}</Badge>;
+                      }
+                      // Before "ready": an invoice asking for a new bank account is
+                      // the classic supplier-fraud scenario, never ready to pay.
+                      if (invoice.ibanChanged) {
+                        return (
+                          <div>
+                            <Badge variant={PAYMENT_STATUS_CONFIG.IBAN_CHANGED.variant}>
+                              {PAYMENT_STATUS_CONFIG.IBAN_CHANGED.label}
+                            </Badge>
+                            <p className="mt-1 text-xs text-muted-foreground whitespace-normal max-w-48">
+                              Diverso da quello verificato: conferma il cambio sulla controparte prima di pagare.
+                            </p>
+                          </div>
+                        );
                       }
                       if (invoice.supplierIban) {
                         return <Badge variant={PAYMENT_STATUS_CONFIG.READY.variant}>{PAYMENT_STATUS_CONFIG.READY.label}</Badge>;

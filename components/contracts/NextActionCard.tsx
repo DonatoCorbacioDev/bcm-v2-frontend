@@ -43,8 +43,8 @@ function inDays(days: number): string {
   return `tra ${days} giorni`;
 }
 
-/** What the contract's dates call for: notice deadline, end, or nothing. */
-function dateAction(contract: Contract): NextAction {
+/** A contract that isn't running has nothing to act on, only a status. */
+function statusAction(contract: Contract): NextAction | null {
   if (contract.status === "DRAFT") {
     return { icon: Info, tone: "info", title: "Bozza: non ancora attiva" };
   }
@@ -54,34 +54,48 @@ function dateAction(contract: Contract): NextAction {
   if (contract.status === "EXPIRED") {
     return { icon: Info, tone: "info", title: `Scaduto ${dayWithArticle(contract.endDate, true)}` };
   }
+  return null;
+}
 
-  const renewal = contract.renewalMonths
-    ? `si rinnova per altri ${contract.renewalMonths} ${contract.renewalMonths === 1 ? "mese" : "mesi"}`
-    : "si rinnova automaticamente";
+function renewalPhrase(months: number | null | undefined): string {
+  if (!months) return "si rinnova automaticamente";
+  const unit = months === 1 ? "mese" : "mesi";
+  return `si rinnova per altri ${months} ${unit}`;
+}
+
+/** A tacit renewal with its notice deadline known: disdici, passed, or nothing yet. */
+function noticeAction(contract: Contract, noticeDeadline: string, days: number): NextAction {
+  const renewal = renewalPhrase(contract.renewalMonths);
+  if (days >= 0 && days <= EXPIRING_SOON_DAYS) {
+    return {
+      icon: CalendarClock,
+      tone: "warning",
+      title: `Disdici entro ${dayWithArticle(noticeDeadline, true)} (${inDays(days)}) se non vuoi rinnovarlo`,
+      detail: `Dopo questa data ${renewal}.`,
+    };
+  }
+  if (days < 0) {
+    return {
+      icon: RefreshCw,
+      tone: "info",
+      title: `Termine di disdetta passato: ${dayWithArticle(contract.endDate, true)} ${renewal}`,
+    };
+  }
+  return {
+    icon: CheckCircle2,
+    tone: "ok",
+    title: `Nessuna azione nei prossimi ${EXPIRING_SOON_DAYS} giorni`,
+    detail: `Ultimo giorno per disdire: ${formatDay(noticeDeadline)}.`,
+  };
+}
+
+/** What the contract's dates call for: notice deadline, end, or nothing. */
+function dateAction(contract: Contract): NextAction {
+  const status = statusAction(contract);
+  if (status) return status;
 
   if (contract.autoRenew && contract.noticeDeadline && contract.daysUntilNoticeDeadline != null) {
-    const days = contract.daysUntilNoticeDeadline;
-    if (days >= 0 && days <= EXPIRING_SOON_DAYS) {
-      return {
-        icon: CalendarClock,
-        tone: "warning",
-        title: `Disdici entro ${dayWithArticle(contract.noticeDeadline, true)} (${inDays(days)}) se non vuoi rinnovarlo`,
-        detail: `Dopo questa data ${renewal}.`,
-      };
-    }
-    if (days < 0) {
-      return {
-        icon: RefreshCw,
-        tone: "info",
-        title: `Termine di disdetta passato: ${dayWithArticle(contract.endDate, true)} ${renewal}`,
-      };
-    }
-    return {
-      icon: CheckCircle2,
-      tone: "ok",
-      title: `Nessuna azione nei prossimi ${EXPIRING_SOON_DAYS} giorni`,
-      detail: `Ultimo giorno per disdire: ${formatDay(contract.noticeDeadline)}.`,
-    };
+    return noticeAction(contract, contract.noticeDeadline, contract.daysUntilNoticeDeadline);
   }
 
   if (contract.autoRenew) {

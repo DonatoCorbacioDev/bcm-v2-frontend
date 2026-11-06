@@ -65,15 +65,13 @@ let refreshInFlight: Promise<string> | null = null;
 // Raw axios prevents recursive refresh when the refresh cookie has expired.
 // Callers own state updates, including ignoring results after unmount.
 export function refreshAccessToken(): Promise<string> {
-  if (!refreshInFlight) {
-    refreshInFlight = axios.post<{ token: string }>(
-      `${API_URL}/auth/refresh`,
-      {},
-      { withCredentials: true, timeout: 10000 }
-    ).then((response) => response.data.token).finally(() => {
-      refreshInFlight = null;
-    });
-  }
+  refreshInFlight ??= axios.post<{ token: string }>(
+    `${API_URL}/auth/refresh`,
+    {},
+    { withCredentials: true, timeout: 10000 }
+  ).then((response) => response.data.token).finally(() => {
+    refreshInFlight = null;
+  });
   return refreshInFlight;
 }
 

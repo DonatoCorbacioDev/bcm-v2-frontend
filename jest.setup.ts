@@ -41,3 +41,16 @@ if (typeof window !== "undefined") {
     Element.prototype.scrollIntoView = () => {};
   }
 }
+
+// jsdom's Blob has no text() (browsers all do): read it through FileReader,
+// so code can use the standard method (lib/apiError reads failed downloads).
+if (typeof Blob !== "undefined" && !Blob.prototype.text) {
+  Blob.prototype.text = function text(this: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
+      reader.onerror = () => reject(reader.error ?? new Error("Blob read failed"));
+      reader.readAsText(this);
+    });
+  };
+}

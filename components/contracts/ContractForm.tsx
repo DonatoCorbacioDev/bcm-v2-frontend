@@ -397,12 +397,11 @@ function ContractFormFields({
             {/* A warning, not an error: a deadline already gone is a real
                 situation worth recording, BCM just says what it means. */}
             {noticeDeadlinePassed && (
-              <p
-                role="status"
-                className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
+              <output
+                className="block rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200"
               >
                 Il termine per disdire è già passato: salvo accordi con la controparte, il contratto si rinnoverà.
-              </p>
+              </output>
             )}
           </>
         )}

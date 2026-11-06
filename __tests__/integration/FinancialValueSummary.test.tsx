@@ -338,7 +338,7 @@ describe('FinancialValueSummary — pace within the year', () => {
   it('describes each row for screen readers, including the expected share', () => {
     render(<FinancialValueSummary financialValues={[]} budgets={[budget({ areaName: 'Legale', percentUsed: 18 })]} year={2026} isAdmin={false} />);
 
-    expect(screen.getByRole('group', { name: 'Legale: 18% del budget annuale, atteso ad oggi 84%' })).toBeInTheDocument();
+    expect(screen.getByText('Legale: 18% del budget annuale, atteso ad oggi 84%')).toHaveClass('sr-only');
   });
 
   it('shows "Nessun costo registrato" instead of a green 0% for a cost budget with no costs', () => {

@@ -57,9 +57,8 @@ export default function KPICard({
         <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           {isLoading ? (
-            <div
-              className="h-9 w-32 mt-2 rounded bg-muted-foreground/20 animate-pulse"
-              role="status"
+            <output
+              className="block h-9 w-32 mt-2 rounded bg-muted-foreground/20 animate-pulse"
               aria-label={`${title}: caricamento`}
             />
           ) : (

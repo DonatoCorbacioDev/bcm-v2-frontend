@@ -500,7 +500,7 @@ function CounterpartyStep({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (name.trim().length < 2) {
       setError("Il nome deve contenere almeno 2 caratteri");

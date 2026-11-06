@@ -48,7 +48,13 @@ const WORKFLOW_ACTION_LABELS: Record<string, string> = {
 };
 
 type Tab = "documents" | "financials" | "history" | "invoices";
-const TABS: readonly Tab[] = ["documents", "financials", "history", "invoices"];
+const TABS: ReadonlySet<string> = new Set<Tab>(["documents", "financials", "history", "invoices"]);
+
+function renewalLabel(months: number | null | undefined): string {
+  if (!months) return "Tacito, durata non indicata";
+  const unit = months === 1 ? "mese" : "mesi";
+  return `Tacito, per ${months} ${unit}`;
+}
 
 export default function ContractDetailPage() {
   const params = useParams();
@@ -64,7 +70,7 @@ export default function ContractDetailPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     const requested = searchParams.get("tab");
-    return TABS.includes(requested as Tab) ? (requested as Tab) : "documents";
+    return requested && TABS.has(requested) ? (requested as Tab) : "documents";
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -202,7 +208,7 @@ export default function ContractDetailPage() {
   ];
 
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
-  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     const ids = tabs.map((tab) => tab.id);
     const current = ids.indexOf(activeTab);
     const targets: Record<string, number> = {
@@ -574,9 +580,7 @@ export default function ContractDetailPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Rinnovo</p>
                 <p className="text-base font-medium text-foreground">
-                  {contract.renewalMonths
-                    ? `Tacito, per ${contract.renewalMonths} ${contract.renewalMonths === 1 ? "mese" : "mesi"}`
-                    : "Tacito, durata non indicata"}
+                  {renewalLabel(contract.renewalMonths)}
                 </p>
               </div>
               <div>
@@ -616,7 +620,6 @@ export default function ContractDetailPage() {
           role="tablist"
           aria-label="Sezioni del contratto"
           className="flex overflow-x-auto border-b border-border"
-          onKeyDown={handleTabKeyDown}
         >
           {tabs.map((tab) => {
             const selected = activeTab === tab.id;
@@ -631,6 +634,7 @@ export default function ContractDetailPage() {
                 aria-controls={`contract-tabpanel-${tab.id}`}
                 tabIndex={selected ? 0 : -1}
                 onClick={() => setActiveTab(tab.id)}
+                onKeyDown={handleTabKeyDown}
                 className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-5 py-3 text-sm font-medium border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring ${
                   selected
                     ? "border-primary text-primary"

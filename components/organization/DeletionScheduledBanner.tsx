@@ -27,8 +27,8 @@ export function DeletionScheduledBanner() {
   if (!isAdmin || !organization?.deletionScheduledFor) return null;
 
   return (
-    <div
-      role="status"
+    <section
+      aria-label="Cancellazione programmata"
       className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-4"
     >
       <AlertTriangle className="h-5 w-5 shrink-0 text-destructive" aria-hidden="true" />
@@ -42,6 +42,6 @@ export function DeletionScheduledBanner() {
       >
         Annulla o esporta i dati
       </Link>
-    </div>
+    </section>
   );
 }

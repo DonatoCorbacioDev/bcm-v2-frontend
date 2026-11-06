@@ -45,6 +45,68 @@ function errorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+interface ScheduledDeletionCardProps {
+  readonly deletionScheduledFor: string;
+  readonly cancelling: boolean;
+  readonly onCancel: () => void;
+}
+
+/** The card once a deletion is scheduled: when it will happen, and how to undo it. */
+function ScheduledDeletionCard({ deletionScheduledFor, cancelling, onCancel }: ScheduledDeletionCardProps) {
+  return (
+    <Card id="cancellazione" className="border-destructive/40">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-destructive">
+          <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+          Cancellazione programmata
+        </CardTitle>
+        <CardDescription>
+          Il <strong>{formatDeletionDate(deletionScheduledFor)}</strong> l&apos;organizzazione e tutti i suoi dati
+          saranno cancellati definitivamente.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          Fino ad allora BCM funziona normalmente: puoi ancora esportare i dati qui sopra. Qualsiasi
+          amministratore può annullare la cancellazione.
+        </p>
+        <div className="flex justify-end">
+          <Button variant="outline" onClick={onCancel} disabled={cancelling}>
+            {cancelling ? "Annullamento..." : "Annulla la cancellazione"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+interface ResendCodeProps {
+  readonly resendIn: number;
+  readonly sending: boolean;
+  readonly onResend: () => void;
+}
+
+/**
+ * During the cooldown a plain sentence, not a faded disabled link: in the
+ * live test it read as broken. Not aria-live, a per-second announcement
+ * would be noise.
+ */
+function ResendCode({ resendIn, sending, onResend }: ResendCodeProps) {
+  if (resendIn > 0) {
+    const unit = resendIn === 1 ? "secondo" : "secondi";
+    return (
+      <p className="text-sm text-muted-foreground">
+        Non è arrivato? Potrai chiedere un nuovo codice tra {resendIn} {unit}.
+      </p>
+    );
+  }
+  return (
+    <Button type="button" variant="link" className="h-auto px-0" disabled={sending} onClick={onResend}>
+      {sending ? "Invio del codice..." : "Non è arrivato? Invia un nuovo codice"}
+    </Button>
+  );
+}
+
 /**
  * "Zona pericolosa" of the organization page (GDPR art. 17, Terms sez. 13).
  * Asking takes three factors (password, retyped name, emailed code) and
@@ -120,29 +182,11 @@ export function DeleteOrganizationCard({ organizationName, deletionScheduledFor 
 
   if (deletionScheduledFor) {
     return (
-      <Card id="cancellazione" className="border-destructive/40">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="h-5 w-5" aria-hidden="true" />
-            Cancellazione programmata
-          </CardTitle>
-          <CardDescription>
-            Il <strong>{formatDeletionDate(deletionScheduledFor)}</strong> l&apos;organizzazione e tutti i suoi dati
-            saranno cancellati definitivamente.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Fino ad allora BCM funziona normalmente: puoi ancora esportare i dati qui sopra. Qualsiasi
-            amministratore può annullare la cancellazione.
-          </p>
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={() => cancelMutation.mutate()} disabled={cancelMutation.isPending}>
-              {cancelMutation.isPending ? "Annullamento..." : "Annulla la cancellazione"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <ScheduledDeletionCard
+        deletionScheduledFor={deletionScheduledFor}
+        cancelling={cancelMutation.isPending}
+        onCancel={() => cancelMutation.mutate()}
+      />
     );
   }
 
@@ -209,25 +253,11 @@ export function DeleteOrganizationCard({ organizationName, deletionScheduledFor 
                   required
                 />
               </div>
-              {/* During the cooldown a plain sentence, not a faded disabled
-                  link: in the live test it read as broken. Not aria-live, a
-                  per-second announcement would be noise. */}
-              {resendIn > 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Non è arrivato? Potrai chiedere un nuovo codice tra {resendIn}{" "}
-                  {resendIn === 1 ? "secondo" : "secondi"}.
-                </p>
-              ) : (
-                <Button
-                  type="button"
-                  variant="link"
-                  className="h-auto px-0"
-                  disabled={requestMutation.isPending}
-                  onClick={() => requestMutation.mutate()}
-                >
-                  {requestMutation.isPending ? "Invio del codice..." : "Non è arrivato? Invia un nuovo codice"}
-                </Button>
-              )}
+              <ResendCode
+                resendIn={resendIn}
+                sending={requestMutation.isPending}
+                onResend={() => requestMutation.mutate()}
+              />
             </form>
           ) : (
             <form

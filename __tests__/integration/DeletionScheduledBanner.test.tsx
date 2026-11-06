@@ -33,7 +33,7 @@ describe('DeletionScheduledBanner', () => {
 
     render(<DeletionScheduledBanner />, { wrapper: createWrapper() });
 
-    expect(await screen.findByRole('status')).toHaveTextContent('saranno cancellati il 3 dicembre 2026');
+    expect(await screen.findByRole('region', { name: 'Cancellazione programmata' })).toHaveTextContent('saranno cancellati il 3 dicembre 2026');
     expect(screen.getByRole('link', { name: 'Annulla o esporta i dati' }))
       .toHaveAttribute('href', '/organization#cancellazione');
   });

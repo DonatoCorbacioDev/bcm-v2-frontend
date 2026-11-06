@@ -34,9 +34,10 @@ function BudgetRow({ budget, expectedPercent, isSelected, onClick }: BudgetRowPr
   // The pace marker only means something while the year is under way.
   const showPaceMarker = expectedPercent > 0 && expectedPercent < 100;
   const used = `${budget.percentUsed.toFixed(0)}%`;
+  const pace = showPaceMarker ? `, atteso ad oggi ${expectedPercent.toFixed(0)}%` : "";
   const summary = noCostsYet
     ? `${budget.areaName}: nessun costo registrato`
-    : `${budget.areaName}: ${used} del budget annuale${showPaceMarker ? `, atteso ad oggi ${expectedPercent.toFixed(0)}%` : ""}`;
+    : `${budget.areaName}: ${used} del budget annuale${pace}`;
 
   const rowClassName = `flex items-center gap-3 rounded-md -mx-2 px-2 py-1 w-full text-left ${clickable ? "cursor-pointer hover:bg-muted/60" : ""} ${isSelected ? "bg-muted ring-1 ring-inset ring-primary/40" : ""}`;
 
@@ -84,7 +85,13 @@ function BudgetRow({ budget, expectedPercent, isSelected, onClick }: BudgetRowPr
     );
   }
 
-  return <div className={rowClassName} title={summary} aria-label={summary} role="group">{content}</div>;
+  // Read as one sentence by screen readers; the bar and figures are visual.
+  return (
+    <div className={rowClassName} title={summary}>
+      <span className="sr-only">{summary}</span>
+      <div className="contents" aria-hidden="true">{content}</div>
+    </div>
+  );
 }
 
 interface FinancialValueSummaryProps {

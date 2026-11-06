@@ -63,6 +63,12 @@ function useCounterpartyFilters(counterparties: Counterparty[]) {
   return { searchQuery, setSearchQuery, filteredCounterparties };
 }
 
+/** "Torino (TO)", "Torino" without a province, "—" without a city. */
+function cityLabel(city?: string | null, province?: string | null): string {
+  if (!city) return "—";
+  return province ? `${city} (${province})` : city;
+}
+
 export default function CounterpartyTable({ onEditClick }: CounterpartyTableProps) {
   const { data: counterparties = [], isLoading, isError } = useCounterparties();
   const queryClient = useQueryClient();
@@ -187,7 +193,7 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-sm">
-                    {cp.city ? `${cp.city}${cp.province ? ` (${cp.province})` : ""}` : "—"}
+                    {cityLabel(cp.city, cp.province)}
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{cp.vatNumber || "—"}</TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">{cp.contactName || "—"}</TableCell>

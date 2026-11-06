@@ -4,7 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useHomeAttention } from "@/hooks/useHomeAttention";
@@ -73,6 +73,60 @@ export default function DashboardPage() {
   const isSetupChecking = isAdmin && (loadingAreas || loadingManagers);
   const windowDays = attention?.windowDays ?? 30;
 
+  // Loading, error or the page itself: one of the three, picked before the JSX.
+  let body: ReactNode;
+  if (isLoading || isSetupChecking) {
+    body = (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <KPICardSkeleton key={i} />
+          ))}
+        </div>
+        <div className="h-48 rounded-lg border border-border bg-card animate-pulse" aria-hidden="true" />
+      </>
+    );
+  } else if (isError || !attention) {
+    body = (
+      <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-6 text-center">
+        <p className="text-destructive">Impossibile caricare le attività</p>
+        <p className="mt-2 text-sm text-muted-foreground">Ricarica la pagina tra qualche istante</p>
+      </div>
+    );
+  } else {
+    body = (
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <KPICard
+            title={`Da fare entro ${windowDays} giorni`}
+            value={attention.dueSoonCount}
+            icon={<CalendarClock className="h-6 w-6" aria-hidden="true" />}
+            variant={attention.dueSoonCount > 0 ? "warning" : "default"}
+          />
+          <KPICard
+            title="Fatture da abbinare"
+            value={attention.invoicesToMatchCount}
+            icon={<FileText className="h-6 w-6" aria-hidden="true" />}
+            variant="default"
+          />
+          <KPICard
+            title="Avvisi IBAN"
+            value={attention.ibanAlertsCount}
+            icon={<Landmark className="h-6 w-6" aria-hidden="true" />}
+            variant={attention.ibanAlertsCount > 0 ? "danger" : "default"}
+          />
+        </div>
+
+        <section aria-labelledby="home-todo" className="space-y-3">
+          <h2 id="home-todo" className="text-lg font-semibold text-foreground">Da fare</h2>
+          <HomeAttentionList items={attention.items} windowDays={windowDays} />
+        </section>
+
+        <SupplierInvoicesSummary invoicesToMatch={attention.invoicesToMatchCount} />
+      </>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -80,51 +134,7 @@ export default function DashboardPage() {
         <p className="text-muted-foreground mt-2">Cosa richiede attenzione nei prossimi {windowDays} giorni</p>
       </div>
 
-      {isLoading || isSetupChecking ? (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <KPICardSkeleton key={i} />
-            ))}
-          </div>
-          <div className="h-48 rounded-lg border border-border bg-card animate-pulse" aria-hidden="true" />
-        </>
-      ) : isError || !attention ? (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-6 text-center">
-          <p className="text-destructive">Impossibile caricare le attività</p>
-          <p className="mt-2 text-sm text-muted-foreground">Ricarica la pagina tra qualche istante</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <KPICard
-              title={`Da fare entro ${windowDays} giorni`}
-              value={attention.dueSoonCount}
-              icon={<CalendarClock className="h-6 w-6" aria-hidden="true" />}
-              variant={attention.dueSoonCount > 0 ? "warning" : "default"}
-            />
-            <KPICard
-              title="Fatture da abbinare"
-              value={attention.invoicesToMatchCount}
-              icon={<FileText className="h-6 w-6" aria-hidden="true" />}
-              variant="default"
-            />
-            <KPICard
-              title="Avvisi IBAN"
-              value={attention.ibanAlertsCount}
-              icon={<Landmark className="h-6 w-6" aria-hidden="true" />}
-              variant={attention.ibanAlertsCount > 0 ? "danger" : "default"}
-            />
-          </div>
-
-          <section aria-labelledby="home-todo" className="space-y-3">
-            <h2 id="home-todo" className="text-lg font-semibold text-foreground">Da fare</h2>
-            <HomeAttentionList items={attention.items} windowDays={windowDays} />
-          </section>
-
-          <SupplierInvoicesSummary invoicesToMatch={attention.invoicesToMatchCount} />
-        </>
-      )}
+      {body}
 
       {SHOW_ANALYTICS && <AnalyticsSections />}
     </div>

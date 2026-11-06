@@ -30,6 +30,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 
 import { instantiateTemplateSchema, type InstantiateTemplateFormData } from "@/lib/validations/contractTemplate.schema";
@@ -129,7 +130,7 @@ export default function InstantiateTemplateDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
         <DialogHeader>
           <DialogTitle>Crea contratto da template</DialogTitle>
           <DialogDescription>

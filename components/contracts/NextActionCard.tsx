@@ -59,8 +59,7 @@ function statusAction(contract: Contract): NextAction | null {
 
 function renewalPhrase(months: number | null | undefined): string {
   if (!months) return "si rinnova automaticamente";
-  const unit = months === 1 ? "mese" : "mesi";
-  return `si rinnova per altri ${months} ${unit}`;
+  return months === 1 ? "si rinnova per un altro mese" : `si rinnova per altri ${months} mesi`;
 }
 
 /** A tacit renewal with its notice deadline known: disdici, passed, or nothing yet. */
@@ -119,6 +118,11 @@ function dateAction(contract: Contract): NextAction {
   };
 }
 
+/** "La fattura FA-12" (or "Fattura FA-12"), "Una fattura" when the XML carried no number. */
+function invoiceLabel(number: string | null | undefined, article = "La fattura"): string {
+  return number ? `${article} ${number}` : "Una fattura";
+}
+
 /**
  * What the user should do about this contract now, in one sentence. Same
  * rules and order as the home page: a changed IBAN first (money can leave
@@ -131,7 +135,7 @@ export function nextAction(contract: Contract, invoices: readonly ElectronicInvo
       icon: Landmark,
       tone: "danger",
       title: "IBAN cambiato: verifica prima di pagare",
-      detail: `La fattura ${ibanChanged.invoiceNumber ?? ""} chiede il pagamento su un conto diverso da quello verificato.`,
+      detail: `${invoiceLabel(ibanChanged.invoiceNumber)} chiede il pagamento su un conto diverso da quello verificato.`,
     };
   }
   const byDate = dateAction(contract);
@@ -143,7 +147,7 @@ export function nextAction(contract: Contract, invoices: readonly ElectronicInvo
       icon: FileText,
       tone: "info",
       title: toMatch.length === 1
-        ? `Fattura ${toMatch[0].invoiceNumber ?? ""} da abbinare`
+        ? `${invoiceLabel(toMatch[0].invoiceNumber, "Fattura")} da abbinare`
         : `${toMatch.length} fatture da abbinare`,
       detail: "Controlla l'abbinamento nella scheda Fatture.",
     };

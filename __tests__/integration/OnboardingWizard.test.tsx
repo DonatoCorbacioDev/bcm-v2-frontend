@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
@@ -131,7 +131,7 @@ describe('OnboardingWizard', () => {
     await userEvent.type(screen.getByLabelText(/cognome/i), 'Rossi');
     await userEvent.type(screen.getByLabelText(/email/i), 'marco@test.com');
     await userEvent.type(screen.getByLabelText(/telefono/i), '+39 0212345');
-    await userEvent.type(screen.getByLabelText(/dipartimento/i), 'Acquisti');
+    await userEvent.type(screen.getByLabelText(/reparto/i), 'Acquisti');
     await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
 
     await waitFor(() => {
@@ -283,5 +283,49 @@ describe('OnboardingWizard', () => {
     // The completed step no longer shows "1" (replaced by Check SVG)
     const nav = screen.getByRole('navigation', { name: /progresso/i });
     expect(nav).toBeInTheDocument();
+  });
+});
+
+describe('OnboardingWizard — what is typed in optional fields is still checked', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockUser(1);
+    mockManagers = [];
+  });
+
+  it('flags an area description over 500 characters', async () => {
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    fireEvent.change(screen.getByLabelText(/^Nome/), { target: { value: 'Acquisti' } });
+    fireEvent.change(screen.getByLabelText('Descrizione'), { target: { value: 'A'.repeat(501) } });
+    await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
+
+    expect(await screen.findByText('La descrizione non può superare i 500 caratteri')).toBeInTheDocument();
+    expect(screen.getByLabelText('Descrizione')).toHaveAttribute('aria-describedby', 'ba-desc-error');
+    expect(mockBaMutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('flags a phone with letters and a one-letter department', async () => {
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+    fireEvent.change(screen.getByLabelText('Telefono'), { target: { value: 'chiamami' } });
+    fireEvent.change(screen.getByLabelText('Reparto'), { target: { value: 'X' } });
+    await userEvent.click(screen.getByRole('button', { name: /crea e continua/i }));
+
+    expect(await screen.findByText('Il numero di telefono può contenere solo numeri, +, -, spazi e parentesi')).toBeInTheDocument();
+    expect(screen.getByText('Il reparto deve contenere almeno 2 caratteri')).toBeInTheDocument();
+    expect(screen.getByLabelText('Telefono')).toHaveAttribute('aria-describedby', 'm-phone-error');
+    expect(screen.getByLabelText('Reparto')).toHaveAttribute('aria-describedby', 'm-dept-error');
+  });
+
+  it('asks for a responsabile while the list of existing ones has not arrived', async () => {
+    mockManagers = undefined as unknown as typeof mockManagers;
+    render(<OnboardingWizard />);
+    await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
+    await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
+
+    expect(screen.getByLabelText('Telefono')).toBeInTheDocument();
   });
 });

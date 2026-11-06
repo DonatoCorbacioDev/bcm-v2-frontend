@@ -383,6 +383,30 @@ describe('InvoicesTab', () => {
 
   // ── row click → detail dialog ──────────────────────────────────────────────
 
+  it('shows taxable amount, VAT and what the contract expects in the detail dialog', async () => {
+    const full = { ...invoice, taxableAmount: 1000, vatAmount: 220, expectedAmount: 1000 };
+    mockApiGet({ invoices: [full], detail: full });
+    renderTab();
+    await userEvent.click(await screen.findByText('fattura.xml'));
+    const dialog = await screen.findByRole('dialog');
+
+    expect(within(dialog).getByText('Imponibile')).toBeInTheDocument();
+    expect(within(dialog).getByText('IVA')).toBeInTheDocument();
+    expect(within(dialog).getByText('Previsto dal contratto')).toBeInTheDocument();
+  });
+
+  it('leaves VAT out of the detail dialog when the XML has only the taxable amount', async () => {
+    const noVat = { ...invoice, taxableAmount: 1000, vatAmount: null, expectedAmount: null };
+    mockApiGet({ invoices: [noVat], detail: noVat });
+    renderTab();
+    await userEvent.click(await screen.findByText('fattura.xml'));
+    const dialog = await screen.findByRole('dialog');
+
+    expect(within(dialog).getByText('Imponibile')).toBeInTheDocument();
+    expect(within(dialog).queryByText('IVA')).not.toBeInTheDocument();
+    expect(within(dialog).queryByText('Previsto dal contratto')).not.toBeInTheDocument();
+  });
+
   it('opens detail dialog with full invoice info on row click', async () => {
     mockApiGet({ invoices: [invoice], detail: invoice });
     renderTab();
@@ -461,6 +485,12 @@ describe('InvoicesTab', () => {
     expect(screen.getByText(/nessun bonifico da fare · scadenza 30\/11\/2026/i)).toBeInTheDocument();
     expect(screen.queryByText('Pronta per SEPA')).not.toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
+  });
+
+  it('says a direct debit without a due date is collected by the supplier, with no date', async () => {
+    mockApiGet({ invoices: [{ ...invoice, paymentMethod: 'MP19', paymentDueDate: null }] });
+    renderTab();
+    expect(await screen.findByText(/^Nessun bonifico da fare\.$/)).toBeInTheDocument();
   });
 
   it('says an invoice paid by card is paid outside BCM', async () => {

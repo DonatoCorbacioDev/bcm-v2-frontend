@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 import type { Counterparty } from "@/types";
 
@@ -51,7 +52,7 @@ export default function CounterpartiesPage() {
       <CounterpartyTable onEditClick={handleEditClick} />
 
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.counterparty ? "Modifica controparte" : "Crea nuova controparte"}

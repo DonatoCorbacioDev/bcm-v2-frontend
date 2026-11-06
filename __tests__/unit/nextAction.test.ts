@@ -84,3 +84,30 @@ describe('nextAction: what to do about a contract now', () => {
     });
   });
 });
+
+describe('nextAction: edge cases', () => {
+  const invoice = (over: Record<string, unknown>) => ({
+    id: 9, invoiceNumber: null, matchStatus: 'SUGGESTED', ibanChanged: false, sepaBatchId: null, ...over,
+  }) as never;
+
+  it('names an invoice without a number as "Una fattura" for a changed IBAN', () => {
+    const action = nextAction(base, [invoice({ ibanChanged: true })]);
+    expect(action.detail).toBe('Una fattura chiede il pagamento su un conto diverso da quello verificato.');
+  });
+
+  it('names an invoice without a number as "Una fattura" when it waits to be matched', () => {
+    expect(nextAction({ ...base, daysUntilExpiry: 120 }, [invoice({})]).title).toBe('Una fattura da abbinare');
+  });
+
+  it('says it renews automatically when the renewal length is missing', () => {
+    const action = nextAction({ ...base, autoRenew: true, noticeDays: 30,
+      noticeDeadline: '2026-12-01', daysUntilNoticeDeadline: 10 });
+    expect(action.detail).toBe('Dopo questa data si rinnova automaticamente.');
+  });
+
+  it('uses the singular for a one-month renewal', () => {
+    const action = nextAction({ ...base, autoRenew: true, noticeDays: 30, renewalMonths: 1,
+      noticeDeadline: '2026-12-01', daysUntilNoticeDeadline: 10 });
+    expect(action.detail).toBe('Dopo questa data si rinnova per un altro mese.');
+  });
+});

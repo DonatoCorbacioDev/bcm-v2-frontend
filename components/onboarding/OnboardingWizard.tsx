@@ -436,7 +436,7 @@ function ManagerStep({
           </div>
           <div>
             <label htmlFor="m-dept" className="block text-sm font-medium mb-1.5">
-              Dipartimento
+              Reparto
             </label>
             <Input
               id="m-dept"

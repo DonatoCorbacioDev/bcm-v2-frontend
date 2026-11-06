@@ -249,3 +249,57 @@ describe('AnalyticsSections', () => {
     expect(await screen.findByText(/analisi del rischio non disponibile al momento/i)).toBeInTheDocument();
   });
 });
+
+describe('AnalyticsSections — loading, errors and missing data', () => {
+  const stats = (over: Record<string, unknown>) =>
+    (useDashboardStats as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: false, ...over });
+  const expiring = (over: Record<string, unknown>) =>
+    (useExpiringContracts as jest.Mock).mockReturnValue({ isLoading: false, isError: false, ...over });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useInvoicingSummary as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: false });
+    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    expiring({ data: [] });
+  });
+
+  it('renders nothing while the statistics load', () => {
+    stats({ isLoading: true });
+    const { container } = render(<AnalyticsSections />, { wrapper: createWrapper() });
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('says when the statistics could not be loaded', () => {
+    stats({ isError: true });
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+    expect(screen.getByText('Impossibile caricare le statistiche della dashboard')).toBeInTheDocument();
+  });
+
+  it('shows zeros when the statistics come back empty, and says when expiring contracts failed', () => {
+    stats({});
+    expiring({ data: undefined, isError: true });
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('Impossibile caricare i contratti in scadenza')).toBeInTheDocument();
+    const totals = screen.getByText('Contratti totali').closest('div')!.parentElement!;
+    expect(within(totals).getByText('0')).toBeInTheDocument();
+  });
+
+  it('lists one expiring contract in the singular, with "1 giorno" and "N/D" without a counterparty', () => {
+    stats({ data: { total: 1, active: 1, expiring: 1, expired: 0, draft: 0 } });
+    expiring({ data: [{ ...nonCriticalContract, counterparty: undefined, daysUntilExpiry: 8 }] });
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('1 contratto in scadenza')).toBeInTheDocument();
+    expect(screen.getByText('CNT-SOON - N/D')).toBeInTheDocument();
+  });
+
+  it('shows five expiring contracts and links to the rest', () => {
+    stats({ data: { total: 6, active: 6, expiring: 6, expired: 0, draft: 0 } });
+    expiring({ data: Array.from({ length: 6 }, (_, i) => ({ ...nonCriticalContract, id: 10 + i, contractNumber: `C-${i}` })) });
+    render(<AnalyticsSections />, { wrapper: createWrapper() });
+
+    expect(screen.getByText('6 contratti in scadenza')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '+ Mostra altri 1 contratti in scadenza' })).toHaveAttribute('href', '/contracts?status=ACTIVE');
+  });
+});

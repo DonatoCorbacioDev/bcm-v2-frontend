@@ -36,6 +36,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -83,7 +84,8 @@ function noticeDeadlinePassed(c: Contract): boolean {
  * again: that is when the contract renews.
  */
 function nextDeadline(c: Contract): string | null {
-  if (noticeDeadlinePassed(c)) return c.endDate ?? null;
+  // A passed notice deadline was computed from the end date, so there is one.
+  if (noticeDeadlinePassed(c)) return c.endDate;
   return c.noticeDeadline ?? c.endDate ?? null;
 }
 
@@ -817,7 +819,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
 
       {/* Save View Dialog */}
       <Dialog open={saveViewDialogOpen} onOpenChange={setSaveViewDialogOpen}>
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>Salva vista corrente</DialogTitle>
             <DialogDescription>

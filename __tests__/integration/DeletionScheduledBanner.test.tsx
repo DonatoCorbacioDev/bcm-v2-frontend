@@ -48,6 +48,15 @@ describe('DeletionScheduledBanner', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('shows nothing and asks nothing while nobody is signed in', () => {
+    (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => selector({ user: null }));
+
+    const { container } = render(<DeletionScheduledBanner />, { wrapper: createWrapper() });
+
+    expect(container).toBeEmptyDOMElement();
+    expect(organizationService.getMine).not.toHaveBeenCalled();
+  });
+
   it('never asks a manager for the organization (admin-only endpoint)', () => {
     mockAuthAs('MANAGER');
 

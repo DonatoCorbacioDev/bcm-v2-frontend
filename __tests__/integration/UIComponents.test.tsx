@@ -64,6 +64,7 @@ import {
 import {
   Dialog, DialogTrigger, DialogClose, DialogContent,
   DialogHeader, DialogTitle, DialogDescription,
+  keepOpenOnOutsideClick,
 } from '@/components/ui/dialog';
 import { TableSkeleton } from '@/components/ui/table-skeleton';
 import {
@@ -375,5 +376,13 @@ describe('Table components', () => {
       </Table>
     );
     expect(container).toBeTruthy();
+  });
+});
+
+describe('keepOpenOnOutsideClick', () => {
+  it('stops a backdrop click from closing a form dialog', () => {
+    const event = { preventDefault: jest.fn() };
+    keepOpenOnOutsideClick(event);
+    expect(event.preventDefault).toHaveBeenCalled();
   });
 });

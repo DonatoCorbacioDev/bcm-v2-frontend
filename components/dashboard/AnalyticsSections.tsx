@@ -41,15 +41,6 @@ export function AnalyticsSections() {
     (c) => c.daysUntilExpiry != null && c.daysUntilExpiry > CRITICAL_RENEWAL_DAYS
   );
 
-  // Helper function to format days remaining
-  const formatDaysLeft = (days: number | null | undefined): string => {
-    if (days === null || days === undefined) {
-      return 'In scadenza a breve';
-    }
-    const dayWord = days === 1 ? 'giorno' : 'giorni';
-    return `${days} ${dayWord} rimanenti`;
-  };
-
   if (isLoading) return null;
   if (isError) {
     return (
@@ -101,7 +92,8 @@ export function AnalyticsSections() {
                         </p>
                       </div>
                       <div className="text-sm font-medium text-[var(--status-amber-fg)]">
-                        {formatDaysLeft(contract.daysUntilExpiry)}
+                        {/* Only contracts with more than CRITICAL_RENEWAL_DAYS left get here. */}
+                        {contract.daysUntilExpiry} giorni rimanenti
                       </div>
                     </div>
                   </Link>

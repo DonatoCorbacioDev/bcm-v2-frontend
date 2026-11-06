@@ -355,3 +355,20 @@ describe('FinancialValueTable', () => {
     expect(screen.queryByRole('button', { name: /pulisci/i })).not.toBeInTheDocument();
   });
 });
+
+describe('FinancialValueTable — missing data', () => {
+  it('says N/D for a contract without counterparty or area, and still searches before contracts load', async () => {
+    const { useContractsPaged } = jest.requireMock('@/hooks/useContractsPaged');
+    (useContractsPaged as jest.Mock).mockReturnValueOnce({ data: undefined }).mockReturnValue({ data: undefined });
+    (useFinancialValues as jest.Mock).mockReturnValue({
+      data: [{ ...value1, customerName: '', areaName: '' }, value2],
+      isLoading: false,
+      isError: false,
+    });
+    render(<FinancialValueTable onEditClick={jest.fn()} />, { wrapper: createWrapper() });
+
+    expect(screen.getAllByText('N/D').length).toBeGreaterThanOrEqual(2);
+    await userEvent.type(screen.getByRole('textbox', { name: 'Cerca movimenti' }), 'beta');
+    expect(screen.getByText(/1 \/ 2 valori/i)).toBeInTheDocument();
+  });
+});

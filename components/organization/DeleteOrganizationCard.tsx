@@ -28,6 +28,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 
 interface DeleteOrganizationCardProps {
@@ -211,16 +212,18 @@ export function DeleteOrganizationCard({ organizationName, deletionScheduledFor 
 
       <Dialog
         open={open}
-        onOpenChange={(next) => {
+        // Controlled and opened only by the button above, so Radix only ever
+        // reports a close (Esc, the X): ignored while a request is on its way.
+        onOpenChange={() => {
           if (requestMutation.isPending || confirmMutation.isPending) return;
-          setOpen(next);
-          if (!next) reset();
+          setOpen(false);
+          reset();
         }}
       >
         {/* A click on the backdrop must not throw away what was typed (or the
             pending code step), as in the app's other form dialogs: only
             Annulla, the close button or Esc close it. */}
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>Cancella {organizationName}</DialogTitle>
             <DialogDescription>

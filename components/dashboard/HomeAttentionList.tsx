@@ -18,14 +18,18 @@ import { formatMoney } from "@/lib/formatMoney";
 import { dayWithArticle } from "@/lib/italianDate";
 import type { HomeAttentionItem, HomeAttentionType } from "@/types";
 
-/** "2026-11-24" -> "24 novembre", read as a calendar day (no timezone shift). */
-
 function formatWhen(daysLeft: number | null): string | null {
   if (daysLeft == null) return null;
   if (daysLeft === 0) return "oggi";
   if (daysLeft === 1) return "domani";
   if (daysLeft > 1) return `tra ${daysLeft} giorni`;
   return null;
+}
+
+function renewalDetail(subject: string, months: number | null | undefined): string {
+  if (!months) return subject;
+  if (months === 1) return `${subject} — dopo si rinnova per un altro mese`;
+  return `${subject} — dopo si rinnova per altri ${months} mesi`;
 }
 
 const TONE = {
@@ -47,27 +51,28 @@ function present(item: HomeAttentionItem): Presentation {
   const subject = [item.projectName, item.counterpartyName].filter(Boolean).join(" · ");
   const contractHref = `/contracts/${item.contractId}`;
   const invoicesHref = `${contractHref}?tab=invoices`;
+  const invoiceRef = item.invoiceNumber ? `La fattura ${item.invoiceNumber}` : "Una fattura";
   const kinds: Record<HomeAttentionType, () => Presentation> = {
     IBAN_CHANGED: () => ({
       icon: Landmark,
       tone: "danger",
       title: "IBAN cambiato: verifica prima di pagare",
-      detail: `La fattura ${item.invoiceNumber ?? ""} di ${item.counterpartyName ?? "un fornitore"} chiede il pagamento su un conto diverso da quello verificato`,
+      detail: `${invoiceRef} di ${item.counterpartyName ?? "un fornitore"} chiede il pagamento su un conto diverso da quello verificato`,
       href: invoicesHref,
     }),
     NOTICE_DEADLINE: () => ({
       icon: CalendarClock,
       tone: "warning",
-      title: `Disdici entro ${item.dueDate ? dayWithArticle(item.dueDate) : ""} se non vuoi rinnovarlo`,
-      detail: item.renewalMonths
-        ? `${subject} — dopo si rinnova per altri ${item.renewalMonths} mesi`
-        : subject,
+      title: item.dueDate
+        ? `Disdici entro ${dayWithArticle(item.dueDate)} se non vuoi rinnovarlo`
+        : "Disdici se non vuoi rinnovarlo",
+      detail: renewalDetail(subject, item.renewalMonths),
       href: contractHref,
     }),
     EXPIRY: () => ({
       icon: AlertTriangle,
       tone: "warning",
-      title: `Scade ${item.dueDate ? dayWithArticle(item.dueDate) : ""}`,
+      title: item.dueDate ? `Scade ${dayWithArticle(item.dueDate)}` : "In scadenza",
       detail: subject,
       href: contractHref,
     }),
@@ -81,7 +86,7 @@ function present(item: HomeAttentionItem): Presentation {
     INVOICE_TO_MATCH: () => ({
       icon: FileText,
       tone: "info",
-      title: `Fattura ${item.invoiceNumber ?? ""} da abbinare`,
+      title: item.invoiceNumber ? `Fattura ${item.invoiceNumber} da abbinare` : "Una fattura da abbinare",
       detail: [item.counterpartyName, item.invoiceAmount != null ? `${formatMoney(item.invoiceAmount)} + IVA` : null]
         .filter(Boolean)
         .join(" · "),

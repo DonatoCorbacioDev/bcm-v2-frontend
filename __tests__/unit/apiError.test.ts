@@ -27,3 +27,9 @@ describe('apiErrorMessage', () => {
     await expect(apiErrorMessage(axiosError(429, {}), 'fallback')).resolves.toBe('Troppi tentativi, riprova tra un minuto');
   });
 });
+
+describe('apiErrorMessage without a response', () => {
+  it('falls back when the request never reached the backend (network error)', async () => {
+    await expect(apiErrorMessage(new AxiosError('Network Error', 'ERR_NETWORK'), 'fallback')).resolves.toBe('fallback');
+  });
+});

@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 import type { Budget } from "@/types";
 
@@ -70,7 +71,7 @@ export default function BudgetsPage() {
       />
 
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.budget ? "Modifica budget" : "Crea nuovo budget"}

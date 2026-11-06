@@ -31,6 +31,15 @@ function Dialog({
   return <DialogPrimitive.Root data-slot="dialog" open={open} {...props} />
 }
 
+/**
+ * For form dialogs: a click on the backdrop must not throw away what was
+ * typed. Pass it as onInteractOutside; Annulla, the close button and Esc
+ * still close the dialog.
+ */
+function keepOpenOnOutsideClick(event: { preventDefault: () => void }) {
+  event.preventDefault()
+}
+
 function DialogTrigger({
   ...props
 }: Readonly<React.ComponentProps<typeof DialogPrimitive.Trigger>>) {
@@ -159,4 +168,5 @@ export {
   DialogPortal,
   DialogTitle,
   DialogTrigger,
+  keepOpenOnOutsideClick,
 }

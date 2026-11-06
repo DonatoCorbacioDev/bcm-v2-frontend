@@ -152,6 +152,13 @@ describe('Header', () => {
     expect(screen.getByText('Dettaglio contratto')).toBeInTheDocument();
   });
 
+  it('uses "Dettaglio controparte" title for /counterparties/:id paths', () => {
+    const { usePathname } = jest.requireMock('next/navigation');
+    (usePathname as jest.Mock).mockReturnValueOnce('/counterparties/7');
+    render(<Header {...defaultProps} />);
+    expect(screen.getByText('Dettaglio controparte')).toBeInTheDocument();
+  });
+
   it('falls back to app name for unknown routes', () => {
     const { usePathname } = jest.requireMock('next/navigation');
     (usePathname as jest.Mock).mockReturnValueOnce('/unknown-page');

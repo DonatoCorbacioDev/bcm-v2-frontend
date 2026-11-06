@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 
 import ContractTemplateTable from "@/components/contract-templates/ContractTemplateTable";
@@ -56,7 +57,7 @@ function ContractTemplatesPageContent() {
 
       {/* Create / Edit Dialog */}
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleClose()}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.template ? "Modifica template" : "Nuovo template"}

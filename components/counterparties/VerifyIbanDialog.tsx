@@ -17,6 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 
 interface VerifyIbanDialogProps {
@@ -66,7 +67,7 @@ export default function VerifyIbanDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent onInteractOutside={keepOpenOnOutsideClick}>
         <DialogHeader>
           <DialogTitle>Conferma IBAN verificato</DialogTitle>
           <DialogDescription>

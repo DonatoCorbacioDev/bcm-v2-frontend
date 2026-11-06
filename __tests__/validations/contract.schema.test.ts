@@ -229,3 +229,14 @@ describe("contractSchema", () => {
     });
   });
 });
+
+describe("contractSchema — notice longer than the contract", () => {
+  it("leaves an unreadable date to the date field's own error instead of guessing", () => {
+    const result = contractSchema.safeParse({
+      ...validContract, startDate: "non-una-data", autoRenew: true, noticeDays: 30, renewalMonths: 12,
+    });
+    const messages = result.success ? [] : result.error.issues.map((i) => i.message);
+    expect(messages).not.toContain(
+      "Il preavviso è più lungo del contratto: la disdetta cadrebbe prima della data di inizio");
+  });
+});

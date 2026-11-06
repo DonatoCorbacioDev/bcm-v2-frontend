@@ -25,6 +25,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 import ContractForm from "@/components/contracts/ContractForm";
 import DocumentsTab from "@/components/contracts/DocumentsTab";
@@ -673,7 +674,7 @@ export default function ContractDetailPage() {
       {/* Edit Dialog */}
       {isAdmin && (
         <Dialog open={editDialogOpen} onOpenChange={(open) => { if (!open) { setPrefilledContract(null); } setEditDialogOpen(open); }}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
             <DialogHeader>
               <DialogTitle>Modifica contratto</DialogTitle>
               <DialogDescription>Aggiorna le informazioni del contratto qui sotto</DialogDescription>
@@ -692,7 +693,7 @@ export default function ContractDetailPage() {
         open={rejectDialogOpen}
         onOpenChange={(open) => !rejectMutation.isPending && setRejectDialogOpen(open)}
       >
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>Rifiuta contratto</DialogTitle>
             <DialogDescription>

@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 import type { FinancialType } from "@/types";
 
@@ -55,7 +56,7 @@ export default function FinancialTypesPage() {
       />
 
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.financialType ? "Modifica tipo finanziario" : "Crea nuovo tipo finanziario"}

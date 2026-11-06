@@ -1157,3 +1157,119 @@ describe('BudgetForm', () => {
     });
   });
 });
+
+describe('Optional fields still validate what is typed', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation());
+    (useUpsertManager as jest.Mock).mockReturnValue(mockMutation());
+  });
+
+  it('BusinessAreaForm: a description over 500 characters is flagged and not saved', async () => {
+    const mutateAsync = jest.fn();
+    (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<BusinessAreaForm onClose={jest.fn()} onSuccess={jest.fn()} />, { wrapper: createWrapper() });
+
+    fireEvent.change(screen.getByLabelText(/^Nome/), { target: { value: 'Acquisti' } });
+    fireEvent.change(screen.getByLabelText('Descrizione'), { target: { value: 'A'.repeat(501) } });
+    await userEvent.click(screen.getByRole('button', { name: /crea/i }));
+
+    expect(await screen.findByText('La descrizione non può superare i 500 caratteri')).toBeInTheDocument();
+    expect(screen.getByLabelText('Descrizione')).toHaveClass('border-destructive');
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('ManagerForm: a phone with letters and a one-letter department are flagged and not saved', async () => {
+    const mutateAsync = jest.fn();
+    (useUpsertManager as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<ManagerForm onClose={jest.fn()} />, { wrapper: createWrapper() });
+
+    fireEvent.change(screen.getByLabelText(/^Nome/), { target: { value: 'Anna' } });
+    fireEvent.change(screen.getByLabelText(/^Cognome/), { target: { value: 'Verdi' } });
+    fireEvent.change(screen.getByLabelText(/^Email/), { target: { value: 'anna@example.com' } });
+    fireEvent.change(screen.getByLabelText(/^Numero di telefono/), { target: { value: 'chiamami-ora' } });
+    fireEvent.change(screen.getByLabelText(/^Reparto/), { target: { value: 'X' } });
+    await userEvent.click(screen.getByRole('button', { name: /crea responsabile/i }));
+
+    expect(await screen.findByText('Il numero di telefono può contenere solo numeri, +, -, spazi e parentesi')).toBeInTheDocument();
+    expect(screen.getByText('Il reparto deve contenere almeno 2 caratteri')).toBeInTheDocument();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('ContractForm — with more than one area and responsabile', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useUpsertContract as jest.Mock).mockReturnValue(mockMutation());
+    (useBusinessAreas as jest.Mock).mockReturnValue({
+      data: [...businessAreas, { id: 2, name: 'Acquisti', description: '' }], isLoading: false, isError: false });
+    (useManagers as jest.Mock).mockReturnValue({
+      data: [...managers, { id: 2, firstName: 'Anna', lastName: 'Verdi', email: 'a@v.com', phoneNumber: '', department: '' }],
+      isLoading: false, isError: false });
+    (useCounterparties as jest.Mock).mockReturnValue({ data: counterparties, isLoading: false, isError: false });
+    (useFinancialTypes as jest.Mock).mockReturnValue({ data: financialTypes, isLoading: false, isError: false });
+  });
+
+  it('chooses neither, and asks for both when the form is sent without them', async () => {
+    const mutateAsync = jest.fn();
+    (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<ContractForm onClose={jest.fn()} />, { wrapper: createWrapper() });
+
+    await userEvent.click(await screen.findByRole('button', { name: /crea contratto/i }));
+
+    expect(await screen.findByText("L'area di business è obbligatoria")).toBeInTheDocument();
+    expect(screen.getByText('Il responsabile è obbligatorio')).toBeInTheDocument();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+
+  it('flags an object and a WBS code that are too long', async () => {
+    render(<ContractForm onClose={jest.fn()} />, { wrapper: createWrapper() });
+
+    fireEvent.change(await screen.findByLabelText(/^Oggetto/), { target: { value: 'A'.repeat(201) } });
+    await userEvent.click(screen.getByText(/Altri dati/));
+    fireEvent.change(screen.getByLabelText(/Codice WBS/), { target: { value: 'W'.repeat(51) } });
+    await userEvent.click(screen.getByRole('button', { name: /crea contratto/i }));
+
+    expect(await screen.findByText("L'oggetto non può superare i 200 caratteri")).toBeInTheDocument();
+    expect(screen.getByText('Il codice WBS non può superare i 50 caratteri')).toBeInTheDocument();
+  });
+});
+
+describe('CounterpartyForm — address', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation());
+  });
+
+  it('shows the stored address when editing', () => {
+    render(
+      <CounterpartyForm onClose={jest.fn()} onSuccess={jest.fn()} counterparty={{
+        id: 1, name: 'Nuvola', type: 'SUPPLIER', postalCode: '10121', city: 'Torino', province: 'TO', country: 'IT',
+      }} />,
+      { wrapper: createWrapper() });
+
+    expect(screen.getByLabelText('CAP')).toHaveValue('10121');
+    expect(screen.getByLabelText('Comune')).toHaveValue('Torino');
+    expect(screen.getByLabelText('Provincia')).toHaveValue('TO');
+    expect(screen.getByLabelText('Nazione')).toHaveValue('IT');
+  });
+
+  it('flags a wrong postal code, city, province and country', async () => {
+    const mutateAsync = jest.fn();
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<CounterpartyForm onClose={jest.fn()} onSuccess={jest.fn()} />, { wrapper: createWrapper() });
+
+    fireEvent.change(screen.getByLabelText(/^Nome/), { target: { value: 'Nuvola' } });
+    fireEvent.change(screen.getByLabelText('CAP'), { target: { value: '1'.repeat(11) } });
+    fireEvent.change(screen.getByLabelText('Comune'), { target: { value: 'C'.repeat(101) } });
+    fireEvent.change(screen.getByLabelText('Provincia'), { target: { value: 'Torino' } });
+    fireEvent.change(screen.getByLabelText('Nazione'), { target: { value: 'Italia' } });
+    await userEvent.click(screen.getByRole('button', { name: /crea/i }));
+
+    expect(await screen.findByText('Il CAP non può superare i 10 caratteri')).toBeInTheDocument();
+    expect(screen.getByText('Il comune non può superare i 100 caratteri')).toBeInTheDocument();
+    expect(screen.getByText('La provincia è una sigla di 2 lettere (es. MI)')).toBeInTheDocument();
+    expect(screen.getByText('La nazione è un codice di 2 lettere (es. IT)')).toBeInTheDocument();
+    expect(mutateAsync).not.toHaveBeenCalled();
+  });
+});

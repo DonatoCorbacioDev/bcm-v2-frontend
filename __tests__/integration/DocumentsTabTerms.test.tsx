@@ -121,3 +121,18 @@ describe('termsToContract', () => {
     ])).toEqual({ autoRenew: false, noticeDays: 60, startDate: '2026-01-01' });
   });
 });
+
+describe('DocumentsTab — while the terms are being read', () => {
+  it('spins only on the document being read', async () => {
+    const other = { ...doc, id: 2, fileName: 'allegato.pdf' };
+    (api.get as jest.Mock).mockImplementation((url: string) =>
+      url.endsWith('/terms') ? new Promise(() => {}) : Promise.resolve({ data: [doc, other] }));
+    render(<DocumentsTab contractId={1} isAdmin={false} onApply={jest.fn()} />, { wrapper: createWrapper() });
+
+    const buttons = await screen.findAllByRole('button', { name: 'Leggi rinnovo e scadenze dal documento' });
+    await userEvent.click(buttons[0]);
+
+    await waitFor(() => expect(buttons[0].querySelector('.animate-spin')).not.toBeNull());
+    expect(buttons[1].querySelector('.animate-spin')).toBeNull();
+  });
+});

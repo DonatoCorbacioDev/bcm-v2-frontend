@@ -30,6 +30,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 import api from "@/lib/api";
 import { apiErrorMessage } from "@/lib/apiError";
@@ -79,6 +80,22 @@ function AmountDifferenceNote({ invoice }: { readonly invoice: ElectronicInvoice
       Differenza {sign}{formatAmount(Math.abs(diff), invoice.currency)} da verificare
     </p>
   );
+}
+
+/** The amounts in the detail dialog: taxable and VAT when the XML has them, the total, what the contract expects. */
+function amountFacts(invoice: ElectronicInvoice): { label: string; value: string }[] {
+  const facts: { label: string; value: string }[] = [];
+  if (invoice.taxableAmount != null) {
+    facts.push({ label: "Imponibile", value: formatAmount(invoice.taxableAmount, invoice.currency) });
+    if (invoice.vatAmount != null) {
+      facts.push({ label: "IVA", value: formatAmount(invoice.vatAmount, invoice.currency) });
+    }
+  }
+  facts.push({ label: "Importo totale", value: formatAmount(invoice.totalAmount, invoice.currency) });
+  if (invoice.expectedAmount != null) {
+    facts.push({ label: "Previsto dal contratto", value: formatAmount(invoice.expectedAmount, invoice.currency) });
+  }
+  return facts;
 }
 
 export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
@@ -669,21 +686,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                       day: "numeric",
                     }),
                   },
-                  ...(selectedInvoice.taxableAmount != null
-                    ? [
-                        { label: "Imponibile", value: formatAmount(selectedInvoice.taxableAmount, selectedInvoice.currency) },
-                        ...(selectedInvoice.vatAmount != null
-                          ? [{ label: "IVA", value: formatAmount(selectedInvoice.vatAmount, selectedInvoice.currency) }]
-                          : []),
-                      ]
-                    : []),
-                  {
-                    label: "Importo totale",
-                    value: formatAmount(selectedInvoice.totalAmount, selectedInvoice.currency),
-                  },
-                  ...(selectedInvoice.expectedAmount != null
-                    ? [{ label: "Previsto dal contratto", value: formatAmount(selectedInvoice.expectedAmount, selectedInvoice.currency) }]
-                    : []),
+                  ...amountFacts(selectedInvoice),
                 ].map(({ label, value }) => (
                   <div key={label}>
                     <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
@@ -760,7 +763,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           (open) => { if (!open) setPaymentDetailsInvoice(null); }
         }
       >
-        <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>Dati di pagamento fornitore</DialogTitle>
             <DialogDescription>

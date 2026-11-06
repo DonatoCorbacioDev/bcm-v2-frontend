@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  keepOpenOnOutsideClick,
 } from "@/components/ui/dialog";
 import type { User } from "@/types";
 
@@ -68,7 +69,7 @@ export default function UsersPage() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>
               {formDialog.user ? "Modifica utente" : "Crea nuovo utente"}
@@ -84,7 +85,7 @@ export default function UsersPage() {
 
       {/* Invite User Dialog */}
       <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent className="max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+        <DialogContent className="max-w-md" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>Invita utente</DialogTitle>
           </DialogHeader>

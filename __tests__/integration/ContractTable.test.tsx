@@ -334,6 +334,52 @@ describe('ContractTable', () => {
     }
   });
 
+  it('on a phone still reads well with a counterparty, without one, without an end date or with an unknown status', () => {
+    const original = window.matchMedia;
+    window.matchMedia = jest.fn().mockReturnValue({
+      matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn(),
+    }) as unknown as typeof window.matchMedia;
+    try {
+      (useContractsPaged as jest.Mock).mockReturnValue({
+        data: makePageResponse([
+          { ...activeContract, id: 5, contractNumber: 'CNT-WITH' },
+          { ...activeContract, id: 6, contractNumber: 'CNT-BARE', counterparty: undefined,
+            endDate: null as unknown as string, status: 'ARCHIVED' as Contract['status'] },
+        ]),
+        isLoading: false,
+        isError: false,
+      });
+      render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+      expect(screen.getByRole('button', { name: /CNT-WITH/ })).toHaveTextContent(activeContract.counterparty!.name);
+      const bare = screen.getByRole('button', { name: /CNT-BARE/ });
+      expect(bare).toHaveTextContent('N/D');
+      expect(bare).toHaveTextContent('Prossima scadenza: N/D');
+      expect(bare).toHaveTextContent('ARCHIVED');
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+
+  it('sorts a contract without any date last when sorting by next deadline', async () => {
+    (useContractsPaged as jest.Mock).mockReturnValue({
+      data: makePageResponse([
+        { ...activeContract, id: 7, contractNumber: 'CNT-NODATE', endDate: null as unknown as string },
+        { ...activeContract, id: 8, contractNumber: 'CNT-DATED', endDate: '2026-06-30' },
+        { ...activeContract, id: 9, contractNumber: 'CNT-LATE', endDate: '2026-12-31', autoRenew: true,
+          noticeDays: 30, noticeDeadline: '2026-01-01', daysUntilNoticeDeadline: -100 },
+      ]),
+      isLoading: false,
+      isError: false,
+    });
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await userEvent.click(screen.getByRole('button', { name: /Prossima scadenza/ }));
+
+    const numbers = screen.getAllByRole('row').slice(1).map((r) => /CNT-(NODATE|DATED|LATE)/.exec(r.textContent ?? '')?.[0]);
+    expect(numbers).toEqual(['CNT-NODATE', 'CNT-DATED', 'CNT-LATE']);
+  });
+
   it('shows fallback text and sorts correctly for a contract with no counterparty', async () => {
     const noCounterpartyContract: Contract = {
       ...activeContract,

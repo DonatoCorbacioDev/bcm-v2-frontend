@@ -195,3 +195,90 @@ describe('DeleteOrganizationCard — deletion scheduled', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Non c'è nessuna cancellazione programmata."));
   });
 });
+
+describe('DeleteOrganizationCard — while a request is on its way', () => {
+  const never = () => new Promise<never>(() => {});
+
+  it('says the code is being sent, and Esc does not close the dialog meanwhile', async () => {
+    service.requestDeletion.mockImplementation(never);
+    renderCard();
+    await fillRequest();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
+    expect(await screen.findByRole('button', { name: 'Invio del codice...' })).toBeDisabled();
+
+    await userEvent.keyboard('{Escape}');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('says the deletion is being confirmed', async () => {
+    service.confirmDeletion.mockImplementation(never);
+    renderCard();
+    await fillRequest();
+    await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
+    await userEvent.type(await screen.findByLabelText('Codice di conferma'), '123456');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Conferma la cancellazione' }));
+
+    expect(await screen.findByRole('button', { name: 'Conferma...' })).toBeDisabled();
+  });
+
+  it('says a new code is being sent from the code step', async () => {
+    service.requestDeletion
+      .mockResolvedValueOnce({ expiresInMinutes: 15, resendCooldownSeconds: 0 })
+      .mockImplementation(never);
+    renderCard();
+    await fillRequest();
+    await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Non è arrivato? Invia un nuovo codice' }));
+
+    expect(await screen.findByRole('button', { name: 'Invio del codice...' })).toBeDisabled();
+  });
+
+  it('uses the singular for the last second of the cooldown', async () => {
+    service.requestDeletion.mockResolvedValue({ expiresInMinutes: 15, resendCooldownSeconds: 1 });
+    renderCard();
+    await fillRequest();
+    await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
+
+    expect(await screen.findByText('Non è arrivato? Potrai chiedere un nuovo codice tra 1 secondo.')).toBeInTheDocument();
+  });
+
+  it('closes with Esc and forgets what was typed when nothing is pending', async () => {
+    renderCard();
+    await fillRequest();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    await userEvent.click(screen.getByRole('button', { name: 'Cancella organizzazione' }));
+
+    expect(screen.getByLabelText('La tua password')).toHaveValue('');
+  });
+
+  it('says the cancellation is under way', async () => {
+    service.cancelDeletion.mockImplementation(never);
+    renderCard('2026-12-03T10:00:00Z');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Annulla la cancellazione' }));
+
+    expect(await screen.findByRole('button', { name: 'Annullamento...' })).toBeDisabled();
+  });
+});
+
+describe('DeleteOrganizationCard — errors without a message', () => {
+  it('falls back to a generic sentence when the backend sends no message or is unreachable', async () => {
+    service.requestDeletion
+      .mockRejectedValueOnce(apiError(500))
+      .mockRejectedValueOnce(new AxiosError('Network Error', 'ERR_NETWORK'));
+    renderCard();
+    await fillRequest();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Richiesta non riuscita, riprova più tardi');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Invia il codice' }));
+    await waitFor(() => expect(service.requestDeletion).toHaveBeenCalledTimes(2));
+    expect(screen.getByRole('alert')).toHaveTextContent('Richiesta non riuscita, riprova più tardi');
+  });
+});

@@ -57,3 +57,23 @@ describe('AuditLogsPage — pagination count', () => {
     expect(await screen.findByText('3 risultati totali')).toBeInTheDocument();
   });
 });
+
+describe('AuditLogsPage — Italian labels', () => {
+  it('translates the counterparty entity and the explicitly recorded events', async () => {
+    (api.get as jest.Mock).mockResolvedValue({
+      data: {
+        content: [
+          { ...baseLog, id: 1, entityType: 'Counterparty', entityId: 69 },
+          { ...baseLog, id: 2, action: 'SEPA_IBAN_MISMATCH_BLOCKED', entityType: 'Counterparty', entityId: 70 },
+        ],
+        totalPages: 1, totalElements: 2, number: 0, size: 20,
+      },
+    });
+
+    render(<AuditLogsPage />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText('Controparte #69 — creazione')).toBeInTheDocument();
+    expect(screen.getAllByText('Pagamento bloccato: IBAN diverso').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Counterparty/)).not.toBeInTheDocument();
+  });
+});

@@ -221,7 +221,7 @@ export default function OrganizationPage() {
             <div className="flex items-center justify-between py-1">
               <span className="text-muted-foreground">IBAN attuale</span>
               <span className="flex items-center gap-2">
-                <span className="font-mono">{organization?.iban ?? "Non impostato"}</span>
+                {organization?.iban ? <span className="font-mono">{organization.iban}</span> : <span className="text-muted-foreground">Non impostato</span>}
                 {organization?.iban && (
                   <button
                     type="button"
@@ -236,7 +236,7 @@ export default function OrganizationPage() {
             <div className="flex items-center justify-between py-1">
               <span className="text-muted-foreground">BIC attuale</span>
               <span className="flex items-center gap-2">
-                <span className="font-mono">{organization?.bic ?? "Non impostato"}</span>
+                {organization?.bic ? <span className="font-mono">{organization.bic}</span> : <span className="text-muted-foreground">Non impostato</span>}
                 {organization?.bic && (
                   <button
                     type="button"
@@ -262,7 +262,7 @@ export default function OrganizationPage() {
               <Input
                 id="iban"
                 {...register("iban")}
-                placeholder="IT60X0542811101000000123456"
+                placeholder="es. IT60X0542811101000000123456"
                 className={errors.iban ? "border-destructive" : ""}
               />
               {errors.iban && (
@@ -277,7 +277,7 @@ export default function OrganizationPage() {
               <Input
                 id="bic"
                 {...register("bic")}
-                placeholder="UNCRITMMXXX"
+                placeholder="es. UNCRITMMXXX"
                 className={errors.bic ? "border-destructive" : ""}
               />
               {errors.bic && (

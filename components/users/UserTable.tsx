@@ -212,12 +212,11 @@ export default function UserTable({ onEditClick }: UserTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="hidden lg:table-cell">ID</TableHead>
                 <TableHead>Nome utente</TableHead>
                 <TableHead className="hidden md:table-cell">Responsabile</TableHead>
                 <TableHead className="hidden md:table-cell">Ruolo</TableHead>
                 <TableHead>Verificato</TableHead>
-                <TableHead className="hidden md:table-cell">Approvatore</TableHead>
+                <TableHead className="hidden md:table-cell">Approva contratti</TableHead>
                 <TableHead className="hidden lg:table-cell">Data creazione</TableHead>
                 <TableHead>Azioni</TableHead>
               </TableRow>
@@ -225,7 +224,6 @@ export default function UserTable({ onEditClick }: UserTableProps) {
             <TableBody>
               {filteredUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="hidden lg:table-cell font-medium text-sm">{user.id}</TableCell>
                   <TableCell className="text-sm">{user.username}</TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{/* istanbul ignore next */managerMap.get(user.managerId) ?? "—"}</TableCell>
                   <TableCell className="hidden md:table-cell text-sm">{roleMap.get(user.roleId) ?? "—"}</TableCell>

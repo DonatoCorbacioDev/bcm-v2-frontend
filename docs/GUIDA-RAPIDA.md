@@ -42,7 +42,7 @@ La prima fattura di un fornitore compila anche il suo **indirizzo** nella scheda
 
 ## 4. IBAN cambiato: cosa fare
 
-Se una fattura chiede il pagamento su un conto **diverso da quello verificato** del fornitore, BCM la segna in rosso (**IBAN cambiato: da verificare**) e **non la fa pagare**.
+Se una fattura chiede il pagamento su un conto **diverso da quello verificato** del fornitore, BCM la segna in rosso (**IBAN cambiato: da verificare**) e **non la mette nel pagamento SEPA**. Un bonifico fatto a mano dall'home banking, fuori da BCM, resta sotto la tua responsabilità.
 
 È la truffa più comune tra aziende: un'email falsa "abbiamo cambiato banca". Quindi:
 
@@ -52,7 +52,7 @@ Se una fattura chiede il pagamento su un conto **diverso da quello verificato** 
 
 ## 5. Pagare le fatture
 
-*Amministratore.* Nella scheda **Fatture** spunta le fatture **Pronte per SEPA** → **Genera pagamento SEPA** → scegli la data di esecuzione. Scarichi un file da caricare nel tuo home banking: la banca esegue i bonifici, BCM segna le fatture come **Pagate**.
+*Amministratore, o il Responsabile del contratto.* Nella scheda **Fatture** spunta le fatture **Pronte per SEPA** → **Genera pagamento SEPA** → scegli la data di esecuzione. Scarichi un file da caricare nel tuo home banking: la banca esegue i bonifici. BCM segna le fatture come **Pagate** quando generi il file, quindi caricalo davvero in banca.
 
 Non tutte le fatture si pagano così:
 

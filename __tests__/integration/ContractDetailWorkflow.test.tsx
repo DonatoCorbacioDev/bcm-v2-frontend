@@ -272,7 +272,7 @@ describe('ContractDetailPage — section tabs', () => {
 
     expect(screen.getByRole('tablist', { name: 'Sezioni del contratto' })).toBeInTheDocument();
     const tabs = screen.getAllByRole('tab');
-    expect(tabs.map((t) => t.textContent)).toEqual(['Documenti', 'Valori finanziari', 'Cronologia modifiche', 'Fatture']);
+    expect(tabs.map((t) => t.textContent)).toEqual(['Documenti', 'Fatture', 'Importi previsti', 'Cronologia modifiche']);
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     expect(tabs[1]).toHaveAttribute('aria-selected', 'false');
     // Only the active tab is in the Tab order (roving tabindex).
@@ -307,18 +307,18 @@ describe('ContractDetailPage — section tabs', () => {
 
     tab('Documenti').focus();
     await userEvent.keyboard('{ArrowRight}');
-    expect(tab('Valori finanziari')).toHaveAttribute('aria-selected', 'true');
-    expect(tab('Valori finanziari')).toHaveFocus();
+    expect(tab('Fatture')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Fatture')).toHaveFocus();
 
     await userEvent.keyboard('{End}');
-    expect(tab('Fatture')).toHaveFocus();
-    expect(screen.getByRole('tabpanel', { name: 'Fatture' })).toBeInTheDocument();
+    expect(tab('Cronologia modifiche')).toHaveFocus();
+    expect(screen.getByRole('tabpanel', { name: 'Cronologia modifiche' })).toBeInTheDocument();
 
     await userEvent.keyboard('{ArrowRight}');
     expect(tab('Documenti')).toHaveFocus();
 
     await userEvent.keyboard('{ArrowLeft}');
-    expect(tab('Fatture')).toHaveFocus();
+    expect(tab('Cronologia modifiche')).toHaveFocus();
 
     await userEvent.keyboard('{Home}');
     expect(tab('Documenti')).toHaveAttribute('aria-selected', 'true');
@@ -351,7 +351,7 @@ describe('ContractDetailPage — financial values tab', () => {
     });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
 
     // Italian accounting format, thousands always grouped ("1.000,00 €").
     const eur = (n: number) =>
@@ -415,9 +415,9 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     mockAuthAs({ role: 'ADMIN' });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
 
-    expect(await screen.findByRole('button', { name: /rigenera valori finanziari/i })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: /rigenera importi previsti/i })).toBeInTheDocument();
   });
 
   it('hides the button when the contract has no financial terms set', async () => {
@@ -425,9 +425,9 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     mockAuthAs({ role: 'ADMIN' });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
 
-    expect(screen.queryByRole('button', { name: /rigenera valori finanziari/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /rigenera importi previsti/i })).not.toBeInTheDocument();
   });
 
   it('hides the button for a MANAGER even when financial terms are set', async () => {
@@ -435,9 +435,9 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     mockAuthAs({ role: 'MANAGER', managerId: 5 });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
 
-    expect(screen.queryByRole('button', { name: /rigenera valori finanziari/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /rigenera importi previsti/i })).not.toBeInTheDocument();
   });
 
   it('calls generateFinancialValues and shows a summary toast on click', async () => {
@@ -448,8 +448,8 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
-    await userEvent.click(await screen.findByRole('button', { name: /rigenera valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /rigenera importi previsti/i }));
 
     await waitFor(() => expect(contractsService.generateFinancialValues).toHaveBeenCalledWith(1));
     await waitFor(() =>
@@ -463,11 +463,11 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     (contractsService.generateFinancialValues as jest.Mock).mockRejectedValue(new Error('fail'));
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('tab', { name: /valori finanziari/i }));
-    await userEvent.click(await screen.findByRole('button', { name: /rigenera valori finanziari/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
+    await userEvent.click(await screen.findByRole('button', { name: /rigenera importi previsti/i }));
 
     await waitFor(() =>
-      expect(toast.error).toHaveBeenCalledWith('Rigenerazione dei valori finanziari non riuscita')
+      expect(toast.error).toHaveBeenCalledWith('Rigenerazione degli importi previsti non riuscita')
     );
   });
 });

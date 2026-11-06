@@ -136,7 +136,7 @@ export default function ContractDetailPage() {
       );
       void queryClient.invalidateQueries({ queryKey: ["financial-values", "by-contract", contractId] });
     },
-    onError: () => toast.error("Rigenerazione dei valori finanziari non riuscita"),
+    onError: () => toast.error("Rigenerazione degli importi previsti non riuscita"),
   });
 
   // Same query as the invoices tab (shared cache): the next-action card must
@@ -192,10 +192,13 @@ export default function ContractDetailPage() {
   };
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    // Invoices next to the documents: received invoices are what the contract
+    // is checked against. "Importi previsti" says what those values are (what
+    // the contract expects), which "Valori finanziari" left open.
     { id: "documents", label: "Documenti", icon: <FileText className="h-4 w-4" /> },
-    { id: "financials", label: "Valori finanziari", icon: <DollarSign className="h-4 w-4" /> },
-    { id: "history", label: "Cronologia modifiche", icon: <History className="h-4 w-4" /> },
     { id: "invoices", label: "Fatture", icon: <Receipt className="h-4 w-4" /> },
+    { id: "financials", label: "Importi previsti", icon: <DollarSign className="h-4 w-4" /> },
+    { id: "history", label: "Cronologia modifiche", icon: <History className="h-4 w-4" /> },
   ];
 
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
@@ -229,7 +232,7 @@ export default function ContractDetailPage() {
           onClick={() => regenerateFinancialValuesMutation.mutate()}
           disabled={regenerateFinancialValuesMutation.isPending}
         >
-          {regenerateFinancialValuesMutation.isPending ? "Rigenerazione..." : "Rigenera valori finanziari"}
+          {regenerateFinancialValuesMutation.isPending ? "Rigenerazione..." : "Rigenera importi previsti"}
         </Button>
       </div>
     );
@@ -253,10 +256,10 @@ export default function ContractDetailPage() {
             </div>
           </div>
           <h2 className="text-lg font-semibold text-foreground mb-2">
-            Nessun valore finanziario
+            Nessun importo previsto
           </h2>
           <p className="text-sm text-muted-foreground">
-            I dati finanziari appariranno qui una volta aggiunti a questo contratto.
+            Compila valore annuo e frequenza di fatturazione nel contratto: gli importi previsti appariranno qui.
           </p>
         </div>
       );

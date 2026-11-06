@@ -160,7 +160,6 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="hidden lg:table-cell">ID</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead className="hidden md:table-cell">Descrizione</TableHead>
                 <TableHead>Azioni</TableHead>
@@ -169,7 +168,6 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
             <TableBody>
               {filteredBusinessAreas.map((area) => (
                 <TableRow key={area.id}>
-                  <TableCell className="hidden lg:table-cell font-medium text-sm">{area.id}</TableCell>
                   <TableCell className="text-sm font-medium">{area.name}</TableCell>
                   <TableCell className="hidden md:table-cell max-w-md truncate text-sm">{area.description}</TableCell>
                   <TableCell>

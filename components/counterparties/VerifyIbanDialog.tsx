@@ -79,7 +79,7 @@ export default function VerifyIbanDialog({
         <div className="space-y-4">
           <div className="rounded-md bg-muted/50 px-3 py-2 text-sm flex items-center justify-between">
             <span className="text-muted-foreground">IBAN verificato attuale</span>
-            <span className="font-mono">{currentIbanMasked || "Non impostato"}</span>
+            {currentIbanMasked ? <span className="font-mono">{currentIbanMasked}</span> : <span className="text-muted-foreground">Non impostato</span>}
           </div>
           <div>
             <label htmlFor="verified-iban" className="block text-sm font-medium mb-2">
@@ -89,7 +89,7 @@ export default function VerifyIbanDialog({
               id="verified-iban"
               value={iban}
               onChange={(e) => setIban(e.target.value)}
-              placeholder="IT60X0542811101000000123456"
+              placeholder="es. IT60X0542811101000000123456"
             />
           </div>
           <div>

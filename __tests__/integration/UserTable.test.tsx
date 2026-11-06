@@ -119,13 +119,13 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     // alice (row 1) is verified, bob (row 2) is not; the "Verificato" badge
-    // is the 5th cell (index 4) — "Approvatore" also renders Sì/No, so this
+    // is the 4th cell (index 3) — "Approva contratti" also renders Sì/No, so this
     // targets the column by position rather than an ambiguous text match.
     const rows = screen.getAllByRole('row');
     const aliceCells = within(rows[1]).getAllByRole('cell');
     const bobCells = within(rows[2]).getAllByRole('cell');
-    expect(aliceCells[4]).toHaveTextContent('Sì');
-    expect(bobCells[4]).toHaveTextContent('No');
+    expect(aliceCells[3]).toHaveTextContent('Sì');
+    expect(bobCells[3]).toHaveTextContent('No');
   });
 
   it('shows the approver badge per user', () => {
@@ -139,13 +139,13 @@ describe('UserTable', () => {
     });
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    // "Approvatore" is the 6th cell (index 5); see the verified-badge test
+    // "Approva contratti" is the 5th cell (index 4); see the verified-badge test
     // above for why this targets by position instead of ambiguous text.
     const rows = screen.getAllByRole('row');
     const aliceCells = within(rows[1]).getAllByRole('cell');
     const bobCells = within(rows[2]).getAllByRole('cell');
-    expect(aliceCells[5]).toHaveTextContent('Sì');
-    expect(bobCells[5]).toHaveTextContent('No');
+    expect(aliceCells[4]).toHaveTextContent('Sì');
+    expect(bobCells[4]).toHaveTextContent('No');
   });
 
   it('shows skeleton while loading', () => {
@@ -306,5 +306,14 @@ describe('UserTable', () => {
     (useRoles as jest.Mock).mockReturnValue({ data: undefined });
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+  });
+});
+
+describe('UserTable — columns', () => {
+  it('shows no technical ID column, and names the approval permission as the form does', () => {
+    render(<UserTable onEditClick={jest.fn()} />, { wrapper: createWrapper() });
+
+    expect(screen.queryByRole('columnheader', { name: 'ID' })).not.toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Approva contratti' })).toBeInTheDocument();
   });
 });

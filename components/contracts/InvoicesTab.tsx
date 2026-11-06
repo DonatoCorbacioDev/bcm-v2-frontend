@@ -787,7 +787,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                 id="supplier-iban"
                 value={ibanInput}
                 onChange={(e) => setIbanInput(e.target.value)}
-                placeholder="IT60X0542811101000000123456"
+                placeholder="es. IT60X0542811101000000123456"
               />
               <p className="text-xs text-muted-foreground mt-1">
                 Lascia vuoto per non modificare quello attuale.
@@ -801,7 +801,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                 id="supplier-bic"
                 value={bicInput}
                 onChange={(e) => setBicInput(e.target.value)}
-                placeholder="UNCRITMMXXX"
+                placeholder="es. UNCRITMMXXX"
               />
             </div>
             <div>

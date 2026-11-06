@@ -120,7 +120,6 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="hidden lg:table-cell">ID</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead className="hidden md:table-cell">Descrizione</TableHead>
@@ -130,7 +129,6 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
             <TableBody>
               {filtered.map((ft) => (
                 <TableRow key={ft.id}>
-                  <TableCell className="hidden lg:table-cell font-medium text-sm">{ft.id}</TableCell>
                   <TableCell className="text-sm font-medium">{ft.name}</TableCell>
                   <TableCell>
                     <Badge variant={ft.category === "REVENUE" ? "success" : "secondary"}>

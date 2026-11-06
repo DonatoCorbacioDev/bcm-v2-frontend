@@ -36,10 +36,22 @@ const ACTION_LABELS: Record<string, string> = {
   CREATE: "Creazione",
   UPDATE: "Modifica",
   DELETE: "Eliminazione",
+  // Recorded explicitly by the backend (auditLogService.save) for the events
+  // that aren't a plain create/update/delete.
+  TERMS_ACCEPTED: "Accettazione dei Termini",
+  DATA_EXPORTED: "Esportazione dei dati",
+  ORGANIZATION_DELETION_SCHEDULED: "Cancellazione richiesta",
+  ORGANIZATION_DELETION_CANCELLED: "Cancellazione annullata",
+  VERIFIED_IBAN_LEARNED: "IBAN verificato registrato",
+  VERIFIED_IBAN_CONFIRMED: "IBAN verificato confermato",
+  SEPA_IBAN_MISMATCH_BLOCKED: "Pagamento bloccato: IBAN diverso",
+  TIER_CHANGED: "Cambio di piano",
 };
 
 const ENTITY_TYPE_LABELS: Record<string, string> = {
   Contract: "Contratto",
+  Counterparty: "Controparte",
+  Billing: "Abbonamento",
   ContractTemplate: "Modello di contratto",
   ContractDocument: "Documento contratto",
   ContractHistory: "Storico contratto",

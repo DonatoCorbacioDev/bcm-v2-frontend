@@ -59,7 +59,7 @@ export function LandingNav() {
 
           {isAuthenticated ? (
             <Button asChild size="sm">
-              <Link href="/dashboard">Vai alla dashboard</Link>
+              <Link href="/dashboard">Apri BCM</Link>
             </Button>
           ) : (
             <>

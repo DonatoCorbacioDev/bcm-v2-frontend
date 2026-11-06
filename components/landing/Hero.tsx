@@ -92,7 +92,7 @@ export function Hero() {
               <div className="flex flex-wrap gap-3">
                 <Button asChild size="lg">
                   <Link href="/dashboard">
-                    Vai alla dashboard
+                    Apri BCM
                     <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                   </Link>
                 </Button>

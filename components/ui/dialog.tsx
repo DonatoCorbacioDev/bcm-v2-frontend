@@ -20,6 +20,9 @@ function Dialog({
   // that cleanup, so the style sticks and the whole page stops responding to
   // clicks until a reload. Clearing it ourselves once the Dialog is closed
   // releases the orphaned lock. Radix re-applies it whenever a layer reopens.
+  // The root cause was two copies of @radix-ui/react-dismissable-layer (Select
+  // and Dialog on different versions): package.json `overrides` keeps one copy.
+  // This stays as a safety net; e2e/dialog-select-escape.spec.ts covers it.
   React.useEffect(() => {
     if (open) return
     document.body.style.pointerEvents = ""

@@ -5,6 +5,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useState } from "react";
+import { isAxiosError } from "axios";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Copy, RefreshCw } from "lucide-react";
@@ -18,6 +19,7 @@ import DataPrivacyCard from "@/components/profile/DataPrivacyCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -31,10 +33,25 @@ interface UserProfile {
   username: string;
   role: string;
   verified: boolean;
+  /** The public demo login: password and two-factor are disabled for it. */
+  demoAccount?: boolean;
+}
+
+const DEMO_NOTE =
+  "Nella demo pubblica questa impostazione è disattivata: l'account è condiviso con tutti i visitatori.";
+
+/** The backend's own message (wrong current password...) or a generic fallback. */
+function errorMessage(error: unknown, fallback: string): string {
+  if (isAxiosError<{ message?: string }>(error)) {
+    if (error.response?.status === 429) return "Troppi tentativi, riprova tra un minuto";
+    return error.response?.data?.message || fallback;
+  }
+  return fallback;
 }
 
 export default function ProfilePage() {
   const { user } = useAuthStore();
+  const [currentPassword, setCurrentPassword] = useState("");
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery<UserProfile>({
@@ -75,6 +92,10 @@ export default function ProfilePage() {
 
   const handlePasswordChange = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!currentPassword) {
+      toast.error("Inserisci la password attuale.");
+      return;
+    }
     if (password.length < 8) {
       toast.error("La password deve contenere almeno 8 caratteri.");
       return;
@@ -86,18 +107,20 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
-      await api.patch(`/users/${profile?.id ?? user?.id}`, { password });
+      await api.post("/users/me/password", { currentPassword, newPassword: password });
       toast.success("Password aggiornata");
+      setCurrentPassword("");
       setPassword("");
       setConfirm("");
-    } catch {
-      toast.error("Aggiornamento della password non riuscito.");
+    } catch (error) {
+      toast.error(errorMessage(error, "Aggiornamento della password non riuscito."));
     } finally {
       setIsSaving(false);
     }
   };
 
   const displayProfile = profile ?? user;
+  const isDemo = profile?.demoAccount === true;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -147,7 +170,20 @@ export default function ProfilePage() {
           <CardDescription>Imposta una nuova password per il tuo account</CardDescription>
         </CardHeader>
         <CardContent>
+          {isDemo ? (
+            <p className="text-sm text-muted-foreground">{DEMO_NOTE}</p>
+          ) : (
           <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Password attuale</Label>
+              <Input
+                id="current-password"
+                type="password"
+                autoComplete="current-password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
             <PasswordFields
               password={password}
               confirm={confirm}
@@ -160,10 +196,22 @@ export default function ProfilePage() {
               </Button>
             </div>
           </form>
+          )}
         </CardContent>
       </Card>
 
-      <TwoFactorAuthCard />
+      {isDemo ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Autenticazione a due fattori</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{DEMO_NOTE}</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <TwoFactorAuthCard />
+      )}
 
       <DataPrivacyCard />
 

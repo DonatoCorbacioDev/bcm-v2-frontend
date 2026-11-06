@@ -32,6 +32,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import api from "@/lib/api";
+import { apiErrorMessage } from "@/lib/apiError";
 import { sepaPaymentsService, type SepaPaymentBatch } from "@/services/sepaPayments.service";
 import { paymentKind, paymentMethodLabel } from "@/lib/paymentMethod";
 import { invoiceMatchingService } from "@/services/invoiceMatching.service";
@@ -155,7 +156,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       toast.success("Dati di pagamento aggiornati");
       setPaymentDetailsInvoice(null);
     },
-    onError: () => toast.error("Aggiornamento dei dati di pagamento non riuscito"),
+    onError: async (error) => toast.error(await apiErrorMessage(error, "Aggiornamento dei dati di pagamento non riuscito")),
   });
 
   const confirmMatchMutation = useMutation({
@@ -192,7 +193,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       setSelectedIds([]);
       toast.success("Pagamento SEPA generato");
     },
-    onError: () => toast.error("Generazione del pagamento SEPA non riuscita"),
+    onError: async (error) => toast.error(await apiErrorMessage(error, "Generazione del pagamento SEPA non riuscita")),
   });
 
   const handleDownloadSepaPayment = async (batch: SepaPaymentBatch) => {

@@ -4,8 +4,8 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import ContractTable from "@/components/contracts/ContractTable";
 import ContractForm from "@/components/contracts/ContractForm";
@@ -116,6 +116,22 @@ function ContractsPageContent() {
   const handleCreateClick = () => {
     setFormDialog({ open: true, contract: null });
   };
+
+  // "Crea primo contratto" at the end of onboarding links here with ?new=1:
+  // open the form straight away, once what it needs has loaded (the same
+  // condition that enables "+ Nuovo contratto"), then drop the parameter so
+  // a reload doesn't open it again.
+  const router = useRouter();
+  const openedFromLink = useRef(false);
+  const wantsNewContract = searchParams.get("new") === "1";
+  const prerequisitesLoaded =
+    businessAreasQuery.isSuccess && managersQuery.isSuccess && counterpartiesQuery.isSuccess;
+  useEffect(() => {
+    if (!wantsNewContract || openedFromLink.current || !prerequisitesLoaded) return;
+    openedFromLink.current = true;
+    if (isAdmin && !hasMissingPrerequisite) setFormDialog({ open: true, contract: null });
+    router.replace("/contracts");
+  }, [wantsNewContract, prerequisitesLoaded, isAdmin, hasMissingPrerequisite, router]);
 
   const { message: prerequisiteMessage, actions: prerequisiteActions } = buildPrerequisiteInfo(
     { missingAreas, missingManagers, missingCounterparties },

@@ -143,7 +143,7 @@ describe('OnboardingWizard', () => {
     expect(screen.getByText(/aggiungi la prima controparte/i)).toBeInTheDocument();
   });
 
-  it('Done step renders both "Vai alla dashboard" and "Crea primo contratto" buttons', async () => {
+  it('Done step renders both "Vai alla Home" and "Crea primo contratto" buttons', async () => {
     render(<OnboardingWizard />);
     // Navigate to done step by skipping both
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
@@ -151,22 +151,22 @@ describe('OnboardingWizard', () => {
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
 
-    expect(screen.getByRole('button', { name: /vai alla dashboard/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /vai alla home/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /crea primo contratto/i })).toBeInTheDocument();
   });
 
-  it('"Vai alla dashboard" from Done step navigates to /dashboard', async () => {
+  it('"Vai alla Home" from Done step navigates to /dashboard', async () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
-    await userEvent.click(screen.getByRole('button', { name: /vai alla dashboard/i }));
+    await userEvent.click(screen.getByRole('button', { name: /vai alla home/i }));
 
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
   });
 
-  it('"Crea primo contratto" from Done step navigates to /contracts', async () => {
+  it('"Crea primo contratto" from Done step opens the new contract form', async () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
@@ -174,7 +174,7 @@ describe('OnboardingWizard', () => {
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /crea primo contratto/i }));
 
-    expect(mockPush).toHaveBeenCalledWith('/contracts');
+    expect(mockPush).toHaveBeenCalledWith('/contracts?new=1');
   });
 
   it('"Salta configurazione" sets localStorage flag and navigates to /dashboard', async () => {

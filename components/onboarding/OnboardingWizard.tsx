@@ -598,9 +598,9 @@ function DoneStep() {
       </div>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button variant="outline" onClick={() => router.push("/dashboard")}>
-          Vai alla dashboard
+          Vai alla Home
         </Button>
-        <Button onClick={() => router.push("/contracts")}>
+        <Button onClick={() => router.push("/contracts?new=1")}>
           Crea primo contratto
         </Button>
       </div>

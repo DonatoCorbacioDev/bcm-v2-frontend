@@ -145,25 +145,15 @@ describe('Header', () => {
     expect(screen.getByText('MR')).toBeInTheDocument();
   });
 
-  it('uses "Dettaglio contratto" title for /contracts/:id paths', () => {
+  it.each([
+    ['/contracts/42', 'Dettaglio contratto'],
+    ['/counterparties/7', 'Dettaglio controparte'],
+    ['/unknown-page', 'Business Contracts Manager'],
+  ])('titles %s as "%s"', (pathname, title) => {
     const { usePathname } = jest.requireMock('next/navigation');
-    (usePathname as jest.Mock).mockReturnValueOnce('/contracts/42');
+    (usePathname as jest.Mock).mockReturnValueOnce(pathname);
     render(<Header {...defaultProps} />);
-    expect(screen.getByText('Dettaglio contratto')).toBeInTheDocument();
-  });
-
-  it('uses "Dettaglio controparte" title for /counterparties/:id paths', () => {
-    const { usePathname } = jest.requireMock('next/navigation');
-    (usePathname as jest.Mock).mockReturnValueOnce('/counterparties/7');
-    render(<Header {...defaultProps} />);
-    expect(screen.getByText('Dettaglio controparte')).toBeInTheDocument();
-  });
-
-  it('falls back to app name for unknown routes', () => {
-    const { usePathname } = jest.requireMock('next/navigation');
-    (usePathname as jest.Mock).mockReturnValueOnce('/unknown-page');
-    render(<Header {...defaultProps} />);
-    expect(screen.getByText('Business Contracts Manager')).toBeInTheDocument();
+    expect(screen.getByText(title)).toBeInTheDocument();
   });
 
   describe('global search box', () => {

@@ -4,8 +4,9 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
 import { useBudgets } from "@/hooks/useBudgets";
@@ -33,7 +34,7 @@ import type { FinancialValue } from "@/types";
 
 const ALL_YEARS = "ALL";
 
-export default function FinancialValuesPage() {
+function FinancialValuesPageContent() {
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
 
@@ -180,4 +181,20 @@ export default function FinancialValuesPage() {
       </Dialog>
     </div>
   );
+}
+
+/**
+ * Admin-only: the page isn't in the Responsabile's menu, and opening it by URL
+ * sends them home, like the other settings pages.
+ */
+export default function FinancialValuesPage() {
+  const router = useRouter();
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
+
+  if (!isAdmin) return null;
+  return <FinancialValuesPageContent />;
 }

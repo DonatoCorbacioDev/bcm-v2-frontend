@@ -4,7 +4,8 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import type { ContractTemplate } from "@/types";
 
@@ -19,7 +20,7 @@ import {
 import ContractTemplateTable from "@/components/contract-templates/ContractTemplateTable";
 import ContractTemplateForm from "@/components/contract-templates/ContractTemplateForm";
 
-export default function ContractTemplatesPage() {
+function ContractTemplatesPageContent() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
 
@@ -70,4 +71,20 @@ export default function ContractTemplatesPage() {
       </Dialog>
     </div>
   );
+}
+
+/**
+ * Admin-only: the page isn't in the Responsabile's menu, and opening it by URL
+ * sends them home, like the other settings pages.
+ */
+export default function ContractTemplatesPage() {
+  const router = useRouter();
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
+
+  useEffect(() => {
+    if (!isAdmin) router.replace("/dashboard");
+  }, [isAdmin, router]);
+
+  if (!isAdmin) return null;
+  return <ContractTemplatesPageContent />;
 }

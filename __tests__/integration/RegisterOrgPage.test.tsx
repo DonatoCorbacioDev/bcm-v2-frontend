@@ -73,6 +73,20 @@ describe('RegisterOrgPage', () => {
     expect(submit).toBeEnabled();
   });
 
+  it('refuses a password shorter than 8 characters before calling the API', async () => {
+    const user = userEvent.setup();
+    render(<RegisterOrgPage />, { wrapper: createWrapper() });
+
+    await fillForm(user);
+    await user.clear(screen.getByLabelText('Password'));
+    await user.type(screen.getByLabelText('Password'), 'abc123');
+    for (const checkbox of declarations()) await user.click(checkbox);
+    await user.click(screen.getByRole('button', { name: 'Continua' }));
+
+    expect(await screen.findByText('La password deve contenere almeno 8 caratteri')).toBeInTheDocument();
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
   it('sends the declarations and the published Terms version, then asks for the emailed code', async () => {
     mockPost.mockResolvedValueOnce({ data: started });
     render(<RegisterOrgPage />, { wrapper: createWrapper() });

@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { passwordSchema } from "./password";
 
 // Schema for creating a new user (password required)
 export const userCreateSchema = z.object({
@@ -14,10 +15,7 @@ export const userCreateSchema = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/, "Il nome utente può contenere solo lettere, numeri, underscore e trattini")
     .trim(),
 
-  password: z
-    .string({ message: "La password è obbligatoria" })
-    .min(8, "La password deve contenere almeno 8 caratteri")
-    .max(100, "La password non può superare i 100 caratteri"),
+  password: passwordSchema(),
 
   managerId: z
     .string({ message: "Il manager è obbligatorio" })
@@ -43,12 +41,8 @@ export const userUpdateSchema = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/, "Il nome utente può contenere solo lettere, numeri, underscore e trattini")
     .trim(),
 
-  password: z
-    .string()
-    .min(8, "La password deve contenere almeno 8 caratteri")
-    .max(100, "La password non può superare i 100 caratteri")
-    .optional()
-    .or(z.literal("")),
+  // Empty keeps the current password.
+  password: passwordSchema().optional().or(z.literal("")),
 
   managerId: z
     .string({ message: "Il manager è obbligatorio" })

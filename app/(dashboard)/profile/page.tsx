@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { passwordViolation } from "@/lib/validations/password";
 import {
   Card,
   CardContent,
@@ -96,8 +97,9 @@ export default function ProfilePage() {
       toast.error("Inserisci la password attuale.");
       return;
     }
-    if (password.length < 8) {
-      toast.error("La password deve contenere almeno 8 caratteri.");
+    const violation = passwordViolation(password);
+    if (violation) {
+      toast.error(violation);
       return;
     }
     if (password !== confirm) {

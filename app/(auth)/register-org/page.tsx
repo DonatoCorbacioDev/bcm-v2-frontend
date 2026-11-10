@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
 import { ONEROUS_CLAUSES, TERMS_VERSION } from "@/lib/legal";
+import { passwordViolation } from "@/lib/validations/password";
 
 interface RegisterOrgForm {
   organizationName: string;
@@ -116,6 +117,11 @@ export default function RegisterOrgPage() {
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const violation = passwordViolation(form.adminPassword);
+    if (violation) {
+      setError(violation);
+      return;
+    }
     setIsLoading(true);
     setError(null);
 

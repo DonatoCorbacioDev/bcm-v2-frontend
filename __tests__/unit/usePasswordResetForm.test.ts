@@ -16,7 +16,7 @@ describe('usePasswordResetForm', () => {
     act(() => result.current.setConfirm('short'));
     await act(async () => result.current.handleSubmit(fakeSubmitEvent()));
 
-    expect(result.current.error).toBe('La password deve contenere almeno 8 caratteri.');
+    expect(result.current.error).toBe('La password deve contenere almeno 8 caratteri');
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { mockAuthenticatedSession, mockApi } from "../utils/mock-backend";
+import { CONTRACT_ID, mockAuthenticatedSession, mockApi } from "../utils/mock-backend";
 
 test.describe("Accessibility: contract detail page", () => {
   test.beforeEach(async ({ page }) => {
@@ -9,7 +9,7 @@ test.describe("Accessibility: contract detail page", () => {
   });
 
   test("documents tab has no detectable axe violations", async ({ page }) => {
-    await page.goto("/contracts/1");
+    await page.goto(`/contracts/${CONTRACT_ID}`);
     await expect(page.getByText("msa.pdf")).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();
@@ -17,7 +17,7 @@ test.describe("Accessibility: contract detail page", () => {
   });
 
   test("invoices tab has no detectable axe violations", async ({ page }) => {
-    await page.goto("/contracts/1");
+    await page.goto(`/contracts/${CONTRACT_ID}`);
     await page.getByRole("tab", { name: "Fatture" }).click();
     await expect(page.getByRole("button", { name: "FT-2024-001", exact: true })).toBeVisible();
 

@@ -26,20 +26,11 @@ export const financialValueSchema = z.object({
     .number({ message: "L'importo è obbligatorio" })
     .positive("L'importo deve essere positivo"),
 
-  financialTypeId: z
-    .string({ message: "Il tipo finanziario è obbligatorio" })
-    .min(1, "Il tipo finanziario è obbligatorio")
-    .uuid("Il tipo finanziario è obbligatorio"),
+  financialTypeId: z.uuid("Il tipo finanziario è obbligatorio"),
 
-  businessAreaId: z
-    .string({ message: "L'area di business è obbligatoria" })
-    .min(1, "L'area di business è obbligatoria")
-    .uuid("L'area di business è obbligatoria"),
+  businessAreaId: z.uuid("L'area di business è obbligatoria"),
 
-  contractId: z
-    .string({ message: "Il contratto è obbligatorio" })
-    .min(1, "Il contratto è obbligatorio")
-    .uuid("Il contratto è obbligatorio"),
+  contractId: z.uuid("Il contratto è obbligatorio"),
 });
 
 /**

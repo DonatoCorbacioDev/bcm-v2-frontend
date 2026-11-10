@@ -13,10 +13,7 @@ import { computeNoticeDeadline } from "@/lib/statusConfig";
  */
 export const contractSchema = z.object({
   // Counterparty (customer/supplier) ID (foreign key)
-  counterpartyId: z
-    .string({ message: "La controparte è obbligatoria" })
-    .min(1, "La controparte è obbligatoria")
-    .uuid("La controparte è obbligatoria"),
+  counterpartyId: z.uuid("La controparte è obbligatoria"),
 
   // Contract number (format: C001, C002, etc.)
   contractNumber: z
@@ -70,24 +67,15 @@ export const contractSchema = z.object({
   }),
 
   // Business area ID (foreign key)
-  areaId: z
-    .string({ message: "L'area di business è obbligatoria" })
-    .min(1, "L'area di business è obbligatoria")
-    .uuid("L'area di business è obbligatoria"),
+  areaId: z.uuid("L'area di business è obbligatoria"),
 
   // Manager ID (foreign key)
-  managerId: z
-    .string({ message: "Il responsabile è obbligatorio" })
-    .min(1, "Il responsabile è obbligatorio")
-    .uuid("Il responsabile è obbligatorio"),
+  managerId: z.uuid("Il responsabile è obbligatorio"),
 
   // Optional financial terms: when all three are set, the backend
   // auto-generates this contract's financial values instead of requiring
   // them to be entered one row at a time (see the .refine below).
-  financialTypeId: z
-    .string()
-    .uuid()
-    .nullish(),
+  financialTypeId: z.uuid().nullish(),
 
   // Note: ContractForm reads this field with a custom `setValueAs` (not
   // `valueAsNumber`) specifically so an empty input becomes `undefined`

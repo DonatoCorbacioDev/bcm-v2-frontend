@@ -22,12 +22,12 @@ export const userCreateSchema = z.object({
   managerId: z
     .string({ message: "Il manager è obbligatorio" })
     .min(1, "Il manager è obbligatorio")
-    .uuid("Seleziona un manager valido"),
+    .pipe(z.uuid("Seleziona un manager valido")),
 
   roleId: z
     .string({ message: "Il ruolo è obbligatorio" })
     .min(1, "Il ruolo è obbligatorio")
-    .uuid("Seleziona un ruolo valido"),
+    .pipe(z.uuid("Seleziona un ruolo valido")),
 
   verified: z.boolean(),
 
@@ -53,12 +53,12 @@ export const userUpdateSchema = z.object({
   managerId: z
     .string({ message: "Il manager è obbligatorio" })
     .min(1, "Il manager è obbligatorio")
-    .uuid("Seleziona un manager valido"),
+    .pipe(z.uuid("Seleziona un manager valido")),
 
   roleId: z
     .string({ message: "Il ruolo è obbligatorio" })
     .min(1, "Il ruolo è obbligatorio")
-    .uuid("Seleziona un ruolo valido"),
+    .pipe(z.uuid("Seleziona un ruolo valido")),
 
   verified: z.boolean(),
 

@@ -29,6 +29,7 @@ jest.mock('@/lib/api', () => ({
 
 import LoginPage from '@/app/(auth)/login/page';
 import api from '@/lib/api';
+import { uid } from "../mocks/ids";
 
 const mockPost = api.post as jest.Mock;
 const mockGet = api.get as jest.Mock;
@@ -103,11 +104,11 @@ describe('LoginPage', () => {
     mockPost.mockResolvedValueOnce({ data: { token: 'fake-jwt-token' } });
     mockGet.mockResolvedValueOnce({
       data: {
-        id: 1,
+        id: uid(1),
         username: 'admin@example.com',
-        managerId: 1,
+        managerId: uid(1),
         role: 'ADMIN',
-        roleId: 1,
+        roleId: uid(1),
         verified: true,
         createdAt: '2024-01-01T00:00:00Z',
       },
@@ -144,7 +145,7 @@ describe('LoginPage', () => {
 
     mockPost.mockResolvedValueOnce({ data: { token: 'real-token', mfaRequired: false, mfaToken: null } });
     mockGet.mockResolvedValueOnce({
-      data: { id: 1, username: 'totp@example.com', managerId: 1, role: 'ADMIN', roleId: 1, verified: true, createdAt: '2024-01-01T00:00:00Z' },
+      data: { id: uid(1), username: 'totp@example.com', managerId: uid(1), role: 'ADMIN', roleId: uid(1), verified: true, createdAt: '2024-01-01T00:00:00Z' },
     });
 
     await userEvent.type(screen.getByLabelText(/codice di verifica/i), '123456');

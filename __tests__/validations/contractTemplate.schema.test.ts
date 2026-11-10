@@ -1,4 +1,5 @@
 import { contractTemplateSchema, instantiateTemplateSchema } from "@/lib/validations/contractTemplate.schema";
+import { uid } from "../mocks/ids";
 
 const validTemplate = {
   name: "NDA Standard",
@@ -16,8 +17,8 @@ describe("contractTemplateSchema", () => {
       description: "Descrizione del template",
       defaultStatus: "ACTIVE",
       defaultDurationDays: 365,
-      businessAreaId: 1,
-      defaultManagerId: 2,
+      businessAreaId: uid(1),
+      defaultManagerId: uid(2),
       notificationDays: 30,
     });
     expect(result.success).toBe(true);
@@ -64,7 +65,7 @@ describe("contractTemplateSchema", () => {
   });
 
   describe("defaultDurationDays", () => {
-    it("rejects non-positive duration", () => {
+    it("rejects an empty or malformed duration", () => {
       expect(contractTemplateSchema.safeParse({ ...validTemplate, defaultDurationDays: 0 }).success).toBe(false);
     });
 
@@ -75,7 +76,7 @@ describe("contractTemplateSchema", () => {
 });
 
 const validInstantiate = {
-  counterpartyId: 1,
+  counterpartyId: uid(1),
   contractNumber: "CTR-2024-001",
   startDate: "2024-01-01",
 };
@@ -86,9 +87,9 @@ describe("instantiateTemplateSchema", () => {
   });
 
   describe("counterpartyId", () => {
-    it("rejects zero or negative IDs", () => {
-      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, counterpartyId: 0 }).success).toBe(false);
-      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, counterpartyId: -1 }).success).toBe(false);
+    it("rejects an empty or malformed id", () => {
+      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, counterpartyId: "" }).success).toBe(false);
+      expect(instantiateTemplateSchema.safeParse({ ...validInstantiate, counterpartyId: "not-a-uuid" }).success).toBe(false);
     });
 
     it("rejects a missing counterpartyId", () => {

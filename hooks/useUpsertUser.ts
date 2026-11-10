@@ -8,7 +8,7 @@ import { usersService, type UserUpsertPayload } from "@/services/users.service";
 import { usersQueryKeys } from "@/hooks/useUsers";
 
 type UpsertUserParams = {
-  id?: number;
+  id?: string;
   payload: UserUpsertPayload;
 };
 

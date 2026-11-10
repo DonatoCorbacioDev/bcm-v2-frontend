@@ -154,11 +154,11 @@ interface SavedView {
 
 // Keyed per user (not just per browser) so two accounts sharing a machine
 // don't see each other's saved filter combinations.
-function savedViewsKey(userId: number) {
+function savedViewsKey(userId: string) {
   return `bcm-contract-views-${userId}`;
 }
 
-function loadSavedViews(userId: number): SavedView[] {
+function loadSavedViews(userId: string): SavedView[] {
   try {
     const raw = localStorage.getItem(savedViewsKey(userId));
     return raw ? JSON.parse(raw) : [];
@@ -167,7 +167,7 @@ function loadSavedViews(userId: number): SavedView[] {
   }
 }
 
-function persistSavedViews(userId: number, views: SavedView[]) {
+function persistSavedViews(userId: string, views: SavedView[]) {
   localStorage.setItem(savedViewsKey(userId), JSON.stringify(views));
 }
 
@@ -282,7 +282,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
   };
 
   // Bulk selection state
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
@@ -316,7 +316,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
     );
   };
 
-  const handleToggleSelectOne = (id: number) => {
+  const handleToggleSelectOne = (id: string) => {
     const next = new Set(selectedIds);
     if (next.has(id)) {
       next.delete(id);
@@ -334,7 +334,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => contractsService.delete(id),
+    mutationFn: (id: string) => contractsService.delete(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.list() });
       toast.success("Contratto eliminato");

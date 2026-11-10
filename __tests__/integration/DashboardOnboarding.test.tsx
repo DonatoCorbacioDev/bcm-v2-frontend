@@ -43,6 +43,7 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useExpiringContracts } from '@/hooks/useExpiringContracts';
 import { api } from '@/lib/api';
 import DashboardPage from '@/app/(dashboard)/dashboard/page';
+import { uid } from "../mocks/ids";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -54,7 +55,7 @@ function mockAdmin(id = 1) {
 
 function mockManager() {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector({ user: { id: 99, role: 'MANAGER', username: 'mgr@test.com' } })
+    selector({ user: { id: uid(99), role: 'MANAGER', username: 'mgr@test.com' } })
   );
 }
 
@@ -82,7 +83,7 @@ describe('DashboardPage — onboarding redirect', () => {
   it('does NOT redirect when ADMIN has at least one business area', async () => {
     mockAdmin(1);
     (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/business-areas') return Promise.resolve({ data: [{ id: 1, name: 'IT', description: 'Desc' }] });
+      if (url === '/business-areas') return Promise.resolve({ data: [{ id: uid(1), name: 'IT', description: 'Desc' }] });
       return Promise.resolve({ data: [] });
     });
 
@@ -100,10 +101,10 @@ describe('DashboardPage — onboarding redirect', () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     client.setQueryData(['reference', 'business-areas'], []);
     // The wizard's manager step leaves the managers in the cache as well.
-    client.setQueryData(['reference', 'managers'], [{ id: 1, firstName: 'Lucia', lastName: 'Verdi', email: 'l@v.it' }]);
+    client.setQueryData(['reference', 'managers'], [{ id: uid(1), firstName: 'Lucia', lastName: 'Verdi', email: 'l@v.it' }]);
     await client.invalidateQueries({ queryKey: ['reference', 'business-areas'] });
     (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/business-areas') return Promise.resolve({ data: [{ id: 1, name: 'Acquisti', description: '' }] });
+      if (url === '/business-areas') return Promise.resolve({ data: [{ id: uid(1), name: 'Acquisti', description: '' }] });
       return Promise.resolve({ data: [] });
     });
 
@@ -119,7 +120,7 @@ describe('DashboardPage — onboarding redirect', () => {
   it('still redirects when ADMIN has a manager but no business area (registration always creates one manager)', async () => {
     mockAdmin(1);
     (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/managers') return Promise.resolve({ data: [{ id: 1, firstName: 'Marco', lastName: 'Rossi', email: 'a@b.com', phoneNumber: '123', department: 'IT' }] });
+      if (url === '/managers') return Promise.resolve({ data: [{ id: uid(1), firstName: 'Marco', lastName: 'Rossi', email: 'a@b.com', phoneNumber: '123', department: 'IT' }] });
       return Promise.resolve({ data: [] });
     });
 

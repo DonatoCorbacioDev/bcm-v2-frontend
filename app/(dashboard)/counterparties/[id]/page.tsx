@@ -34,7 +34,7 @@ const PERCENT_FORMATTER = new Intl.NumberFormat("it-IT", {
 export default function CounterpartyDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const counterpartyId = Number(params.id);
+  const counterpartyId = String(params.id);
   const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
   const [ibanDialogOpen, setIbanDialogOpen] = useState(false);
 

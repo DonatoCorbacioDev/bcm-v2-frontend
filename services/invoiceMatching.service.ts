@@ -7,7 +7,7 @@ import api from "@/lib/api";
 import type { ElectronicInvoice } from "@/types";
 
 export const invoiceMatchingService = {
-  confirm: async (contractId: number, invoiceId: number, financialValueId?: number): Promise<ElectronicInvoice> => {
+  confirm: async (contractId: string, invoiceId: string, financialValueId?: string): Promise<ElectronicInvoice> => {
     const res = await api.post<ElectronicInvoice>(
       `/contracts/${contractId}/invoices/${invoiceId}/match/confirm`,
       financialValueId != null ? { financialValueId } : {}
@@ -15,12 +15,12 @@ export const invoiceMatchingService = {
     return res.data;
   },
 
-  reject: async (contractId: number, invoiceId: number): Promise<ElectronicInvoice> => {
+  reject: async (contractId: string, invoiceId: string): Promise<ElectronicInvoice> => {
     const res = await api.post<ElectronicInvoice>(`/contracts/${contractId}/invoices/${invoiceId}/match/reject`);
     return res.data;
   },
 
-  recompute: async (contractId: number): Promise<ElectronicInvoice[]> => {
+  recompute: async (contractId: string): Promise<ElectronicInvoice[]> => {
     const res = await api.post<ElectronicInvoice[]>(`/contracts/${contractId}/invoices/match/recompute`);
     return res.data;
   },

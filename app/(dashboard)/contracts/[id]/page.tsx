@@ -61,7 +61,7 @@ export default function ContractDetailPage() {
   const params = useParams();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const contractId = Number(params.id);
+  const contractId = String(params.id);
 
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
@@ -167,7 +167,7 @@ export default function ContractDetailPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await contractsService.delete(id);
     },
     onSuccess: () => {

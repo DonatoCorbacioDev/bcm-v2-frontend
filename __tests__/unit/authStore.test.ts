@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/store/authStore";
+import { uid } from "../mocks/ids";
 
-const mockUser = { id: 1, username: "testuser", role: "ADMIN", roleId: 1, managerId: 1, verified: true, createdAt: "2024-01-01" };
+const mockUser = { id: uid(1), username: "testuser", role: "ADMIN", roleId: uid(1), managerId: uid(1), verified: true, createdAt: "2024-01-01" };
 
 describe("authStore", () => {
   beforeEach(() => {

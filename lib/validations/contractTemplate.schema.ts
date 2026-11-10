@@ -32,16 +32,14 @@ export const contractTemplateSchema = z.object({
     .nullable(),
 
   businessAreaId: z
-    .number()
-    .int()
-    .positive()
+    .string()
+    .uuid()
     .optional()
     .nullable(),
 
   defaultManagerId: z
-    .number()
-    .int()
-    .positive()
+    .string()
+    .uuid()
     .optional()
     .nullable(),
 
@@ -59,9 +57,9 @@ export type ContractTemplateFormData = z.infer<typeof contractTemplateSchema>;
 
 export const instantiateTemplateSchema = z.object({
   counterpartyId: z
-    .number({ message: "La controparte è obbligatoria" })
-    .int("La controparte deve essere un numero intero")
-    .positive("La controparte deve essere un numero positivo"),
+    .string({ message: "La controparte è obbligatoria" })
+    .min(1, "La controparte è obbligatoria")
+    .uuid("La controparte è obbligatoria"),
 
   contractNumber: z
     .string({ message: "Il numero contratto è obbligatorio" })
@@ -90,8 +88,8 @@ export const instantiateTemplateSchema = z.object({
       "Formato AAAA-MM-GG"
     ),
 
-  businessAreaId: z.number().int().positive().optional().nullable(),
-  managerId: z.number().int().positive().optional().nullable(),
+  businessAreaId: z.string().uuid().optional().nullable(),
+  managerId: z.string().uuid().optional().nullable(),
 
   status: z
     .enum(["ACTIVE", "EXPIRED", "CANCELLED", "DRAFT"])

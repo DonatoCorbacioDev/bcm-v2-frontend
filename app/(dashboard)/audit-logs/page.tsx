@@ -12,14 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
+import { shortId } from "@/lib/shortId";
 
 interface AuditLogDTO {
-  id: number;
+  id: string;
   action: string;
   entityType: string;
-  entityId: number;
+  entityId: string;
   username: string;
-  orgId: number;
+  orgId: string;
   timestamp: string;
   details: string | null;
 }
@@ -96,7 +97,7 @@ function actionBadgeClass(action: string): string {
 function summaryText(log: AuditLogDTO): string {
   const entity = entityTypeLabel(log.entityType);
   const action = actionLabel(log.action).toLowerCase();
-  return log.entityId == null ? `${entity} — ${action}` : `${entity} #${log.entityId} — ${action}`;
+  return log.entityId == null ? `${entity} — ${action}` : `${entity} #${shortId(log.entityId)} — ${action}`;
 }
 
 const PAGE_SIZE = 20;

@@ -13,7 +13,7 @@ import { formatMoney } from "@/lib/formatMoney";
 
 
 export interface BudgetAreaSelection {
-  readonly id: number;
+  readonly id: string;
   readonly name: string;
 }
 
@@ -104,7 +104,7 @@ interface FinancialValueSummaryProps {
   /** Financial values failed to load: the totals show N/D instead of 0 €. */
   readonly isError?: boolean;
   /** Currently active area filter (drives the row highlight below). */
-  readonly selectedAreaId?: number | null;
+  readonly selectedAreaId?: string | null;
   /** Clicking a budget row asks the parent to filter the table below by that area. */
   readonly onAreaClick?: (area: BudgetAreaSelection) => void;
 }

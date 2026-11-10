@@ -56,31 +56,32 @@ import { useUsers } from '@/hooks/useUsers';
 import { useManagers } from '@/hooks/useManagers';
 import { useRoles } from '@/hooks/useRoles';
 import { usersService } from '@/services/users.service';
+import { uid } from "../mocks/ids";
 
 const mockUsers: User[] = [
   {
-    id: 1,
+    id: uid(1),
     username: 'alice@example.com',
-    managerId: 1,
+    managerId: uid(1),
     role: 'ADMIN',
-    roleId: 1,
+    roleId: uid(1),
     verified: true,
     createdAt: '2024-01-01T00:00:00Z',
   },
   {
-    id: 2,
+    id: uid(2),
     username: 'bob@example.com',
-    managerId: 2,
+    managerId: uid(2),
     role: 'VIEWER',
-    roleId: 2,
+    roleId: uid(2),
     verified: false,
     createdAt: '2024-02-01T00:00:00Z',
   },
 ];
 
 const mockManagers: Manager[] = [
-  { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@example.com', phoneNumber: '0000', department: 'IT' },
-  { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', phoneNumber: '1111', department: 'HR' },
+  { id: uid(1), firstName: 'John', lastName: 'Doe', email: 'john@example.com', phoneNumber: '0000', department: 'IT' },
+  { id: uid(2), firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com', phoneNumber: '1111', department: 'HR' },
 ];
 
 describe('UserTable', () => {
@@ -95,7 +96,7 @@ describe('UserTable', () => {
     });
     (useManagers as jest.Mock).mockReturnValue({ data: mockManagers });
     (useRoles as jest.Mock).mockReturnValue({
-      data: [{ id: 1, role: 'ADMIN' }, { id: 2, role: 'VIEWER' }],
+      data: [{ id: uid(1), role: 'ADMIN' }, { id: uid(2), role: 'VIEWER' }],
     });
   });
 
@@ -212,7 +213,7 @@ describe('UserTable', () => {
 
     expect(onEditClick).toHaveBeenCalledTimes(1);
     expect(onEditClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, username: 'alice@example.com' })
+      expect.objectContaining({ id: uid(1), username: 'alice@example.com' })
     );
   });
 

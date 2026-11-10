@@ -9,8 +9,8 @@ import type { User } from "@/types";
 export type UserUpsertPayload = {
   username: string;
   password?: string;
-  managerId: number;
-  roleId: number;
+  managerId: string;
+  roleId: string;
   verified: boolean;
   canApproveContracts: boolean;
 };
@@ -18,7 +18,7 @@ export type UserUpsertPayload = {
 export type InviteUserPayload = {
   username: string;
   role: string;
-  managerId: number;
+  managerId: string;
 };
 
 export const usersService = {
@@ -32,12 +32,12 @@ export const usersService = {
     return res.data;
   },
 
-  update: async (id: number, payload: UserUpsertPayload): Promise<User> => {
+  update: async (id: string, payload: UserUpsertPayload): Promise<User> => {
     const res = await api.put<User>(`/users/${id}`, payload);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/users/${id}`);
   },
 

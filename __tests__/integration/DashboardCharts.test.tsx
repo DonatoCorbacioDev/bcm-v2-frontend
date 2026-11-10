@@ -82,6 +82,7 @@ import { ContractsByAreaChart } from '@/components/dashboard/ContractsByAreaChar
 import { ContractsTimelineChart } from '@/components/dashboard/ContractsTimelineChart';
 import { TopManagersChart } from '@/components/dashboard/TopManagersChart';
 import KPICardSkeleton from '@/components/dashboard/KPICardSkeleton';
+import { uid } from "../mocks/ids";
 
 // ─── ContractStatsChart ───────────────────────────────────────────────────────
 
@@ -300,8 +301,8 @@ describe('TopManagersChart', () => {
   it('renders the ranked bar list (no single-manager note) when there are multiple managers', () => {
     (useTopManagers as jest.Mock).mockReturnValue({
       data: [
-        { managerId: 1, managerName: 'John Doe', contractsCount: 10 },
-        { managerId: 2, managerName: 'Jane Smith', contractsCount: 6 },
+        { managerId: uid(1), managerName: 'John Doe', contractsCount: 10 },
+        { managerId: uid(2), managerName: 'Jane Smith', contractsCount: 6 },
       ],
       isLoading: false,
       isError: false,

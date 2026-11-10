@@ -10,7 +10,7 @@ jest.mock('@/lib/api', () => ({
 }));
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn(() => ({ user: { id: 7, username: 'marco', role: 'MANAGER' } })),
+  useAuthStore: jest.fn(() => ({ user: { id: '00000000-0000-4000-8000-000000000007', username: 'marco', role: 'MANAGER' } })),
 }));
 jest.mock('@/services/calendarFeed.service', () => ({
   calendarFeedService: { getUrl: jest.fn().mockResolvedValue('https://example.test/feed.ics'), regenerate: jest.fn() },
@@ -27,11 +27,12 @@ jest.mock('@/components/profile/DataPrivacyCard', () => ({
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import ProfilePage from '@/app/(dashboard)/profile/page';
+import { uid } from "../mocks/ids";
 
 const mockedApi = api as unknown as { get: jest.Mock; post: jest.Mock; patch: jest.Mock };
 
 const profile = (demoAccount: boolean) => ({
-  id: 7, username: demoAccount ? 'demo' : 'marco', role: 'MANAGER', verified: true, demoAccount,
+  id: uid(7), username: demoAccount ? 'demo' : 'marco', role: 'MANAGER', verified: true, demoAccount,
 });
 
 beforeEach(() => {

@@ -16,6 +16,7 @@ jest.mock('@/services/counterparties.service', () => ({
 
 import { toast } from 'sonner';
 import VerifyIbanDialog from '@/components/counterparties/VerifyIbanDialog';
+import { uid } from "../mocks/ids";
 
 const renderDialog = (overrides: Partial<React.ComponentProps<typeof VerifyIbanDialog>> = {}) => {
   const onOpenChange = jest.fn();
@@ -23,7 +24,7 @@ const renderDialog = (overrides: Partial<React.ComponentProps<typeof VerifyIbanD
     <VerifyIbanDialog
       open={true}
       onOpenChange={onOpenChange}
-      counterpartyId={1}
+      counterpartyId={uid(1)}
       currentIbanMasked={null}
       {...overrides}
     />,
@@ -56,7 +57,7 @@ describe('VerifyIbanDialog', () => {
   });
 
   it('submits the trimmed IBAN/BIC, shows a success toast and closes on success', async () => {
-    mockConfirmVerifiedIban.mockResolvedValue({ id: 1, verifiedIban: 'IT...3456' });
+    mockConfirmVerifiedIban.mockResolvedValue({ id: uid(1), verifiedIban: 'IT...3456' });
     const user = userEvent.setup();
     const { onOpenChange } = renderDialog();
 
@@ -65,7 +66,7 @@ describe('VerifyIbanDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Conferma' }));
 
     await waitFor(() =>
-      expect(mockConfirmVerifiedIban).toHaveBeenCalledWith(1, {
+      expect(mockConfirmVerifiedIban).toHaveBeenCalledWith(uid(1), {
         iban: 'IT60X0542811101000000123456',
         bic: 'BPPIITRRXXX',
       })
@@ -99,7 +100,7 @@ describe('VerifyIbanDialog', () => {
   });
 
   it('omits the BIC from the payload when left blank', async () => {
-    mockConfirmVerifiedIban.mockResolvedValue({ id: 1, verifiedIban: 'IT...3456' });
+    mockConfirmVerifiedIban.mockResolvedValue({ id: uid(1), verifiedIban: 'IT...3456' });
     const user = userEvent.setup();
     renderDialog();
 
@@ -107,7 +108,7 @@ describe('VerifyIbanDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Conferma' }));
 
     await waitFor(() =>
-      expect(mockConfirmVerifiedIban).toHaveBeenCalledWith(1, {
+      expect(mockConfirmVerifiedIban).toHaveBeenCalledWith(uid(1), {
         iban: 'IT60X0542811101000000123456',
         bic: undefined,
       })
@@ -141,7 +142,7 @@ describe('VerifyIbanDialog', () => {
   });
 
   it('ignores Escape (which would close the dialog) while the mutation is pending', async () => {
-    let resolveMutation: (value: { id: number }) => void = () => {};
+    let resolveMutation: (value: { id: string }) => void = () => {};
     mockConfirmVerifiedIban.mockImplementation(
       () => new Promise((resolve) => { resolveMutation = resolve; })
     );
@@ -155,6 +156,6 @@ describe('VerifyIbanDialog', () => {
     await user.keyboard('{Escape}');
     expect(onOpenChange).not.toHaveBeenCalled();
 
-    resolveMutation({ id: 1 });
+    resolveMutation({ id: uid(1) });
   });
 });

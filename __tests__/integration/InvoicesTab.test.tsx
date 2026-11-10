@@ -20,6 +20,7 @@ jest.mock('@/lib/api', () => ({
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import InvoicesTab from '@/components/contracts/InvoicesTab';
+import { uid } from "../mocks/ids";
 
 // ── fixtures ──────────────────────────────────────────────────────────────────
 
@@ -34,8 +35,8 @@ const lineItem = {
 };
 
 const invoice = {
-  id: 1,
-  contractId: 1,
+  id: uid(1),
+  contractId: uid(1),
   fileName: 'fattura.xml',
   fileSize: 2097152,          // 2 MB → "2.0 MB"
   uploadedAt: '2024-03-15T10:00:00Z',
@@ -59,23 +60,23 @@ const invoice = {
   matchedByUsername: null,
 };
 
-const invoiceSuggested = { ...invoice, id: 7, fileName: 'suggerita.xml', matchStatus: 'SUGGESTED', matchConfidence: 0.84 };
-const invoiceConfirmed = { ...invoice, id: 8, fileName: 'confermata.xml', matchStatus: 'CONFIRMED' };
-const invoiceRejected = { ...invoice, id: 9, fileName: 'rifiutata.xml', matchStatus: 'REJECTED' };
-const invoiceMismatch = { ...invoice, id: 10, fileName: 'fornitore-diverso.xml', matchStatus: 'COUNTERPARTY_MISMATCH' };
+const invoiceSuggested = { ...invoice, id: uid(7), fileName: 'suggerita.xml', matchStatus: 'SUGGESTED', matchConfidence: 0.84 };
+const invoiceConfirmed = { ...invoice, id: uid(8), fileName: 'confermata.xml', matchStatus: 'CONFIRMED' };
+const invoiceRejected = { ...invoice, id: uid(9), fileName: 'rifiutata.xml', matchStatus: 'REJECTED' };
+const invoiceMismatch = { ...invoice, id: uid(10), fileName: 'fornitore-diverso.xml', matchStatus: 'COUNTERPARTY_MISMATCH' };
 
-const invoiceKB   = { ...invoice, id: 2, fileName: 'piccola.xml', fileSize: 512    }; // 512 B
-const invoiceMed  = { ...invoice, id: 3, fileName: 'media.xml',   fileSize: 102400 }; // 100 KB
-const invoiceNoIban = { ...invoice, id: 4, fileName: 'no-iban.xml', supplierIban: null, supplierBic: null };
-const invoicePaid = { ...invoice, id: 5, fileName: 'pagata.xml', sepaBatchId: 99 };
+const invoiceKB   = { ...invoice, id: uid(2), fileName: 'piccola.xml', fileSize: 512    }; // 512 B
+const invoiceMed  = { ...invoice, id: uid(3), fileName: 'media.xml',   fileSize: 102400 }; // 100 KB
+const invoiceNoIban = { ...invoice, id: uid(4), fileName: 'no-iban.xml', supplierIban: null, supplierBic: null };
+const invoicePaid = { ...invoice, id: uid(5), fileName: 'pagata.xml', sepaBatchId: uid(99) };
 const invoiceNoPaymentDetails = {
-  ...invoice, id: 6, fileName: 'no-payment-details.xml',
+  ...invoice, id: uid(6), fileName: 'no-payment-details.xml',
   supplierIban: null, supplierBic: null, paymentDueDate: null,
 };
 
 const sepaBatch = {
-  id: 99,
-  contractId: 1,
+  id: uid(99),
+  contractId: uid(1),
   executionDate: '2024-04-05',
   totalAmount: 1220,
   currency: 'EUR',
@@ -93,7 +94,7 @@ beforeEach(() => jest.clearAllMocks());
 
 function renderTab(isAdmin = true) {
   return render(
-    <InvoicesTab contractId={1} isAdmin={isAdmin} />,
+    <InvoicesTab contractId={uid(1)} isAdmin={isAdmin} />,
     { wrapper: createWrapper() },
   );
 }
@@ -122,7 +123,7 @@ function mockApiGet(config: MockConfig) {
         ? Promise.reject(config.downloadError)
         : Promise.resolve({ data: config.download ?? new Blob(['<xml/>']) });
     }
-    if (/\/invoices\/\d+$/.test(url)) {
+    if (/\/invoices\/[0-9a-f-]{36}$/.test(url)) {
       return config.detailError
         ? Promise.reject(config.detailError)
         : Promise.resolve({ data: config.detail });
@@ -263,7 +264,7 @@ describe('InvoicesTab', () => {
     Object.defineProperty(file, 'name', { value: 'fattura.xml' });
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(api.post).toHaveBeenCalledWith(
-      '/contracts/1/invoices',
+      `/contracts/${uid(1)}/invoices`,
       expect.any(FormData),
       expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } }),
     ));
@@ -317,7 +318,7 @@ describe('InvoicesTab', () => {
     expect(await screen.findByTitle('Elimina fattura')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina fattura'));
     await waitFor(() =>
-      expect(api.delete).toHaveBeenCalledWith('/contracts/1/invoices/1'),
+      expect(api.delete).toHaveBeenCalledWith(`/contracts/${uid(1)}/invoices/${uid(1)}`),
     );
     expect(toast.success).toHaveBeenCalledWith('Fattura eliminata');
   });
@@ -351,7 +352,7 @@ describe('InvoicesTab', () => {
     await userEvent.click(screen.getByTitle('Scarica fattura'));
     await waitFor(() =>
       expect(api.get).toHaveBeenCalledWith(
-        '/contracts/1/invoices/1/download',
+        `/contracts/${uid(1)}/invoices/${uid(1)}/download`,
         { responseType: 'blob' },
       ),
     );
@@ -542,8 +543,8 @@ describe('InvoicesTab', () => {
     const today = new Date().toISOString().slice(0, 10);
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith(
-        '/contracts/1/sepa-payments',
-        { invoiceIds: [1], executionDate: today },
+        `/contracts/${uid(1)}/sepa-payments`,
+        { invoiceIds: [uid(1)], executionDate: today },
         expect.objectContaining({ responseType: 'blob' }),
       ),
     );
@@ -564,8 +565,8 @@ describe('InvoicesTab', () => {
     await userEvent.click(screen.getByRole('button', { name: /genera pagamento sepa/i }));
     await waitFor(() =>
       expect(api.post).toHaveBeenCalledWith(
-        '/contracts/1/sepa-payments',
-        { invoiceIds: [1], executionDate: '2030-01-15' },
+        `/contracts/${uid(1)}/sepa-payments`,
+        { invoiceIds: [uid(1)], executionDate: '2030-01-15' },
         expect.objectContaining({ responseType: 'blob' }),
       ),
     );
@@ -623,7 +624,7 @@ describe('InvoicesTab', () => {
 
     await waitFor(() =>
       expect(api.patch).toHaveBeenCalledWith(
-        '/contracts/1/invoices/4/payment-details',
+        `/contracts/${uid(1)}/invoices/${uid(4)}/payment-details`,
         expect.objectContaining({ supplierIban: 'IT60X0542811101000000123456' }),
       ),
     );
@@ -666,7 +667,7 @@ describe('InvoicesTab', () => {
 
     await waitFor(() =>
       expect(api.patch).toHaveBeenCalledWith(
-        '/contracts/1/invoices/1/payment-details',
+        `/contracts/${uid(1)}/invoices/${uid(1)}/payment-details`,
         expect.objectContaining({ supplierIban: undefined, supplierBic: 'BCITITMM', paymentDueDate: '2024-05-01' }),
       ),
     );
@@ -725,7 +726,7 @@ describe('InvoicesTab', () => {
 
     await waitFor(() =>
       expect(api.patch).toHaveBeenCalledWith(
-        '/contracts/1/invoices/6/payment-details',
+        `/contracts/${uid(1)}/invoices/${uid(6)}/payment-details`,
         expect.objectContaining({ supplierBic: undefined, paymentDueDate: null }),
       ),
     );
@@ -756,7 +757,7 @@ describe('InvoicesTab', () => {
     await userEvent.click(screen.getByTitle('Scarica di nuovo'));
     await waitFor(() =>
       expect(api.get).toHaveBeenCalledWith(
-        '/contracts/1/sepa-payments/99/download',
+        `/contracts/${uid(1)}/sepa-payments/${uid(99)}/download`,
         { responseType: 'blob' },
       ),
     );
@@ -831,7 +832,7 @@ describe('InvoicesTab', () => {
   });
 
   it('falls back to the "N/D" badge for an unrecognized matchStatus value', async () => {
-    const invoiceUnknownStatus = { ...invoice, id: 11, fileName: 'stato-sconosciuto.xml', matchStatus: 'SOME_FUTURE_STATUS' };
+    const invoiceUnknownStatus = { ...invoice, id: uid(11), fileName: 'stato-sconosciuto.xml', matchStatus: 'SOME_FUTURE_STATUS' };
     mockApiGet({ invoices: [invoiceUnknownStatus] });
     renderTab();
     expect(await screen.findByText('N/D')).toBeInTheDocument();
@@ -844,7 +845,7 @@ describe('InvoicesTab', () => {
     expect(await screen.findByTitle('Conferma abbinamento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Conferma abbinamento'));
     await waitFor(() =>
-      expect(api.post).toHaveBeenCalledWith('/contracts/1/invoices/7/match/confirm', {}),
+      expect(api.post).toHaveBeenCalledWith(`/contracts/${uid(1)}/invoices/${uid(7)}/match/confirm`, {}),
     );
     expect(toast.success).toHaveBeenCalledWith('Abbinamento confermato');
   });
@@ -867,7 +868,7 @@ describe('InvoicesTab', () => {
     expect(await screen.findByTitle('Rifiuta abbinamento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Rifiuta abbinamento'));
     await waitFor(() =>
-      expect(api.post).toHaveBeenCalledWith('/contracts/1/invoices/7/match/reject'),
+      expect(api.post).toHaveBeenCalledWith(`/contracts/${uid(1)}/invoices/${uid(7)}/match/reject`),
     );
     expect(toast.success).toHaveBeenCalledWith('Abbinamento rifiutato');
   });

@@ -52,12 +52,13 @@ jest.mock('@/lib/api', () => ({ api: { get: jest.fn() } }));
 import { useFinancialValues } from '@/hooks/useFinancialValues';
 import { api } from '@/lib/api';
 import { FinancialForecastChart } from '@/components/dashboard/FinancialForecastChart';
+import { uid } from "../mocks/ids";
 
 const financialValues = [
-  { id: 1, month: 1, year: 2024, financialAmount: 10000, financialTypeId: 1, businessAreaId: 1, contractId: 1 },
-  { id: 2, month: 1, year: 2024, financialAmount: 5000,  financialTypeId: 2, businessAreaId: 1, contractId: 1 },
-  { id: 3, month: 2, year: 2024, financialAmount: 8000,  financialTypeId: 1, businessAreaId: 1, contractId: 2 },
-  { id: 4, month: 3, year: 2024, financialAmount: null as unknown as number, financialTypeId: 1, businessAreaId: 1, contractId: 3 }, // covers financialAmount ?? 0
+  { id: uid(1), month: 1, year: 2024, financialAmount: 10000, financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(1) },
+  { id: uid(2), month: 1, year: 2024, financialAmount: 5000,  financialTypeId: uid(2), businessAreaId: uid(1), contractId: uid(1) },
+  { id: uid(3), month: 2, year: 2024, financialAmount: 8000,  financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(2) },
+  { id: uid(4), month: 3, year: 2024, financialAmount: null as unknown as number, financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(3) }, // covers financialAmount ?? 0
 ];
 
 const forecastResponse = {

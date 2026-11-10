@@ -9,11 +9,12 @@ jest.mock('@/lib/api', () => ({
 
 import { api } from '@/lib/api';
 import { RiskScoreWidget } from '@/components/dashboard/RiskScoreWidget';
+import { uid } from "../mocks/ids";
 
 const mockScores = [
-  { contractId: 1, customerName: 'Acme Corp', riskScore: 0.85, level: 'HIGH' as const, anomalies: ['amount_spike', 'expiring_soon'] },
-  { contractId: 2, customerName: 'Beta Ltd',  riskScore: 0.45, level: 'MEDIUM' as const, anomalies: [] },
-  { contractId: 3, customerName: 'Gamma Inc', riskScore: 0.1,  level: 'LOW' as const,    anomalies: ['minor_delay'] },
+  { contractId: uid(1), customerName: 'Acme Corp', riskScore: 0.85, level: 'HIGH' as const, anomalies: ['amount_spike', 'expiring_soon'] },
+  { contractId: uid(2), customerName: 'Beta Ltd',  riskScore: 0.45, level: 'MEDIUM' as const, anomalies: [] },
+  { contractId: uid(3), customerName: 'Gamma Inc', riskScore: 0.1,  level: 'LOW' as const,    anomalies: ['minor_delay'] },
 ];
 
 beforeEach(() => jest.clearAllMocks());
@@ -65,7 +66,7 @@ describe('RiskScoreWidget', () => {
 
   it('translates the real backend anomaly codes to Italian', async () => {
     const realCodes = [
-      { contractId: 4, customerName: 'Delta Srl', riskScore: 0.9, level: 'HIGH' as const,
+      { contractId: uid(4), customerName: 'Delta Srl', riskScore: 0.9, level: 'HIGH' as const,
         anomalies: ['EXPIRED', 'EXPIRING_SOON', 'UNUSUAL_VALUE', 'NO_END_DATE'] },
     ];
     (api.get as jest.Mock).mockResolvedValue({ data: realCodes });
@@ -86,7 +87,7 @@ describe('RiskScoreWidget', () => {
   });
 
   it('falls back to LOW config for unknown risk level', async () => {
-    const unknownLevel = [{ contractId: 9, customerName: 'Unknown Corp', riskScore: 0.5, level: 'UNKNOWN' as 'LOW', anomalies: [] }];
+    const unknownLevel = [{ contractId: uid(9), customerName: 'Unknown Corp', riskScore: 0.5, level: 'UNKNOWN' as 'LOW', anomalies: [] }];
     (api.get as jest.Mock).mockResolvedValue({ data: unknownLevel });
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
     expect(await screen.findByText('Unknown Corp')).toBeInTheDocument();
@@ -97,7 +98,7 @@ describe('RiskScoreWidget', () => {
     render(<RiskScoreWidget />, { wrapper: createWrapper() });
     expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     const links = screen.getAllByRole('link');
-    expect(links[0]).toHaveAttribute('href', '/contracts/1');
+    expect(links[0]).toHaveAttribute('href', `/contracts/${uid(1)}`);
   });
 
   it('shows only the first 5 scores with a toggle when there are more', async () => {
@@ -171,7 +172,7 @@ describe('RiskScoreWidget', () => {
     it('submits agree feedback with the score/level shown for that contract', async () => {
       mockGetByUrl({ '/risk-scores': mockScores, '/risk-feedback': [] });
       (api.post as jest.Mock).mockResolvedValue({
-        data: { id: 1, contractId: 1, riskScore: 0.85, riskLevel: 'HIGH', mlScore: null, mlLevel: null, agree: true, createdAt: '2027-01-01T00:00:00' },
+        data: { id: uid(1), contractId: uid(1), riskScore: 0.85, riskLevel: 'HIGH', mlScore: null, mlLevel: null, agree: true, createdAt: '2027-01-01T00:00:00' },
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
@@ -179,7 +180,7 @@ describe('RiskScoreWidget', () => {
       const [firstThumbsUp] = screen.getAllByRole('button', { name: 'Punteggio corretto' });
       await userEvent.click(firstThumbsUp);
 
-      await waitFor(() => expect(api.post).toHaveBeenCalledWith('/risk-feedback/contracts/1', {
+      await waitFor(() => expect(api.post).toHaveBeenCalledWith(`/risk-feedback/contracts/${uid(1)}`, {
         riskScore: 0.85,
         level: 'HIGH',
         mlScore: undefined,
@@ -191,7 +192,7 @@ describe('RiskScoreWidget', () => {
     it('submits disagree feedback for the clicked contract', async () => {
       mockGetByUrl({ '/risk-scores': mockScores, '/risk-feedback': [] });
       (api.post as jest.Mock).mockResolvedValue({
-        data: { id: 2, contractId: 2, riskScore: 0.45, riskLevel: 'MEDIUM', mlScore: null, mlLevel: null, agree: false, createdAt: '2027-01-01T00:00:00' },
+        data: { id: uid(2), contractId: uid(2), riskScore: 0.45, riskLevel: 'MEDIUM', mlScore: null, mlLevel: null, agree: false, createdAt: '2027-01-01T00:00:00' },
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
@@ -199,7 +200,7 @@ describe('RiskScoreWidget', () => {
       const thumbsDownButtons = screen.getAllByRole('button', { name: 'Punteggio errato' });
       await userEvent.click(thumbsDownButtons[1]);
 
-      await waitFor(() => expect(api.post).toHaveBeenCalledWith('/risk-feedback/contracts/2', {
+      await waitFor(() => expect(api.post).toHaveBeenCalledWith(`/risk-feedback/contracts/${uid(2)}`, {
         riskScore: 0.45,
         level: 'MEDIUM',
         mlScore: undefined,
@@ -211,7 +212,7 @@ describe('RiskScoreWidget', () => {
     it('shows a confirmed state instead of buttons when feedback already exists', async () => {
       mockGetByUrl({
         '/risk-scores': mockScores,
-        '/risk-feedback': [{ id: 1, contractId: 1, riskScore: 0.85, riskLevel: 'HIGH', mlScore: null, mlLevel: null, agree: true, createdAt: '2027-01-01T00:00:00' }],
+        '/risk-feedback': [{ id: uid(1), contractId: uid(1), riskScore: 0.85, riskLevel: 'HIGH', mlScore: null, mlLevel: null, agree: true, createdAt: '2027-01-01T00:00:00' }],
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 
@@ -223,7 +224,7 @@ describe('RiskScoreWidget', () => {
     it('shows a disputed state when feedback disagreed with the score', async () => {
       mockGetByUrl({
         '/risk-scores': mockScores,
-        '/risk-feedback': [{ id: 2, contractId: 2, riskScore: 0.45, riskLevel: 'MEDIUM', mlScore: null, mlLevel: null, agree: false, createdAt: '2027-01-01T00:00:00' }],
+        '/risk-feedback': [{ id: uid(2), contractId: uid(2), riskScore: 0.45, riskLevel: 'MEDIUM', mlScore: null, mlLevel: null, agree: false, createdAt: '2027-01-01T00:00:00' }],
       });
       render(<RiskScoreWidget />, { wrapper: createWrapper() });
 

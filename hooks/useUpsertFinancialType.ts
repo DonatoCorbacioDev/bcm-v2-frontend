@@ -8,7 +8,7 @@ import { financialTypesService, type FinancialTypeUpsertPayload } from "@/servic
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
 
 type UpsertFinancialTypeParams = {
-  id?: number;
+  id?: string;
   payload: FinancialTypeUpsertPayload;
 };
 

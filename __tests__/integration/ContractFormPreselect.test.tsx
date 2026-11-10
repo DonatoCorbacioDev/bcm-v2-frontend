@@ -11,9 +11,10 @@ jest.mock('@/hooks/useFinancialTypes', () => ({ useFinancialTypes: () => ({ data
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
 import { useManagers } from '@/hooks/useManagers';
 import ContractForm from '@/components/contracts/ContractForm';
+import { uid } from "../mocks/ids";
 
-const area = { id: 1, name: 'Acquisti', description: '' };
-const manager = { id: 4, firstName: 'Lucia', lastName: 'Verdi', email: 'l@v.it' };
+const area = { id: uid(1), name: 'Acquisti', description: '' };
+const manager = { id: uid(4), firstName: 'Lucia', lastName: 'Verdi', email: 'l@v.it' };
 const loaded = (data: unknown[]) => ({ data, isLoading: false, isError: false });
 
 describe('ContractForm — single area or responsabile', () => {
@@ -40,7 +41,7 @@ describe('ContractForm — single area or responsabile', () => {
   });
 
   it('leaves the choice open when there are several business areas', () => {
-    (useBusinessAreas as jest.Mock).mockReturnValue(loaded([area, { id: 2, name: 'IT', description: '' }]));
+    (useBusinessAreas as jest.Mock).mockReturnValue(loaded([area, { id: uid(2), name: 'IT', description: '' }]));
     (useManagers as jest.Mock).mockReturnValue(loaded([manager]));
     render(<ContractForm onClose={jest.fn()} />, { wrapper: createWrapper() });
 

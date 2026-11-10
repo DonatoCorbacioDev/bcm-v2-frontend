@@ -5,11 +5,11 @@
 
 // Core entity types matching backend DTOs
 export interface User {
-  id: number;
+  id: string;
   username: string;
-  managerId: number;
+  managerId: string;
   role: string;
-  roleId: number;
+  roleId: string;
   verified: boolean;
   createdAt: string;
   canApproveContracts?: boolean;
@@ -19,7 +19,7 @@ export interface User {
 }
 
 export interface Manager {
-  id: number;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -28,12 +28,12 @@ export interface Manager {
 }
 
 export interface Role {
-  id: number;
+  id: string;
   role: string;
 }
 
 export interface BusinessArea {
-  id: number;
+  id: string;
   name: string;
   description: string;
 }
@@ -41,7 +41,7 @@ export interface BusinessArea {
 export type CounterpartyType = "CUSTOMER" | "SUPPLIER" | "BOTH";
 
 export interface Counterparty {
-  id: number;
+  id: string;
   name: string;
   type: CounterpartyType;
   vatNumber?: string | null;
@@ -64,7 +64,7 @@ export interface Counterparty {
 }
 
 export interface CounterpartyInvoicingSummary {
-  counterpartyId: number;
+  counterpartyId: string;
   counterpartyName: string;
   activeContracts: number;
   contractedValue: number;
@@ -89,15 +89,15 @@ export interface OrganizationInvoicingSummary {
 export type FinancialCategory = "REVENUE" | "COST";
 
 export interface FinancialType {
-  id: number;
+  id: string;
   name: string;
   description: string;
   category: FinancialCategory;
 }
 
 export interface Budget {
-  id: number;
-  businessAreaId: number;
+  id: string;
+  businessAreaId: string;
   areaName: string;
   category: FinancialCategory;
   year: number;
@@ -109,14 +109,14 @@ export interface Budget {
 export type BillingFrequency = "MONTHLY" | "QUARTERLY" | "SEMIANNUAL" | "ANNUAL";
 
 export interface Contract {
-  id: number;
-  counterpartyId: number;
+  id: string;
+  counterpartyId: string;
   counterparty?: Counterparty;
   contractNumber: string;
   wbsCode: string;
   projectName: string;
-  areaId: number;
-  managerId: number;
+  areaId: string;
+  managerId: string;
   managerName: string;
   startDate: string;
   endDate: string;
@@ -129,7 +129,7 @@ export interface Contract {
   // Optional financial terms — when all three are set, the backend
   // auto-generates this contract's FinancialValue rows instead of requiring
   // them to be entered one at a time.
-  financialTypeId?: number | null;
+  financialTypeId?: string | null;
   annualValue?: number | null;
   billingFrequency?: BillingFrequency | null;
   // Tacit renewal terms, all optional (null = not stated). With a tacit
@@ -143,7 +143,7 @@ export interface Contract {
 }
 
 export interface ContractWorkflowEvent {
-  id: number;
+  id: string;
   fromStage: "DRAFT" | "IN_REVIEW" | "APPROVED" | null;
   toStage: "DRAFT" | "IN_REVIEW" | "APPROVED";
   action: "SUBMIT" | "APPROVE" | "REJECT";
@@ -155,13 +155,13 @@ export interface ContractWorkflowEvent {
 export type FinancialValueSource = "MANUAL" | "GENERATED";
 
 export interface FinancialValue {
-  id: number;
+  id: string;
   month: number;
   year: number;
   financialAmount: number;
-  financialTypeId: number;
-  businessAreaId: number;
-  contractId: number;
+  financialTypeId: string;
+  businessAreaId: string;
+  contractId: string;
   typeName?: string;
   areaName?: string;
   customerName?: string;
@@ -189,8 +189,8 @@ export interface InvoiceLineItem {
 }
 
 export interface ElectronicInvoice {
-  id: number;
-  contractId: number;
+  id: string;
+  contractId: string;
   fileName: string;
   fileSize: number;
   uploadedAt: string;
@@ -206,9 +206,9 @@ export interface ElectronicInvoice {
   supplierIban: string | null;
   supplierBic: string | null;
   paymentDueDate: string | null;
-  sepaBatchId: number | null;
+  sepaBatchId: string | null;
   matchStatus: InvoiceMatchStatus;
-  matchedFinancialValueId: number | null;
+  matchedFinancialValueId: string | null;
   matchConfidence: number | null;
   matchedAt: string | null;
   matchedByUsername: string | null;
@@ -226,9 +226,9 @@ export interface ElectronicInvoice {
 }
 
 export interface ContractHistory {
-  id: number;
-  contractId: number;
-  modifiedById: number | null;
+  id: string;
+  contractId: string;
+  modifiedById: string | null;
   modificationDate: string;
   previousStatus: string;
   newStatus: string;
@@ -251,7 +251,7 @@ export interface ContractImportResult {
 
 // Notifications
 export interface Notification {
-  id: number;
+  id: string;
   title: string;
   message: string;
   read: boolean;
@@ -286,7 +286,7 @@ export interface AgentInsights {
 // must explicitly confirm it (POST /notifications) before anything is created.
 export interface ProposedAction {
   type: "CREATE_REMINDER";
-  contractId: number;
+  contractId: string;
   customerName: string;
   message: string;
 }
@@ -299,10 +299,10 @@ export interface AgentAnswer {
 }
 
 export interface SemanticSearchResult {
-  contractId: number;
+  contractId: string;
   contractNumber: string;
   customerName: string;
-  documentId: number;
+  documentId: string;
   fileName: string;
   score: number;
 }
@@ -310,7 +310,7 @@ export interface SemanticSearchResult {
 export type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
 
 export interface RiskScore {
-  contractId: number;
+  contractId: string;
   customerName: string;
   riskScore: number;
   level: RiskLevel;
@@ -320,8 +320,8 @@ export interface RiskScore {
 }
 
 export interface RiskFeedback {
-  id: number;
-  contractId: number;
+  id: string;
+  contractId: string;
   riskScore: number;
   riskLevel: RiskLevel;
   mlScore: number | null;
@@ -339,14 +339,14 @@ export interface RiskFeedbackRequest {
 }
 
 export interface ContractDocument {
-  id: number;
-  contractId: number;
+  id: string;
+  contractId: string;
   fileName: string;
   fileSize: number;
   contentType: string;
   uploadedAt: string;
   downloadUrl: string;
-  versionGroupId?: number;
+  versionGroupId?: string;
   versionNumber?: number;
   versionCount?: number;
 }
@@ -360,9 +360,9 @@ export interface DiffLine {
 }
 
 export interface DocumentDiff {
-  fromDocumentId: number;
+  fromDocumentId: string;
   fromFileName: string;
-  toDocumentId: number;
+  toDocumentId: string;
   toFileName: string;
   lines: DiffLine[];
 }
@@ -378,12 +378,12 @@ export interface ContractTerm {
 }
 
 export interface ContractTerms {
-  documentId: number;
+  documentId: string;
   terms: ContractTerm[];
 }
 
 export interface DocumentAnalysis {
-  documentId: number;
+  documentId: string;
   rawText: string;
   detectedCustomerName: string | null;
   detectedContractNumber: string | null;
@@ -406,13 +406,13 @@ export interface ClauseRiskAnalysis {
 
 // Contract Templates
 export interface ContractTemplate {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   defaultStatus: "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT" | null;
   defaultDurationDays: number | null;
-  businessAreaId: number | null;
-  defaultManagerId: number | null;
+  businessAreaId: string | null;
+  defaultManagerId: string | null;
   autoRenew: boolean;
   notificationDays: number | null;
   createdAt: string;
@@ -449,7 +449,7 @@ export interface ContractsTimeline {
 }
 
 export interface TopManager {
-  managerId: number;
+  managerId: string;
   managerName: string;
   contractsCount: number;
 }
@@ -464,7 +464,7 @@ export type HomeAttentionType =
 
 export interface HomeAttentionItem {
   type: HomeAttentionType;
-  contractId: number;
+  contractId: string;
   contractNumber: string;
   counterpartyName: string | null;
   projectName: string | null;
@@ -473,7 +473,7 @@ export interface HomeAttentionItem {
   daysLeft: number | null;
   managerName: string | null;
   renewalMonths: number | null;
-  invoiceId: number | null;
+  invoiceId: string | null;
   invoiceNumber: string | null;
   invoiceAmount: number | null;
 }

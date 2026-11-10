@@ -25,7 +25,7 @@ export function useSubmitRiskFeedback() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ contractId, ...payload }: RiskFeedbackRequest & { contractId: number }) => {
+    mutationFn: async ({ contractId, ...payload }: RiskFeedbackRequest & { contractId: string }) => {
       const res = await api.post<RiskFeedback>(`/risk-feedback/contracts/${contractId}`, payload);
       return res.data;
     },

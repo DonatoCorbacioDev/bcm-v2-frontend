@@ -73,7 +73,7 @@ export default function InstantiateTemplateDialog({
     !template?.businessAreaId && businessAreasQuery.isSuccess && businessAreas.length === 0;
 
   const instantiateMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: InstantiateTemplateFormData }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: InstantiateTemplateFormData }) =>
       contractTemplatesService.instantiate(id, {
         counterpartyId: payload.counterpartyId,
         contractNumber: payload.contractNumber,
@@ -164,7 +164,7 @@ export default function InstantiateTemplateDialog({
                 id="inst-counterpartyId"
                 label={<>Controparte <span className="text-destructive">*</span></>}
                 value={field.value ? String(field.value) : ""}
-                onValueChange={/* istanbul ignore next */ (v) => field.onChange(Number(v))}
+                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v)}
                 placeholder="Seleziona la controparte"
                 options={counterparties.map((cp) => ({ value: String(cp.id), label: cp.name }))}
                 error={errors.counterpartyId?.message}
@@ -253,7 +253,7 @@ export default function InstantiateTemplateDialog({
                   </>
                 }
                 value={field.value ? String(field.value) : ""}
-                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
+                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v || null)}
                 placeholder={template?.businessAreaId ? "Dal template" : "Seleziona area..."}
                 options={businessAreas.map((area) => ({ value: String(area.id), label: area.name }))}
               />
@@ -269,7 +269,7 @@ export default function InstantiateTemplateDialog({
                 id="inst-managerId"
                 label="Responsabile"
                 value={field.value ? String(field.value) : ""}
-                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
+                onValueChange={/* istanbul ignore next */ (v) => field.onChange(v || null)}
                 placeholder="Dal template"
                 options={managers.map((m) => ({ value: String(m.id), label: `${m.firstName} ${m.lastName}` }))}
               />

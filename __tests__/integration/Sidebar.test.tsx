@@ -35,12 +35,13 @@ import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
+import { uid } from "../mocks/ids";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const mockUser = (role: string) => {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector({ user: { id: 1, username: 'user', role }, isAuthenticated: true })
+    selector({ user: { id: uid(1), username: 'user', role }, isAuthenticated: true })
   );
 };
 
@@ -83,7 +84,7 @@ describe('Sidebar', () => {
   });
 
   it('keeps Contratti highlighted on a contract detail page', () => {
-    (usePathname as jest.Mock).mockReturnValue('/contracts/12');
+    (usePathname as jest.Mock).mockReturnValue(`/contracts/${uid(12)}`);
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
     expect(screen.getByRole('link', { name: 'Contratti' })).toHaveAttribute('aria-current', 'page');
   });
@@ -141,7 +142,7 @@ describe('Sidebar', () => {
 
   it('shows the organization name and a known subscription tier label', async () => {
     (api.get as jest.Mock).mockResolvedValue({
-      data: { id: 1, name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'PRO', iban: null, bic: null, createdAt: '2025-01-01' },
+      data: { id: uid(1), name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'PRO', iban: null, bic: null, createdAt: '2025-01-01' },
     });
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
 
@@ -151,7 +152,7 @@ describe('Sidebar', () => {
 
   it('falls back to the raw tier value when it has no known label', async () => {
     (api.get as jest.Mock).mockResolvedValue({
-      data: { id: 1, name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'CUSTOM_TIER', iban: null, bic: null, createdAt: '2025-01-01' },
+      data: { id: uid(1), name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'CUSTOM_TIER', iban: null, bic: null, createdAt: '2025-01-01' },
     });
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
 

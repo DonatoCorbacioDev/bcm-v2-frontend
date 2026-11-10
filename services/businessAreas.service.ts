@@ -22,12 +22,12 @@ export const businessAreasService = {
     return res.data;
   },
 
-  update: async (id: number, payload: BusinessAreaUpsertPayload): Promise<BusinessArea> => {
+  update: async (id: string, payload: BusinessAreaUpsertPayload): Promise<BusinessArea> => {
     const res = await api.put<BusinessArea>(`/business-areas/${id}`, payload);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/business-areas/${id}`);
   },
 };

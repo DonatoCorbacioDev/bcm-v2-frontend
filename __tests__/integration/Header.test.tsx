@@ -39,6 +39,7 @@ jest.mock('@/lib/api', () => ({
 import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
+import { uid } from "../mocks/ids";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -146,8 +147,8 @@ describe('Header', () => {
   });
 
   it.each([
-    ['/contracts/42', 'Dettaglio contratto'],
-    ['/counterparties/7', 'Dettaglio controparte'],
+    [`/contracts/${uid(42)}`, 'Dettaglio contratto'],
+    [`/counterparties/${uid(7)}`, 'Dettaglio controparte'],
     ['/unknown-page', 'Business Contracts Manager'],
   ])('titles %s as "%s"', (pathname, title) => {
     const { usePathname } = jest.requireMock('next/navigation');

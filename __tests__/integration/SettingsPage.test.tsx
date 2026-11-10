@@ -16,10 +16,11 @@ import { useAuthStore } from '@/store/authStore';
 import SettingsPage from '@/app/(dashboard)/settings/page';
 import { SETTINGS_SECTIONS } from '@/components/settings/settingsSections';
 import { SETTINGS_ROUTES, navGroups } from '@/components/layout/sidebarNavConfig';
+import { uid } from "../mocks/ids";
 
 const mockRole = (role: string | null) => {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector({ user: role ? { id: 1, username: 'user', role } : null })
+    selector({ user: role ? { id: uid(1), username: 'user', role } : null })
   );
 };
 

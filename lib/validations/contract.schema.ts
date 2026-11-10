@@ -14,9 +14,9 @@ import { computeNoticeDeadline } from "@/lib/statusConfig";
 export const contractSchema = z.object({
   // Counterparty (customer/supplier) ID (foreign key)
   counterpartyId: z
-    .number({ message: "La controparte è obbligatoria" })
-    .int("La controparte deve essere un numero intero")
-    .positive("La controparte deve essere un numero positivo"),
+    .string({ message: "La controparte è obbligatoria" })
+    .min(1, "La controparte è obbligatoria")
+    .uuid("La controparte è obbligatoria"),
 
   // Contract number (format: C001, C002, etc.)
   contractNumber: z
@@ -71,23 +71,22 @@ export const contractSchema = z.object({
 
   // Business area ID (foreign key)
   areaId: z
-    .number({ message: "L'area di business è obbligatoria" })
-    .int("L'area di business deve essere un numero intero")
-    .positive("L'area di business deve essere un numero positivo"),
+    .string({ message: "L'area di business è obbligatoria" })
+    .min(1, "L'area di business è obbligatoria")
+    .uuid("L'area di business è obbligatoria"),
 
   // Manager ID (foreign key)
   managerId: z
-    .number({ message: "Il responsabile è obbligatorio" })
-    .int("Il responsabile deve essere un numero intero")
-    .positive("Il responsabile deve essere un numero positivo"),
+    .string({ message: "Il responsabile è obbligatorio" })
+    .min(1, "Il responsabile è obbligatorio")
+    .uuid("Il responsabile è obbligatorio"),
 
   // Optional financial terms: when all three are set, the backend
   // auto-generates this contract's financial values instead of requiring
   // them to be entered one row at a time (see the .refine below).
   financialTypeId: z
-    .number()
-    .int("Il tipo finanziario deve essere un numero intero")
-    .positive("Il tipo finanziario deve essere un numero positivo")
+    .string()
+    .uuid()
     .nullish(),
 
   // Note: ContractForm reads this field with a custom `setValueAs` (not

@@ -15,16 +15,17 @@ import { toast } from 'sonner';
 import api from '@/lib/api';
 import DocumentsTab from '@/components/contracts/DocumentsTab';
 import { termsToContract } from '@/components/contracts/ContractTermsPanel';
+import { uid } from "../mocks/ids";
 
 const doc = {
-  id: 1, contractId: 1, fileName: 'contratto.pdf',
+  id: uid(1), contractId: uid(1), fileName: 'contratto.pdf',
   fileSize: 1500, contentType: 'application/pdf',
   uploadedAt: '2026-03-15T10:00:00Z', downloadUrl: '',
 };
 
 const sentence = 'Il contratto si rinnova tacitamente salvo disdetta con preavviso di tre mesi.';
 const terms = {
-  documentId: 1,
+  documentId: uid(1),
   terms: [
     { field: 'AUTO_RENEW', value: 'true', asWritten: 'rinnova tacitamente', sentence },
     { field: 'NOTICE_DAYS', value: '90', asWritten: '3 mesi', sentence },
@@ -51,7 +52,7 @@ beforeEach(() => jest.clearAllMocks());
 describe('DocumentsTab — renewal and dates read from the document', () => {
   it('shows each value with the sentence it comes from', async () => {
     mockApi(terms);
-    render(<DocumentsTab contractId={1} isAdmin={false} onApply={jest.fn()} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={false} onApply={jest.fn()} />, { wrapper: createWrapper() });
     await openTerms();
 
     expect(await screen.findByText('Rinnovo e scadenze nel documento')).toBeInTheDocument();
@@ -59,12 +60,12 @@ describe('DocumentsTab — renewal and dates read from the document', () => {
     expect(screen.getByText('12 mesi')).toBeInTheDocument();
     expect(screen.getByText('31 gennaio 2027')).toBeInTheDocument();
     expect(screen.getAllByText(`“${sentence}”`)).toHaveLength(4);
-    expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/1/terms');
+    expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(1)}/terms`);
   });
 
   it('lets a manager read the values but not apply them', async () => {
     mockApi(terms);
-    render(<DocumentsTab contractId={1} isAdmin={false} onApply={jest.fn()} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={false} onApply={jest.fn()} />, { wrapper: createWrapper() });
     await openTerms();
 
     expect(await screen.findByText(/solo un amministratore/i)).toBeInTheDocument();
@@ -74,7 +75,7 @@ describe('DocumentsTab — renewal and dates read from the document', () => {
   it('lets an admin open the edit form pre-filled with the values', async () => {
     mockApi(terms);
     const onApply = jest.fn();
-    render(<DocumentsTab contractId={1} isAdmin onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin onApply={onApply} />, { wrapper: createWrapper() });
     await openTerms();
     await userEvent.click(await screen.findByRole('button', { name: 'Usa questi valori' }));
 
@@ -82,8 +83,8 @@ describe('DocumentsTab — renewal and dates read from the document', () => {
   });
 
   it('says so when the text states nothing clear', async () => {
-    mockApi({ documentId: 1, terms: [] });
-    render(<DocumentsTab contractId={1} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
+    mockApi({ documentId: uid(1), terms: [] });
+    render(<DocumentsTab contractId={uid(1)} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
     await openTerms();
 
     expect(await screen.findByText(/meglio nessun valore che uno sbagliato/i)).toBeInTheDocument();
@@ -92,7 +93,7 @@ describe('DocumentsTab — renewal and dates read from the document', () => {
 
   it('collapses and reopens without asking the server again', async () => {
     mockApi(terms);
-    render(<DocumentsTab contractId={1} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
     await openTerms();
     expect(await screen.findByText('Rinnovo e scadenze nel documento')).toBeInTheDocument();
 
@@ -105,7 +106,7 @@ describe('DocumentsTab — renewal and dates read from the document', () => {
 
   it('shows an error toast when reading fails', async () => {
     mockApi(new Error('boom'));
-    render(<DocumentsTab contractId={1} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
     await openTerms();
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Lettura del documento non riuscita'));
@@ -124,10 +125,10 @@ describe('termsToContract', () => {
 
 describe('DocumentsTab — while the terms are being read', () => {
   it('spins only on the document being read', async () => {
-    const other = { ...doc, id: 2, fileName: 'allegato.pdf' };
+    const other = { ...doc, id: uid(2), fileName: 'allegato.pdf' };
     (api.get as jest.Mock).mockImplementation((url: string) =>
       url.endsWith('/terms') ? new Promise(() => {}) : Promise.resolve({ data: [doc, other] }));
-    render(<DocumentsTab contractId={1} isAdmin={false} onApply={jest.fn()} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={false} onApply={jest.fn()} />, { wrapper: createWrapper() });
 
     const buttons = await screen.findAllByRole('button', { name: 'Leggi rinnovo e scadenze dal documento' });
     await userEvent.click(buttons[0]);

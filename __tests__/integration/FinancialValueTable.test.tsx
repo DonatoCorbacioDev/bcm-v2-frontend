@@ -17,7 +17,7 @@ jest.mock('@/hooks/useFinancialValues', () => ({
 
 jest.mock('@/hooks/useContractsPaged', () => ({
   useContractsPaged: jest.fn(() => ({
-    data: { content: [{ id: 1, contractNumber: 'CNT-001' }, { id: 2, contractNumber: 'CNT-002' }] },
+    data: { content: [{ id: '00000000-0000-4000-8000-000000000001', contractNumber: 'CNT-001' }, { id: '00000000-0000-4000-8000-000000000002', contractNumber: 'CNT-002' }] },
   })),
 }));
 
@@ -51,17 +51,18 @@ import { toast } from 'sonner';
 import { useFinancialValues } from '@/hooks/useFinancialValues';
 import { financialValuesService } from '@/services/financialValues.service';
 import FinancialValueTable from '@/components/financial-values/FinancialValueTable';
+import { uid } from "../mocks/ids";
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
 const value1: FinancialValue = {
-  id: 1,
+  id: uid(1),
   month: 1,
   year: 2024,
   financialAmount: 10000,
-  financialTypeId: 1,
-  businessAreaId: 1,
-  contractId: 1,
+  financialTypeId: uid(1),
+  businessAreaId: uid(1),
+  contractId: uid(1),
   typeName: 'Revenue',
   areaName: 'Engineering',
   customerName: 'Acme Corp',
@@ -69,13 +70,13 @@ const value1: FinancialValue = {
 };
 
 const value2: FinancialValue = {
-  id: 2,
+  id: uid(2),
   month: 6,
   year: 2024,
   financialAmount: 5000,
-  financialTypeId: 2,
-  businessAreaId: 2,
-  contractId: 2,
+  financialTypeId: uid(2),
+  businessAreaId: uid(2),
+  contractId: uid(2),
   typeName: 'Expense',
   areaName: 'Sales',
   customerName: 'Beta Inc',
@@ -154,7 +155,7 @@ describe('FinancialValueTable', () => {
 
   it('lists the area of each month only when one contract spans several areas', async () => {
     (useFinancialValues as jest.Mock).mockReturnValue({
-      data: [value1, { ...value1, id: 3, month: 2, businessAreaId: 9, areaName: 'Marketing' }],
+      data: [value1, { ...value1, id: uid(3), month: 2, businessAreaId: uid(9), areaName: 'Marketing' }],
       isLoading: false,
       isError: false,
     });
@@ -169,8 +170,8 @@ describe('FinancialValueTable', () => {
     (useFinancialValues as jest.Mock).mockReturnValue({
       data: [
         value1,
-        { ...value1, id: 3, month: 2, financialAmount: 12000 },
-        { ...value1, id: 4, contractId: 5, customerName: 'Small Srl', financialAmount: 100 },
+        { ...value1, id: uid(3), month: 2, financialAmount: 12000 },
+        { ...value1, id: uid(4), contractId: uid(5), customerName: 'Small Srl', financialAmount: 100 },
       ],
       isLoading: false,
       isError: false,
@@ -280,7 +281,7 @@ describe('FinancialValueTable', () => {
   // ── Area prop ─────────────────────────────────────────────────────────────
 
   it('restricts rows and the count to the given business area', () => {
-    render(<FinancialValueTable onEditClick={onEditClick} areaId={1} />, { wrapper: createWrapper() });
+    render(<FinancialValueTable onEditClick={onEditClick} areaId={uid(1)} />, { wrapper: createWrapper() });
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
     expect(screen.queryByText('Beta Inc')).not.toBeInTheDocument();
     expect(screen.getByText(/1 \/ 1 valori/i)).toBeInTheDocument();
@@ -299,7 +300,7 @@ describe('FinancialValueTable', () => {
     await expand('Acme Corp');
     await userEvent.click(screen.getByRole('button', { name: /modifica/i }));
     expect(onEditClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, year: 2024, month: 1 })
+      expect.objectContaining({ id: uid(1), year: 2024, month: 1 })
     );
   });
 

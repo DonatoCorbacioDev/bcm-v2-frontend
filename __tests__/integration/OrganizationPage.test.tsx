@@ -46,16 +46,17 @@ import { redirectToExternal } from '@/lib/externalRedirect';
 import { downloadBlob } from '@/lib/download';
 import { AxiosError, AxiosHeaders } from 'axios';
 import OrganizationPage from '@/app/(dashboard)/organization/page';
+import { uid } from "../mocks/ids";
 
 const mockAuthAs = (role: string | null) => {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
-    const state = { user: role ? { id: 1, username: 'user', role } : null };
+    const state = { user: role ? { id: uid(1), username: 'user', role } : null };
     return selector ? selector(state) : state;
   });
 };
 
 const organization = {
-  id: 1, name: 'Acme', slug: 'acme', subscriptionTier: 'FREE',
+  id: uid(1), name: 'Acme', slug: 'acme', subscriptionTier: 'FREE',
   iban: null, bic: null, createdAt: '2024-01-01', billingPortalAvailable: false,
 };
 

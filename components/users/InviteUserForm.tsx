@@ -31,7 +31,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
   const [form, setForm] = useState<InviteUserPayload>({
     username: "",
     role: "",
-    managerId: 0,
+    managerId: "",
   });
 
   const mutation = useMutation({
@@ -92,7 +92,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
         <select
           id="invite-manager"
           value={form.managerId || ""}
-          onChange={(e) => setForm({ ...form, managerId: Number(e.target.value) })}
+          onChange={(e) => setForm({ ...form, managerId: e.target.value })}
           className="w-full px-3 py-2 border border-input rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           required
         >

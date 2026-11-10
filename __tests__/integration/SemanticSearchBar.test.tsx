@@ -15,9 +15,10 @@ jest.mock('@/lib/api', () => ({
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { SemanticSearchBar } from '@/components/contracts/SemanticSearchBar';
+import { uid } from "../mocks/ids";
 
 const mockResults = [
-  { contractId: 1, contractNumber: 'CNT-2024-001', customerName: 'Acme Corp', documentId: 10, fileName: 'msa.pdf', score: 0.87 },
+  { contractId: uid(1), contractNumber: 'CNT-2024-001', customerName: 'Acme Corp', documentId: uid(10), fileName: 'msa.pdf', score: 0.87 },
 ];
 
 const mockPush = jest.fn();
@@ -79,6 +80,6 @@ describe('SemanticSearchBar', () => {
     const resultButton = await screen.findByText(/CNT-2024-001/);
     await user.click(resultButton);
 
-    expect(mockPush).toHaveBeenCalledWith('/contracts/1');
+    expect(mockPush).toHaveBeenCalledWith(`/contracts/${uid(1)}`);
   });
 });

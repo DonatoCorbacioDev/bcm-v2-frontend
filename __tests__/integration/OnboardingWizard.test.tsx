@@ -29,7 +29,7 @@ jest.mock('@/hooks/useUpsertCounterparty', () => ({
 }));
 
 // The managers already in the organization (registration makes the admin one).
-let mockManagers: Array<{ id: number; firstName: string; lastName: string; email: string }> = [];
+let mockManagers: Array<{ id: string; firstName: string; lastName: string; email: string }> = [];
 jest.mock('@/hooks/useManagers', () => ({
   useManagers: () => ({ data: mockManagers }),
 }));
@@ -40,10 +40,11 @@ jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }))
 
 import { useAuthStore } from '@/store/authStore';
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
+import { uid } from "../mocks/ids";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function mockUser(id: number) {
+function mockUser(id: string) {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
     selector({ user: { id, role: 'ADMIN', username: 'admin@test.com' } })
   );
@@ -55,7 +56,7 @@ describe('OnboardingWizard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    mockUser(1);
+    mockUser(uid(1));
     mockManagers = [];
   });
 
@@ -83,7 +84,7 @@ describe('OnboardingWizard', () => {
   });
 
   it('submits the Business Area form and advances to the Manager step', async () => {
-    mockBaMutateAsync.mockResolvedValue({ id: 1, name: 'IT', description: 'Tech dept' });
+    mockBaMutateAsync.mockResolvedValue({ id: uid(1), name: 'IT', description: 'Tech dept' });
     render(<OnboardingWizard />);
 
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
@@ -118,8 +119,8 @@ describe('OnboardingWizard', () => {
   });
 
   it('submits the Manager form and advances to the Done step', async () => {
-    mockBaMutateAsync.mockResolvedValue({ id: 1, name: 'IT', description: 'Desc' });
-    mockMgrMutateAsync.mockResolvedValue({ id: 1 });
+    mockBaMutateAsync.mockResolvedValue({ id: uid(1), name: 'IT', description: 'Desc' });
+    mockMgrMutateAsync.mockResolvedValue({ id: uid(1) });
     render(<OnboardingWizard />);
 
     // Step 1 → 2
@@ -181,7 +182,7 @@ describe('OnboardingWizard', () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /salta configurazione/i }));
 
-    expect(localStorage.getItem('bcm-setup-skip-1')).toBe('1');
+    expect(localStorage.getItem(`bcm-setup-skip-${uid(1)}`)).toBe('1');
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
   });
 
@@ -190,7 +191,7 @@ describe('OnboardingWizard', () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /salta configurazione/i }));
 
-    expect(localStorage.getItem('bcm-setup-skip-1')).toBeNull();
+    expect(localStorage.getItem(`bcm-setup-skip-${uid(1)}`)).toBeNull();
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
   });
 
@@ -216,7 +217,7 @@ describe('OnboardingWizard', () => {
   });
 
   it('shows the admin who already follows the contracts and lets them continue without adding anyone', async () => {
-    mockManagers = [{ id: 1, firstName: 'Lucia', lastName: 'Verdi', email: 'lucia@acme.it' }];
+    mockManagers = [{ id: uid(1), firstName: 'Lucia', lastName: 'Verdi', email: 'lucia@acme.it' }];
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
@@ -231,7 +232,7 @@ describe('OnboardingWizard', () => {
   });
 
   it('opens the manager form on request when one already exists', async () => {
-    mockManagers = [{ id: 1, firstName: 'Lucia', lastName: 'Verdi', email: 'lucia@acme.it' }];
+    mockManagers = [{ id: uid(1), firstName: 'Lucia', lastName: 'Verdi', email: 'lucia@acme.it' }];
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
@@ -241,7 +242,7 @@ describe('OnboardingWizard', () => {
   });
 
   it('creates the first counterparty with name and type, then reaches the done step', async () => {
-    mockCpMutateAsync.mockResolvedValue({ id: 5 });
+    mockCpMutateAsync.mockResolvedValue({ id: uid(5) });
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
@@ -290,7 +291,7 @@ describe('OnboardingWizard — what is typed in optional fields is still checked
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
-    mockUser(1);
+    mockUser(uid(1));
     mockManagers = [];
   });
 

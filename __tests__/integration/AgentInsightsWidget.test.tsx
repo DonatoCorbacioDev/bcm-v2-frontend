@@ -10,6 +10,7 @@ jest.mock('@/lib/api', () => ({
 
 import { api } from '@/lib/api';
 import { AgentInsightsWidget } from '@/components/dashboard/AgentInsightsWidget';
+import { uid } from "../mocks/ids";
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -151,7 +152,7 @@ describe('AgentInsightsWidget', () => {
               data: {
                 answer: 'Ho preparato un promemoria, confermi?',
                 error: null,
-                proposedAction: { type: 'CREATE_REMINDER', contractId: 1, customerName: 'Acme', message: 'Rinnovo in scadenza' },
+                proposedAction: { type: 'CREATE_REMINDER', contractId: uid(1), customerName: 'Acme', message: 'Rinnovo in scadenza' },
               },
             });
           }
@@ -177,7 +178,7 @@ describe('AgentInsightsWidget', () => {
               data: {
                 answer: 'Confermi?',
                 error: null,
-                proposedAction: { type: 'CREATE_REMINDER', contractId: 1, customerName: 'Acme', message: 'hi' },
+                proposedAction: { type: 'CREATE_REMINDER', contractId: uid(1), customerName: 'Acme', message: 'hi' },
               },
             });
           }
@@ -203,7 +204,7 @@ describe('AgentInsightsWidget', () => {
         await userEvent.click(await screen.findByRole('button', { name: 'Conferma promemoria' }));
 
         await waitFor(() =>
-          expect(api.post).toHaveBeenCalledWith('/notifications', { contractId: 1, message: 'Rinnovo in scadenza' })
+          expect(api.post).toHaveBeenCalledWith('/notifications', { contractId: uid(1), message: 'Rinnovo in scadenza' })
         );
         expect(await screen.findByText('Promemoria creato.')).toBeInTheDocument();
       });
@@ -215,7 +216,7 @@ describe('AgentInsightsWidget', () => {
               data: {
                 answer: 'Confermi?',
                 error: null,
-                proposedAction: { type: 'CREATE_REMINDER', contractId: 1, customerName: 'Acme', message: 'hi' },
+                proposedAction: { type: 'CREATE_REMINDER', contractId: uid(1), customerName: 'Acme', message: 'hi' },
               },
             });
           }

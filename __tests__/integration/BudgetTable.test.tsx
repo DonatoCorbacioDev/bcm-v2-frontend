@@ -44,15 +44,16 @@ import { toast } from 'sonner';
 import { useBudgets } from '@/hooks/useBudgets';
 import { budgetsService } from '@/services/budgets.service';
 import BudgetTable from '@/components/budgets/BudgetTable';
+import { uid } from "../mocks/ids";
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
 const budget1: Budget = {
-  id: 1, businessAreaId: 1, areaName: 'IT', category: 'COST',
+  id: uid(1), businessAreaId: uid(1), areaName: 'IT', category: 'COST',
   year: 2025, targetAmount: 10000, actualAmount: 4000, percentUsed: 40,
 };
 const budget2: Budget = {
-  id: 2, businessAreaId: 2, areaName: 'Sales', category: 'REVENUE',
+  id: uid(2), businessAreaId: uid(2), areaName: 'Sales', category: 'REVENUE',
   year: 2025, targetAmount: 20000, actualAmount: 22000, percentUsed: 110,
 };
 
@@ -132,7 +133,7 @@ describe('BudgetTable', () => {
     jest.useFakeTimers({ now: new Date(2026, 6, 2), doNotFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate', 'clearImmediate', 'queueMicrotask', 'nextTick'] });
     try {
       const aheadOfPace: Budget = {
-        id: 3, businessAreaId: 3, areaName: 'Marketing', category: 'COST',
+        id: uid(3), businessAreaId: uid(3), areaName: 'Marketing', category: 'COST',
         year: 2026, targetAmount: 10000, actualAmount: 8500, percentUsed: 85,
       };
       (useBudgets as jest.Mock).mockReturnValue({ data: [aheadOfPace], isLoading: false, isError: false });
@@ -147,7 +148,7 @@ describe('BudgetTable', () => {
 
   it("uses the green tone for a closed year's cost budget within its target", () => {
     const closedYear: Budget = {
-      id: 3, businessAreaId: 3, areaName: 'Marketing', category: 'COST',
+      id: uid(3), businessAreaId: uid(3), areaName: 'Marketing', category: 'COST',
       year: 2025, targetAmount: 10000, actualAmount: 8500, percentUsed: 85,
     };
     (useBudgets as jest.Mock).mockReturnValue({ data: [closedYear], isLoading: false, isError: false });
@@ -158,7 +159,7 @@ describe('BudgetTable', () => {
 
   it('uses the green tone for a revenue budget that exceeds 100% (target beaten is good news)', () => {
     const beatsTarget: Budget = {
-      id: 4, businessAreaId: 4, areaName: 'Sales', category: 'REVENUE',
+      id: uid(4), businessAreaId: uid(4), areaName: 'Sales', category: 'REVENUE',
       year: 2025, targetAmount: 10000, actualAmount: 12700, percentUsed: 127,
     };
     (useBudgets as jest.Mock).mockReturnValue({ data: [beatsTarget], isLoading: false, isError: false });
@@ -169,7 +170,7 @@ describe('BudgetTable', () => {
 
   it('uses the red tone for a cost budget that exceeds 100% (over budget is bad news)', () => {
     const overBudget: Budget = {
-      id: 5, businessAreaId: 5, areaName: 'Ops', category: 'COST',
+      id: uid(5), businessAreaId: uid(5), areaName: 'Ops', category: 'COST',
       year: 2025, targetAmount: 10000, actualAmount: 12700, percentUsed: 127,
     };
     (useBudgets as jest.Mock).mockReturnValue({ data: [overBudget], isLoading: false, isError: false });
@@ -184,7 +185,7 @@ describe('BudgetTable', () => {
     render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
     await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
-    expect(onEditClick).toHaveBeenCalledWith(expect.objectContaining({ id: 1, areaName: 'IT' }));
+    expect(onEditClick).toHaveBeenCalledWith(expect.objectContaining({ id: uid(1), areaName: 'IT' }));
   });
 
   it('opens delete confirmation dialog when Delete is clicked', async () => {

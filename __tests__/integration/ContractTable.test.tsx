@@ -59,10 +59,11 @@ import { useRouter } from 'next/navigation';
 import { useContractsPaged } from '@/hooks/useContractsPaged';
 import { contractsService } from '@/services/contracts.service';
 import { useAuthStore } from '@/store/authStore';
+import { uid } from "../mocks/ids";
 
 const mockAuthAs = (role: string) => {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
-    const state = { user: { id: 1, username: 'user', role }, isAuthenticated: true };
+    const state = { user: { id: uid(1), username: 'user', role }, isAuthenticated: true };
     return selector ? selector(state) : state;
   });
 };
@@ -80,14 +81,14 @@ const makePageResponse = (contracts: Contract[], totalPages = 1) => ({
 });
 
 const activeContract: Contract = {
-  id: 1,
+  id: uid(1),
   contractNumber: 'CNT-001',
-  counterpartyId: 1,
-  counterparty: { id: 1, name: 'Acme Corp', type: 'CUSTOMER' },
+  counterpartyId: uid(1),
+  counterparty: { id: uid(1), name: 'Acme Corp', type: 'CUSTOMER' },
   projectName: 'Digital Transform',
   wbsCode: 'WBS-001',
-  areaId: 1,
-  managerId: 1,
+  areaId: uid(1),
+  managerId: uid(1),
   managerName: 'John Doe',
   startDate: '2024-01-01',
   endDate: '2024-12-31',
@@ -97,10 +98,10 @@ const activeContract: Contract = {
 
 const expiredContract: Contract = {
   ...activeContract,
-  id: 2,
+  id: uid(2),
   contractNumber: 'CNT-002',
-  counterpartyId: 2,
-  counterparty: { id: 2, name: 'Beta Ltd', type: 'CUSTOMER' },
+  counterpartyId: uid(2),
+  counterparty: { id: uid(2), name: 'Beta Ltd', type: 'CUSTOMER' },
   status: 'EXPIRED',
 };
 
@@ -234,7 +235,7 @@ describe('ContractTable', () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: makePageResponse([
         { ...activeContract, daysUntilExpiry: 12 },
-        { ...activeContract, id: 3, contractNumber: 'CNT-003', daysUntilExpiry: 90 },
+        { ...activeContract, id: uid(3), contractNumber: 'CNT-003', daysUntilExpiry: 90 },
         expiredContract,
       ]),
       isLoading: false,
@@ -254,7 +255,7 @@ describe('ContractTable', () => {
   it('shows fallback text for a contract without an assigned manager', () => {
     const unassignedContract: Contract = {
       ...activeContract,
-      id: 3,
+      id: uid(3),
       contractNumber: 'CNT-003',
       managerName: '',
     };
@@ -271,9 +272,9 @@ describe('ContractTable', () => {
   it('shows the date to act on: the last day to give notice for a tacit renewal, otherwise the end date', () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: makePageResponse([
-        { ...activeContract, id: 4, contractNumber: 'CNT-TACIT', endDate: '2026-12-31', autoRenew: true,
+        { ...activeContract, id: uid(4), contractNumber: 'CNT-TACIT', endDate: '2026-12-31', autoRenew: true,
           noticeDays: 90, renewalMonths: 12, noticeDeadline: '2026-10-02' },
-        { ...activeContract, id: 5, contractNumber: 'CNT-PLAIN', endDate: '2026-12-31' },
+        { ...activeContract, id: uid(5), contractNumber: 'CNT-PLAIN', endDate: '2026-12-31' },
       ]),
       isLoading: false,
       isError: false,
@@ -292,7 +293,7 @@ describe('ContractTable', () => {
   it('once the notice deadline has passed, shows the renewal date instead of a deadline already gone', () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: makePageResponse([
-        { ...activeContract, id: 6, contractNumber: 'CNT-LATE', endDate: '2026-12-31', autoRenew: true,
+        { ...activeContract, id: uid(6), contractNumber: 'CNT-LATE', endDate: '2026-12-31', autoRenew: true,
           noticeDays: 60, renewalMonths: 12, noticeDeadline: '2026-11-01', daysUntilNoticeDeadline: -4 },
       ]),
       isLoading: false,
@@ -314,7 +315,7 @@ describe('ContractTable', () => {
     try {
       (useContractsPaged as jest.Mock).mockReturnValue({
         data: makePageResponse([
-          { ...activeContract, id: 4, contractNumber: 'CNT-TACIT', projectName: 'Manutenzione', endDate: '2026-12-31',
+          { ...activeContract, id: uid(4), contractNumber: 'CNT-TACIT', projectName: 'Manutenzione', endDate: '2026-12-31',
             autoRenew: true, noticeDays: 90, renewalMonths: 12, noticeDeadline: '2026-10-02' },
         ]),
         isLoading: false,
@@ -328,7 +329,7 @@ describe('ContractTable', () => {
       expect(card).toHaveTextContent(/Prossima scadenza: 0?2\/10\/2026/);
       expect(card).toHaveTextContent('ultimo giorno per disdire');
       await userEvent.click(card);
-      expect(mockPush).toHaveBeenCalledWith('/contracts/4');
+      expect(mockPush).toHaveBeenCalledWith(`/contracts/${uid(4)}`);
     } finally {
       window.matchMedia = original;
     }
@@ -342,8 +343,8 @@ describe('ContractTable', () => {
     try {
       (useContractsPaged as jest.Mock).mockReturnValue({
         data: makePageResponse([
-          { ...activeContract, id: 5, contractNumber: 'CNT-WITH' },
-          { ...activeContract, id: 6, contractNumber: 'CNT-BARE', counterparty: undefined,
+          { ...activeContract, id: uid(5), contractNumber: 'CNT-WITH' },
+          { ...activeContract, id: uid(6), contractNumber: 'CNT-BARE', counterparty: undefined,
             endDate: null as unknown as string, status: 'ARCHIVED' as Contract['status'] },
         ]),
         isLoading: false,
@@ -364,9 +365,9 @@ describe('ContractTable', () => {
   it('sorts a contract without any date last when sorting by next deadline', async () => {
     (useContractsPaged as jest.Mock).mockReturnValue({
       data: makePageResponse([
-        { ...activeContract, id: 7, contractNumber: 'CNT-NODATE', endDate: null as unknown as string },
-        { ...activeContract, id: 8, contractNumber: 'CNT-DATED', endDate: '2026-06-30' },
-        { ...activeContract, id: 9, contractNumber: 'CNT-LATE', endDate: '2026-12-31', autoRenew: true,
+        { ...activeContract, id: uid(7), contractNumber: 'CNT-NODATE', endDate: null as unknown as string },
+        { ...activeContract, id: uid(8), contractNumber: 'CNT-DATED', endDate: '2026-06-30' },
+        { ...activeContract, id: uid(9), contractNumber: 'CNT-LATE', endDate: '2026-12-31', autoRenew: true,
           noticeDays: 30, noticeDeadline: '2026-01-01', daysUntilNoticeDeadline: -100 },
       ]),
       isLoading: false,
@@ -383,7 +384,7 @@ describe('ContractTable', () => {
   it('shows fallback text and sorts correctly for a contract with no counterparty', async () => {
     const noCounterpartyContract: Contract = {
       ...activeContract,
-      id: 3,
+      id: uid(3),
       contractNumber: 'CNT-003',
       counterparty: undefined,
     };
@@ -439,7 +440,7 @@ describe('ContractTable', () => {
     const viewButton = within(rows[1]).getByRole('button', { name: /visualizza/i });
     await userEvent.click(viewButton);
 
-    expect(mockPush).toHaveBeenCalledWith('/contracts/1');
+    expect(mockPush).toHaveBeenCalledWith(`/contracts/${uid(1)}`);
   });
 
   it('calls onEditClick with the correct contract when Edit is clicked', async () => {
@@ -451,7 +452,7 @@ describe('ContractTable', () => {
 
     expect(onEditClick).toHaveBeenCalledTimes(1);
     expect(onEditClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, contractNumber: 'CNT-001' })
+      expect.objectContaining({ id: uid(1), contractNumber: 'CNT-001' })
     );
   });
 
@@ -827,8 +828,8 @@ describe('ContractTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(contractsService.delete).toHaveBeenCalledWith(1);
-      expect(contractsService.delete).toHaveBeenCalledWith(2);
+      expect(contractsService.delete).toHaveBeenCalledWith(uid(1));
+      expect(contractsService.delete).toHaveBeenCalledWith(uid(2));
       expect(toast.success).toHaveBeenCalledWith('2 contratti eliminati');
     });
   });
@@ -949,7 +950,7 @@ describe('ContractTable', () => {
     });
     expect(screen.getByText('La mia vista')).toBeInTheDocument();
 
-    const stored = JSON.parse(localStorage.getItem('bcm-contract-views-1') ?? '[]');
+    const stored = JSON.parse(localStorage.getItem(`bcm-contract-views-${uid(1)}`) ?? '[]');
     expect(stored).toEqual([
       expect.objectContaining({ name: 'La mia vista', statusFilter: 'ALL' }),
     ]);
@@ -978,12 +979,12 @@ describe('ContractTable', () => {
     await userEvent.click(screen.getByRole('button', { name: /elimina vista corrente/i }));
 
     expect(screen.queryByText('Temporanea')).not.toBeInTheDocument();
-    expect(JSON.parse(localStorage.getItem('bcm-contract-views-1') ?? '[]')).toEqual([]);
+    expect(JSON.parse(localStorage.getItem(`bcm-contract-views-${uid(1)}`) ?? '[]')).toEqual([]);
   });
 
   it('loads previously saved views for the current user on mount (without dropping them on a new save)', async () => {
     localStorage.setItem(
-      'bcm-contract-views-1',
+      `bcm-contract-views-${uid(1)}`,
       JSON.stringify([{ name: 'Esistente', searchQuery: '', statusFilter: 'ACTIVE', pageSize: 10, sortKey: null, sortDirection: 'asc' }])
     );
 
@@ -994,13 +995,13 @@ describe('ContractTable', () => {
     await userEvent.type(within(dialog).getByLabelText(/nome vista/i), 'Nuova');
     await userEvent.click(within(dialog).getByRole('button', { name: /^salva$/i }));
 
-    const stored = JSON.parse(localStorage.getItem('bcm-contract-views-1') ?? '[]');
+    const stored = JSON.parse(localStorage.getItem(`bcm-contract-views-${uid(1)}`) ?? '[]');
     expect(stored.map((v: { name: string }) => v.name)).toEqual(['Esistente', 'Nuova']);
   });
 
   it('does not load saved views belonging to a different user', () => {
     localStorage.setItem(
-      'bcm-contract-views-2',
+      `bcm-contract-views-${uid(2)}`,
       JSON.stringify([{ name: 'Di un altro utente', searchQuery: '', statusFilter: 'ALL', pageSize: 10, sortKey: null, sortDirection: 'asc' }])
     );
 
@@ -1010,7 +1011,7 @@ describe('ContractTable', () => {
   });
 
   it('shows a corrupt saved-views entry as an empty list instead of crashing', () => {
-    localStorage.setItem('bcm-contract-views-1', '{not valid json');
+    localStorage.setItem(`bcm-contract-views-${uid(1)}`, '{not valid json');
 
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
@@ -1029,6 +1030,6 @@ describe('ContractTable', () => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
     expect(screen.queryByText('Mai salvata')).not.toBeInTheDocument();
-    expect(localStorage.getItem('bcm-contract-views-1')).toBeNull();
+    expect(localStorage.getItem(`bcm-contract-views-${uid(1)}`)).toBeNull();
   });
 });

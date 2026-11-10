@@ -8,7 +8,7 @@ import { counterpartiesService, type CounterpartyUpsertPayload } from "@/service
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
 
 type UpsertCounterpartyParams = {
-  id?: number;
+  id?: string;
   payload: CounterpartyUpsertPayload;
 };
 

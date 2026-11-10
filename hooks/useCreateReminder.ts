@@ -10,7 +10,7 @@ export function useCreateReminder() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ contractId, message }: { contractId: number; message: string }) => {
+    mutationFn: async ({ contractId, message }: { contractId: string; message: string }) => {
       await api.post("/notifications", { contractId, message });
     },
     onSuccess: () => {

@@ -33,12 +33,12 @@ export const counterpartiesService = {
     return res.data;
   },
 
-  getById: async (id: number): Promise<Counterparty> => {
+  getById: async (id: string): Promise<Counterparty> => {
     const res = await api.get<Counterparty>(`/counterparties/${id}`);
     return res.data;
   },
 
-  getInvoicingSummary: async (id: number): Promise<CounterpartyInvoicingSummary> => {
+  getInvoicingSummary: async (id: string): Promise<CounterpartyInvoicingSummary> => {
     const res = await api.get<CounterpartyInvoicingSummary>(`/counterparties/${id}/invoicing-summary`);
     return res.data;
   },
@@ -48,16 +48,16 @@ export const counterpartiesService = {
     return res.data;
   },
 
-  update: async (id: number, payload: CounterpartyUpsertPayload): Promise<Counterparty> => {
+  update: async (id: string, payload: CounterpartyUpsertPayload): Promise<Counterparty> => {
     const res = await api.put<Counterparty>(`/counterparties/${id}`, payload);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/counterparties/${id}`);
   },
 
-  confirmVerifiedIban: async (id: number, payload: VerifyIbanPayload): Promise<Counterparty> => {
+  confirmVerifiedIban: async (id: string, payload: VerifyIbanPayload): Promise<Counterparty> => {
     const res = await api.patch<Counterparty>(`/counterparties/${id}/verified-iban`, payload);
     return res.data;
   },

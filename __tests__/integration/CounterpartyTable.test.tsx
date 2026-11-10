@@ -49,10 +49,11 @@ import { useCounterparties } from '@/hooks/useCounterparties';
 import { counterpartiesService } from '@/services/counterparties.service';
 import { useAuthStore } from '@/store/authStore';
 import CounterpartyTable from '@/components/counterparties/CounterpartyTable';
+import { uid } from "../mocks/ids";
 
 const mockAuthAs = (role: string) => {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) => {
-    const state = { user: { id: 1, username: 'user', role }, isAuthenticated: true };
+    const state = { user: { id: uid(1), username: 'user', role }, isAuthenticated: true };
     return selector ? selector(state) : state;
   });
 };
@@ -60,14 +61,14 @@ const mockAuthAs = (role: string) => {
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
 const alfa: Counterparty = {
-  id: 1,
+  id: uid(1),
   name: 'Alfa Srl',
   type: 'CUSTOMER',
   vatNumber: 'IT01234567890',
 };
 
 const beta: Counterparty = {
-  id: 2,
+  id: uid(2),
   name: 'Beta Srl',
   type: 'SUPPLIER',
 };
@@ -94,7 +95,7 @@ describe('CounterpartyTable', () => {
       data: [
         { ...beta, city: 'Torino', province: 'TO' },
         { ...alfa, city: 'Lugano' },
-        { id: 3, name: 'Gamma Srl', type: 'SUPPLIER' },
+        { id: uid(3), name: 'Gamma Srl', type: 'SUPPLIER' },
       ],
       isLoading: false,
       isError: false,
@@ -112,7 +113,7 @@ describe('CounterpartyTable', () => {
       data: [
         { ...beta, verifiedIban: 'IT...6789' },
         { ...alfa, verifiedIban: 'IT...1111' },
-        { id: 3, name: 'Gamma Srl', type: 'SUPPLIER' },
+        { id: uid(3), name: 'Gamma Srl', type: 'SUPPLIER' },
       ],
       isLoading: false,
       isError: false,
@@ -174,8 +175,8 @@ describe('CounterpartyTable', () => {
   it('links the counterparty name to its detail page', () => {
     render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByRole('link', { name: 'Alfa Srl' })).toHaveAttribute('href', '/counterparties/1');
-    expect(screen.getByRole('link', { name: 'Beta Srl' })).toHaveAttribute('href', '/counterparties/2');
+    expect(screen.getByRole('link', { name: 'Alfa Srl' })).toHaveAttribute('href', `/counterparties/${uid(1)}`);
+    expect(screen.getByRole('link', { name: 'Beta Srl' })).toHaveAttribute('href', `/counterparties/${uid(2)}`);
   });
 
   it('shows the counterparty count', () => {
@@ -218,7 +219,7 @@ describe('CounterpartyTable', () => {
     await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
 
     expect(onEditClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, name: 'Alfa Srl' })
+      expect.objectContaining({ id: uid(1), name: 'Alfa Srl' })
     );
   });
 

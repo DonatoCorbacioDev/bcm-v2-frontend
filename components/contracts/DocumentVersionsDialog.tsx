@@ -20,8 +20,8 @@ import api from "@/lib/api";
 import type { ContractDocument, DocumentDiff } from "@/types";
 
 interface DocumentVersionsDialogProps {
-  readonly contractId: number;
-  readonly documentId: number | null;
+  readonly contractId: string;
+  readonly documentId: string | null;
   readonly fileName: string;
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
@@ -37,7 +37,7 @@ function formatDate(value: string) {
 export default function DocumentVersionsDialog({
   contractId, documentId, fileName, open, onOpenChange, onDownload,
 }: DocumentVersionsDialogProps) {
-  const [selected, setSelected] = useState<number[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
 
   const { data: versions, isLoading } = useQuery<ContractDocument[]>({
     queryKey: ["document-versions", contractId, documentId],
@@ -69,7 +69,7 @@ export default function DocumentVersionsDialog({
     enabled: !!comparePair,
   });
 
-  const toggleSelected = (id: number) => {
+  const toggleSelected = (id: string) => {
     setSelected((prev) => {
       if (prev.includes(id)) return prev.filter((v) => v !== id);
       if (prev.length < 2) return [...prev, id];

@@ -1,10 +1,11 @@
 import { userCreateSchema, userUpdateSchema } from "@/lib/validations/user.schema";
+import { uid } from "../mocks/ids";
 
 const validCreateData = {
   username: "john_doe",
   password: "securePass1",
-  managerId: 1,
-  roleId: 2,
+  managerId: uid(1),
+  roleId: uid(2),
   verified: false,
   canApproveContracts: false,
 };
@@ -45,9 +46,9 @@ describe("userCreateSchema", () => {
   });
 
   describe("managerId / roleId", () => {
-    it("rejects non-positive IDs", () => {
-      expect(userCreateSchema.safeParse({ ...validCreateData, managerId: 0 }).success).toBe(false);
-      expect(userCreateSchema.safeParse({ ...validCreateData, roleId: -1 }).success).toBe(false);
+    it("rejects an empty or malformed id", () => {
+      expect(userCreateSchema.safeParse({ ...validCreateData, managerId: "" }).success).toBe(false);
+      expect(userCreateSchema.safeParse({ ...validCreateData, roleId: "not-a-uuid" }).success).toBe(false);
     });
   });
 });
@@ -55,8 +56,8 @@ describe("userCreateSchema", () => {
 describe("userUpdateSchema", () => {
   const validUpdateData = {
     username: "john_doe",
-    managerId: 1,
-    roleId: 2,
+    managerId: uid(1),
+    roleId: uid(2),
     verified: true,
     canApproveContracts: false,
   };

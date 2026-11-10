@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/card";
 
 interface UserProfile {
-  id: number;
+  id: string;
   username: string;
   role: string;
   verified: boolean;

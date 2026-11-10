@@ -31,6 +31,7 @@ import { organizationService } from '@/services/organization.service';
 import { twoFactorAuthService } from '@/services/twoFactorAuth.service';
 import { budgetsService } from '@/services/budgets.service';
 import { invoiceMatchingService } from '@/services/invoiceMatching.service';
+import { uid } from "../mocks/ids";
 
 const mockGet = api.get as jest.Mock;
 const mockPost = api.post as jest.Mock;
@@ -44,7 +45,7 @@ beforeEach(() => jest.clearAllMocks());
 
 describe('businessAreasService', () => {
   it('list() calls GET /business-areas and returns data', async () => {
-    const data = [{ id: 1, name: 'Eng', description: 'Eng' }];
+    const data = [{ id: uid(1), name: 'Eng', description: 'Eng' }];
     mockGet.mockResolvedValue({ data });
     const result = await businessAreasService.list();
     expect(mockGet).toHaveBeenCalledWith('/business-areas');
@@ -53,7 +54,7 @@ describe('businessAreasService', () => {
 
   it('create() calls POST /business-areas with payload', async () => {
     const payload = { name: 'Eng', description: 'Engineering' };
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await businessAreasService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/business-areas', payload);
@@ -62,17 +63,17 @@ describe('businessAreasService', () => {
 
   it('update() calls PUT /business-areas/:id with payload', async () => {
     const payload = { name: 'Eng Updated', description: 'Updated' };
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await businessAreasService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/business-areas/1', payload);
+    const result = await businessAreasService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/business-areas/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /business-areas/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await businessAreasService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/business-areas/1');
+    await businessAreasService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/business-areas/${uid(1)}`);
   });
 });
 
@@ -80,7 +81,7 @@ describe('businessAreasService', () => {
 
 describe('counterpartiesService', () => {
   it('list() calls GET /counterparties and returns data', async () => {
-    const data = [{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }];
+    const data = [{ id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER' }];
     mockGet.mockResolvedValue({ data });
     const result = await counterpartiesService.list();
     expect(mockGet).toHaveBeenCalledWith('/counterparties');
@@ -89,7 +90,7 @@ describe('counterpartiesService', () => {
 
   it('create() calls POST /counterparties with payload', async () => {
     const payload = { name: 'Alfa Srl', type: 'CUSTOMER' as const };
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await counterpartiesService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/counterparties', payload);
@@ -98,45 +99,45 @@ describe('counterpartiesService', () => {
 
   it('update() calls PUT /counterparties/:id with payload', async () => {
     const payload = { name: 'Alfa Srl Updated', type: 'SUPPLIER' as const };
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await counterpartiesService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/counterparties/1', payload);
+    const result = await counterpartiesService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/counterparties/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /counterparties/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await counterpartiesService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/counterparties/1');
+    await counterpartiesService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/counterparties/${uid(1)}`);
   });
 
   it('getById() calls GET /counterparties/:id and returns data', async () => {
-    const data = { id: 1, name: 'Alfa Srl', type: 'CUSTOMER' };
+    const data = { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER' };
     mockGet.mockResolvedValue({ data });
-    const result = await counterpartiesService.getById(1);
-    expect(mockGet).toHaveBeenCalledWith('/counterparties/1');
+    const result = await counterpartiesService.getById(uid(1));
+    expect(mockGet).toHaveBeenCalledWith(`/counterparties/${uid(1)}`);
     expect(result).toEqual(data);
   });
 
   it('getInvoicingSummary() calls GET /counterparties/:id/invoicing-summary and returns data', async () => {
     const data = {
-      counterpartyId: 1, counterpartyName: 'Alfa Srl', activeContracts: 3,
+      counterpartyId: uid(1), counterpartyName: 'Alfa Srl', activeContracts: 3,
       contractedValue: 36000, invoicedYtd: 24000, variancePercent: -33.3,
       invoiceCount: 8, lastInvoiceDate: '2026-08-28',
     };
     mockGet.mockResolvedValue({ data });
-    const result = await counterpartiesService.getInvoicingSummary(1);
-    expect(mockGet).toHaveBeenCalledWith('/counterparties/1/invoicing-summary');
+    const result = await counterpartiesService.getInvoicingSummary(uid(1));
+    expect(mockGet).toHaveBeenCalledWith(`/counterparties/${uid(1)}/invoicing-summary`);
     expect(result).toEqual(data);
   });
 
   it('confirmVerifiedIban() calls PATCH /counterparties/:id/verified-iban with payload', async () => {
     const payload = { iban: 'IT60X0542811101000000123456', bic: 'BPPIITRRXXX' };
-    const data = { id: 1, name: 'Alfa Srl', type: 'CUSTOMER', verifiedIban: 'IT...3456' };
+    const data = { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', verifiedIban: 'IT...3456' };
     mockPatch.mockResolvedValue({ data });
-    const result = await counterpartiesService.confirmVerifiedIban(1, payload);
-    expect(mockPatch).toHaveBeenCalledWith('/counterparties/1/verified-iban', payload);
+    const result = await counterpartiesService.confirmVerifiedIban(uid(1), payload);
+    expect(mockPatch).toHaveBeenCalledWith(`/counterparties/${uid(1)}/verified-iban`, payload);
     expect(result).toEqual(data);
   });
 });
@@ -145,7 +146,7 @@ describe('counterpartiesService', () => {
 
 describe('financialTypesService', () => {
   it('list() calls GET /financial-types', async () => {
-    const data = [{ id: 1, name: 'Revenue', description: 'Revenue' }];
+    const data = [{ id: uid(1), name: 'Revenue', description: 'Revenue' }];
     mockGet.mockResolvedValue({ data });
     const result = await financialTypesService.list();
     expect(mockGet).toHaveBeenCalledWith('/financial-types');
@@ -154,7 +155,7 @@ describe('financialTypesService', () => {
 
   it('create() calls POST /financial-types', async () => {
     const payload = { name: 'Revenue', description: 'Revenue', category: 'REVENUE' as const };
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await financialTypesService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/financial-types', payload);
@@ -163,17 +164,17 @@ describe('financialTypesService', () => {
 
   it('update() calls PUT /financial-types/:id', async () => {
     const payload = { name: 'Revenue', description: 'Revenue', category: 'REVENUE' as const };
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await financialTypesService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/financial-types/1', payload);
+    const result = await financialTypesService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/financial-types/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /financial-types/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await financialTypesService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/financial-types/1');
+    await financialTypesService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/financial-types/${uid(1)}`);
   });
 });
 
@@ -181,7 +182,7 @@ describe('financialTypesService', () => {
 
 describe('budgetsService', () => {
   it('list() calls GET /budgets', async () => {
-    const data = [{ id: 1, businessAreaId: 1, areaName: 'IT', category: 'COST', year: 2025, targetAmount: 1000, actualAmount: 400, percentUsed: 40 }];
+    const data = [{ id: uid(1), businessAreaId: uid(1), areaName: 'IT', category: 'COST', year: 2025, targetAmount: 1000, actualAmount: 400, percentUsed: 40 }];
     mockGet.mockResolvedValue({ data });
     const result = await budgetsService.list();
     expect(mockGet).toHaveBeenCalledWith('/budgets');
@@ -189,8 +190,8 @@ describe('budgetsService', () => {
   });
 
   it('create() calls POST /budgets', async () => {
-    const payload = { businessAreaId: 1, category: 'COST' as const, year: 2025, targetAmount: 1000 };
-    const data = { id: 1, ...payload };
+    const payload = { businessAreaId: uid(1), category: 'COST' as const, year: 2025, targetAmount: 1000 };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await budgetsService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/budgets', payload);
@@ -198,18 +199,18 @@ describe('budgetsService', () => {
   });
 
   it('update() calls PUT /budgets/:id', async () => {
-    const payload = { businessAreaId: 1, category: 'REVENUE' as const, year: 2025, targetAmount: 2000 };
-    const data = { id: 1, ...payload };
+    const payload = { businessAreaId: uid(1), category: 'REVENUE' as const, year: 2025, targetAmount: 2000 };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await budgetsService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/budgets/1', payload);
+    const result = await budgetsService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/budgets/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /budgets/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await budgetsService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/budgets/1');
+    await budgetsService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/budgets/${uid(1)}`);
   });
 });
 
@@ -217,7 +218,7 @@ describe('budgetsService', () => {
 
 describe('financialValuesService', () => {
   it('list() calls GET /financial-values', async () => {
-    const data = [{ id: 1, month: 1, year: 2024, financialAmount: 1000, financialTypeId: 1, businessAreaId: 1, contractId: 1 }];
+    const data = [{ id: uid(1), month: 1, year: 2024, financialAmount: 1000, financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(1) }];
     mockGet.mockResolvedValue({ data });
     const result = await financialValuesService.list();
     expect(mockGet).toHaveBeenCalledWith('/financial-values');
@@ -225,8 +226,8 @@ describe('financialValuesService', () => {
   });
 
   it('create() calls POST /financial-values', async () => {
-    const payload = { month: 1, year: 2024, financialAmount: 1000, financialTypeId: 1, businessAreaId: 1, contractId: 1 };
-    const data = { id: 1, ...payload };
+    const payload = { month: 1, year: 2024, financialAmount: 1000, financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(1) };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await financialValuesService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/financial-values', payload);
@@ -234,18 +235,18 @@ describe('financialValuesService', () => {
   });
 
   it('update() calls PUT /financial-values/:id', async () => {
-    const payload = { month: 2, year: 2024, financialAmount: 2000, financialTypeId: 1, businessAreaId: 1, contractId: 1 };
-    const data = { id: 1, ...payload };
+    const payload = { month: 2, year: 2024, financialAmount: 2000, financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(1) };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await financialValuesService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/financial-values/1', payload);
+    const result = await financialValuesService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/financial-values/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /financial-values/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await financialValuesService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/financial-values/1');
+    await financialValuesService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/financial-values/${uid(1)}`);
   });
 });
 
@@ -255,7 +256,7 @@ describe('managersService', () => {
   const payload = { firstName: 'John', lastName: 'Doe', email: 'j@d.com', phoneNumber: '123', department: 'IT' };
 
   it('list() calls GET /managers', async () => {
-    const data = [{ id: 1, ...payload }];
+    const data = [{ id: uid(1), ...payload }];
     mockGet.mockResolvedValue({ data });
     const result = await managersService.list();
     expect(mockGet).toHaveBeenCalledWith('/managers');
@@ -263,7 +264,7 @@ describe('managersService', () => {
   });
 
   it('create() calls POST /managers', async () => {
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await managersService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/managers', payload);
@@ -271,27 +272,27 @@ describe('managersService', () => {
   });
 
   it('update() calls PUT /managers/:id', async () => {
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await managersService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/managers/1', payload);
+    const result = await managersService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/managers/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /managers/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await managersService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/managers/1');
+    await managersService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/managers/${uid(1)}`);
   });
 });
 
 // ─── usersService ────────────────────────────────────────────────────────────
 
 describe('usersService', () => {
-  const payload = { username: 'user1', managerId: 1, roleId: 1, verified: true, canApproveContracts: false };
+  const payload = { username: 'user1', managerId: uid(1), roleId: uid(1), verified: true, canApproveContracts: false };
 
   it('list() calls GET /users', async () => {
-    const data = [{ id: 1, username: 'user1' }];
+    const data = [{ id: uid(1), username: 'user1' }];
     mockGet.mockResolvedValue({ data });
     const result = await usersService.list();
     expect(mockGet).toHaveBeenCalledWith('/users');
@@ -299,7 +300,7 @@ describe('usersService', () => {
   });
 
   it('create() calls POST /users', async () => {
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await usersService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/users', payload);
@@ -307,21 +308,21 @@ describe('usersService', () => {
   });
 
   it('update() calls PUT /users/:id', async () => {
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await usersService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/users/1', payload);
+    const result = await usersService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/users/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /users/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await usersService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/users/1');
+    await usersService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/users/${uid(1)}`);
   });
 
   it('invite() calls POST /users/invite', async () => {
-    const invitePayload = { username: 'newuser', role: 'VIEWER', managerId: 1 };
+    const invitePayload = { username: 'newuser', role: 'VIEWER', managerId: uid(1) };
     mockPost.mockResolvedValue({ data: undefined });
     await usersService.invite(invitePayload);
     expect(mockPost).toHaveBeenCalledWith('/users/invite', invitePayload);
@@ -332,13 +333,13 @@ describe('usersService', () => {
 
 describe('contractsService', () => {
   const payload = {
-    counterpartyId: 1, contractNumber: 'CNT-001', wbsCode: 'WBS-001',
+    counterpartyId: uid(1), contractNumber: 'CNT-001', wbsCode: 'WBS-001',
     projectName: 'Project A', startDate: '2024-01-01', endDate: '2024-12-31',
-    status: 'ACTIVE' as const, areaId: 1, managerId: 1,
+    status: 'ACTIVE' as const, areaId: uid(1), managerId: uid(1),
   };
 
   it('list() calls GET /contracts', async () => {
-    const data = [{ id: 1, ...payload }];
+    const data = [{ id: uid(1), ...payload }];
     mockGet.mockResolvedValue({ data });
     const result = await contractsService.list();
     expect(mockGet).toHaveBeenCalledWith('/contracts');
@@ -346,7 +347,7 @@ describe('contractsService', () => {
   });
 
   it('create() calls POST /contracts', async () => {
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPost.mockResolvedValue({ data });
     const result = await contractsService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/contracts', payload);
@@ -354,32 +355,32 @@ describe('contractsService', () => {
   });
 
   it('update() calls PUT /contracts/:id', async () => {
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockPut.mockResolvedValue({ data });
-    const result = await contractsService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/contracts/1', payload);
+    const result = await contractsService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/contracts/${uid(1)}`, payload);
     expect(result).toEqual(data);
   });
 
   it('getById() calls GET /contracts/:id', async () => {
-    const data = { id: 1, ...payload };
+    const data = { id: uid(1), ...payload };
     mockGet.mockResolvedValue({ data });
-    const result = await contractsService.getById(1);
-    expect(mockGet).toHaveBeenCalledWith('/contracts/1');
+    const result = await contractsService.getById(uid(1));
+    expect(mockGet).toHaveBeenCalledWith(`/contracts/${uid(1)}`);
     expect(result).toEqual(data);
   });
 
   it('delete() calls DELETE /contracts/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await contractsService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/contracts/1');
+    await contractsService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/contracts/${uid(1)}`);
   });
 
   it('generateFinancialValues() calls POST /contracts/:id/generate-financial-values', async () => {
     const data = { created: 2, regenerated: 0, skippedManual: 1, values: [] };
     mockPost.mockResolvedValue({ data });
-    const result = await contractsService.generateFinancialValues(1);
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/generate-financial-values');
+    const result = await contractsService.generateFinancialValues(uid(1));
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/generate-financial-values`);
     expect(result).toEqual(data);
   });
 
@@ -467,30 +468,30 @@ describe('contractsService', () => {
 describe('contractWorkflowService', () => {
   it('submit() calls POST /contracts/:id/workflow/submit', async () => {
     mockPost.mockResolvedValue({});
-    await contractWorkflowService.submit(1);
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/workflow/submit');
+    await contractWorkflowService.submit(uid(1));
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/workflow/submit`);
   });
 
   it('approve() calls POST /contracts/:id/workflow/approve', async () => {
     mockPost.mockResolvedValue({});
-    await contractWorkflowService.approve(1);
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/workflow/approve');
+    await contractWorkflowService.approve(uid(1));
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/workflow/approve`);
   });
 
   it('reject() calls POST /contracts/:id/workflow/reject with a comment', async () => {
     mockPost.mockResolvedValue({});
-    await contractWorkflowService.reject(1, 'Missing signature');
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/workflow/reject', { comment: 'Missing signature' });
+    await contractWorkflowService.reject(uid(1), 'Missing signature');
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/workflow/reject`, { comment: 'Missing signature' });
   });
 
   it('getEvents() calls GET /contracts/:id/workflow/events and returns the events', async () => {
     const events = [{
-      id: 1, fromStage: null, toStage: 'IN_REVIEW' as const, action: 'SUBMIT' as const,
+      id: uid(1), fromStage: null, toStage: 'IN_REVIEW' as const, action: 'SUBMIT' as const,
       actorUsername: 'user1', comment: null, createdAt: '2025-01-01',
     }];
     mockGet.mockResolvedValue({ data: events });
-    const result = await contractWorkflowService.getEvents(1);
-    expect(mockGet).toHaveBeenCalledWith('/contracts/1/workflow/events');
+    const result = await contractWorkflowService.getEvents(uid(1));
+    expect(mockGet).toHaveBeenCalledWith(`/contracts/${uid(1)}/workflow/events`);
     expect(result).toEqual(events);
   });
 });
@@ -519,7 +520,7 @@ describe('dashboardService', () => {
 
 describe('rolesService', () => {
   it('list() calls GET /roles', async () => {
-    const data = [{ id: 1, name: 'ADMIN' }];
+    const data = [{ id: uid(1), name: 'ADMIN' }];
     mockGet.mockResolvedValue({ data });
     const result = await rolesService.list();
     expect(mockGet).toHaveBeenCalledWith('/roles');
@@ -530,7 +531,7 @@ describe('rolesService', () => {
 // ─── contractTemplatesService ─────────────────────────────────────────────────
 
 describe('contractTemplatesService', () => {
-  const template = { id: 1, name: 'NDA', autoRenew: false };
+  const template = { id: uid(1), name: 'NDA', autoRenew: false };
   const payload = { name: 'NDA', autoRenew: false };
 
   it('list() calls GET /contract-templates', async () => {
@@ -542,37 +543,37 @@ describe('contractTemplatesService', () => {
 
   it('getById() calls GET /contract-templates/:id', async () => {
     mockGet.mockResolvedValue({ data: template });
-    const result = await contractTemplatesService.getById(1);
-    expect(mockGet).toHaveBeenCalledWith('/contract-templates/1');
+    const result = await contractTemplatesService.getById(uid(1));
+    expect(mockGet).toHaveBeenCalledWith(`/contract-templates/${uid(1)}`);
     expect(result).toEqual(template);
   });
 
   it('create() calls POST /contract-templates', async () => {
-    mockPost.mockResolvedValue({ data: { id: 1, ...payload } });
+    mockPost.mockResolvedValue({ data: { id: uid(1), ...payload } });
     const result = await contractTemplatesService.create(payload);
     expect(mockPost).toHaveBeenCalledWith('/contract-templates', payload);
-    expect(result).toEqual({ id: 1, ...payload });
+    expect(result).toEqual({ id: uid(1), ...payload });
   });
 
   it('update() calls PUT /contract-templates/:id', async () => {
-    mockPut.mockResolvedValue({ data: { id: 1, ...payload } });
-    const result = await contractTemplatesService.update(1, payload);
-    expect(mockPut).toHaveBeenCalledWith('/contract-templates/1', payload);
-    expect(result).toEqual({ id: 1, ...payload });
+    mockPut.mockResolvedValue({ data: { id: uid(1), ...payload } });
+    const result = await contractTemplatesService.update(uid(1), payload);
+    expect(mockPut).toHaveBeenCalledWith(`/contract-templates/${uid(1)}`, payload);
+    expect(result).toEqual({ id: uid(1), ...payload });
   });
 
   it('delete() calls DELETE /contract-templates/:id', async () => {
     mockDelete.mockResolvedValue({});
-    await contractTemplatesService.delete(1);
-    expect(mockDelete).toHaveBeenCalledWith('/contract-templates/1');
+    await contractTemplatesService.delete(uid(1));
+    expect(mockDelete).toHaveBeenCalledWith(`/contract-templates/${uid(1)}`);
   });
 
   it('instantiate() calls POST /contract-templates/:id/instantiate', async () => {
-    const instantiatePayload = { counterpartyId: 1, contractNumber: 'CTR-001', startDate: '2024-01-01' };
-    const contract = { id: 10, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } };
+    const instantiatePayload = { counterpartyId: uid(1), contractNumber: 'CTR-001', startDate: '2024-01-01' };
+    const contract = { id: uid(10), counterparty: { id: uid(1), name: 'Acme', type: 'CUSTOMER' } };
     mockPost.mockResolvedValue({ data: contract });
-    const result = await contractTemplatesService.instantiate(1, instantiatePayload);
-    expect(mockPost).toHaveBeenCalledWith('/contract-templates/1/instantiate', instantiatePayload);
+    const result = await contractTemplatesService.instantiate(uid(1), instantiatePayload);
+    expect(mockPost).toHaveBeenCalledWith(`/contract-templates/${uid(1)}/instantiate`, instantiatePayload);
     expect(result).toEqual(contract);
   });
 });
@@ -599,7 +600,7 @@ describe('calendarFeedService', () => {
 
 describe('organizationService', () => {
   const organization = {
-    id: 1, name: 'Acme', slug: 'acme', subscriptionTier: 'FREE',
+    id: uid(1), name: 'Acme', slug: 'acme', subscriptionTier: 'FREE',
     iban: null, bic: null, createdAt: '2024-01-01',
   };
 
@@ -719,33 +720,33 @@ describe('twoFactorAuthService', () => {
 
 describe('invoiceMatchingService', () => {
   it('confirm() calls POST .../match/confirm with no body when no override is given', async () => {
-    const data = { id: 1, matchStatus: 'CONFIRMED' };
+    const data = { id: uid(1), matchStatus: 'CONFIRMED' };
     mockPost.mockResolvedValue({ data });
-    const result = await invoiceMatchingService.confirm(1, 7);
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/7/match/confirm', {});
+    const result = await invoiceMatchingService.confirm(uid(1), uid(7));
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/invoices/${uid(7)}/match/confirm`, {});
     expect(result).toEqual(data);
   });
 
   it('confirm() sends the financialValueId when overriding the suggestion', async () => {
-    const data = { id: 1, matchStatus: 'CONFIRMED' };
+    const data = { id: uid(1), matchStatus: 'CONFIRMED' };
     mockPost.mockResolvedValue({ data });
-    await invoiceMatchingService.confirm(1, 7, 42);
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/7/match/confirm', { financialValueId: 42 });
+    await invoiceMatchingService.confirm(uid(1), uid(7), uid(42));
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/invoices/${uid(7)}/match/confirm`, { financialValueId: uid(42) });
   });
 
   it('reject() calls POST .../match/reject and returns the updated invoice', async () => {
-    const data = { id: 1, matchStatus: 'REJECTED' };
+    const data = { id: uid(1), matchStatus: 'REJECTED' };
     mockPost.mockResolvedValue({ data });
-    const result = await invoiceMatchingService.reject(1, 7);
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/7/match/reject');
+    const result = await invoiceMatchingService.reject(uid(1), uid(7));
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/invoices/${uid(7)}/match/reject`);
     expect(result).toEqual(data);
   });
 
   it('recompute() calls POST .../invoices/match/recompute and returns the updated invoices', async () => {
-    const data = [{ id: 1, matchStatus: 'SUGGESTED' }];
+    const data = [{ id: uid(1), matchStatus: 'SUGGESTED' }];
     mockPost.mockResolvedValue({ data });
-    const result = await invoiceMatchingService.recompute(1);
-    expect(mockPost).toHaveBeenCalledWith('/contracts/1/invoices/match/recompute');
+    const result = await invoiceMatchingService.recompute(uid(1));
+    expect(mockPost).toHaveBeenCalledWith(`/contracts/${uid(1)}/invoices/match/recompute`);
     expect(result).toEqual(data);
   });
 });

@@ -78,7 +78,7 @@ export default function ManagerTable({ onEditClick }: ManagerTableProps) {
   }>({ open: false, manager: null });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await managersService.delete(id);
     },
     onSuccess: () => {

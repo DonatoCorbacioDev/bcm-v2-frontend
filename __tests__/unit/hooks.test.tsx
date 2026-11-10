@@ -109,6 +109,7 @@ import { useUpsertUser } from '@/hooks/useUpsertUser';
 import { useUpsertContract } from '@/hooks/useUpsertContract';
 import { useUpsertCounterparty } from '@/hooks/useUpsertCounterparty';
 import { useAuth, type LoginResult } from '@/hooks/useAuth';
+import { uid } from "../mocks/ids";
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -116,7 +117,7 @@ beforeEach(() => jest.clearAllMocks());
 
 describe('useBusinessAreas', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, name: 'Eng', description: 'Eng' }];
+    const data = [{ id: uid(1), name: 'Eng', description: 'Eng' }];
     (businessAreasService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useBusinessAreas(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -126,7 +127,7 @@ describe('useBusinessAreas', () => {
 
 describe('useFinancialTypes', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, name: 'Revenue', description: 'Revenue' }];
+    const data = [{ id: uid(1), name: 'Revenue', description: 'Revenue' }];
     (financialTypesService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useFinancialTypes(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -136,7 +137,7 @@ describe('useFinancialTypes', () => {
 
 describe('useFinancialValues', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, month: 1, year: 2024, financialAmount: 1000, financialTypeId: 1, businessAreaId: 1, contractId: 1 }];
+    const data = [{ id: uid(1), month: 1, year: 2024, financialAmount: 1000, financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(1) }];
     (financialValuesService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useFinancialValues(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -146,7 +147,7 @@ describe('useFinancialValues', () => {
 
 describe('useBudgets', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, businessAreaId: 1, areaName: 'IT', category: 'COST', year: 2025, targetAmount: 1000, actualAmount: 400, percentUsed: 40 }];
+    const data = [{ id: uid(1), businessAreaId: uid(1), areaName: 'IT', category: 'COST', year: 2025, targetAmount: 1000, actualAmount: 400, percentUsed: 40 }];
     (budgetsService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useBudgets(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -156,7 +157,7 @@ describe('useBudgets', () => {
 
 describe('useManagers', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, firstName: 'John', lastName: 'Doe', email: 'j@d.com', phoneNumber: '123', department: 'IT' }];
+    const data = [{ id: uid(1), firstName: 'John', lastName: 'Doe', email: 'j@d.com', phoneNumber: '123', department: 'IT' }];
     (managersService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useManagers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -166,7 +167,7 @@ describe('useManagers', () => {
 
 describe('useRoles', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, role: 'ADMIN' }];
+    const data = [{ id: uid(1), role: 'ADMIN' }];
     (rolesService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useRoles(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -176,7 +177,7 @@ describe('useRoles', () => {
 
 describe('useUsers', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, username: 'user1' }];
+    const data = [{ id: uid(1), username: 'user1' }];
     (usersService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useUsers(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -186,7 +187,7 @@ describe('useUsers', () => {
 
 describe('useContracts', () => {
   it('fetches and returns data', async () => {
-    const data = [{ id: 1, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } }];
+    const data = [{ id: uid(1), counterparty: { id: uid(1), name: 'Acme', type: 'CUSTOMER' } }];
     (contractsService.list as jest.Mock).mockResolvedValue(data);
     const { result } = renderHook(() => useContracts(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -246,15 +247,15 @@ describe('useInvoicingSummary', () => {
 
 describe('useCounterparty', () => {
   it('fetches counterparty when id > 0', async () => {
-    const data = { id: 1, name: 'Alfa Srl', type: 'CUSTOMER' };
+    const data = { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER' };
     (counterpartiesService.getById as jest.Mock).mockResolvedValue(data);
-    const { result } = renderHook(() => useCounterparty(1), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCounterparty(uid(1)), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
   });
 
-  it('is disabled when id is 0', () => {
-    const { result } = renderHook(() => useCounterparty(0), { wrapper: createWrapper() });
+  it('is disabled without an id', () => {
+    const { result } = renderHook(() => useCounterparty(''), { wrapper: createWrapper() });
     expect(result.current.fetchStatus).toBe('idle');
   });
 });
@@ -262,18 +263,18 @@ describe('useCounterparty', () => {
 describe('useCounterpartyInvoicingSummary', () => {
   it('fetches the invoicing summary when id > 0', async () => {
     const data = {
-      counterpartyId: 1, counterpartyName: 'Alfa Srl', activeContracts: 3,
+      counterpartyId: uid(1), counterpartyName: 'Alfa Srl', activeContracts: 3,
       contractedValue: 36000, invoicedYtd: 24000, variancePercent: -33.3,
       invoiceCount: 8, lastInvoiceDate: '2026-08-28',
     };
     (counterpartiesService.getInvoicingSummary as jest.Mock).mockResolvedValue(data);
-    const { result } = renderHook(() => useCounterpartyInvoicingSummary(1), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useCounterpartyInvoicingSummary(uid(1)), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
   });
 
-  it('is disabled when id is 0', () => {
-    const { result } = renderHook(() => useCounterpartyInvoicingSummary(0), { wrapper: createWrapper() });
+  it('is disabled without an id', () => {
+    const { result } = renderHook(() => useCounterpartyInvoicingSummary(''), { wrapper: createWrapper() });
     expect(result.current.fetchStatus).toBe('idle');
   });
 });
@@ -291,22 +292,22 @@ describe('useContractsPaged', () => {
 
 describe('useContract', () => {
   it('fetches contract when id > 0', async () => {
-    const data = { id: 1, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } };
+    const data = { id: uid(1), counterparty: { id: uid(1), name: 'Acme', type: 'CUSTOMER' } };
     (contractsService.getById as jest.Mock).mockResolvedValue(data);
-    const { result } = renderHook(() => useContract(1), { wrapper: createWrapper() });
+    const { result } = renderHook(() => useContract(uid(1)), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
   });
 
-  it('is disabled when id is 0', () => {
-    const { result } = renderHook(() => useContract(0), { wrapper: createWrapper() });
+  it('is disabled without an id', () => {
+    const { result } = renderHook(() => useContract(''), { wrapper: createWrapper() });
     expect(result.current.fetchStatus).toBe('idle');
   });
 });
 
 describe('useExpiringContracts', () => {
   it('fetches expiring contracts', async () => {
-    const data = [{ id: 1, counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' } }];
+    const data = [{ id: uid(1), counterparty: { id: uid(1), name: 'Acme', type: 'CUSTOMER' } }];
     (api.get as jest.Mock).mockResolvedValue({ data });
     const { result } = renderHook(() => useExpiringContracts(30), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -314,7 +315,7 @@ describe('useExpiringContracts', () => {
   });
 
   it('uses default days=30 when called without arguments', async () => {
-    const data = [{ id: 2, counterparty: { id: 2, name: 'Beta', type: 'CUSTOMER' } }];
+    const data = [{ id: uid(2), counterparty: { id: uid(2), name: 'Beta', type: 'CUSTOMER' } }];
     (api.get as jest.Mock).mockResolvedValue({ data });
     const { result } = renderHook(() => useExpiringContracts(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -326,7 +327,7 @@ describe('useExpiringContracts', () => {
 
 describe('useUpsertBusinessArea', () => {
   it('calls create when no id is provided', async () => {
-    const created = { id: 1, name: 'Eng', description: 'Eng' };
+    const created = { id: uid(1), name: 'Eng', description: 'Eng' };
     (businessAreasService.create as jest.Mock).mockResolvedValue(created);
     const { result } = renderHook(() => useUpsertBusinessArea(), { wrapper: createWrapper() });
     await act(async () => {
@@ -336,19 +337,19 @@ describe('useUpsertBusinessArea', () => {
   });
 
   it('calls update when id is provided', async () => {
-    const updated = { id: 1, name: 'Eng', description: 'Eng' };
+    const updated = { id: uid(1), name: 'Eng', description: 'Eng' };
     (businessAreasService.update as jest.Mock).mockResolvedValue(updated);
     const { result } = renderHook(() => useUpsertBusinessArea(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ id: 1, payload: { name: 'Eng', description: 'Eng' } });
+      await result.current.mutateAsync({ id: uid(1), payload: { name: 'Eng', description: 'Eng' } });
     });
-    expect(businessAreasService.update).toHaveBeenCalledWith(1, { name: 'Eng', description: 'Eng' });
+    expect(businessAreasService.update).toHaveBeenCalledWith(uid(1), { name: 'Eng', description: 'Eng' });
   });
 });
 
 describe('useUpsertFinancialType', () => {
   it('calls create when no id is provided', async () => {
-    (financialTypesService.create as jest.Mock).mockResolvedValue({ id: 1, name: 'Rev', description: 'Rev' });
+    (financialTypesService.create as jest.Mock).mockResolvedValue({ id: uid(1), name: 'Rev', description: 'Rev' });
     const { result } = renderHook(() => useUpsertFinancialType(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ payload: { name: 'Rev', description: 'Rev', category: 'REVENUE' } });
@@ -357,40 +358,40 @@ describe('useUpsertFinancialType', () => {
   });
 
   it('calls update when id is provided', async () => {
-    (financialTypesService.update as jest.Mock).mockResolvedValue({ id: 1, name: 'Rev', description: 'Rev' });
+    (financialTypesService.update as jest.Mock).mockResolvedValue({ id: uid(1), name: 'Rev', description: 'Rev' });
     const { result } = renderHook(() => useUpsertFinancialType(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ id: 1, payload: { name: 'Rev', description: 'Rev', category: 'REVENUE' } });
+      await result.current.mutateAsync({ id: uid(1), payload: { name: 'Rev', description: 'Rev', category: 'REVENUE' } });
     });
-    expect(financialTypesService.update).toHaveBeenCalledWith(1, { name: 'Rev', description: 'Rev', category: 'REVENUE' });
+    expect(financialTypesService.update).toHaveBeenCalledWith(uid(1), { name: 'Rev', description: 'Rev', category: 'REVENUE' });
   });
 });
 
 describe('useUpsertBudget', () => {
   it('calls create when no id is provided', async () => {
-    (budgetsService.create as jest.Mock).mockResolvedValue({ id: 1, businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 });
+    (budgetsService.create as jest.Mock).mockResolvedValue({ id: uid(1), businessAreaId: uid(1), category: 'COST', year: 2025, targetAmount: 1000 });
     const { result } = renderHook(() => useUpsertBudget(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ payload: { businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 } });
+      await result.current.mutateAsync({ payload: { businessAreaId: uid(1), category: 'COST', year: 2025, targetAmount: 1000 } });
     });
     expect(budgetsService.create).toHaveBeenCalled();
   });
 
   it('calls update when id is provided', async () => {
-    (budgetsService.update as jest.Mock).mockResolvedValue({ id: 1, businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 });
+    (budgetsService.update as jest.Mock).mockResolvedValue({ id: uid(1), businessAreaId: uid(1), category: 'COST', year: 2025, targetAmount: 1000 });
     const { result } = renderHook(() => useUpsertBudget(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ id: 1, payload: { businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 } });
+      await result.current.mutateAsync({ id: uid(1), payload: { businessAreaId: uid(1), category: 'COST', year: 2025, targetAmount: 1000 } });
     });
-    expect(budgetsService.update).toHaveBeenCalledWith(1, { businessAreaId: 1, category: 'COST', year: 2025, targetAmount: 1000 });
+    expect(budgetsService.update).toHaveBeenCalledWith(uid(1), { businessAreaId: uid(1), category: 'COST', year: 2025, targetAmount: 1000 });
   });
 });
 
 describe('useUpsertFinancialValue', () => {
-  const payload = { month: 1, year: 2024, financialAmount: 1000, financialTypeId: 1, businessAreaId: 1, contractId: 1 };
+  const payload = { month: 1, year: 2024, financialAmount: 1000, financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(1) };
 
   it('calls create in create mode', async () => {
-    (financialValuesService.create as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (financialValuesService.create as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertFinancialValue(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ mode: 'create', payload });
@@ -399,12 +400,12 @@ describe('useUpsertFinancialValue', () => {
   });
 
   it('calls update in update mode', async () => {
-    (financialValuesService.update as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (financialValuesService.update as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertFinancialValue(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ mode: 'update', id: 1, payload });
+      await result.current.mutateAsync({ mode: 'update', id: uid(1), payload });
     });
-    expect(financialValuesService.update).toHaveBeenCalledWith(1, payload);
+    expect(financialValuesService.update).toHaveBeenCalledWith(uid(1), payload);
   });
 });
 
@@ -412,7 +413,7 @@ describe('useUpsertManager', () => {
   const payload = { firstName: 'John', lastName: 'Doe', email: 'j@d.com', phoneNumber: '123', department: 'IT' };
 
   it('calls create in create mode', async () => {
-    (managersService.create as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (managersService.create as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertManager(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ mode: 'create', payload });
@@ -421,20 +422,20 @@ describe('useUpsertManager', () => {
   });
 
   it('calls update in update mode', async () => {
-    (managersService.update as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (managersService.update as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertManager(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ mode: 'update', id: 1, payload });
+      await result.current.mutateAsync({ mode: 'update', id: uid(1), payload });
     });
-    expect(managersService.update).toHaveBeenCalledWith(1, payload);
+    expect(managersService.update).toHaveBeenCalledWith(uid(1), payload);
   });
 });
 
 describe('useUpsertUser', () => {
-  const payload = { username: 'user1', managerId: 1, roleId: 1, verified: true, canApproveContracts: false };
+  const payload = { username: 'user1', managerId: uid(1), roleId: uid(1), verified: true, canApproveContracts: false };
 
   it('calls create when no id is provided', async () => {
-    (usersService.create as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (usersService.create as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertUser(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ payload });
@@ -443,24 +444,24 @@ describe('useUpsertUser', () => {
   });
 
   it('calls update when id is provided', async () => {
-    (usersService.update as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (usersService.update as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertUser(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ id: 1, payload });
+      await result.current.mutateAsync({ id: uid(1), payload });
     });
-    expect(usersService.update).toHaveBeenCalledWith(1, payload);
+    expect(usersService.update).toHaveBeenCalledWith(uid(1), payload);
   });
 });
 
 describe('useUpsertContract', () => {
   const payload = {
-    counterpartyId: 1, contractNumber: 'CNT-001', wbsCode: 'WBS-001',
+    counterpartyId: uid(1), contractNumber: 'CNT-001', wbsCode: 'WBS-001',
     projectName: 'Proj A', startDate: '2024-01-01', endDate: '2024-12-31',
-    status: 'ACTIVE' as const, areaId: 1, managerId: 1,
+    status: 'ACTIVE' as const, areaId: uid(1), managerId: uid(1),
   };
 
   it('calls create in create mode', async () => {
-    (contractsService.create as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (contractsService.create as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertContract(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ mode: 'create', payload });
@@ -469,12 +470,12 @@ describe('useUpsertContract', () => {
   });
 
   it('calls update in update mode', async () => {
-    (contractsService.update as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (contractsService.update as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertContract(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ mode: 'update', id: 1, payload });
+      await result.current.mutateAsync({ mode: 'update', id: uid(1), payload });
     });
-    expect(contractsService.update).toHaveBeenCalledWith(1, payload);
+    expect(contractsService.update).toHaveBeenCalledWith(uid(1), payload);
   });
 });
 
@@ -484,7 +485,7 @@ describe('useUpsertCounterparty', () => {
   };
 
   it('calls create when no id is given', async () => {
-    (counterpartiesService.create as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (counterpartiesService.create as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertCounterparty(), { wrapper: createWrapper() });
     await act(async () => {
       await result.current.mutateAsync({ payload });
@@ -494,12 +495,12 @@ describe('useUpsertCounterparty', () => {
   });
 
   it('calls update when an id is given', async () => {
-    (counterpartiesService.update as jest.Mock).mockResolvedValue({ id: 1, ...payload });
+    (counterpartiesService.update as jest.Mock).mockResolvedValue({ id: uid(1), ...payload });
     const { result } = renderHook(() => useUpsertCounterparty(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ id: 1, payload });
+      await result.current.mutateAsync({ id: uid(1), payload });
     });
-    expect(counterpartiesService.update).toHaveBeenCalledWith(1, payload);
+    expect(counterpartiesService.update).toHaveBeenCalledWith(uid(1), payload);
     expect(counterpartiesService.create).not.toHaveBeenCalled();
   });
 });
@@ -541,13 +542,13 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123', mfaRequired: false, mfaToken: null } });
-    (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
+    (api.get as jest.Mock).mockResolvedValue({ data: { id: uid(1), username: 'alice', role: 'ADMIN' } });
     const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let loginResult: LoginResult | undefined;
     await act(async () => { loginResult = await result.current.login({ username: 'alice', password: 'pw' }); });
     expect(loginResult?.success).toBe(true);
     expect(mockSetAuth).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, username: 'alice' }),
+      expect.objectContaining({ id: uid(1), username: 'alice' }),
       'abc123'
     );
   });
@@ -628,13 +629,13 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockResolvedValue({ data: { token: 'real-token', mfaRequired: false, mfaToken: null } });
-    (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
+    (api.get as jest.Mock).mockResolvedValue({ data: { id: uid(1), username: 'alice', role: 'ADMIN' } });
     const { result } = renderHook(() => useAuth(), { wrapper: createWrapper() });
     let success: boolean | undefined;
     await act(async () => { success = await result.current.verifyTwoFactor('pending-token-123', '123456'); });
     expect(success).toBe(true);
     expect(api.post).toHaveBeenCalledWith('/auth/2fa/verify', { mfaToken: 'pending-token-123', code: '123456' });
-    expect(mockSetAuth).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }), 'real-token');
+    expect(mockSetAuth).toHaveBeenCalledWith(expect.objectContaining({ id: uid(1) }), 'real-token');
   });
 
   it('verifyTwoFactor sets an error message on an invalid code', async () => {
@@ -691,7 +692,7 @@ describe('useAuth', () => {
       user: null, isAuthenticated: false,
     });
     (api.post as jest.Mock).mockResolvedValue({ data: { token: 'abc123', mfaRequired: false, mfaToken: null } });
-    (api.get as jest.Mock).mockResolvedValue({ data: { id: 1, username: 'alice', role: 'ADMIN' } });
+    (api.get as jest.Mock).mockResolvedValue({ data: { id: uid(1), username: 'alice', role: 'ADMIN' } });
 
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(async () => { await result.current.login({ username: 'alice', password: 'pw' }); });
@@ -730,7 +731,7 @@ describe('contractTemplatesQueryKeys', () => {
   });
 
   it('detail() returns key with id', () => {
-    expect(contractTemplatesQueryKeys.detail(42)).toEqual(['contract-templates', 'detail', 42]);
+    expect(contractTemplatesQueryKeys.detail(uid(42))).toEqual(['contract-templates', 'detail', uid(42)]);
   });
 });
 
@@ -738,7 +739,7 @@ describe('contractTemplatesQueryKeys', () => {
 
 describe('useContractTemplates', () => {
   it('fetches template list via service', async () => {
-    const templates = [{ id: 1, name: 'NDA', autoRenew: false }];
+    const templates = [{ id: uid(1), name: 'NDA', autoRenew: false }];
     (contractTemplatesService.list as jest.Mock).mockResolvedValue(templates);
     const { result } = renderHook(() => useContractTemplates(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -753,7 +754,7 @@ describe('useUpsertContractTemplate', () => {
   const payload = { name: 'NDA', autoRenew: false };
 
   it('calls create when mode is "create"', async () => {
-    const created = { id: 1, ...payload };
+    const created = { id: uid(1), ...payload };
     (contractTemplatesService.create as jest.Mock).mockResolvedValue(created);
     const { result } = renderHook(() => useUpsertContractTemplate(), { wrapper: createWrapper() });
     await act(async () => {
@@ -763,12 +764,12 @@ describe('useUpsertContractTemplate', () => {
   });
 
   it('calls update when mode is "update"', async () => {
-    const updated = { id: 5, ...payload };
+    const updated = { id: uid(5), ...payload };
     (contractTemplatesService.update as jest.Mock).mockResolvedValue(updated);
     const { result } = renderHook(() => useUpsertContractTemplate(), { wrapper: createWrapper() });
     await act(async () => {
-      await result.current.mutateAsync({ mode: 'update', id: 5, payload });
+      await result.current.mutateAsync({ mode: 'update', id: uid(5), payload });
     });
-    expect(contractTemplatesService.update).toHaveBeenCalledWith(5, payload);
+    expect(contractTemplatesService.update).toHaveBeenCalledWith(uid(5), payload);
   });
 });

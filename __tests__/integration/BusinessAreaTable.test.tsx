@@ -44,17 +44,18 @@ import { toast } from 'sonner';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
 import { businessAreasService } from '@/services/businessAreas.service';
 import BusinessAreaTable from '@/components/business-areas/BusinessAreaTable';
+import { uid } from "../mocks/ids";
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
 const area1: BusinessArea = {
-  id: 1,
+  id: uid(1),
   name: 'Engineering',
   description: 'Software development and infrastructure',
 };
 
 const area2: BusinessArea = {
-  id: 2,
+  id: uid(2),
   name: 'Sales',
   description: 'Customer acquisition and account management',
 };
@@ -160,7 +161,7 @@ describe('BusinessAreaTable', () => {
     await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
 
     expect(onEditClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, name: 'Engineering' })
+      expect.objectContaining({ id: uid(1), name: 'Engineering' })
     );
   });
 

@@ -44,11 +44,12 @@ import { useContractTemplates } from '@/hooks/useContractTemplates';
 import { contractTemplatesService } from '@/services/contractTemplates.service';
 import { useAuthStore } from '@/store/authStore';
 import ContractTemplateTable from '@/components/contract-templates/ContractTemplateTable';
+import { uid } from "../mocks/ids";
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const template1: ContractTemplate = {
-  id: 1,
+  id: uid(1),
   name: 'NDA Standard',
   description: 'Accordo di riservatezza',
   defaultStatus: 'ACTIVE',
@@ -61,7 +62,7 @@ const template1: ContractTemplate = {
 };
 
 const template2: ContractTemplate = {
-  id: 2,
+  id: uid(2),
   name: 'Contratto di fornitura',
   description: null,
   defaultStatus: 'DRAFT',
@@ -75,7 +76,7 @@ const template2: ContractTemplate = {
 
 function setup(role = 'ADMIN', templates: ContractTemplate[] = [template1, template2]) {
   (useContractTemplates as jest.Mock).mockReturnValue({ data: templates, isLoading: false, isError: false });
-  (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role } });
+  (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { id: uid(1), username: 'admin', role } });
   return render(<ContractTemplateTable onEditClick={jest.fn()} />, { wrapper: createWrapper() });
 }
 
@@ -167,7 +168,7 @@ describe('ContractTemplateTable', () => {
   it('calls onEditClick when Modifica is clicked', async () => {
     const onEditClick = jest.fn();
     (useContractTemplates as jest.Mock).mockReturnValue({ data: [template1], isLoading: false, isError: false });
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { id: 1, username: 'admin', role: 'ADMIN' } });
+    (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { id: uid(1), username: 'admin', role: 'ADMIN' } });
     render(<ContractTemplateTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /modifica/i }));
     expect(onEditClick).toHaveBeenCalledWith(template1);

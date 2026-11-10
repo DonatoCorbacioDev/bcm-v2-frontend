@@ -35,10 +35,11 @@ import { toast } from 'sonner';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
 import { useManagers } from '@/hooks/useManagers';
 import ContractTemplateForm from '@/components/contract-templates/ContractTemplateForm';
+import { uid } from "../mocks/ids";
 
 const onClose = jest.fn();
-const defaultBA = { data: [{ id: 1, name: 'Engineering', description: '' }], isLoading: false, isError: false };
-const defaultMgr = { data: [{ id: 1, firstName: 'Marco', lastName: 'Rossi' }], isLoading: false, isError: false };
+const defaultBA = { data: [{ id: uid(1), name: 'Engineering', description: '' }], isLoading: false, isError: false };
+const defaultMgr = { data: [{ id: uid(1), firstName: 'Marco', lastName: 'Rossi' }], isLoading: false, isError: false };
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -80,7 +81,7 @@ describe('ContractTemplateForm', () => {
   });
 
   it('pre-fills name when editing an existing template', () => {
-    const template = { id: 5, name: 'NDA Standard', autoRenew: true, description: 'desc' } as never;
+    const template = { id: uid(5), name: 'NDA Standard', autoRenew: true, description: 'desc' } as never;
     render(<ContractTemplateForm onClose={onClose} template={template} />, { wrapper: createWrapper() });
     expect((screen.getByPlaceholderText('es. NDA Standard') as HTMLInputElement).value).toBe('NDA Standard');
     expect(screen.getByRole('button', { name: /aggiorna template/i })).toBeInTheDocument();
@@ -88,13 +89,13 @@ describe('ContractTemplateForm', () => {
 
   it('pre-fills numeric and reference fields when editing a fully populated template', () => {
     const template = {
-      id: 6,
+      id: uid(6),
       name: 'Full Template',
       autoRenew: true,
       defaultStatus: 'ACTIVE',
       defaultDurationDays: 90,
-      businessAreaId: 1,
-      defaultManagerId: 1,
+      businessAreaId: uid(1),
+      defaultManagerId: uid(1),
       notificationDays: 15,
     } as never;
     render(<ContractTemplateForm onClose={onClose} template={template} />, { wrapper: createWrapper() });
@@ -103,7 +104,7 @@ describe('ContractTemplateForm', () => {
   });
 
   it('submits null for duration and notification days when left empty', async () => {
-    mockMutateAsync.mockResolvedValueOnce({ id: 2 });
+    mockMutateAsync.mockResolvedValueOnce({ id: uid(2) });
     const { container } = render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
     fireEvent.change(screen.getByPlaceholderText('es. NDA Standard'), { target: { value: 'Senza durata' } });
     fireEvent.submit(container.querySelector('form')!);
@@ -114,7 +115,7 @@ describe('ContractTemplateForm', () => {
   });
 
   it('calls create mutation on submit and shows success toast', async () => {
-    mockMutateAsync.mockResolvedValueOnce({ id: 1 });
+    mockMutateAsync.mockResolvedValueOnce({ id: uid(1) });
     const { container } = render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
     fillAndSubmit(container, 'Nuovo Template');
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalled());
@@ -126,14 +127,14 @@ describe('ContractTemplateForm', () => {
   });
 
   it('calls update mutation when editing an existing template', async () => {
-    const template = { id: 5, name: 'Old Name', autoRenew: false } as never;
-    mockMutateAsync.mockResolvedValueOnce({ id: 5 });
+    const template = { id: uid(5), name: 'Old Name', autoRenew: false } as never;
+    mockMutateAsync.mockResolvedValueOnce({ id: uid(5) });
     const { container } = render(<ContractTemplateForm onClose={onClose} template={template} />, { wrapper: createWrapper() });
     fillAndSubmit(container, 'Updated Name');
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalled());
     const callArg = mockMutateAsync.mock.calls[0][0];
     expect(callArg.mode).toBe('update');
-    expect(callArg.id).toBe(5);
+    expect(callArg.id).toBe(uid(5));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Template aggiornato'));
   });
 

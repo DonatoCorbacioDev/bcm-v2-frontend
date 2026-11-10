@@ -23,7 +23,7 @@ import {
 interface VerifyIbanDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
-  readonly counterpartyId: number;
+  readonly counterpartyId: string;
   readonly currentIbanMasked?: string | null;
 }
 

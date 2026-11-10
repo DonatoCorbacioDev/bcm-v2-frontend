@@ -9,7 +9,7 @@ import { financialValuesQueryKeys } from "@/hooks/useFinancialValues";
 
 type UpsertFinancialValueParams =
   | { mode: "create"; payload: FinancialValueUpsertPayload }
-  | { mode: "update"; id: number; payload: FinancialValueUpsertPayload };
+  | { mode: "update"; id: string; payload: FinancialValueUpsertPayload };
 
 export function useUpsertFinancialValue() {
   const queryClient = useQueryClient();

@@ -82,7 +82,7 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
   }>({ open: false, counterparty: null });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await counterpartiesService.delete(id);
     },
     onSuccess: () => {

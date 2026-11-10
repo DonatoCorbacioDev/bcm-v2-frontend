@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FinancialValueSummary from '@/components/financial-values/FinancialValueSummary';
 import type { Budget, FinancialValue } from '@/types';
+import { uid } from "../mocks/ids";
 
 // Matches the component's own EUR_FORMATTER — computed rather than hardcoded
 // so the assertions don't depend on the exact separators the host's ICU data
@@ -16,13 +17,13 @@ const eur = (n: number) =>
 
 function fv(overrides: Partial<FinancialValue>): FinancialValue {
   return {
-    id: 1,
+    id: uid(1),
     month: 1,
     year: 2026,
     financialAmount: 0,
-    financialTypeId: 1,
-    businessAreaId: 1,
-    contractId: 1,
+    financialTypeId: uid(1),
+    businessAreaId: uid(1),
+    contractId: uid(1),
     category: 'REVENUE',
     ...overrides,
   };
@@ -30,8 +31,8 @@ function fv(overrides: Partial<FinancialValue>): FinancialValue {
 
 function budget(overrides: Partial<Budget>): Budget {
   return {
-    id: 1,
-    businessAreaId: 1,
+    id: uid(1),
+    businessAreaId: uid(1),
     areaName: 'IT',
     category: 'REVENUE',
     year: 2026,
@@ -70,9 +71,9 @@ describe('FinancialValueSummary', () => {
 
   it('sums revenue and cost for the selected year only', () => {
     const values = [
-      fv({ id: 1, year: 2026, category: 'REVENUE', financialAmount: 1000 }),
-      fv({ id: 2, year: 2026, category: 'COST', financialAmount: 400 }),
-      fv({ id: 3, year: 2025, category: 'REVENUE', financialAmount: 9000 }), // different year, excluded
+      fv({ id: uid(1), year: 2026, category: 'REVENUE', financialAmount: 1000 }),
+      fv({ id: uid(2), year: 2026, category: 'COST', financialAmount: 400 }),
+      fv({ id: uid(3), year: 2025, category: 'REVENUE', financialAmount: 9000 }), // different year, excluded
     ];
     render(<FinancialValueSummary financialValues={values} budgets={[]} year={2026} isAdmin={false} />);
 
@@ -86,9 +87,9 @@ describe('FinancialValueSummary', () => {
 
   it('aggregates across all years when year is null', () => {
     const values = [
-      fv({ id: 1, year: 2026, category: 'REVENUE', financialAmount: 1000 }),
-      fv({ id: 2, year: 2025, category: 'REVENUE', financialAmount: 500 }),
-      fv({ id: 3, year: 2026, category: 'COST', financialAmount: 200 }),
+      fv({ id: uid(1), year: 2026, category: 'REVENUE', financialAmount: 1000 }),
+      fv({ id: uid(2), year: 2025, category: 'REVENUE', financialAmount: 500 }),
+      fv({ id: uid(3), year: 2026, category: 'COST', financialAmount: 200 }),
     ];
     render(<FinancialValueSummary financialValues={values} budgets={[]} year={null} isAdmin={false} />);
 
@@ -100,8 +101,8 @@ describe('FinancialValueSummary', () => {
 
   it('shows a danger variant net margin when costs exceed revenue', () => {
     const values = [
-      fv({ id: 1, category: 'REVENUE', financialAmount: 100 }),
-      fv({ id: 2, category: 'COST', financialAmount: 300 }),
+      fv({ id: uid(1), category: 'REVENUE', financialAmount: 100 }),
+      fv({ id: uid(2), category: 'COST', financialAmount: 300 }),
     ];
     render(
       <FinancialValueSummary financialValues={values} budgets={[]} year={2026} isAdmin={false} />
@@ -140,8 +141,8 @@ describe('FinancialValueSummary', () => {
 
   it('shows budget rows scoped to the selected year, grouped under a Ricavi section', () => {
     const budgets = [
-      budget({ id: 1, areaName: 'IT', category: 'REVENUE', year: 2026, percentUsed: 42 }),
-      budget({ id: 2, areaName: 'Sales', category: 'COST', year: 2025, percentUsed: 99 }), // different year, excluded
+      budget({ id: uid(1), areaName: 'IT', category: 'REVENUE', year: 2026, percentUsed: 42 }),
+      budget({ id: uid(2), areaName: 'Sales', category: 'COST', year: 2025, percentUsed: 99 }), // different year, excluded
     ];
     render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
 
@@ -170,8 +171,8 @@ describe('FinancialValueSummary', () => {
 
   it('sorts revenue budgets worst-first (lowest achievement on top)', () => {
     const budgets = [
-      budget({ id: 1, areaName: 'On track', category: 'REVENUE', percentUsed: 95 }),
-      budget({ id: 2, areaName: 'Behind', category: 'REVENUE', percentUsed: 20 }),
+      budget({ id: uid(1), areaName: 'On track', category: 'REVENUE', percentUsed: 95 }),
+      budget({ id: uid(2), areaName: 'Behind', category: 'REVENUE', percentUsed: 20 }),
     ];
     render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
 
@@ -181,8 +182,8 @@ describe('FinancialValueSummary', () => {
 
   it('sorts cost budgets worst-first (highest overrun on top)', () => {
     const budgets = [
-      budget({ id: 1, areaName: 'Under budget', category: 'COST', percentUsed: 30 }),
-      budget({ id: 2, areaName: 'Over budget', category: 'COST', percentUsed: 140 }),
+      budget({ id: uid(1), areaName: 'Under budget', category: 'COST', percentUsed: 30 }),
+      budget({ id: uid(2), areaName: 'Over budget', category: 'COST', percentUsed: 140 }),
     ];
     render(<FinancialValueSummary financialValues={[]} budgets={budgets} year={2026} isAdmin={false} />);
 
@@ -255,7 +256,7 @@ describe('FinancialValueSummary', () => {
     render(
       <FinancialValueSummary
         financialValues={[]}
-        budgets={[budget({ id: 7, businessAreaId: 42, areaName: 'IT', percentUsed: 50 })]}
+        budgets={[budget({ id: uid(7), businessAreaId: uid(42), areaName: 'IT', percentUsed: 50 })]}
         year={2026}
         isAdmin={false}
         onAreaClick={onAreaClick}
@@ -263,7 +264,7 @@ describe('FinancialValueSummary', () => {
     );
 
     await userEvent.click(screen.getByRole('button', { name: /IT/ }));
-    expect(onAreaClick).toHaveBeenCalledWith({ id: 42, name: 'IT' });
+    expect(onAreaClick).toHaveBeenCalledWith({ id: uid(42), name: 'IT' });
   });
 
   it('is not rendered as a clickable button when onAreaClick is not provided', () => {
@@ -283,10 +284,10 @@ describe('FinancialValueSummary', () => {
     render(
       <FinancialValueSummary
         financialValues={[]}
-        budgets={[budget({ businessAreaId: 42, areaName: 'IT', percentUsed: 50 })]}
+        budgets={[budget({ businessAreaId: uid(42), areaName: 'IT', percentUsed: 50 })]}
         year={2026}
         isAdmin={false}
-        selectedAreaId={42}
+        selectedAreaId={uid(42)}
         onAreaClick={jest.fn()}
       />
     );
@@ -321,9 +322,9 @@ describe('FinancialValueSummary — pace within the year', () => {
       <FinancialValueSummary
         financialValues={[]}
         budgets={[
-          budget({ id: 1, areaName: 'Ahead', percentUsed: 90 }),
-          budget({ id: 2, areaName: 'Slightly behind', percentUsed: 70 }),
-          budget({ id: 3, areaName: 'Far behind', percentUsed: 18 }),
+          budget({ id: uid(1), areaName: 'Ahead', percentUsed: 90 }),
+          budget({ id: uid(2), areaName: 'Slightly behind', percentUsed: 70 }),
+          budget({ id: uid(3), areaName: 'Far behind', percentUsed: 18 }),
         ]}
         year={2026}
         isAdmin={false}

@@ -7,7 +7,7 @@ import api from "@/lib/api";
 import type { Budget, FinancialCategory } from "@/types";
 
 export type BudgetUpsertPayload = {
-  businessAreaId: number;
+  businessAreaId: string;
   category: FinancialCategory;
   year: number;
   targetAmount: number;
@@ -24,12 +24,12 @@ export const budgetsService = {
     return res.data;
   },
 
-  update: async (id: number, payload: BudgetUpsertPayload): Promise<Budget> => {
+  update: async (id: string, payload: BudgetUpsertPayload): Promise<Budget> => {
     const res = await api.put<Budget>(`/budgets/${id}`, payload);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/budgets/${id}`);
   },
 };

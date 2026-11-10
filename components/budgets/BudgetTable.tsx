@@ -58,7 +58,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
   }>({ open: false, budget: null });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => budgetsService.delete(id),
+    mutationFn: (id: string) => budgetsService.delete(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.budgets });
       toast.success("Budget eliminato");

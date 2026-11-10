@@ -17,11 +17,12 @@ jest.mock('next/navigation', () => ({ useRouter: () => ({ push: jest.fn() }) }))
 
 import api from '@/lib/api';
 import NotificationBell from '@/components/layout/NotificationBell';
+import { uid } from "../mocks/ids";
 
-const unread  = { id: 1, title: 'New Contract', message: 'A new contract was added', read: false, createdAt: new Date().toISOString(),                        type: 'INFO' as const };
-const read    = { id: 2, title: 'Reminder',     message: 'Contract expiring',         read: true,  createdAt: new Date(Date.now() - 1800000).toISOString(),  type: 'WARNING' as const }; // 30m ago
-const error   = { id: 3, title: 'Error',         message: 'Something failed',          read: false, createdAt: new Date(Date.now() - 3700000).toISOString(),  type: 'ERROR' as const };  // 1h ago
-const oldNote = { id: 4, title: 'Old',           message: 'Old notification',          read: true,  createdAt: new Date(Date.now() - 90000000).toISOString(), type: 'INFO' as const };   // 1d ago
+const unread  = { id: uid(1), title: 'New Contract', message: 'A new contract was added', read: false, createdAt: new Date().toISOString(),                        type: 'INFO' as const };
+const read    = { id: uid(2), title: 'Reminder',     message: 'Contract expiring',         read: true,  createdAt: new Date(Date.now() - 1800000).toISOString(),  type: 'WARNING' as const }; // 30m ago
+const error   = { id: uid(3), title: 'Error',         message: 'Something failed',          read: false, createdAt: new Date(Date.now() - 3700000).toISOString(),  type: 'ERROR' as const };  // 1h ago
+const oldNote = { id: uid(4), title: 'Old',           message: 'Old notification',          read: true,  createdAt: new Date(Date.now() - 90000000).toISOString(), type: 'INFO' as const };   // 1d ago
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -82,12 +83,12 @@ describe('NotificationBell', () => {
     expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
     await userEvent.click(screen.getByRole('button', { name: /segna come letta/i }));
-    expect(api.patch).toHaveBeenCalledWith('/notifications/1/read');
+    expect(api.patch).toHaveBeenCalledWith(`/notifications/${uid(1)}/read`);
   });
 
   it('marks all notifications as read', async () => {
     (api.patch as jest.Mock).mockResolvedValue({});
-    (api.get as jest.Mock).mockResolvedValue({ data: [unread, { ...unread, id: 5 }] });
+    (api.get as jest.Mock).mockResolvedValue({ data: [unread, { ...unread, id: uid(5) }] });
     render(<NotificationBell />, { wrapper: createWrapper() });
     expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /notifiche/i }));
@@ -116,7 +117,7 @@ describe('NotificationBell', () => {
   });
 
   it('renders notification with unknown type falls back to INFO dot via outer ??', async () => {
-    const unknownType = { id: 20, title: 'Critical', message: 'msg', read: false, createdAt: new Date().toISOString(), type: 'CRITICAL' as 'INFO' };
+    const unknownType = { id: uid(20), title: 'Critical', message: 'msg', read: false, createdAt: new Date().toISOString(), type: 'CRITICAL' as 'INFO' };
     (api.get as jest.Mock).mockResolvedValue({ data: [unknownType] });
     render(<NotificationBell />, { wrapper: createWrapper() });
     expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();
@@ -125,7 +126,7 @@ describe('NotificationBell', () => {
   });
 
   it('renders notification with no type (falls back to INFO dot color)', async () => {
-    const noType = { id: 10, title: 'No type', message: 'msg', read: false, createdAt: new Date().toISOString() };
+    const noType = { id: uid(10), title: 'No type', message: 'msg', read: false, createdAt: new Date().toISOString() };
     (api.get as jest.Mock).mockResolvedValue({ data: [noType] });
     render(<NotificationBell />, { wrapper: createWrapper() });
     expect(await screen.findByRole('button', { name: /notifiche/i })).toBeInTheDocument();

@@ -99,24 +99,25 @@ import { useManagers } from '@/hooks/useManagers';
 import { useCounterparties } from '@/hooks/useCounterparties';
 import { useAuthStore } from '@/store/authStore';
 import InstantiateTemplateDialog from '@/components/contract-templates/InstantiateTemplateDialog';
+import { uid } from "../mocks/ids";
 
-const baseTemplate = { id: 3, name: 'NDA Standard', autoRenew: false } as never;
+const baseTemplate = { id: uid(3), name: 'NDA Standard', autoRenew: false } as never;
 const fullTemplate = {
-  id: 4,
+  id: uid(4),
   name: 'Full Template',
   autoRenew: true,
   defaultStatus: 'ACTIVE',
   defaultDurationDays: 60,
-  businessAreaId: 1,
-  defaultManagerId: 1,
+  businessAreaId: uid(1),
+  defaultManagerId: uid(1),
 } as never;
 const onOpenChange = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
-  (useBusinessAreas as jest.Mock).mockReturnValue({ data: [{ id: 1, name: 'Eng', description: '' }], isLoading: false, isError: false });
-  (useManagers as jest.Mock).mockReturnValue({ data: [{ id: 1, firstName: 'Marco', lastName: 'Rossi' }], isLoading: false, isError: false });
-  (useCounterparties as jest.Mock).mockReturnValue({ data: [{ id: 1, name: 'Acme Corp', type: 'CUSTOMER' }], isLoading: false, isError: false });
+  (useBusinessAreas as jest.Mock).mockReturnValue({ data: [{ id: uid(1), name: 'Eng', description: '' }], isLoading: false, isError: false });
+  (useManagers as jest.Mock).mockReturnValue({ data: [{ id: uid(1), firstName: 'Marco', lastName: 'Rossi' }], isLoading: false, isError: false });
+  (useCounterparties as jest.Mock).mockReturnValue({ data: [{ id: uid(1), name: 'Acme Corp', type: 'CUSTOMER' }], isLoading: false, isError: false });
 });
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -228,7 +229,7 @@ describe('InstantiateTemplateDialog', () => {
   });
 
   it('submits the form and shows success toast', async () => {
-    const contract = { id: 99, counterparty: { id: 1, name: 'Acme Corp', type: 'CUSTOMER' } };
+    const contract = { id: uid(99), counterparty: { id: uid(1), name: 'Acme Corp', type: 'CUSTOMER' } };
     mockInstantiate.mockResolvedValueOnce(contract);
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
@@ -237,8 +238,8 @@ describe('InstantiateTemplateDialog', () => {
     await fillAndSubmit();
     await waitFor(() =>
       expect(mockInstantiate).toHaveBeenCalledWith(
-        3,
-        expect.objectContaining({ counterpartyId: 1, contractNumber: 'CTR-2024-001', startDate: '2024-01-01' })
+        uid(3),
+        expect.objectContaining({ counterpartyId: uid(1), contractNumber: 'CTR-2024-001', startDate: '2024-01-01' })
       )
     );
     await waitFor(() =>
@@ -247,7 +248,7 @@ describe('InstantiateTemplateDialog', () => {
   });
 
   it('navigates to the new contract when the success toast action is clicked', async () => {
-    const contract = { id: 99, counterparty: { id: 1, name: 'Acme Corp', type: 'CUSTOMER' } };
+    const contract = { id: uid(99), counterparty: { id: uid(1), name: 'Acme Corp', type: 'CUSTOMER' } };
     mockInstantiate.mockResolvedValueOnce(contract);
     render(
       <InstantiateTemplateDialog template={baseTemplate} open={true} onOpenChange={onOpenChange} />,
@@ -257,7 +258,7 @@ describe('InstantiateTemplateDialog', () => {
     await waitFor(() => expect(toast.success).toHaveBeenCalled());
     const [, options] = (toast.success as jest.Mock).mock.calls[0];
     options.action.onClick();
-    expect(mockPush).toHaveBeenCalledWith('/contracts/99');
+    expect(mockPush).toHaveBeenCalledWith(`/contracts/${uid(99)}`);
   });
 
   it('shows error toast when instantiate fails', async () => {
@@ -284,7 +285,7 @@ describe('InstantiateTemplateDialog', () => {
 
   it('shows the admin-specific banner message and action link when the caller is an ADMIN', () => {
     useAuthStore.setState({
-      user: { id: 1, username: 'admin', managerId: 0, role: 'ADMIN', roleId: 1, verified: true, createdAt: '' },
+      user: { id: uid(1), username: 'admin', managerId: uid(0), role: 'ADMIN', roleId: uid(1), verified: true, createdAt: '' },
     });
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false, isSuccess: true });
     try {

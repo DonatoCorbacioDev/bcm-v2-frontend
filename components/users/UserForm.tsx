@@ -63,8 +63,8 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
       : {
         username: "",
         password: "",
-        managerId: 0,
-        roleId: 0,
+        managerId: "",
+        roleId: "",
         verified: false,
         canApproveContracts: false,
       },
@@ -149,7 +149,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           render={({ field }) => (
             <Select
               value={/* istanbul ignore next */field.value?.toString()}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
               disabled={loadingManagers}
             >
               <SelectTrigger className={errors.managerId ? "border-destructive" : ""}>
@@ -181,7 +181,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
           render={({ field }) => (
             <Select
               value={/* istanbul ignore next */field.value?.toString()}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
               disabled={loadingRoles}
             >
               <SelectTrigger className={errors.roleId ? "border-destructive" : ""}>

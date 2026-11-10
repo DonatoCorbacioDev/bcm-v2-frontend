@@ -1,3 +1,4 @@
+import { uid } from "../mocks/ids";
 // Tests for lib/api.ts using jest.resetModules so each test loads a fresh
 // copy of the module with the desired env configuration.
 
@@ -168,7 +169,7 @@ describe('lib/api', () => {
 
   it('response success handler returns the response unchanged', () => {
     loadModule('http://localhost:8080');
-    const response = { data: { id: 1 }, status: 200 };
+    const response = { data: { id: uid(1) }, status: 200 };
     expect(resSuccessFn!(response)).toBe(response);
   });
 

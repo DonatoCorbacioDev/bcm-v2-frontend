@@ -8,7 +8,7 @@ import type { AxiosError } from "axios";
 import { counterpartiesService, type VerifyIbanPayload } from "@/services/counterparties.service";
 import type { Counterparty } from "@/types";
 
-export function useConfirmVerifiedIban(counterpartyId: number) {
+export function useConfirmVerifiedIban(counterpartyId: string) {
   const queryClient = useQueryClient();
 
   return useMutation<Counterparty, AxiosError<{ message?: string }>, VerifyIbanPayload>({

@@ -1,7 +1,8 @@
 import { budgetSchema } from "@/lib/validations/budget.schema";
+import { uid } from "../mocks/ids";
 
 const validData = {
-  businessAreaId: 1,
+  businessAreaId: uid(1),
   category: "COST" as const,
   year: 2025,
   targetAmount: 50000,
@@ -19,8 +20,8 @@ describe("budgetSchema", () => {
       expect(result.success).toBe(false);
     });
 
-    it("rejects a non-positive businessAreaId", () => {
-      const result = budgetSchema.safeParse({ ...validData, businessAreaId: 0 });
+    it("rejects an empty or malformed businessAreaId", () => {
+      const result = budgetSchema.safeParse({ ...validData, businessAreaId: "" });
       expect(result.success).toBe(false);
     });
   });
@@ -55,7 +56,7 @@ describe("budgetSchema", () => {
   });
 
   describe("targetAmount", () => {
-    it("rejects a non-positive targetAmount", () => {
+    it("rejects an empty or malformed targetAmount", () => {
       const result = budgetSchema.safeParse({ ...validData, targetAmount: 0 });
       expect(result.success).toBe(false);
     });

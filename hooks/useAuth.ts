@@ -22,11 +22,11 @@ export type LoginResult =
   | { success: false; mfaRequired: false };
 
 interface UserProfile {
-  id: number;
+  id: string;
   username: string;
-  managerId: number;
+  managerId: string;
   role: string;
-  roleId: number;
+  roleId: string;
   verified: boolean;
   createdAt: string;
   canApproveContracts: boolean;

@@ -9,7 +9,7 @@ import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
 
 type UpsertManagerParams =
   | { mode: "create"; payload: ManagerUpsertPayload }
-  | { mode: "update"; id: number; payload: ManagerUpsertPayload };
+  | { mode: "update"; id: string; payload: ManagerUpsertPayload };
 
 export function useUpsertManager() {
   const queryClient = useQueryClient();

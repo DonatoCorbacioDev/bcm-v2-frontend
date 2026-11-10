@@ -1,12 +1,13 @@
 import { financialValueSchema } from "@/lib/validations/financialValue.schema";
+import { uid } from "../mocks/ids";
 
 const validData = {
   month: 6,
   year: 2025,
   financialAmount: 15000.5,
-  financialTypeId: 1,
-  businessAreaId: 2,
-  contractId: 3,
+  financialTypeId: uid(1),
+  businessAreaId: uid(2),
+  contractId: uid(3),
 };
 
 describe("financialValueSchema", () => {
@@ -64,17 +65,17 @@ describe("financialValueSchema", () => {
   });
 
   describe("financialTypeId / businessAreaId / contractId", () => {
-    it("rejects non-positive financialTypeId", () => {
-      expect(financialValueSchema.safeParse({ ...validData, financialTypeId: 0 }).success).toBe(false);
-      expect(financialValueSchema.safeParse({ ...validData, financialTypeId: -1 }).success).toBe(false);
+    it("rejects an empty or malformed financialTypeId", () => {
+      expect(financialValueSchema.safeParse({ ...validData, financialTypeId: "" }).success).toBe(false);
+      expect(financialValueSchema.safeParse({ ...validData, financialTypeId: "not-a-uuid" }).success).toBe(false);
     });
 
-    it("rejects non-positive businessAreaId", () => {
-      expect(financialValueSchema.safeParse({ ...validData, businessAreaId: 0 }).success).toBe(false);
+    it("rejects an empty or malformed businessAreaId", () => {
+      expect(financialValueSchema.safeParse({ ...validData, businessAreaId: "" }).success).toBe(false);
     });
 
-    it("rejects non-positive contractId", () => {
-      expect(financialValueSchema.safeParse({ ...validData, contractId: 0 }).success).toBe(false);
+    it("rejects an empty or malformed contractId", () => {
+      expect(financialValueSchema.safeParse({ ...validData, contractId: "" }).success).toBe(false);
     });
 
     it("rejects non-integer IDs", () => {

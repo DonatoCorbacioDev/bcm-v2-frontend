@@ -7,18 +7,18 @@ import { useQuery } from "@tanstack/react-query";
 import { counterpartiesService } from "@/services/counterparties.service";
 import type { Counterparty, CounterpartyInvoicingSummary } from "@/types";
 
-export function useCounterparty(id: number) {
+export function useCounterparty(id: string) {
   return useQuery<Counterparty>({
     queryKey: ["counterparty", id],
     queryFn: () => counterpartiesService.getById(id),
-    enabled: !!id && id > 0,
+    enabled: !!id,
   });
 }
 
-export function useCounterpartyInvoicingSummary(id: number) {
+export function useCounterpartyInvoicingSummary(id: string) {
   return useQuery<CounterpartyInvoicingSummary>({
     queryKey: ["counterparty", id, "invoicing-summary"],
     queryFn: () => counterpartiesService.getInvoicingSummary(id),
-    enabled: !!id && id > 0,
+    enabled: !!id,
   });
 }

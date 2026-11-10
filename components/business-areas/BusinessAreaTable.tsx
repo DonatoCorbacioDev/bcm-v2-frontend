@@ -73,7 +73,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   }>({ open: false, businessArea: null });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await businessAreasService.delete(id);
     },
     onSuccess: () => {

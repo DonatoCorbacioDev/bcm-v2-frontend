@@ -20,14 +20,14 @@ export const userCreateSchema = z.object({
     .max(100, "La password non può superare i 100 caratteri"),
 
   managerId: z
-    .number({ message: "Il manager è obbligatorio" })
-    .int()
-    .positive("Seleziona un manager valido"),
+    .string({ message: "Il manager è obbligatorio" })
+    .min(1, "Il manager è obbligatorio")
+    .uuid("Seleziona un manager valido"),
 
   roleId: z
-    .number({ message: "Il ruolo è obbligatorio" })
-    .int()
-    .positive("Seleziona un ruolo valido"),
+    .string({ message: "Il ruolo è obbligatorio" })
+    .min(1, "Il ruolo è obbligatorio")
+    .uuid("Seleziona un ruolo valido"),
 
   verified: z.boolean(),
 
@@ -51,14 +51,14 @@ export const userUpdateSchema = z.object({
     .or(z.literal("")),
 
   managerId: z
-    .number({ message: "Il manager è obbligatorio" })
-    .int()
-    .positive("Seleziona un manager valido"),
+    .string({ message: "Il manager è obbligatorio" })
+    .min(1, "Il manager è obbligatorio")
+    .uuid("Seleziona un manager valido"),
 
   roleId: z
-    .number({ message: "Il ruolo è obbligatorio" })
-    .int()
-    .positive("Seleziona un ruolo valido"),
+    .string({ message: "Il ruolo è obbligatorio" })
+    .min(1, "Il ruolo è obbligatorio")
+    .uuid("Seleziona un ruolo valido"),
 
   verified: z.boolean(),
 

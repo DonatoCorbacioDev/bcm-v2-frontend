@@ -16,17 +16,18 @@ jest.mock('@/store/authStore', () => ({
 }));
 
 jest.mock('@/lib/api', () => {
-  const shared = { get: jest.fn().mockResolvedValue({ data: [{ id: 1, name: 'IT' }] }) };
+  const shared = { get: jest.fn().mockResolvedValue({ data: [{ id: '00000000-0000-4000-8000-000000000001', name: 'IT' }] }) };
   return { __esModule: true, api: shared, default: shared };
 });
 
 import DashboardPage from '@/app/(dashboard)/dashboard/page';
 import { useHomeAttention } from '@/hooks/useHomeAttention';
 import { useAuthStore } from '@/store/authStore';
+import { uid } from "../mocks/ids";
 
 const item = (overrides: Partial<HomeAttentionItem>): HomeAttentionItem => ({
   type: 'EXPIRY',
-  contractId: 1,
+  contractId: uid(1),
   contractNumber: 'NRT-2024-004',
   counterpartyName: 'Vertice Legal S.r.l.',
   projectName: 'Audit di Conformità',
@@ -55,23 +56,23 @@ const showing = (data: HomeAttention | undefined, state: { isLoading?: boolean; 
 beforeEach(() => {
   jest.clearAllMocks();
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector({ user: { id: 4, username: 'demo', role: 'MANAGER' } }));
+    selector({ user: { id: uid(4), username: 'demo', role: 'MANAGER' } }));
 });
 
 describe('Home', () => {
   it('says what to do, by when and who follows it, each linked to where it gets done', () => {
     showing(home([
-      item({ type: 'IBAN_CHANGED', contractId: 8, counterpartyName: 'Ferri & Associati S.r.l.', invoiceId: 31, invoiceNumber: 'FA-2026-11', dueDate: '2026-11-01', daysLeft: -3 }),
-      item({ type: 'NOTICE_DEADLINE', contractId: 9, projectName: 'Manutenzione impianti', counterpartyName: 'Rossi Impianti S.r.l.', dueDate: '2026-11-24', daysLeft: 20, renewalMonths: 12 }),
+      item({ type: 'IBAN_CHANGED', contractId: uid(8), counterpartyName: 'Ferri & Associati S.r.l.', invoiceId: uid(31), invoiceNumber: 'FA-2026-11', dueDate: '2026-11-01', daysLeft: -3 }),
+      item({ type: 'NOTICE_DEADLINE', contractId: uid(9), projectName: 'Manutenzione impianti', counterpartyName: 'Rossi Impianti S.r.l.', dueDate: '2026-11-24', daysLeft: 20, renewalMonths: 12 }),
       item({}),
-      item({ type: 'INVOICE_TO_MATCH', contractId: 7, counterpartyName: 'Nuvola Cloud Services S.r.l.', invoiceId: 30, invoiceNumber: '2026/118', invoiceAmount: 4800, dueDate: '2026-11-01', daysLeft: -3 }),
+      item({ type: 'INVOICE_TO_MATCH', contractId: uid(7), counterpartyName: 'Nuvola Cloud Services S.r.l.', invoiceId: uid(30), invoiceNumber: '2026/118', invoiceAmount: 4800, dueDate: '2026-11-01', daysLeft: -3 }),
     ]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
     const rows = within(screen.getByRole('region', { name: 'Da fare' })).getAllByRole('link');
     expect(rows.map((r) => r.getAttribute('href'))).toEqual([
-      '/contracts/8?tab=invoices', '/contracts/9', '/contracts/1', '/contracts/7?tab=invoices',
+      `/contracts/${uid(8)}?tab=invoices`, `/contracts/${uid(9)}`, `/contracts/${uid(1)}`, `/contracts/${uid(7)}?tab=invoices`,
     ]);
     expect(rows[0]).toHaveTextContent('IBAN cambiato: verifica prima di pagare');
     expect(rows[0]).toHaveTextContent('La fattura FA-2026-11 di Ferri & Associati S.r.l.');
@@ -84,7 +85,7 @@ describe('Home', () => {
   });
 
   it('shows the counters of that same list', () => {
-    showing(home([item({}), item({ type: 'INVOICE_TO_MATCH', invoiceId: 30, invoiceNumber: '1' })]));
+    showing(home([item({}), item({ type: 'INVOICE_TO_MATCH', invoiceId: uid(30), invoiceNumber: '1' })]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 

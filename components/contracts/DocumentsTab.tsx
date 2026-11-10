@@ -26,7 +26,7 @@ const RISK_LEVEL_CONFIG = {
 };
 
 interface DocumentsTabProps {
-  readonly contractId: number;
+  readonly contractId: string;
   readonly isAdmin: boolean;
   readonly onApply: (detected: Partial<Contract>) => void;
 }
@@ -81,14 +81,14 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const versionInputRef = useRef<HTMLInputElement>(null);
-  const [analysisMap, setAnalysisMap] = useState<Record<number, DocumentAnalysis>>({});
-  const [expandedDoc, setExpandedDoc] = useState<number | null>(null);
-  const [clauseRiskMap, setClauseRiskMap] = useState<Record<number, ClauseRiskAnalysis>>({});
-  const [expandedRiskDoc, setExpandedRiskDoc] = useState<number | null>(null);
+  const [analysisMap, setAnalysisMap] = useState<Record<string, DocumentAnalysis>>({});
+  const [expandedDoc, setExpandedDoc] = useState<string | null>(null);
+  const [clauseRiskMap, setClauseRiskMap] = useState<Record<string, ClauseRiskAnalysis>>({});
+  const [expandedRiskDoc, setExpandedRiskDoc] = useState<string | null>(null);
   const [versionUploadTarget, setVersionUploadTarget] = useState<ContractDocument | null>(null);
   const [historyDoc, setHistoryDoc] = useState<ContractDocument | null>(null);
-  const [termsMap, setTermsMap] = useState<Record<number, ContractTerms>>({});
-  const [expandedTermsDoc, setExpandedTermsDoc] = useState<number | null>(null);
+  const [termsMap, setTermsMap] = useState<Record<string, ContractTerms>>({});
+  const [expandedTermsDoc, setExpandedTermsDoc] = useState<string | null>(null);
 
   const { data: documents, isLoading } = useQuery<ContractDocument[]>({
     queryKey: ["documents", contractId],
@@ -117,7 +117,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   });
 
   const uploadVersionMutation = useMutation({
-    mutationFn: async ({ documentId, file }: { documentId: number; file: File }) => {
+    mutationFn: async ({ documentId, file }: { documentId: string; file: File }) => {
       const formData = new FormData();
       formData.append("file", file);
       const res = await api.post(`/contracts/${contractId}/documents/${documentId}/versions`, formData, {
@@ -136,7 +136,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (documentId: number) => {
+    mutationFn: async (documentId: string) => {
       await api.delete(`/contracts/${contractId}/documents/${documentId}`);
     },
     onSuccess: () => {
@@ -147,7 +147,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   });
 
   const analyzeMutation = useMutation({
-    mutationFn: async (documentId: number) => {
+    mutationFn: async (documentId: string) => {
       const res = await api.post<DocumentAnalysis>(
         `/contracts/${contractId}/documents/${documentId}/extract`
       );
@@ -162,7 +162,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   });
 
   const termsMutation = useMutation({
-    mutationFn: async (documentId: number) => {
+    mutationFn: async (documentId: string) => {
       const res = await api.get<ContractTerms>(`/contracts/${contractId}/documents/${documentId}/terms`);
       return res.data;
     },
@@ -173,7 +173,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
     onError: () => toast.error("Lettura del documento non riuscita"),
   });
 
-  const toggleTerms = (documentId: number) => {
+  const toggleTerms = (documentId: string) => {
     if (termsMap[documentId]) {
       setExpandedTermsDoc(expandedTermsDoc === documentId ? null : documentId);
     } else {
@@ -182,7 +182,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
   };
 
   const clauseRiskMutation = useMutation({
-    mutationFn: async (documentId: number) => {
+    mutationFn: async (documentId: string) => {
       const res = await api.post<ClauseRiskAnalysis>(
         `/contracts/${contractId}/documents/${documentId}/analyze-clause-risk`
       );

@@ -191,7 +191,7 @@ export default function ContractTemplateForm({
             <Label htmlFor="businessAreaId">Area di business predefinita</Label>
             <Select
               value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
+              onValueChange={/* istanbul ignore next */ (v) => field.onChange(v || null)}
             >
               <SelectTrigger id="businessAreaId">
                 <SelectValue placeholder="Nessuna (obbligatoria all'istanziazione)" />
@@ -226,7 +226,7 @@ export default function ContractTemplateForm({
             <Label htmlFor="defaultManagerId">Responsabile predefinito</Label>
             <Select
               value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (v) => field.onChange(v ? Number(v) : null)}
+              onValueChange={/* istanbul ignore next */ (v) => field.onChange(v || null)}
             >
               <SelectTrigger id="defaultManagerId">
                 <SelectValue placeholder="Nessuno" />

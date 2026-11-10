@@ -98,7 +98,7 @@ export default function BudgetForm({ onClose, onSuccess, budget }: BudgetFormPro
             </Label>
             <Select
               value={/* istanbul ignore next */ field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
             >
               <SelectTrigger id="businessAreaId">
                 <SelectValue placeholder="Seleziona area" />

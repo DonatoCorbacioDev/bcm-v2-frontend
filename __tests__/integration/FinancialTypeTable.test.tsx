@@ -44,11 +44,12 @@ import { toast } from 'sonner';
 import { useFinancialTypes } from '@/hooks/useFinancialTypes';
 import { financialTypesService } from '@/services/financialTypes.service';
 import FinancialTypeTable from '@/components/financial-types/FinancialTypeTable';
+import { uid } from "../mocks/ids";
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
-const type1: FinancialType = { id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' };
-const type2: FinancialType = { id: 2, name: 'Expense', description: 'Expense type', category: 'COST' };
+const type1: FinancialType = { id: uid(1), name: 'Revenue', description: 'Revenue type', category: 'REVENUE' };
+const type2: FinancialType = { id: uid(2), name: 'Expense', description: 'Expense type', category: 'COST' };
 
 // ─── Test suite ──────────────────────────────────────────────────────────────
 
@@ -150,7 +151,7 @@ describe('FinancialTypeTable', () => {
     const rows = screen.getAllByRole('row');
     await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
     expect(onEditClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, name: 'Revenue' })
+      expect.objectContaining({ id: uid(1), name: 'Revenue' })
     );
   });
 

@@ -11,9 +11,9 @@ import { z } from "zod";
  */
 export const budgetSchema = z.object({
   businessAreaId: z
-    .number({ message: "L'area di business è obbligatoria" })
-    .int("L'area di business deve essere un numero intero")
-    .positive("L'area di business deve essere un numero positivo"),
+    .string({ message: "L'area di business è obbligatoria" })
+    .min(1, "L'area di business è obbligatoria")
+    .uuid("L'area di business è obbligatoria"),
 
   category: z.enum(["REVENUE", "COST"], { message: "Seleziona una categoria" }),
 

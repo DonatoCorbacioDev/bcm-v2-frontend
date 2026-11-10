@@ -30,14 +30,15 @@ jest.mock('@/lib/api', () => {
 import { useDashboardStats, useInvoicingSummary } from '@/hooks/useDashboardStats';
 import { useExpiringContracts } from '@/hooks/useExpiringContracts';
 import { api } from '@/lib/api';
+import { uid } from "../mocks/ids";
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const baseContract: Omit<Contract, 'id' | 'contractNumber' | 'counterpartyId' | 'counterparty' | 'daysUntilExpiry'> = {
   wbsCode: 'WBS-001',
   projectName: 'Project',
-  areaId: 1,
-  managerId: 1,
+  areaId: uid(1),
+  managerId: uid(1),
   managerName: 'John Doe',
   startDate: '2024-01-01',
   endDate: '2024-12-31',
@@ -47,24 +48,24 @@ const baseContract: Omit<Contract, 'id' | 'contractNumber' | 'counterpartyId' | 
 
 const criticalContract: Contract = {
   ...baseContract,
-  id: 1,
+  id: uid(1),
   contractNumber: 'CNT-CRIT',
-  counterpartyId: 1,
-  counterparty: { id: 1, name: 'Urgent Corp', type: 'CUSTOMER' },
+  counterpartyId: uid(1),
+  counterparty: { id: uid(1), name: 'Urgent Corp', type: 'CUSTOMER' },
   daysUntilExpiry: 3,
 };
 
 const nonCriticalContract: Contract = {
   ...baseContract,
-  id: 2,
+  id: uid(2),
   contractNumber: 'CNT-SOON',
-  counterpartyId: 2,
-  counterparty: { id: 2, name: 'Later Corp', type: 'CUSTOMER' },
+  counterpartyId: uid(2),
+  counterparty: { id: uid(2), name: 'Later Corp', type: 'CUSTOMER' },
   daysUntilExpiry: 20,
 };
 
 const highRiskScore = {
-  contractId: 3,
+  contractId: uid(3),
   customerName: 'Risky SpA',
   riskScore: 0.9,
   level: 'HIGH' as const,
@@ -153,7 +154,7 @@ describe('AnalyticsSections', () => {
 
     render(<AnalyticsSections />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/urgent corp/i).closest('a')).toHaveAttribute('href', '/contracts/1');
+    expect(screen.getByText(/urgent corp/i).closest('a')).toHaveAttribute('href', `/contracts/${uid(1)}`);
   });
 
   it('falls back to "N/D" for a critical renewal with no counterparty', async () => {

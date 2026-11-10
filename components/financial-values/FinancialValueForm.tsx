@@ -204,7 +204,7 @@ export default function FinancialValueForm({
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleziona contratto" />
@@ -235,7 +235,7 @@ export default function FinancialValueForm({
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleziona tipo" />
@@ -268,7 +268,7 @@ export default function FinancialValueForm({
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Seleziona area" />

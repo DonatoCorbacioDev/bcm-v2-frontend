@@ -9,16 +9,16 @@ import type { BillingFrequency, Contract, ContractImportResult, ContractsByArea,
 export type ContractStatus = "ACTIVE" | "EXPIRED" | "CANCELLED" | "DRAFT";
 
 export type ContractUpsertPayload = {
-  counterpartyId: number;
+  counterpartyId: string;
   contractNumber: string;
   wbsCode?: string;
   projectName?: string;
   startDate: string;
   endDate: string;
   status: ContractStatus;
-  areaId: number;
-  managerId: number;
-  financialTypeId?: number | null;
+  areaId: string;
+  managerId: string;
+  financialTypeId?: string | null;
   annualValue?: number | null;
   billingFrequency?: BillingFrequency | null;
   autoRenew?: boolean | null;
@@ -53,21 +53,21 @@ export const contractsService = {
     return res.data;
   },
 
-  update: async (id: number, payload: ContractUpsertPayload): Promise<Contract> => {
+  update: async (id: string, payload: ContractUpsertPayload): Promise<Contract> => {
     const res = await api.put<Contract>(`/contracts/${id}`, payload);
     return res.data;
   },
 
-  getById: async (id: number): Promise<Contract> => {
+  getById: async (id: string): Promise<Contract> => {
     const res = await api.get<Contract>(`/contracts/${id}`);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/contracts/${id}`);
   },
 
-  generateFinancialValues: async (id: number): Promise<FinancialGenerationResult> => {
+  generateFinancialValues: async (id: string): Promise<FinancialGenerationResult> => {
     const res = await api.post<FinancialGenerationResult>(`/contracts/${id}/generate-financial-values`);
     return res.data;
   },

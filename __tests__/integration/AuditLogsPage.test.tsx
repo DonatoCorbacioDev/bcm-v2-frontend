@@ -18,14 +18,15 @@ jest.mock('@/lib/api', () => ({
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import AuditLogsPage from '@/app/(dashboard)/audit-logs/page';
+import { uid } from "../mocks/ids";
 
 const baseLog = {
-  id: 1,
+  id: uid(1),
   action: 'CREATE',
   entityType: 'BusinessArea',
-  entityId: 8,
+  entityId: uid(8),
   username: 'qa_sweep_admin',
-  orgId: 1,
+  orgId: uid(1),
   timestamp: '2026-08-20T16:35:59Z',
   details: null,
 };
@@ -63,8 +64,8 @@ describe('AuditLogsPage — Italian labels', () => {
     (api.get as jest.Mock).mockResolvedValue({
       data: {
         content: [
-          { ...baseLog, id: 1, entityType: 'Counterparty', entityId: 69 },
-          { ...baseLog, id: 2, action: 'SEPA_IBAN_MISMATCH_BLOCKED', entityType: 'Counterparty', entityId: 70 },
+          { ...baseLog, id: uid(1), entityType: 'Counterparty', entityId: '0d4704b8-2b40-4101-8cea-b897d01dedf7' },
+          { ...baseLog, id: uid(2), action: 'SEPA_IBAN_MISMATCH_BLOCKED', entityType: 'Counterparty', entityId: uid(70) },
         ],
         totalPages: 1, totalElements: 2, number: 0, size: 20,
       },
@@ -72,7 +73,7 @@ describe('AuditLogsPage — Italian labels', () => {
 
     render(<AuditLogsPage />, { wrapper: createWrapper() });
 
-    expect(await screen.findByText('Controparte #69 — creazione')).toBeInTheDocument();
+    expect(await screen.findByText('Controparte #0d4704b8 — creazione')).toBeInTheDocument();
     expect(screen.getAllByText('Pagamento bloccato: IBAN diverso').length).toBeGreaterThan(0);
     expect(screen.queryByText(/Counterparty/)).not.toBeInTheDocument();
   });

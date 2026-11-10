@@ -10,9 +10,10 @@ jest.mock('@/lib/api', () => ({
 
 import api from '@/lib/api';
 import DocumentsTab from '@/components/contracts/DocumentsTab';
+import { uid } from "../mocks/ids";
 
 const doc = {
-  id: 1, contractId: 1, fileName: 'contract.pdf',
+  id: uid(1), contractId: uid(1), fileName: 'contract.pdf',
   fileSize: 1500000, contentType: 'application/pdf',
   uploadedAt: '2024-03-15T10:00:00Z', downloadUrl: '',
 };
@@ -21,7 +22,7 @@ describe('DocumentsTab — default, AI actions off', () => {
   it('keeps upload, versions and download, and hides field extraction and clause risk', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
 
-    render(<DocumentsTab contractId={1} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin onApply={jest.fn()} />, { wrapper: createWrapper() });
 
     expect(await screen.findByText('contract.pdf')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Scarica documento' })).toBeInTheDocument();

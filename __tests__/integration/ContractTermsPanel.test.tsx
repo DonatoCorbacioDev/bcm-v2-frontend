@@ -2,13 +2,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import ContractTermsPanel from '@/components/contracts/ContractTermsPanel';
 import type { ContractTerm } from '@/types';
+import { uid } from "../mocks/ids";
 
 const term = (field: ContractTerm['field'], value: string, asWritten: string): ContractTerm => ({
   field, value, asWritten, sentence: `frase per ${field}`,
 });
 
 const renderTerms = (terms: ContractTerm[]) =>
-  render(<ContractTermsPanel result={{ documentId: 1, terms } as never} isAdmin={false} onApply={jest.fn()} />);
+  render(<ContractTermsPanel result={{ documentId: uid(1), terms } as never} isAdmin={false} onApply={jest.fn()} />);
 
 describe('ContractTermsPanel — how each value is written', () => {
   it('says "No" when the text excludes the tacit renewal', () => {

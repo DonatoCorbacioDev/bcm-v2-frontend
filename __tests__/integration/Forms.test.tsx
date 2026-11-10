@@ -100,6 +100,7 @@ import UserForm from '@/components/users/UserForm';
 import ContractForm from '@/components/contracts/ContractForm';
 import FinancialValueForm from '@/components/financial-values/FinancialValueForm';
 import BudgetForm from '@/components/budgets/BudgetForm';
+import { uid } from "../mocks/ids";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -108,12 +109,12 @@ const mockMutation = (opts: { mutateAsync?: jest.Mock; isPending?: boolean } = {
   isPending: opts.isPending ?? false,
 });
 
-const managers = [{ id: 1, firstName: 'John', lastName: 'Doe', email: 'j@d.com', phoneNumber: '123', department: 'IT' }];
-const roles = [{ id: 1, role: 'ADMIN' }];
-const businessAreas = [{ id: 1, name: 'Engineering', description: 'Eng' }];
-const counterparties = [{ id: 1, name: 'Acme', type: 'CUSTOMER' as const }];
-const contracts = [{ id: 1, contractNumber: 'CNT-001', counterpartyId: 1, counterparty: counterparties[0], projectName: 'P', wbsCode: 'W', areaId: 1, managerId: 1, startDate: '2024-01-01', endDate: '2024-12-31', status: 'ACTIVE', createdAt: '2024-01-01' }];
-const financialTypes = [{ id: 1, name: 'Revenue', description: 'Rev', category: 'REVENUE' as const }];
+const managers = [{ id: uid(1), firstName: 'John', lastName: 'Doe', email: 'j@d.com', phoneNumber: '123', department: 'IT' }];
+const roles = [{ id: uid(1), role: 'ADMIN' }];
+const businessAreas = [{ id: uid(1), name: 'Engineering', description: 'Eng' }];
+const counterparties = [{ id: uid(1), name: 'Acme', type: 'CUSTOMER' as const }];
+const contracts = [{ id: uid(1), contractNumber: 'CNT-001', counterpartyId: uid(1), counterparty: counterparties[0], projectName: 'P', wbsCode: 'W', areaId: uid(1), managerId: uid(1), startDate: '2024-01-01', endDate: '2024-12-31', status: 'ACTIVE', createdAt: '2024-01-01' }];
+const financialTypes = [{ id: uid(1), name: 'Revenue', description: 'Rev', category: 'REVENUE' as const }];
 
 // ─── BusinessAreaForm ─────────────────────────────────────────────────────────
 
@@ -133,7 +134,7 @@ describe('BusinessAreaForm', () => {
 
   it('renders Update button in edit mode', () => {
     render(
-      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: 1, name: 'Eng', description: 'Engineering' }} />,
+      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: uid(1), name: 'Eng', description: 'Engineering' }} />,
       { wrapper: createWrapper() }
     );
     expect(screen.getByRole('button', { name: /aggiorna/i })).toBeInTheDocument();
@@ -141,7 +142,7 @@ describe('BusinessAreaForm', () => {
 
   it('pre-fills fields in edit mode', () => {
     render(
-      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: 1, name: 'Eng', description: 'Engineering dept' }} />,
+      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: uid(1), name: 'Eng', description: 'Engineering dept' }} />,
       { wrapper: createWrapper() }
     );
     expect(screen.getByDisplayValue('Eng')).toBeInTheDocument();
@@ -160,7 +161,7 @@ describe('BusinessAreaForm', () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: 1, name: 'Eng', description: 'Engineering dept' }} />,
+      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: uid(1), name: 'Eng', description: 'Engineering dept' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -174,7 +175,7 @@ describe('BusinessAreaForm', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
     (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: 1, name: 'Eng', description: 'Engineering dept' }} />,
+      <BusinessAreaForm onClose={onClose} onSuccess={onSuccess} businessArea={{ id: uid(1), name: 'Eng', description: 'Engineering dept' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -227,7 +228,7 @@ describe('CounterpartyForm', () => {
 
   it('renders Update button in edit mode', () => {
     render(
-      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }} />,
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER' }} />,
       { wrapper: createWrapper() }
     );
     expect(screen.getByRole('button', { name: /aggiorna/i })).toBeInTheDocument();
@@ -235,7 +236,7 @@ describe('CounterpartyForm', () => {
 
   it('pre-fills fields in edit mode', () => {
     render(
-      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'SUPPLIER' }} />,
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: uid(1), name: 'Alfa Srl', type: 'SUPPLIER' }} />,
       { wrapper: createWrapper() }
     );
     expect(screen.getByDisplayValue('Alfa Srl')).toBeInTheDocument();
@@ -254,7 +255,7 @@ describe('CounterpartyForm', () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }} />,
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -268,7 +269,7 @@ describe('CounterpartyForm', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
     (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: 1, name: 'Alfa Srl', type: 'CUSTOMER' }} />,
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -306,7 +307,7 @@ describe('CounterpartyForm', () => {
         onClose={onClose}
         onSuccess={onSuccess}
         counterparty={{
-          id: 1,
+          id: uid(1),
           name: 'Alfa Srl',
           type: 'CUSTOMER',
           vatNumber: 'IT01234567890',
@@ -378,7 +379,7 @@ describe('FinancialTypeForm', () => {
 
   it('renders Update button in edit mode', () => {
     render(
-      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
+      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: uid(1), name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
       { wrapper: createWrapper() }
     );
     expect(screen.getByRole('button', { name: /aggiorna/i })).toBeInTheDocument();
@@ -388,7 +389,7 @@ describe('FinancialTypeForm', () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertFinancialType as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
+      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: uid(1), name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -411,7 +412,7 @@ describe('FinancialTypeForm', () => {
     const mutateAsync = jest.fn().mockRejectedValue(new Error('fail'));
     (useUpsertFinancialType as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(
-      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: 1, name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
+      <FinancialTypeForm onClose={onClose} onSuccess={onSuccess} financialType={{ id: uid(1), name: 'Revenue', description: 'Revenue type', category: 'REVENUE' }} />,
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
@@ -448,7 +449,7 @@ describe('FinancialTypeForm', () => {
 describe('ManagerForm', () => {
   const onClose = jest.fn();
   const onSuccess = jest.fn();
-  const validManager = { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@example.com', phoneNumber: '+39 333 1234567', department: 'IT' };
+  const validManager = { id: uid(1), firstName: 'John', lastName: 'Doe', email: 'john@example.com', phoneNumber: '+39 333 1234567', department: 'IT' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -470,7 +471,7 @@ describe('ManagerForm', () => {
     (useUpsertManager as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ManagerForm onClose={onClose} onSuccess={onSuccess} manager={validManager} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /aggiorna responsabile/i }));
-    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: uid(1) })));
     expect(toast.success).toHaveBeenCalledWith('Responsabile aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
@@ -542,7 +543,7 @@ describe('InviteUserForm', () => {
 
   // The invite endpoint only accepts MANAGER — includes ADMIN here to verify
   // it's filtered out of the rendered options, not just absent from the fixture.
-  const inviteRoles = [{ id: 1, role: 'ADMIN' }, { id: 2, role: 'MANAGER' }];
+  const inviteRoles = [{ id: uid(1), role: 'ADMIN' }, { id: uid(2), role: 'MANAGER' }];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -585,7 +586,7 @@ describe('InviteUserForm', () => {
 
     await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
     await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'MANAGER');
-    await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), '1');
+    await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), uid(1));
 
     await userEvent.click(screen.getByRole('button', { name: /invia invito/i }));
     await waitFor(() => expect(usersService.invite).toHaveBeenCalled());
@@ -598,7 +599,7 @@ describe('InviteUserForm', () => {
 
     await userEvent.type(screen.getByLabelText(/email/i), 'user@example.com');
     await userEvent.selectOptions(screen.getByLabelText(/ruolo/i), 'MANAGER');
-    await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), '1');
+    await userEvent.selectOptions(screen.getByLabelText(/responsabile/i), uid(1));
 
     await userEvent.click(screen.getByRole('button', { name: /invia invito/i }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Invio dell'invito non riuscito."));
@@ -617,7 +618,7 @@ describe('InviteUserForm', () => {
 describe('UserForm', () => {
   const onClose = jest.fn();
   const onSuccess = jest.fn();
-  const validUser = { id: 1, username: 'alice_user', password: '', managerId: 1, roleId: 1, verified: true, role: 'ADMIN', createdAt: '2024-01-01' };
+  const validUser = { id: uid(1), username: 'alice_user', password: '', managerId: uid(1), roleId: uid(1), verified: true, role: 'ADMIN', createdAt: '2024-01-01' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -710,9 +711,9 @@ describe('ContractForm', () => {
   const onClose = jest.fn();
   const onSuccess = jest.fn();
   const validContract = {
-    id: 1, counterpartyId: 1, counterparty: counterparties[0], contractNumber: 'CNT-001', wbsCode: 'WBS-001',
+    id: uid(1), counterpartyId: uid(1), counterparty: counterparties[0], contractNumber: 'CNT-001', wbsCode: 'WBS-001',
     projectName: 'Project A', startDate: '2024-01-01', endDate: '2024-12-31',
-    status: 'ACTIVE' as const, areaId: 1, managerId: 1, createdAt: '2024-01-01',
+    status: 'ACTIVE' as const, areaId: uid(1), managerId: uid(1), createdAt: '2024-01-01',
     managerName: 'John Doe',
   };
 
@@ -759,7 +760,7 @@ describe('ContractForm', () => {
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ContractForm onClose={onClose} onSuccess={onSuccess} contract={validContract} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
-    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: uid(1) })));
     expect(toast.success).toHaveBeenCalledWith('Contratto aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
@@ -900,7 +901,7 @@ describe('ContractForm', () => {
     render(
       <ContractForm
         onClose={onClose}
-        contract={{ ...validContract, financialTypeId: 1, annualValue: 36000, billingFrequency: 'MONTHLY' }}
+        contract={{ ...validContract, financialTypeId: uid(1), annualValue: 36000, billingFrequency: 'MONTHLY' }}
       />,
       { wrapper: createWrapper() }
     );
@@ -924,7 +925,7 @@ describe('ContractForm', () => {
 
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
     const payload = mutateAsync.mock.calls[0][0].payload;
-    expect(payload.financialTypeId).toBe(1);
+    expect(payload.financialTypeId).toBe(uid(1));
     expect(payload.annualValue).toBe(36000);
     expect(payload.billingFrequency).toBe('MONTHLY');
   });
@@ -951,8 +952,8 @@ describe('FinancialValueForm', () => {
   const onClose = jest.fn();
   const onSuccess = jest.fn();
   const validFV = {
-    id: 1, month: 1, year: 2024, financialAmount: 1000,
-    financialTypeId: 1, businessAreaId: 1, contractId: 1,
+    id: uid(1), month: 1, year: 2024, financialAmount: 1000,
+    financialTypeId: uid(1), businessAreaId: uid(1), contractId: uid(1),
   };
 
   beforeEach(() => {
@@ -1005,7 +1006,7 @@ describe('FinancialValueForm', () => {
     (useUpsertFinancialValue as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<FinancialValueForm onClose={onClose} onSuccess={onSuccess} financialValue={validFV} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /^aggiorna$/i }));
-    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: 1 })));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ mode: 'update', id: uid(1) })));
     expect(toast.success).toHaveBeenCalledWith('Valore finanziario aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
@@ -1051,7 +1052,7 @@ describe('BudgetForm', () => {
   const onClose = jest.fn();
   const onSuccess = jest.fn();
   const validBudget = {
-    id: 1, businessAreaId: 1, areaName: 'Engineering', category: 'COST' as const,
+    id: uid(1), businessAreaId: uid(1), areaName: 'Engineering', category: 'COST' as const,
     year: 2025, targetAmount: 50000, actualAmount: 20000, percentUsed: 40,
   };
 
@@ -1202,9 +1203,9 @@ describe('ContractForm — with more than one area and responsabile', () => {
     jest.clearAllMocks();
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation());
     (useBusinessAreas as jest.Mock).mockReturnValue({
-      data: [...businessAreas, { id: 2, name: 'Acquisti', description: '' }], isLoading: false, isError: false });
+      data: [...businessAreas, { id: uid(2), name: 'Acquisti', description: '' }], isLoading: false, isError: false });
     (useManagers as jest.Mock).mockReturnValue({
-      data: [...managers, { id: 2, firstName: 'Anna', lastName: 'Verdi', email: 'a@v.com', phoneNumber: '', department: '' }],
+      data: [...managers, { id: uid(2), firstName: 'Anna', lastName: 'Verdi', email: 'a@v.com', phoneNumber: '', department: '' }],
       isLoading: false, isError: false });
     (useCounterparties as jest.Mock).mockReturnValue({ data: counterparties, isLoading: false, isError: false });
     (useFinancialTypes as jest.Mock).mockReturnValue({ data: financialTypes, isLoading: false, isError: false });
@@ -1244,7 +1245,7 @@ describe('CounterpartyForm — address', () => {
   it('shows the stored address when editing', () => {
     render(
       <CounterpartyForm onClose={jest.fn()} onSuccess={jest.fn()} counterparty={{
-        id: 1, name: 'Nuvola', type: 'SUPPLIER', postalCode: '10121', city: 'Torino', province: 'TO', country: 'IT',
+        id: uid(1), name: 'Nuvola', type: 'SUPPLIER', postalCode: '10121', city: 'Torino', province: 'TO', country: 'IT',
       }} />,
       { wrapper: createWrapper() });
 

@@ -9,7 +9,7 @@ import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 
 type UpsertArgs =
   | { mode: "create"; payload: ContractUpsertPayload }
-  | { mode: "update"; id: number; payload: ContractUpsertPayload };
+  | { mode: "update"; id: string; payload: ContractUpsertPayload };
 
 export function useUpsertContract() {
   const qc = useQueryClient();

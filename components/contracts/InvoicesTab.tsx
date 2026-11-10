@@ -42,7 +42,7 @@ import type { ElectronicInvoice } from "@/types";
 import { formatMoney, formatNumber } from "@/lib/formatMoney";
 
 interface InvoicesTabProps {
-  readonly contractId: number;
+  readonly contractId: string;
   readonly isAdmin: boolean;
 }
 
@@ -103,7 +103,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<ElectronicInvoice | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [paymentDetailsInvoice, setPaymentDetailsInvoice] = useState<ElectronicInvoice | null>(null);
   const [ibanInput, setIbanInput] = useState("");
   const [bicInput, setBicInput] = useState("");
@@ -150,7 +150,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (invoiceId: number) => {
+    mutationFn: async (invoiceId: string) => {
       await api.delete(`/contracts/${contractId}/invoices/${invoiceId}`);
     },
     onSuccess: () => {
@@ -161,7 +161,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   });
 
   const paymentDetailsMutation = useMutation({
-    mutationFn: async (params: { invoiceId: number; supplierIban?: string; supplierBic?: string; paymentDueDate: string | null }) => {
+    mutationFn: async (params: { invoiceId: string; supplierIban?: string; supplierBic?: string; paymentDueDate: string | null }) => {
       await api.patch(`/contracts/${contractId}/invoices/${params.invoiceId}/payment-details`, {
         supplierIban: params.supplierIban,
         supplierBic: params.supplierBic,
@@ -177,7 +177,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   });
 
   const confirmMatchMutation = useMutation({
-    mutationFn: (invoiceId: number) => invoiceMatchingService.confirm(contractId, invoiceId),
+    mutationFn: (invoiceId: string) => invoiceMatchingService.confirm(contractId, invoiceId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       toast.success("Abbinamento confermato");
@@ -186,7 +186,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   });
 
   const rejectMatchMutation = useMutation({
-    mutationFn: (invoiceId: number) => invoiceMatchingService.reject(contractId, invoiceId),
+    mutationFn: (invoiceId: string) => invoiceMatchingService.reject(contractId, invoiceId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["invoices", contractId] });
       toast.success("Abbinamento rifiutato");
@@ -195,7 +195,7 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
   });
 
   const generateSepaMutation = useMutation({
-    mutationFn: async (invoiceIds: number[]) => {
+    mutationFn: async (invoiceIds: string[]) => {
       return sepaPaymentsService.create(contractId, { invoiceIds, executionDate: executionDateInput });
     },
     onSuccess: (blob) => {

@@ -7,8 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
 export interface AnomalyRecord {
-  financialValueId: number;
-  contractId: number;
+  financialValueId: string;
+  contractId: string;
   customerName: string;
   month: number;
   year: number;

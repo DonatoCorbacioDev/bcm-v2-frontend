@@ -7,7 +7,7 @@ import api, { EXPORT_REQUEST_TIMEOUT_MS } from "@/lib/api";
 import { filenameFromContentDisposition } from "@/lib/download";
 
 export interface Organization {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   subscriptionTier: string;

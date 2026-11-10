@@ -23,12 +23,12 @@ export const financialTypesService = {
     return res.data;
   },
 
-  update: async (id: number, payload: FinancialTypeUpsertPayload): Promise<FinancialType> => {
+  update: async (id: string, payload: FinancialTypeUpsertPayload): Promise<FinancialType> => {
     const res = await api.put<FinancialType>(`/financial-types/${id}`, payload);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/financial-types/${id}`);
   },
 };

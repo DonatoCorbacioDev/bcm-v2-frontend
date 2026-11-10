@@ -48,7 +48,7 @@ export default function NotificationBell() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markReadMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await api.patch(`/notifications/${id}/read`);
     },
     onSuccess: () => {

@@ -13,14 +13,15 @@ jest.mock('@/services/organization.service', () => ({
 import { useAuthStore } from '@/store/authStore';
 import { organizationService } from '@/services/organization.service';
 import { DeletionScheduledBanner } from '@/components/organization/DeletionScheduledBanner';
+import { uid } from "../mocks/ids";
 
 const mockAuthAs = (role: string) => {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector({ user: { id: 1, username: 'u', role } }));
+    selector({ user: { id: uid(1), username: 'u', role } }));
 };
 
 const organization = (deletionScheduledFor: string | null) => ({
-  id: 1, name: 'Acme', slug: 'acme', subscriptionTier: 'FREE', iban: null, bic: null,
+  id: uid(1), name: 'Acme', slug: 'acme', subscriptionTier: 'FREE', iban: null, bic: null,
   createdAt: '2024-01-01', billingPortalAvailable: false, deletionScheduledFor,
 });
 

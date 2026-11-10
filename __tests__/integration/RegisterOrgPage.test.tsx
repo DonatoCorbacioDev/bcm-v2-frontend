@@ -26,6 +26,7 @@ jest.mock('@/store/authStore', () => ({
 import RegisterOrgPage from '@/app/(auth)/register-org/page';
 import api from '@/lib/api';
 import { ONEROUS_CLAUSES, TERMS_VERSION } from '@/lib/legal';
+import { uid } from "../mocks/ids";
 
 const mockPost = api.post as jest.Mock;
 const mockGet = api.get as jest.Mock;
@@ -95,7 +96,7 @@ describe('RegisterOrgPage', () => {
     mockPost
       .mockResolvedValueOnce({ data: started })
       .mockResolvedValueOnce({ data: { token: 'access-token' } });
-    mockGet.mockResolvedValue({ data: { id: 1, username: 'mario', role: 'ADMIN' } });
+    mockGet.mockResolvedValue({ data: { id: uid(1), username: 'mario', role: 'ADMIN' } });
     render(<RegisterOrgPage />, { wrapper: createWrapper() });
     await submitForm();
 

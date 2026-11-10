@@ -44,11 +44,12 @@ import { toast } from 'sonner';
 import { useManagers } from '@/hooks/useManagers';
 import { managersService } from '@/services/managers.service';
 import ManagerTable from '@/components/managers/ManagerTable';
+import { uid } from "../mocks/ids";
 
 // ─── Test fixtures ───────────────────────────────────────────────────────────
 
 const manager1: Manager = {
-  id: 1,
+  id: uid(1),
   firstName: 'Alice',
   lastName: 'Smith',
   email: 'alice@example.com',
@@ -57,7 +58,7 @@ const manager1: Manager = {
 };
 
 const manager2: Manager = {
-  id: 2,
+  id: uid(2),
   firstName: 'Bob',
   lastName: 'Jones',
   email: 'bob@example.com',
@@ -169,7 +170,7 @@ describe('ManagerTable', () => {
     await userEvent.click(within(rows[1]).getByRole('button', { name: /modifica/i }));
 
     expect(onEditClick).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 1, firstName: 'Alice' })
+      expect.objectContaining({ id: uid(1), firstName: 'Alice' })
     );
   });
 

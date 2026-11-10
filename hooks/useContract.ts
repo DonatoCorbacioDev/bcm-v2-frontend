@@ -8,10 +8,10 @@ import { contractsService } from "@/services/contracts.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import type { Contract } from "@/types";
 
-export function useContract(id: number) {
+export function useContract(id: string) {
   return useQuery<Contract>({
     queryKey: contractsQueryKeys.detail(id),
     queryFn: () => contractsService.getById(id),
-    enabled: !!id && id > 0,
+    enabled: !!id,
   });
 }

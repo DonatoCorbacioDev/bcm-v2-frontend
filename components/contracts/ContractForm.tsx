@@ -99,10 +99,10 @@ export default function ContractForm(props: ContractFormProps) {
 }
 
 interface ContractFormFieldsProps extends ContractFormProps {
-  readonly businessAreas: { id: number; name: string }[];
-  readonly managers: { id: number; firstName: string; lastName: string }[];
-  readonly counterparties: { id: number; name: string }[];
-  readonly financialTypes: { id: number; name: string }[];
+  readonly businessAreas: { id: string; name: string }[];
+  readonly managers: { id: string; firstName: string; lastName: string }[];
+  readonly counterparties: { id: string; name: string }[];
+  readonly financialTypes: { id: string; name: string }[];
 }
 
 function ContractFormFields({
@@ -208,7 +208,7 @@ function ContractFormFields({
             id="counterpartyId"
             label={<>Controparte <span className="text-destructive">*</span></>}
             value={field.value ? String(field.value) : ""}
-            onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+            onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
             placeholder="Seleziona la controparte"
             options={counterparties.map((cp) => ({ value: String(cp.id), label: cp.name }))}
             error={errors.counterpartyId?.message}
@@ -295,7 +295,7 @@ function ContractFormFields({
             id="areaId"
             label={<>Area di business <span className="text-destructive">*</span></>}
             value={field.value ? String(field.value) : ""}
-            onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+            onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
             placeholder="Seleziona l'area di business"
             options={businessAreas.map((area) => ({ value: String(area.id), label: area.name }))}
             error={errors.areaId?.message}
@@ -312,7 +312,7 @@ function ContractFormFields({
             id="managerId"
             label={<>Responsabile <span className="text-destructive">*</span></>}
             value={field.value ? String(field.value) : ""}
-            onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+            onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
             placeholder="Seleziona il responsabile"
             options={managers.map((m) => ({ value: String(m.id), label: `${m.firstName} ${m.lastName}` }))}
             error={errors.managerId?.message}
@@ -426,7 +426,7 @@ function ContractFormFields({
               id="financialTypeId"
               label="Tipo finanziario"
               value={field.value ? String(field.value) : ""}
-              onValueChange={/* istanbul ignore next */ (value) => field.onChange(Number(value))}
+              onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
               placeholder="Seleziona il tipo finanziario"
               options={financialTypes.map((ft) => ({ value: String(ft.id), label: ft.name }))}
               // The schema's all-or-nothing refine always attaches its error to

@@ -15,21 +15,22 @@ jest.mock('@/lib/api', () => ({
 
 import api from '@/lib/api';
 import DocumentVersionsDialog from '@/components/contracts/DocumentVersionsDialog';
+import { uid } from "../mocks/ids";
 
 const v1 = {
-  id: 1, contractId: 1, fileName: 'contract.pdf', fileSize: 1000,
+  id: uid(1), contractId: uid(1), fileName: 'contract.pdf', fileSize: 1000,
   contentType: 'application/pdf', uploadedAt: '2027-01-01T10:00:00Z', downloadUrl: '',
-  versionGroupId: 1, versionNumber: 1, versionCount: 2,
+  versionGroupId: uid(1), versionNumber: 1, versionCount: 2,
 };
 const v2 = {
-  ...v1, id: 2, fileName: 'contract-v2.pdf', versionNumber: 2, uploadedAt: '2027-02-01T10:00:00Z',
+  ...v1, id: uid(2), fileName: 'contract-v2.pdf', versionNumber: 2, uploadedAt: '2027-02-01T10:00:00Z',
 };
 const v3 = {
-  ...v1, id: 3, fileName: 'contract-v3.pdf', versionNumber: 3, uploadedAt: '2027-03-01T10:00:00Z',
+  ...v1, id: uid(3), fileName: 'contract-v3.pdf', versionNumber: 3, uploadedAt: '2027-03-01T10:00:00Z',
 };
 
 const diff = {
-  fromDocumentId: 1, fromFileName: 'contract.pdf', toDocumentId: 2, toFileName: 'contract-v2.pdf',
+  fromDocumentId: uid(1), fromFileName: 'contract.pdf', toDocumentId: uid(2), toFileName: 'contract-v2.pdf',
   lines: [
     { tag: 'EQUAL', oldText: 'Clausola invariata', newText: 'Clausola invariata' },
     { tag: 'CHANGE', oldText: 'Importo: 1000', newText: 'Importo: 2000' },
@@ -45,7 +46,7 @@ describe('DocumentVersionsDialog', () => {
   it('does not fetch versions when closed', () => {
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={false} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -57,21 +58,21 @@ describe('DocumentVersionsDialog', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [v2, v1] });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
     );
     expect(await screen.findByText(/v2 · contract-v2\.pdf/)).toBeInTheDocument();
     expect(screen.getByText(/v1 · contract\.pdf/)).toBeInTheDocument();
-    expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/1/versions');
+    expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(1)}/versions`);
   });
 
   it('calls onDownload when a version download button is clicked', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [v1] });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -88,7 +89,7 @@ describe('DocumentVersionsDialog', () => {
     });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -99,7 +100,7 @@ describe('DocumentVersionsDialog', () => {
     await userEvent.click(checkboxes[0]);
     await userEvent.click(checkboxes[1]);
 
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/1/diff/2'));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(1)}/diff/${uid(2)}`));
     expect(await screen.findByText(/confronto tra versioni/i)).toBeInTheDocument();
     expect(screen.getByText(/Clausola invariata/)).toBeInTheDocument();
     expect(screen.getByText(/− Importo: 1000/)).toBeInTheDocument();
@@ -114,7 +115,7 @@ describe('DocumentVersionsDialog', () => {
     });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -132,7 +133,7 @@ describe('DocumentVersionsDialog', () => {
     });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -142,7 +143,7 @@ describe('DocumentVersionsDialog', () => {
     await userEvent.click(checkboxes[1]);
 
     expect(await screen.findByText(/confronto tra versioni/i)).toBeInTheDocument();
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/1/diff/2'));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(1)}/diff/${uid(2)}`));
     await waitFor(() => {
       expect(document.querySelector('.animate-spin')).not.toBeInTheDocument();
     });
@@ -158,7 +159,7 @@ describe('DocumentVersionsDialog', () => {
     render(
       <QueryClientProvider client={queryClient}>
         <DocumentVersionsDialog
-          contractId={1} documentId={1} fileName="contract.pdf"
+          contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
           open={true} onOpenChange={jest.fn()} onDownload={onDownload}
         />
       </QueryClientProvider>
@@ -185,7 +186,7 @@ describe('DocumentVersionsDialog', () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [v2, v1] });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -196,9 +197,30 @@ describe('DocumentVersionsDialog', () => {
     expect(screen.queryByText(/confronto tra versioni/i)).not.toBeInTheDocument();
   });
 
+  it('shows no comparison when the selected versions are no longer in the list (another document)', async () => {
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url.includes(`/documents/${uid(9)}/versions`)) return Promise.resolve({ data: [v3] });
+      if (url.endsWith('/versions')) return Promise.resolve({ data: [v1, v2] });
+      return Promise.resolve({ data: diff });
+    });
+    const props = { contractId: uid(1), fileName: 'contract.pdf', open: true, onOpenChange: jest.fn(), onDownload };
+    const { rerender } = render(<DocumentVersionsDialog {...props} documentId={uid(1)} />, { wrapper: createWrapper() });
+    const checkboxes = await screen.findAllByRole('checkbox');
+    await userEvent.click(checkboxes[0]);
+    await userEvent.click(checkboxes[1]);
+    const diffCalls = () => (api.get as jest.Mock).mock.calls.filter(([url]) => String(url).includes('/diff/')).length;
+    await waitFor(() => expect(diffCalls()).toBe(1));
+
+    // Same dialog, another document: the two selected ids are not among its
+    // versions, so no comparison is requested with ids that are not its own.
+    rerender(<DocumentVersionsDialog {...props} documentId={uid(9)} />);
+    expect(await screen.findByText(/contract-v3\.pdf/)).toBeInTheDocument();
+    expect(diffCalls()).toBe(1);
+  });
+
   it('falls back to version 1 when a document has no versionNumber', async () => {
     const untaggedVersion = {
-      id: 4, contractId: 1, fileName: 'contract-legacy.pdf', fileSize: 1000,
+      id: uid(4), contractId: uid(1), fileName: 'contract-legacy.pdf', fileSize: 1000,
       contentType: 'application/pdf', uploadedAt: '2026-12-01T10:00:00Z', downloadUrl: '',
     };
     (api.get as jest.Mock).mockImplementation((url: string) => {
@@ -207,7 +229,7 @@ describe('DocumentVersionsDialog', () => {
     });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -222,16 +244,16 @@ describe('DocumentVersionsDialog', () => {
     await userEvent.click(checkboxes[0]);
     await userEvent.click(checkboxes[1]);
 
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/4/diff/1'));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(4)}/diff/${uid(1)}`));
   });
 
   it('sorts two documents that both lack versionNumber without crashing', async () => {
     const untagged1 = {
-      id: 5, contractId: 1, fileName: 'legacy-a.pdf', fileSize: 1000,
+      id: uid(5), contractId: uid(1), fileName: 'legacy-a.pdf', fileSize: 1000,
       contentType: 'application/pdf', uploadedAt: '2026-11-01T10:00:00Z', downloadUrl: '',
     };
     const untagged2 = {
-      id: 6, contractId: 1, fileName: 'legacy-b.pdf', fileSize: 1000,
+      id: uid(6), contractId: uid(1), fileName: 'legacy-b.pdf', fileSize: 1000,
       contentType: 'application/pdf', uploadedAt: '2026-12-01T10:00:00Z', downloadUrl: '',
     };
     (api.get as jest.Mock).mockImplementation((url: string) => {
@@ -240,7 +262,7 @@ describe('DocumentVersionsDialog', () => {
     });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -259,7 +281,7 @@ describe('DocumentVersionsDialog', () => {
     });
     render(
       <DocumentVersionsDialog
-        contractId={1} documentId={1} fileName="contract.pdf"
+        contractId={uid(1)} documentId={uid(1)} fileName="contract.pdf"
         open={true} onOpenChange={jest.fn()} onDownload={onDownload}
       />,
       { wrapper: createWrapper() }
@@ -268,7 +290,7 @@ describe('DocumentVersionsDialog', () => {
 
     await userEvent.click(screen.getByRole('checkbox', { name: /versione 3/i }));
     await userEvent.click(screen.getByRole('checkbox', { name: /versione 2/i }));
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/2/diff/3'));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(2)}/diff/${uid(3)}`));
 
     // Selecting a third version drops the oldest-selected (v3), keeping v2 and adding v1.
     await userEvent.click(screen.getByRole('checkbox', { name: /versione 1/i }));
@@ -276,6 +298,6 @@ describe('DocumentVersionsDialog', () => {
     expect(screen.getByRole('checkbox', { name: /versione 1/i })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: /versione 2/i })).toBeChecked();
     expect(screen.getByRole('checkbox', { name: /versione 3/i })).not.toBeChecked();
-    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/1/diff/2'));
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(1)}/diff/${uid(2)}`));
   });
 });

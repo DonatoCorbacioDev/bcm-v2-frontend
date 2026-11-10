@@ -23,10 +23,11 @@ jest.mock('@/components/contract-templates/ContractTemplateForm', () => ({
 import { useAuthStore } from '@/store/authStore';
 import ContractTemplatesPage from '@/app/(dashboard)/contract-templates/page';
 import FinancialValuesPage from '@/app/(dashboard)/financial-values/page';
+import { uid } from "../mocks/ids";
 
 const mockRole = (role: string) => {
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector?: (s: unknown) => unknown) => {
-    const state = { user: { id: 1, username: 'user', role } };
+    const state = { user: { id: uid(1), username: 'user', role } };
     return selector ? selector(state) : state;
   });
 };

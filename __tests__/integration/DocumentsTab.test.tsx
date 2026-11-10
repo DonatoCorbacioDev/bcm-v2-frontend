@@ -23,23 +23,24 @@ jest.mock('@/lib/api', () => ({
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import DocumentsTab from '@/components/contracts/DocumentsTab';
+import { uid } from "../mocks/ids";
 
 const doc = {
-  id: 1, contractId: 1, fileName: 'contract.pdf',
+  id: uid(1), contractId: uid(1), fileName: 'contract.pdf',
   fileSize: 1500000, contentType: 'application/pdf',
   uploadedAt: '2024-03-15T10:00:00Z', downloadUrl: '',
 };
 
-const smallDoc  = { ...doc, id: 2, fileName: 'tiny.pdf',   fileSize: 512 };
-const mediumDoc = { ...doc, id: 3, fileName: 'medium.pdf', fileSize: 102400 };
+const smallDoc  = { ...doc, id: uid(2), fileName: 'tiny.pdf',   fileSize: 512 };
+const mediumDoc = { ...doc, id: uid(3), fileName: 'medium.pdf', fileSize: 102400 };
 
 const versionedDoc = {
-  ...doc, id: 4, fileName: 'contract-v2.pdf',
-  versionGroupId: 4, versionNumber: 2, versionCount: 2,
+  ...doc, id: uid(4), fileName: 'contract-v2.pdf',
+  versionGroupId: uid(4), versionNumber: 2, versionCount: 2,
 };
 
 const analysis = {
-  documentId: 1, rawText: 'Contract text here',
+  documentId: uid(1), rawText: 'Contract text here',
   detectedCustomerName: 'Acme Corp', detectedContractNumber: 'CNT-001',
   detectedStartDate: '2024-01-01', detectedEndDate: '2024-12-31',
   detectedAmount: '50000',
@@ -55,19 +56,19 @@ beforeEach(() => jest.clearAllMocks());
 describe('DocumentsTab', () => {
   it('shows loading spinner initially', () => {
     (api.get as jest.Mock).mockReturnValue(new Promise(() => {}));
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(document.querySelector('.animate-spin')).toBeInTheDocument();
   });
 
   it('shows empty state when there are no documents', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText(/nessun documento/i)).toBeInTheDocument();
   });
 
   it('renders document list with formatted file sizes', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc, smallDoc, mediumDoc] });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText('contract.pdf')).toBeInTheDocument();
     expect(screen.getByText('tiny.pdf')).toBeInTheDocument();
     expect(screen.getByText('medium.pdf')).toBeInTheDocument();
@@ -79,30 +80,30 @@ describe('DocumentsTab', () => {
 
   it('hides delete button for non-admin users', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
-    render(<DocumentsTab contractId={1} isAdmin={false} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={false} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText('contract.pdf')).toBeInTheDocument();
     expect(screen.queryByTitle('Elimina documento')).not.toBeInTheDocument();
   });
 
   it('shows delete button for admin users', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Elimina documento')).toBeInTheDocument();
   });
 
   it('calls delete mutation and shows success toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.delete as jest.Mock).mockResolvedValue({});
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Elimina documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina documento'));
-    await waitFor(() => expect(api.delete).toHaveBeenCalledWith('/contracts/1/documents/1'));
+    await waitFor(() => expect(api.delete).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(1)}`));
     expect(toast.success).toHaveBeenCalledWith('Documento eliminato');
   });
 
   it('rejects non-PDF files and shows error toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['content'], 'doc.txt', { type: 'text/plain' });
@@ -114,7 +115,7 @@ describe('DocumentsTab', () => {
   it('uploads a valid PDF and shows success toast', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockResolvedValue({ data: doc });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF-1.4'], 'valid.pdf', { type: 'application/pdf' });
@@ -126,7 +127,7 @@ describe('DocumentsTab', () => {
   it('shows analysis results after clicking analyze button', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: analysis });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     expect(await screen.findByText(/campi estratti/i)).toBeInTheDocument();
@@ -139,7 +140,7 @@ describe('DocumentsTab', () => {
   it('shows "Not detected" for null analysis fields', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: { ...analysis, detectedAmount: null, detectedContractNumber: null } });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     await waitFor(() => expect(screen.getAllByText('Non rilevato').length).toBeGreaterThan(0));
@@ -148,7 +149,7 @@ describe('DocumentsTab', () => {
   it('calls onApply with detected values when Apply button is clicked', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: analysis });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     expect(await screen.findByText(/applica al contratto/i)).toBeInTheDocument();
@@ -167,7 +168,7 @@ describe('DocumentsTab', () => {
   it('collapses analysis panel when toggle button is clicked', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: analysis });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     expect(await screen.findByTitle('Comprimi analisi')).toBeInTheDocument();
@@ -182,11 +183,11 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock)
       .mockResolvedValueOnce({ data: [doc] })
       .mockResolvedValueOnce({ data: new Blob(['%PDF']) });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Scarica documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Scarica documento'));
     await waitFor(() => expect(api.get).toHaveBeenCalledWith(
-      '/contracts/1/documents/1/download',
+      `/contracts/${uid(1)}/documents/${uid(1)}/download`,
       { responseType: 'blob' }
     ));
   });
@@ -194,7 +195,7 @@ describe('DocumentsTab', () => {
   it('hides raw text section when rawText is empty', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: { ...analysis, rawText: '' } });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     expect(await screen.findByText(/campi estratti/i)).toBeInTheDocument();
@@ -205,7 +206,7 @@ describe('DocumentsTab', () => {
     const nullAnalysis = { ...analysis, detectedCustomerName: null, detectedContractNumber: null, detectedStartDate: null, detectedEndDate: null };
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockResolvedValue({ data: nullAnalysis });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     expect(await screen.findByText(/applica al contratto/i)).toBeInTheDocument();
@@ -215,7 +216,7 @@ describe('DocumentsTab', () => {
 
   it('does nothing when file input fires with no file selected', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     fireEvent.change(input, { target: { files: null } });
@@ -226,7 +227,7 @@ describe('DocumentsTab', () => {
   it('shows uploading state while upload mutation is pending', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'loading.pdf', { type: 'application/pdf' });
@@ -238,7 +239,7 @@ describe('DocumentsTab', () => {
   it('shows analyzing spinner while analyze mutation is pending', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     expect(await screen.findByTitle('Estrai campi')).toBeDisabled();
@@ -248,7 +249,7 @@ describe('DocumentsTab', () => {
     (api.get as jest.Mock)
       .mockResolvedValueOnce({ data: [doc] })
       .mockRejectedValueOnce(new Error('download failed'));
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Scarica documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Scarica documento'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Download del documento non riuscito'));
@@ -257,7 +258,7 @@ describe('DocumentsTab', () => {
   it('shows error toast when upload fails', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
     (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const file = new File(['%PDF'], 'test.pdf', { type: 'application/pdf' });
@@ -268,7 +269,7 @@ describe('DocumentsTab', () => {
   it('shows error toast when delete fails', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Elimina documento')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Elimina documento'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Eliminazione del documento non riuscita'));
@@ -276,7 +277,7 @@ describe('DocumentsTab', () => {
 
   it('clicks the hidden file input when upload button is clicked', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [] });
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByRole('button', { name: /carica pdf/i })).toBeInTheDocument();
     const input = document.querySelector('input[type="file"]') as HTMLInputElement;
     const clickSpy = jest.spyOn(input, 'click').mockImplementation(() => {});
@@ -287,7 +288,7 @@ describe('DocumentsTab', () => {
   it('shows error toast when analysis fails', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.post as jest.Mock).mockRejectedValue(new Error('analysis failed'));
-    render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
     expect(await screen.findByTitle('Estrai campi')).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Estrai campi'));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Estrazione non riuscita'), { timeout: 3000 });
@@ -296,20 +297,20 @@ describe('DocumentsTab', () => {
   describe('versioning', () => {
     it('shows the version badge for a document', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByText('v1')).toBeInTheDocument();
     });
 
     it('does not show the history button when there is only one version', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByText('contract.pdf')).toBeInTheDocument();
       expect(screen.queryByTitle('Cronologia versioni')).not.toBeInTheDocument();
     });
 
     it('shows the history button with version count when multiple versions exist', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [versionedDoc] });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Cronologia versioni')).toBeInTheDocument();
       expect(screen.getByText('2')).toBeInTheDocument();
       expect(screen.getByText('v2')).toBeInTheDocument();
@@ -322,11 +323,11 @@ describe('DocumentsTab', () => {
         }
         return Promise.resolve({ data: [versionedDoc] });
       });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Cronologia versioni')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Cronologia versioni'));
       expect(await screen.findByText(/cronologia versioni/i)).toBeInTheDocument();
-      await waitFor(() => expect(api.get).toHaveBeenCalledWith('/contracts/1/documents/4/versions'));
+      await waitFor(() => expect(api.get).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(4)}/versions`));
     });
 
     it('closes the version history dialog on Escape', async () => {
@@ -336,7 +337,7 @@ describe('DocumentsTab', () => {
         }
         return Promise.resolve({ data: [versionedDoc] });
       });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Cronologia versioni')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Cronologia versioni'));
       expect(await screen.findByText(/cronologia versioni/i)).toBeInTheDocument();
@@ -349,14 +350,14 @@ describe('DocumentsTab', () => {
     it('uploads a new version and shows success toast', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: versionedDoc });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Carica nuova versione'));
       const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
       const file = new File(['%PDF-1.4'], 'contract-v2.pdf', { type: 'application/pdf' });
       fireEvent.change(input, { target: { files: [file] } });
       await waitFor(() => expect(api.post).toHaveBeenCalledWith(
-        '/contracts/1/documents/1/versions',
+        `/contracts/${uid(1)}/documents/${uid(1)}/versions`,
         expect.any(FormData),
         expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } })
       ));
@@ -367,7 +368,7 @@ describe('DocumentsTab', () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc, smallDoc] });
       let resolveUpload!: (value: { data: typeof versionedDoc }) => void;
       (api.post as jest.Mock).mockReturnValueOnce(new Promise((resolve) => { resolveUpload = resolve; }));
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
 
       const uploadButtons = await screen.findAllByTitle('Carica nuova versione');
       expect(uploadButtons).toHaveLength(2);
@@ -385,7 +386,7 @@ describe('DocumentsTab', () => {
 
     it('ignores a version-upload change event where files itself is nullish', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Carica nuova versione'));
       const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
@@ -402,7 +403,7 @@ describe('DocumentsTab', () => {
 
     it('rejects a non-PDF file for a new version', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Carica nuova versione'));
       const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
@@ -415,7 +416,7 @@ describe('DocumentsTab', () => {
     it('shows error toast when new version upload fails', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Carica nuova versione')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Carica nuova versione'));
       const input = screen.getByTestId('version-upload-input') as HTMLInputElement;
@@ -441,10 +442,10 @@ describe('DocumentsTab', () => {
     it('shows detected risky clauses after clicking the button', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: riskyClauses });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
-      expect(api.post).toHaveBeenCalledWith('/contracts/1/documents/1/analyze-clause-risk');
+      expect(api.post).toHaveBeenCalledWith(`/contracts/${uid(1)}/documents/${uid(1)}/analyze-clause-risk`);
       expect(await screen.findByText('Rinnovo automatico')).toBeInTheDocument();
       expect(screen.getByText(/rinnovo tacito senza preavviso/i)).toBeInTheDocument();
       expect(toast.success).toHaveBeenCalledWith('Analisi clausole completata');
@@ -463,7 +464,7 @@ describe('DocumentsTab', () => {
           error: null,
         },
       });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       expect(await screen.findByText('Penale')).toBeInTheDocument();
@@ -473,7 +474,7 @@ describe('DocumentsTab', () => {
     it('shows a positive message when no risky clauses are found', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: { clauses: [], error: null } });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       expect(await screen.findByText(/nessuna clausola a rischio rilevata/i)).toBeInTheDocument();
@@ -484,7 +485,7 @@ describe('DocumentsTab', () => {
       (api.post as jest.Mock).mockResolvedValue({
         data: { clauses: [], error: 'Ollama service unavailable' },
       });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       expect(await screen.findByText('Ollama service unavailable')).toBeInTheDocument();
@@ -494,7 +495,7 @@ describe('DocumentsTab', () => {
     it('shows error toast when the clause risk request fails', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockRejectedValue(new Error('network error'));
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Analisi delle clausole non riuscita'));
@@ -503,7 +504,7 @@ describe('DocumentsTab', () => {
     it('collapses the clause risk panel when toggle button is clicked', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockResolvedValue({ data: riskyClauses });
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       expect(await screen.findByTitle('Comprimi clausole a rischio')).toBeInTheDocument();
@@ -516,7 +517,7 @@ describe('DocumentsTab', () => {
     it('shows analyzing spinner while clause risk mutation is pending', async () => {
       (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
       (api.post as jest.Mock).mockReturnValue(new Promise(() => {}));
-      render(<DocumentsTab contractId={1} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+      render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeInTheDocument();
       await userEvent.click(screen.getByTitle('Rileva clausole a rischio'));
       expect(await screen.findByTitle('Rileva clausole a rischio')).toBeDisabled();

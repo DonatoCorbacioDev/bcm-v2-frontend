@@ -8,7 +8,7 @@ import { businessAreasService, type BusinessAreaUpsertPayload } from "@/services
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
 
 type UpsertBusinessAreaParams = {
-  id?: number;
+  id?: string;
   payload: BusinessAreaUpsertPayload;
 };
 

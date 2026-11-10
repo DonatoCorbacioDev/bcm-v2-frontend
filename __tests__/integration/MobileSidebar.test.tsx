@@ -31,6 +31,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import MobileSidebar from '@/components/layout/MobileSidebar';
+import { uid } from "../mocks/ids";
 
 const mockLogout = jest.fn();
 
@@ -43,7 +44,7 @@ beforeEach(() => {
   (usePathname as jest.Mock).mockReturnValue('/dashboard');
   (useAuth as jest.Mock).mockReturnValue({ logout: mockLogout });
   (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
-    selector({ user: { id: 1, username: 'admin', role: 'ADMIN' }, isAuthenticated: true })
+    selector({ user: { id: uid(1), username: 'admin', role: 'ADMIN' }, isAuthenticated: true })
   );
 });
 
@@ -70,7 +71,7 @@ describe('MobileSidebar', () => {
 
   it('hides admin-only links for MANAGER', () => {
     (useAuthStore as unknown as jest.Mock).mockImplementation((selector) =>
-      selector({ user: { id: 2, username: 'mgr', role: 'MANAGER' }, isAuthenticated: true })
+      selector({ user: { id: uid(2), username: 'mgr', role: 'MANAGER' }, isAuthenticated: true })
     );
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
     expect(screen.queryByRole('link', { name: 'Impostazioni' })).not.toBeInTheDocument();
@@ -111,7 +112,7 @@ describe('MobileSidebar', () => {
   });
 
   it('marks the active route with aria-current="page", sub-pages included', () => {
-    (usePathname as jest.Mock).mockReturnValue('/contracts/12');
+    (usePathname as jest.Mock).mockReturnValue(`/contracts/${uid(12)}`);
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
     expect(screen.getByRole('link', { name: /contratti$/i })).toHaveAttribute('aria-current', 'page');
   });
@@ -124,7 +125,7 @@ describe('MobileSidebar', () => {
 
   it('shows the organization name for ADMIN', async () => {
     (api.get as jest.Mock).mockResolvedValue({
-      data: { id: 1, name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'PRO', iban: null, bic: null, createdAt: '2025-01-01' },
+      data: { id: uid(1), name: 'Acme S.r.l.', slug: 'acme', subscriptionTier: 'PRO', iban: null, bic: null, createdAt: '2025-01-01' },
     });
     renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
     expect(await screen.findByText('Acme S.r.l.')).toBeInTheDocument();

@@ -9,18 +9,19 @@ jest.mock('@/lib/api', () => ({
 
 import { api } from '@/lib/api';
 import { AnomalyWidget } from '@/components/dashboard/AnomalyWidget';
+import { uid } from "../mocks/ids";
 
 const mockAnomalies = [
   {
-    financialValueId: 1, contractId: 10, customerName: 'Acme Corp',
+    financialValueId: uid(1), contractId: uid(10), customerName: 'Acme Corp',
     month: 6, year: 2025, financialAmount: 150000, anomalyScore: -0.5, severity: 'HIGH' as const,
   },
   {
-    financialValueId: 2, contractId: 11, customerName: 'Beta Ltd',
+    financialValueId: uid(2), contractId: uid(11), customerName: 'Beta Ltd',
     month: 11, year: 2025, financialAmount: 80000, anomalyScore: -0.12, severity: 'MEDIUM' as const,
   },
   {
-    financialValueId: 3, contractId: 12, customerName: 'Gamma Inc',
+    financialValueId: uid(3), contractId: uid(12), customerName: 'Gamma Inc',
     month: 3, year: 2025, financialAmount: 45000, anomalyScore: -0.06, severity: 'LOW' as const,
   },
 ];
@@ -72,13 +73,13 @@ describe('AnomalyWidget', () => {
     expect(await screen.findByText('Acme Corp')).toBeInTheDocument();
     const links = screen.getAllByRole('link');
     const hrefs = links.map((l) => l.getAttribute('href'));
-    expect(hrefs).toContain('/contracts/10');
-    expect(hrefs).toContain('/contracts/11');
+    expect(hrefs).toContain(`/contracts/${uid(10)}`);
+    expect(hrefs).toContain(`/contracts/${uid(11)}`);
   });
 
   it('falls back to LOW config for unknown severity', async () => {
     const unknown = [{
-      financialValueId: 9, contractId: 99, customerName: 'Unknown Ltd',
+      financialValueId: uid(9), contractId: uid(99), customerName: 'Unknown Ltd',
       month: 1, year: 2025, financialAmount: 1000, anomalyScore: -0.01,
       severity: 'UNKNOWN' as 'LOW',
     }];

@@ -108,7 +108,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
   }>({ open: false, user: null });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await usersService.delete(id);
     },
     onSuccess: () => {

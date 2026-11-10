@@ -1,9 +1,10 @@
 import { nextAction } from '@/components/contracts/NextActionCard';
 import type { Contract } from '@/types';
+import { uid } from "../mocks/ids";
 
 const base: Contract = {
-  id: 1, counterpartyId: 1, contractNumber: 'MAN-1', wbsCode: '', projectName: 'Manutenzione impianti',
-  areaId: 1, managerId: 1, managerName: 'Marco Bellini', startDate: '2025-12-31', endDate: '2026-12-31',
+  id: uid(1), counterpartyId: uid(1), contractNumber: 'MAN-1', wbsCode: '', projectName: 'Manutenzione impianti',
+  areaId: uid(1), managerId: uid(1), managerName: 'Marco Bellini', startDate: '2025-12-31', endDate: '2026-12-31',
   status: 'ACTIVE', createdAt: '2025-12-01',
 };
 
@@ -56,7 +57,7 @@ describe('nextAction: what to do about a contract now', () => {
   });
 
   describe("with the contract's invoices, in the home page's order", () => {
-    const inv = (over: object) => ({ id: 1, invoiceNumber: 'FA-1', matchStatus: 'CONFIRMED', sepaBatchId: null, ibanChanged: false, ...over }) as never;
+    const inv = (over: object) => ({ id: uid(1), invoiceNumber: 'FA-1', matchStatus: 'CONFIRMED', sepaBatchId: null, ibanChanged: false, ...over }) as never;
 
     it('puts a changed IBAN before any deadline', () => {
       const action = nextAction({ ...base, daysUntilExpiry: 3 }, [inv({ ibanChanged: true, invoiceNumber: 'FA-2026-4T' })]);
@@ -67,7 +68,7 @@ describe('nextAction: what to do about a contract now', () => {
     });
 
     it('ignores a changed IBAN once the invoice is paid', () => {
-      expect(nextAction({ ...base, daysUntilExpiry: 120 }, [inv({ ibanChanged: true, sepaBatchId: 7 })]).tone).toBe('ok');
+      expect(nextAction({ ...base, daysUntilExpiry: 120 }, [inv({ ibanChanged: true, sepaBatchId: uid(7) })]).tone).toBe('ok');
     });
 
     it('keeps a near deadline before invoices to match', () => {
@@ -79,7 +80,7 @@ describe('nextAction: what to do about a contract now', () => {
       expect(nextAction({ ...base, daysUntilExpiry: 120 }, [inv({ matchStatus: 'SUGGESTED', invoiceNumber: 'NCS-11' })]).title)
         .toBe('Fattura NCS-11 da abbinare');
       expect(nextAction({ ...base, daysUntilExpiry: 120 }, [
-        inv({ matchStatus: 'UNMATCHED' }), inv({ id: 2, matchStatus: 'COUNTERPARTY_MISMATCH' }),
+        inv({ matchStatus: 'UNMATCHED' }), inv({ id: uid(2), matchStatus: 'COUNTERPARTY_MISMATCH' }),
       ]).title).toBe('2 fatture da abbinare');
     });
   });
@@ -87,7 +88,7 @@ describe('nextAction: what to do about a contract now', () => {
 
 describe('nextAction: edge cases', () => {
   const invoice = (over: Record<string, unknown>) => ({
-    id: 9, invoiceNumber: null, matchStatus: 'SUGGESTED', ibanChanged: false, sepaBatchId: null, ...over,
+    id: uid(9), invoiceNumber: null, matchStatus: 'SUGGESTED', ibanChanged: false, sepaBatchId: null, ...over,
   }) as never;
 
   it('names an invoice without a number as "Una fattura" for a changed IBAN', () => {

@@ -10,9 +10,9 @@ export type FinancialValueUpsertPayload = {
   month: number;
   year: number;
   financialAmount: number;
-  financialTypeId: number;
-  businessAreaId: number;
-  contractId: number;
+  financialTypeId: string;
+  businessAreaId: string;
+  contractId: string;
 };
 
 export const financialValuesService = {
@@ -26,12 +26,12 @@ export const financialValuesService = {
     return res.data;
   },
 
-  update: async (id: number, payload: FinancialValueUpsertPayload): Promise<FinancialValue> => {
+  update: async (id: string, payload: FinancialValueUpsertPayload): Promise<FinancialValue> => {
     const res = await api.put<FinancialValue>(`/financial-values/${id}`, payload);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/financial-values/${id}`);
   },
 };

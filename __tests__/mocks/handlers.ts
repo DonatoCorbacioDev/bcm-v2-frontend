@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import { uid } from "./ids";
 
 const BASE = 'http://localhost:8090/api/v1';
 
@@ -14,11 +15,11 @@ export const handlers = [
 
   http.get(`${BASE}/auth/me`, () => {
     return HttpResponse.json({
-      id: 1,
+      id: uid(1),
       username: 'admin@example.com',
-      managerId: 1,
+      managerId: uid(1),
       role: 'ADMIN',
-      roleId: 1,
+      roleId: uid(1),
       verified: true,
       createdAt: '2024-01-01T00:00:00Z',
     });
@@ -28,20 +29,20 @@ export const handlers = [
   http.get(`${BASE}/users`, () => {
     return HttpResponse.json([
       {
-        id: 1,
+        id: uid(1),
         username: 'alice@example.com',
-        managerId: 1,
+        managerId: uid(1),
         role: 'ADMIN',
-        roleId: 1,
+        roleId: uid(1),
         verified: true,
         createdAt: '2024-01-01T00:00:00Z',
       },
       {
-        id: 2,
+        id: uid(2),
         username: 'bob@example.com',
-        managerId: 2,
+        managerId: uid(2),
         role: 'VIEWER',
-        roleId: 2,
+        roleId: uid(2),
         verified: false,
         createdAt: '2024-02-01T00:00:00Z',
       },
@@ -52,7 +53,7 @@ export const handlers = [
   http.get(`${BASE}/managers`, () => {
     return HttpResponse.json([
       {
-        id: 1,
+        id: uid(1),
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
@@ -60,7 +61,7 @@ export const handlers = [
         department: 'IT',
       },
       {
-        id: 2,
+        id: uid(2),
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com',

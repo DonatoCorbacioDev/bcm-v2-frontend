@@ -1,15 +1,16 @@
 import { contractSchema } from "@/lib/validations/contract.schema";
+import { uid } from "../mocks/ids";
 
 const validContract = {
-  counterpartyId: 1,
+  counterpartyId: uid(1),
   contractNumber: "C001",
   wbsCode: "WBS-001",
   projectName: "Cloud Migration",
   startDate: "2024-01-01",
   endDate: "2024-12-31",
   status: "ACTIVE" as const,
-  areaId: 1,
-  managerId: 1,
+  areaId: uid(1),
+  managerId: uid(1),
 };
 
 describe("contractSchema", () => {
@@ -19,12 +20,12 @@ describe("contractSchema", () => {
   });
 
   describe("counterpartyId", () => {
-    it("rejects zero or negative IDs", () => {
+    it("rejects an empty or malformed id", () => {
       expect(
-        contractSchema.safeParse({ ...validContract, counterpartyId: 0 }).success,
+        contractSchema.safeParse({ ...validContract, counterpartyId: "" }).success,
       ).toBe(false);
       expect(
-        contractSchema.safeParse({ ...validContract, counterpartyId: -1 }).success,
+        contractSchema.safeParse({ ...validContract, counterpartyId: "not-a-uuid" }).success,
       ).toBe(false);
     });
 
@@ -115,12 +116,12 @@ describe("contractSchema", () => {
   });
 
   describe("areaId / managerId", () => {
-    it("rejects zero or negative IDs", () => {
+    it("rejects an empty or malformed id", () => {
       expect(
-        contractSchema.safeParse({ ...validContract, areaId: 0 }).success,
+        contractSchema.safeParse({ ...validContract, areaId: "" }).success,
       ).toBe(false);
       expect(
-        contractSchema.safeParse({ ...validContract, managerId: -1 }).success,
+        contractSchema.safeParse({ ...validContract, managerId: "not-a-uuid" }).success,
       ).toBe(false);
     });
   });
@@ -134,7 +135,7 @@ describe("contractSchema", () => {
     it("accepts a contract with all three set", () => {
       const result = contractSchema.safeParse({
         ...validContract,
-        financialTypeId: 1,
+        financialTypeId: uid(1),
         annualValue: 36000,
         billingFrequency: "MONTHLY",
       });
@@ -143,7 +144,7 @@ describe("contractSchema", () => {
 
     it("rejects a contract with only some of the three set", () => {
       expect(
-        contractSchema.safeParse({ ...validContract, financialTypeId: 1 }).success,
+        contractSchema.safeParse({ ...validContract, financialTypeId: uid(1) }).success,
       ).toBe(false);
       expect(
         contractSchema.safeParse({ ...validContract, annualValue: 36000 }).success,
@@ -151,7 +152,7 @@ describe("contractSchema", () => {
       expect(
         contractSchema.safeParse({
           ...validContract,
-          financialTypeId: 1,
+          financialTypeId: uid(1),
           annualValue: 36000,
         }).success,
       ).toBe(false);
@@ -160,7 +161,7 @@ describe("contractSchema", () => {
     it("rejects a negative or zero annualValue", () => {
       const result = contractSchema.safeParse({
         ...validContract,
-        financialTypeId: 1,
+        financialTypeId: uid(1),
         annualValue: 0,
         billingFrequency: "MONTHLY",
       });
@@ -170,7 +171,7 @@ describe("contractSchema", () => {
     it("rejects an unknown billingFrequency", () => {
       const result = contractSchema.safeParse({
         ...validContract,
-        financialTypeId: 1,
+        financialTypeId: uid(1),
         annualValue: 36000,
         billingFrequency: "WEEKLY",
       });

@@ -10,7 +10,7 @@ jest.mock('sonner', () => ({
 }));
 
 jest.mock('next/navigation', () => ({
-  useParams: () => ({ id: '1' }),
+  useParams: () => ({ id: '00000000-0000-4000-8000-000000000001' }),
   useRouter: () => ({ push: jest.fn() }),
   useSearchParams: () => mockSearchParams,
 }));
@@ -39,7 +39,7 @@ jest.mock('@/services/contractWorkflow.service', () => ({
 }));
 
 jest.mock('@/hooks/queries/contracts.queryKeys', () => ({
-  contractsQueryKeys: { detail: (id: number) => ['contracts', id], all: ['contracts'] },
+  contractsQueryKeys: { detail: (id: string) => ['contracts', id], all: ['contracts'] },
 }));
 
 jest.mock('@/lib/api', () => ({
@@ -76,31 +76,32 @@ import { contractsService } from '@/services/contracts.service';
 import { contractWorkflowService } from '@/services/contractWorkflow.service';
 import api from '@/lib/api';
 import ContractDetailPage from '@/app/(dashboard)/contracts/[id]/page';
+import { uid } from "../mocks/ids";
 
 const baseContract = {
-  id: 1,
-  counterpartyId: 1,
-  counterparty: { id: 1, name: 'Acme', type: 'CUSTOMER' as const },
+  id: uid(1),
+  counterpartyId: uid(1),
+  counterparty: { id: uid(1), name: 'Acme', type: 'CUSTOMER' as const },
   contractNumber: 'CNT-1',
   wbsCode: 'WBS-1',
   projectName: 'Progetto',
-  areaId: 1,
-  managerId: 5,
+  areaId: uid(1),
+  managerId: uid(5),
   managerName: 'Mario Rossi',
   startDate: '2025-01-01',
   endDate: '2026-01-01',
   status: 'DRAFT',
   createdAt: '2025-01-01',
   workflowStage: null as string | null,
-  financialTypeId: null as number | null,
+  financialTypeId: null as string | null,
   annualValue: null as number | null,
   billingFrequency: null as string | null,
   daysUntilExpiry: undefined as number | undefined,
 };
 
-const mockAuthAs = (overrides: Partial<{ role: string; managerId: number; canApproveContracts: boolean }>) => {
+const mockAuthAs = (overrides: Partial<{ role: string; managerId: string; canApproveContracts: boolean }>) => {
   (useAuthStore as unknown as jest.Mock).mockReturnValue({
-    user: { id: 1, username: 'user', role: 'MANAGER', managerId: 5, canApproveContracts: false, ...overrides },
+    user: { id: uid(1), username: 'user', role: 'MANAGER', managerId: uid(5), canApproveContracts: false, ...overrides },
   });
 };
 
@@ -120,7 +121,7 @@ beforeEach(() => {
 describe('ContractDetailPage — approval workflow', () => {
   it('shows "Invia in revisione" for the contract\'s own manager when DRAFT', () => {
     mockContract({ workflowStage: 'DRAFT' });
-    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5) });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
 
@@ -129,7 +130,7 @@ describe('ContractDetailPage — approval workflow', () => {
 
   it('does not show "Invia in revisione" for a manager who does not own the contract', () => {
     mockContract({ workflowStage: 'DRAFT' });
-    mockAuthAs({ role: 'MANAGER', managerId: 999 });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(999) });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
 
@@ -138,19 +139,19 @@ describe('ContractDetailPage — approval workflow', () => {
 
   it('submits for review and shows a success toast', async () => {
     mockContract({ workflowStage: 'DRAFT' });
-    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5) });
     (contractWorkflowService.submit as jest.Mock).mockResolvedValue(undefined);
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /invia in revisione/i }));
 
-    await waitFor(() => expect(contractWorkflowService.submit).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(contractWorkflowService.submit).toHaveBeenCalledWith(uid(1)));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Contratto inviato in revisione'));
   });
 
   it('shows Approva/Rifiuta for an approver when IN_REVIEW', () => {
     mockContract({ workflowStage: 'IN_REVIEW' });
-    mockAuthAs({ role: 'MANAGER', managerId: 999, canApproveContracts: true });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(999), canApproveContracts: true });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
 
@@ -160,7 +161,7 @@ describe('ContractDetailPage — approval workflow', () => {
 
   it('does not show Approva/Rifiuta for a manager without the approval permission', () => {
     mockContract({ workflowStage: 'IN_REVIEW' });
-    mockAuthAs({ role: 'MANAGER', managerId: 5, canApproveContracts: false });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5), canApproveContracts: false });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
 
@@ -176,7 +177,7 @@ describe('ContractDetailPage — approval workflow', () => {
     render(<ContractDetailPage />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /approva/i }));
 
-    await waitFor(() => expect(contractWorkflowService.approve).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(contractWorkflowService.approve).toHaveBeenCalledWith(uid(1)));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Contratto approvato e attivato'));
   });
 
@@ -194,7 +195,7 @@ describe('ContractDetailPage — approval workflow', () => {
     const rejectButtons = screen.getAllByRole('button', { name: /rifiuta/i });
     await userEvent.click(rejectButtons[rejectButtons.length - 1]);
 
-    await waitFor(() => expect(contractWorkflowService.reject).toHaveBeenCalledWith(1, "Manca l'allegato"));
+    await waitFor(() => expect(contractWorkflowService.reject).toHaveBeenCalledWith(uid(1), "Manca l'allegato"));
     await waitFor(() => expect(toast.success).toHaveBeenCalledWith('Contratto rifiutato e rimandato in bozza'));
   });
 
@@ -337,13 +338,13 @@ describe('ContractDetailPage — section tabs', () => {
 describe('ContractDetailPage — financial values tab', () => {
   it('totals revenue and cost separately instead of blending them together', async () => {
     mockContract({ workflowStage: 'DRAFT' });
-    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5) });
     (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/financial-values/by-contract/1') {
+      if (url === `/financial-values/by-contract/${uid(1)}`) {
         return Promise.resolve({
           data: [
-            { id: 1, typeName: 'Ricavi', areaName: 'IT', financialAmount: 1000, month: 1, year: 2025, category: 'REVENUE' },
-            { id: 2, typeName: 'Costi', areaName: 'IT', financialAmount: 400, month: 1, year: 2025, category: 'COST' },
+            { id: uid(1), typeName: 'Ricavi', areaName: 'IT', financialAmount: 1000, month: 1, year: 2025, category: 'REVENUE' },
+            { id: uid(2), typeName: 'Costi', areaName: 'IT', financialAmount: 400, month: 1, year: 2025, category: 'COST' },
           ],
         });
       }
@@ -372,14 +373,14 @@ describe('ContractDetailPage — financial values tab', () => {
 describe('ContractDetailPage — history tab', () => {
   it('names who changed the status, "Sistema" when nobody did, and lists the approval workflow after', async () => {
     mockContract({ workflowStage: 'IN_REVIEW' });
-    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5) });
     (api.get as jest.Mock).mockImplementation((url: string) => {
-      if (url === '/contract-history/contract/1') {
+      if (url === `/contract-history/contract/${uid(1)}`) {
         return Promise.resolve({
           data: [
-            { id: 1, contractId: 1, modifiedById: 7, modifiedByName: 'Marco Bellini', modificationDate: '2026-01-10T10:00:00',
+            { id: uid(1), contractId: uid(1), modifiedById: uid(7), modifiedByName: 'Marco Bellini', modificationDate: '2026-01-10T10:00:00',
               previousStatus: 'DRAFT', newStatus: 'ACTIVE' },
-            { id: 2, contractId: 1, modifiedById: null, modifiedByName: null, modificationDate: '2026-02-10T04:00:00',
+            { id: uid(2), contractId: uid(1), modifiedById: null, modifiedByName: null, modificationDate: '2026-02-10T04:00:00',
               previousStatus: 'ACTIVE', newStatus: 'EXPIRED' },
           ],
         });
@@ -387,7 +388,7 @@ describe('ContractDetailPage — history tab', () => {
       return Promise.resolve({ data: [] });
     });
     (contractWorkflowService.getEvents as jest.Mock).mockResolvedValue([
-      { id: 1, fromStage: 'DRAFT', toStage: 'IN_REVIEW', action: 'SUBMIT', actorUsername: 'demo', comment: null,
+      { id: uid(1), fromStage: 'DRAFT', toStage: 'IN_REVIEW', action: 'SUBMIT', actorUsername: 'demo', comment: null,
         createdAt: '2026-01-05T09:00:00' },
     ]);
 
@@ -405,7 +406,7 @@ describe('ContractDetailPage — history tab', () => {
 
 describe('ContractDetailPage — regenerate financial values button', () => {
   const contractWithFinancialTerms = {
-    financialTypeId: 1,
+    financialTypeId: uid(1),
     annualValue: 36000,
     billingFrequency: 'MONTHLY' as const,
   };
@@ -432,7 +433,7 @@ describe('ContractDetailPage — regenerate financial values button', () => {
 
   it('hides the button for a MANAGER even when financial terms are set', async () => {
     mockContract(contractWithFinancialTerms);
-    mockAuthAs({ role: 'MANAGER', managerId: 5 });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5) });
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
@@ -451,7 +452,7 @@ describe('ContractDetailPage — regenerate financial values button', () => {
     await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
     await userEvent.click(await screen.findByRole('button', { name: /rigenera importi previsti/i }));
 
-    await waitFor(() => expect(contractsService.generateFinancialValues).toHaveBeenCalledWith(1));
+    await waitFor(() => expect(contractsService.generateFinancialValues).toHaveBeenCalledWith(uid(1)));
     await waitFor(() =>
       expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('5 creati'))
     );

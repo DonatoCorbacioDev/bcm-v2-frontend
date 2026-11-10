@@ -25,12 +25,12 @@ export const managersService = {
     return res.data;
   },
 
-  update: async (id: number, payload: ManagerUpsertPayload): Promise<Manager> => {
+  update: async (id: string, payload: ManagerUpsertPayload): Promise<Manager> => {
     const res = await api.put<Manager>(`/managers/${id}`, payload);
     return res.data;
   },
 
-  delete: async (id: number): Promise<void> => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`/managers/${id}`);
   },
 };

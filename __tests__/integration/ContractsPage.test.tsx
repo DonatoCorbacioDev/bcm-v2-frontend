@@ -42,8 +42,9 @@ import { useAuthStore } from '@/store/authStore';
 import { useBusinessAreas } from '@/hooks/useBusinessAreas';
 import { useManagers } from '@/hooks/useManagers';
 import ContractsPage from '@/app/(dashboard)/contracts/page';
+import { uid } from "../mocks/ids";
 
-const nonEmptyQuery = { isSuccess: true, data: [{ id: 1 }] };
+const nonEmptyQuery = { isSuccess: true, data: [{ id: uid(1) }] };
 
 beforeEach(() => {
   jest.clearAllMocks();

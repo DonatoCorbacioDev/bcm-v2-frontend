@@ -34,8 +34,9 @@ import { useBusinessAreas } from '@/hooks/useBusinessAreas';
 import { useManagers } from '@/hooks/useManagers';
 import { useCounterparties } from '@/hooks/useCounterparties';
 import ContractsPage from '@/app/(dashboard)/contracts/page';
+import { uid } from "../mocks/ids";
 
-const loaded = { isSuccess: true, data: [{ id: 1 }] };
+const loaded = { isSuccess: true, data: [{ id: uid(1) }] };
 const empty = { isSuccess: true, data: [] };
 
 const setUp = (role: string, counterparties = loaded) => {

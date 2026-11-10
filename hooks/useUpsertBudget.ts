@@ -8,7 +8,7 @@ import { budgetsService, type BudgetUpsertPayload } from "@/services/budgets.ser
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
 
 type UpsertBudgetParams = {
-  id?: number;
+  id?: string;
   payload: BudgetUpsertPayload;
 };
 

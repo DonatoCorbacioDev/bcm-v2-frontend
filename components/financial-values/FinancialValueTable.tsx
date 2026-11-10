@@ -55,7 +55,7 @@ interface FinancialValueTableProps {
   /** Restricts rows to this year. `null` (the default) shows every year. */
   readonly year?: number | null;
   /** Restricts rows to this business area. `null` (the default) shows every area. */
-  readonly areaId?: number | null;
+  readonly areaId?: string | null;
 }
 
 // Search and filter logic for financial values (category is no longer a
@@ -64,8 +64,8 @@ interface FinancialValueTableProps {
 function useFinancialValueFilters(
   financialValues: FinancialValue[],
   year: number | null,
-  areaId: number | null,
-  contractNumbers: ReadonlyMap<number, string>
+  areaId: string | null,
+  contractNumbers: ReadonlyMap<string, string>
 ) {
   const [searchQuery, setSearchQuery] = useState("");
   const [monthFilter, setMonthFilter] = useState<string>("ALL");
@@ -111,7 +111,7 @@ function useFinancialValueFilters(
 const MIXED_AREAS = "Più aree";
 
 interface ContractGroup {
-  readonly contractId: number;
+  readonly contractId: string;
   readonly counterparty: string;
   readonly contractNumber?: string;
   readonly areaName?: string;
@@ -120,8 +120,8 @@ interface ContractGroup {
 }
 
 // One group per contract, biggest total first; months oldest first inside.
-function groupByContract(rows: FinancialValue[], contractNumbers: ReadonlyMap<number, string>): ContractGroup[] {
-  const byContract = new Map<number, FinancialValue[]>();
+function groupByContract(rows: FinancialValue[], contractNumbers: ReadonlyMap<string, string>): ContractGroup[] {
+  const byContract = new Map<string, FinancialValue[]>();
   for (const fv of rows) {
     const group = byContract.get(fv.contractId);
     if (group) group.push(fv);
@@ -145,7 +145,7 @@ interface CategorySectionProps {
   readonly title: string;
   readonly emptyLabel: string;
   readonly rows: FinancialValue[];
-  readonly contractNumbers: ReadonlyMap<number, string>;
+  readonly contractNumbers: ReadonlyMap<string, string>;
   /** A search or month filter is active: every contract is shown expanded. */
   readonly expandAll: boolean;
   readonly totalVariantClass: string;
@@ -166,10 +166,10 @@ function CategorySection({
   onDeleteClick,
 }: CategorySectionProps) {
   const groups = useMemo(() => groupByContract(rows, contractNumbers), [rows, contractNumbers]);
-  const [expanded, setExpanded] = useState<ReadonlySet<number>>(new Set());
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const total = rows.reduce((sum, fv) => sum + fv.financialAmount, 0);
 
-  const toggle = (contractId: number) => {
+  const toggle = (contractId: string) => {
     setExpanded((current) => {
       const next = new Set(current);
       if (next.has(contractId)) next.delete(contractId);
@@ -320,7 +320,7 @@ export default function FinancialValueTable({ onEditClick, year = null, areaId =
   }>({ open: false, financialValue: null });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       await financialValuesService.delete(id);
     },
     onSuccess: () => {

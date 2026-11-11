@@ -18,7 +18,6 @@ import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
 import { HomeAttentionList } from "@/components/dashboard/HomeAttentionList";
 import { SupplierInvoicesSummary } from "@/components/dashboard/SupplierInvoicesSummary";
 import { AnalyticsSections } from "@/components/dashboard/AnalyticsSections";
-import { TwoFactorReminder } from "@/components/dashboard/TwoFactorReminder";
 
 /** The former charts and AI widgets, off until their numbers are reliable (see AnalyticsSections). */
 const SHOW_ANALYTICS = process.env.NEXT_PUBLIC_HOME_ANALYTICS === "true";
@@ -134,8 +133,6 @@ export default function DashboardPage() {
         <h1 className="text-3xl font-bold text-foreground">{greeting}</h1>
         <p className="text-muted-foreground mt-2">Cosa richiede attenzione nei prossimi {windowDays} giorni</p>
       </div>
-
-      <TwoFactorReminder isAdmin={isAdmin} />
 
       {body}
 

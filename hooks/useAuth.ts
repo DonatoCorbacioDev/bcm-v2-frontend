@@ -14,12 +14,15 @@ interface BackendAuthResponse {
   token: string | null;
   mfaRequired: boolean;
   mfaToken: string | null;
+  mfaSetupRequired?: boolean;
+  setupToken?: string | null;
 }
 
 export type LoginResult =
   | { success: true }
   | { success: false; mfaRequired: true; mfaToken: string }
-  | { success: false; mfaRequired: false };
+  | { success: false; mfaRequired: false; mfaSetupRequired: true; setupToken: string }
+  | { success: false; mfaRequired: false; mfaSetupRequired?: false };
 
 interface UserProfile {
   id: string;
@@ -64,10 +67,14 @@ export const useAuth = () => {
     setError(null);
     try {
       const loginResponse = await api.post<BackendAuthResponse>("/auth/login", credentials);
-      const { token, mfaRequired, mfaToken } = loginResponse.data;
+      const { token, mfaRequired, mfaToken, mfaSetupRequired, setupToken } = loginResponse.data;
 
       if (mfaRequired && mfaToken) {
         return { success: false, mfaRequired: true, mfaToken };
+      }
+      // An administrator without 2FA: no session until it is set up.
+      if (mfaSetupRequired && setupToken) {
+        return { success: false, mfaRequired: false, mfaSetupRequired: true, setupToken };
       }
 
       await completeLogin(token as string);
@@ -120,5 +127,15 @@ export const useAuth = () => {
     }
   };
 
-  return { login, verifyTwoFactor, logout, isLoading, error, user, isAuthenticated };
+  /** Starts the session with the access token from a completed 2FA setup. */
+  const finishLogin = async (token: string) => {
+    setIsLoading(true);
+    try {
+      await completeLogin(token);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { login, verifyTwoFactor, finishLogin, logout, isLoading, error, user, isAuthenticated };
 };

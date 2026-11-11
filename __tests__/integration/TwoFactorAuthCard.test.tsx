@@ -5,6 +5,19 @@ import { createWrapper } from '../mocks/wrapper';
 
 jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 
+const mockPush = jest.fn();
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn() }),
+}));
+
+const mockLogout = jest.fn().mockResolvedValue(undefined);
+jest.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ logout: mockLogout }) }));
+
+let mockRole = 'MANAGER';
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: (select: (state: { user: { role: string } }) => unknown) => select({ user: { role: mockRole } }),
+}));
+
 jest.mock('qrcode', () => ({
   __esModule: true,
   default: { toDataURL: jest.fn().mockResolvedValue('data:image/png;base64,fake') },
@@ -38,7 +51,10 @@ function renderCard() {
   return render(<TwoFactorAuthCard />, { wrapper: createWrapper() });
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockRole = 'MANAGER';
+});
 
 describe('TwoFactorAuthCard', () => {
   it('shows "Non attiva" and an "Attiva 2FA" button when 2FA is disabled', async () => {
@@ -111,6 +127,23 @@ describe('TwoFactorAuthCard', () => {
 
     await waitFor(() => expect(mockDisable).toHaveBeenCalledWith('654321'));
     expect(toast.success).toHaveBeenCalledWith('Autenticazione a due fattori disattivata');
+  });
+
+  it('lets an administrator change device: says what happens, then signs out to the login', async () => {
+    mockRole = 'ADMIN';
+    mockGetStatus.mockResolvedValue(true);
+    mockDisable.mockResolvedValue(undefined);
+
+    renderCard();
+    await userEvent.click(await screen.findByRole('button', { name: /cambia dispositivo/i }));
+    expect(screen.getByText(/per gli amministratori la 2fa è obbligatoria/i)).toBeInTheDocument();
+
+    await userEvent.type(screen.getByPlaceholderText('123456'), '654321');
+    await userEvent.click(screen.getByRole('button', { name: /conferma disattivazione/i }));
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/login'));
+    expect(mockLogout).toHaveBeenCalled();
+    expect(toast.success).toHaveBeenCalledWith(expect.stringMatching(/accedi di nuovo/i));
   });
 
   it('shows an error toast when starting setup fails', async () => {

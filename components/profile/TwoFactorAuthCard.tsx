@@ -5,11 +5,14 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import { ShieldCheck, ShieldOff, Copy } from "lucide-react";
 import { twoFactorAuthService } from "@/services/twoFactorAuth.service";
+import { useAuthStore } from "@/store/authStore";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +28,11 @@ type Step = "idle" | "setup" | "recoveryCodes" | "disabling";
 
 export default function TwoFactorAuthCard() {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const { logout } = useAuth();
+  // Administrators must keep 2FA on: turning it off ends the session and the
+  // next login asks for the setup again (how an admin changes phone).
+  const isAdmin = useAuthStore((state) => state.user?.role === "ADMIN");
   const [step, setStep] = useState<Step>("idle");
   const [secret, setSecret] = useState<string | null>(null);
   const [otpAuthUri, setOtpAuthUri] = useState<string | null>(null);
@@ -74,10 +82,16 @@ export default function TwoFactorAuthCard() {
 
   const disableMutation = useMutation({
     mutationFn: () => twoFactorAuthService.disable(disableCode),
-    onSuccess: () => {
-      toast.success("Autenticazione a due fattori disattivata");
+    onSuccess: async () => {
       setDisableCode("");
       setStep("idle");
+      if (isAdmin) {
+        toast.success("2FA disattivata: accedi di nuovo per configurarla sul nuovo dispositivo");
+        await logout();
+        router.push("/login");
+        return;
+      }
+      toast.success("Autenticazione a due fattori disattivata");
       queryClient.setQueryData(["2fa-status"], false);
     },
     onError: () => toast.error("Codice non valido"),
@@ -127,7 +141,7 @@ export default function TwoFactorAuthCard() {
                 )}
                 {enabled ? (
                   <Button variant="outline" size="sm" onClick={() => setStep("disabling")}>
-                    Disattiva
+                    {isAdmin ? "Cambia dispositivo" : "Disattiva"}
                   </Button>
                 ) : (
                   <Button size="sm" onClick={() => setupMutation.mutate()} disabled={setupMutation.isPending}>
@@ -143,6 +157,12 @@ export default function TwoFactorAuthCard() {
                   Inserisci un codice dalla tua app di autenticazione (o un codice di recupero)
                   per confermare la disattivazione.
                 </p>
+                {isAdmin && (
+                  <p className="text-sm text-foreground">
+                    Per gli amministratori la 2FA è obbligatoria: dopo la disattivazione uscirai e al
+                    prossimo accesso la configurerai di nuovo, per esempio su un nuovo telefono.
+                  </p>
+                )}
                 <Input
                   value={disableCode}
                   onChange={(e) => setDisableCode(e.target.value)}

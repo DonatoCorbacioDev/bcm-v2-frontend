@@ -12,17 +12,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogoMark } from "@/components/layout/Logo";
+import { TwoFactorEnrollment } from "@/components/auth/TwoFactorEnrollment";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { ArrowLeft, ArrowRight, Lock, Moon, Sun } from "lucide-react";
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, verifyTwoFactor, isLoading, error } = useAuth();
+  const { login, verifyTwoFactor, finishLogin, isLoading, error } = useAuth();
   const { isDark, toggle: toggleDark } = useDarkMode();
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [mfaCode, setMfaCode] = useState("");
+  const [setupToken, setSetupToken] = useState<string | null>(null);
 
   const resetSuccess = searchParams.get("reset") === "success";
   const inviteSuccess = searchParams.get("invite") === "success";
@@ -35,6 +37,8 @@ function LoginContent() {
       router.push("/dashboard");
     } else if (result.mfaRequired) {
       setMfaToken(result.mfaToken);
+    } else if (result.mfaSetupRequired) {
+      setSetupToken(result.setupToken);
     }
   };
 
@@ -187,7 +191,17 @@ function LoginContent() {
             </div>
           )}
 
-          {mfaToken ? (
+          {setupToken ? (
+            <TwoFactorEnrollment
+              setupToken={setupToken}
+              onComplete={async (token) => {
+                await finishLogin(token);
+                router.push("/dashboard");
+              }}
+              onCancel={() => setSetupToken(null)}
+              cancelLabel="Torna al login"
+            />
+          ) : mfaToken ? (
             <form onSubmit={handleMfaSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="mfa-code" className="text-[13px] font-medium">

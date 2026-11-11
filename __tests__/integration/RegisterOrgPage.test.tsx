@@ -23,6 +23,12 @@ jest.mock('@/store/authStore', () => ({
   useAuthStore: () => ({ setAuth: mockSetAuth }),
 }));
 
+jest.mock('qrcode', () => ({
+  __esModule: true,
+  default: { toDataURL: jest.fn().mockResolvedValue('data:image/png;base64,fake') },
+}));
+
+import QRCode from 'qrcode';
 import RegisterOrgPage from '@/app/(auth)/register-org/page';
 import api from '@/lib/api';
 import { ONEROUS_CLAUSES, TERMS_VERSION } from '@/lib/legal';
@@ -126,6 +132,27 @@ describe('RegisterOrgPage', () => {
     }));
     await waitFor(() => expect(mockSetAuth).toHaveBeenCalled());
     expect(mockPush).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('asks the new admin to set 2FA up before the dashboard, or to do it at the next login', async () => {
+    // beforeEach resets every mock, the QR code generator included.
+    (QRCode.toDataURL as jest.Mock).mockResolvedValue('data:image/png;base64,fake');
+    mockPost
+      .mockResolvedValueOnce({ data: started })
+      .mockResolvedValueOnce({ data: { token: null, mfaSetupRequired: true, setupToken: 'setup-1' } })
+      .mockResolvedValueOnce({ data: { secret: 'JBSWY3DPEHPK3PXP', otpAuthUri: 'otpauth://totp/BCM:mario' } });
+    render(<RegisterOrgPage />, { wrapper: createWrapper() });
+    await submitForm();
+    await userEvent.type(await screen.findByLabelText('Codice di conferma'), '123456');
+    await userEvent.click(screen.getByRole('button', { name: 'Firma e crea organizzazione' }));
+
+    expect(await screen.findByText('Organizzazione creata')).toBeInTheDocument();
+    expect(await screen.findByText('JBSWY3DPEHPK3PXP')).toBeInTheDocument();
+    expect(mockSetAuth).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: /più tardi/i }));
+    expect(mockPush).toHaveBeenCalledWith('/login');
+    expect(mockSetAuth).not.toHaveBeenCalled();
   });
 
   it('keeps the confirm button disabled until six digits are typed', async () => {

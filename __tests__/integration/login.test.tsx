@@ -27,6 +27,11 @@ jest.mock('@/lib/api', () => ({
   },
 }));
 
+jest.mock('qrcode', () => ({
+  __esModule: true,
+  default: { toDataURL: jest.fn().mockResolvedValue('data:image/png;base64,fake') },
+}));
+
 import LoginPage from '@/app/(auth)/login/page';
 import api from '@/lib/api';
 import { uid } from "../mocks/ids";
@@ -154,6 +159,59 @@ describe('LoginPage', () => {
     await waitFor(() => {
       expect(mockPost).toHaveBeenCalledWith('/auth/2fa/verify', { mfaToken: 'pending-token-123', code: '123456' });
     });
+  });
+
+  it('makes an administrator without 2FA set it up before the session starts', async () => {
+    mockPost.mockResolvedValueOnce({
+      data: { token: null, mfaRequired: false, mfaToken: null, mfaSetupRequired: true, setupToken: 'setup-1' },
+    });
+    mockPost.mockResolvedValueOnce({ data: { secret: 'JBSWY3DPEHPK3PXP', otpAuthUri: 'otpauth://totp/BCM:boss' } });
+
+    render(<LoginPage />, { wrapper: createWrapper() });
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'boss');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
+
+    expect(await screen.findByText('JBSWY3DPEHPK3PXP')).toBeInTheDocument();
+    expect(mockPost).toHaveBeenCalledWith('/auth/2fa/enroll/setup', { setupToken: 'setup-1' });
+    // No session yet: the profile is not asked for until 2FA is on.
+    expect(mockGet).not.toHaveBeenCalled();
+
+    mockPost.mockResolvedValueOnce({ data: { token: 'real-token', recoveryCodes: ['AAAA-BBBB', 'CCCC-DDDD'] } });
+    mockGet.mockResolvedValueOnce({
+      data: { id: uid(1), username: 'boss', managerId: uid(1), role: 'ADMIN', roleId: uid(1), verified: true, createdAt: '2024-01-01T00:00:00Z' },
+    });
+    await userEvent.type(screen.getByLabelText(/codice di verifica/i), '123456');
+    await userEvent.click(screen.getByRole('button', { name: /attiva e accedi/i }));
+
+    expect(await screen.findByText('AAAA-BBBB')).toBeInTheDocument();
+    expect(mockPost).toHaveBeenCalledWith('/auth/2fa/enroll/confirm', { setupToken: 'setup-1', code: '123456' });
+    expect(mockGet).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: /ho salvato i codici/i }));
+    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/auth/me', { headers: { Authorization: 'Bearer real-token' } }));
+  });
+
+  it('keeps the setup step and says why when the code is wrong', async () => {
+    mockPost.mockResolvedValueOnce({
+      data: { token: null, mfaRequired: false, mfaToken: null, mfaSetupRequired: true, setupToken: 'setup-1' },
+    });
+    mockPost.mockResolvedValueOnce({ data: { secret: 'JBSWY3DPEHPK3PXP', otpAuthUri: 'otpauth://totp/BCM:boss' } });
+    render(<LoginPage />, { wrapper: createWrapper() });
+    await userEvent.type(screen.getByLabelText(/nome utente/i), 'boss');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /accedi/i }));
+    await screen.findByText('JBSWY3DPEHPK3PXP');
+
+    mockPost.mockRejectedValueOnce({ response: { status: 400, data: { message: 'Codice di verifica non valido' } } });
+    await userEvent.type(screen.getByLabelText(/codice di verifica/i), '000000');
+    await userEvent.click(screen.getByRole('button', { name: /attiva e accedi/i }));
+
+    expect(await screen.findByText('Codice di verifica non valido')).toBeInTheDocument();
+    expect(mockGet).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: /torna al login/i }));
+    expect(screen.getByLabelText(/nome utente/i)).toBeInTheDocument();
   });
 
   it('shows an error and stays on the MFA step when the code is wrong', async () => {

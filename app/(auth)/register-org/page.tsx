@@ -20,6 +20,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
+import { TwoFactorEnrollment } from "@/components/auth/TwoFactorEnrollment";
 import { ONEROUS_CLAUSES, TERMS_VERSION } from "@/lib/legal";
 import { passwordViolation } from "@/lib/validations/password";
 
@@ -42,7 +43,10 @@ interface Declarations {
 }
 
 interface AuthTokenResponse {
-  token: string;
+  token: string | null;
+  /** The new admin sets 2FA up before the first session. */
+  mfaSetupRequired?: boolean;
+  setupToken?: string | null;
 }
 
 interface RegistrationStarted {
@@ -82,6 +86,7 @@ export default function RegisterOrgPage() {
   const allDeclared = Object.values(declarations).every(Boolean);
   // Set once the code has been emailed: the page then asks for it instead of the form.
   const [pending, setPending] = useState<RegistrationStarted | null>(null);
+  const [setupToken, setSetupToken] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [resendIn, setResendIn] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
@@ -153,14 +158,11 @@ export default function RegisterOrgPage() {
         registrationId: pending.registrationId,
         code,
       });
-      const { token } = data;
-
-      const { data: userProfile } = await api.get<UserProfile>("/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setAuth(userProfile, token);
-      router.push("/dashboard");
+      if (data.mfaSetupRequired && data.setupToken) {
+        setSetupToken(data.setupToken);
+        return;
+      }
+      await startSession(data.token as string);
     } catch (err) {
       showError(err);
     } finally {
@@ -184,11 +186,46 @@ export default function RegisterOrgPage() {
     }
   };
 
+  const startSession = async (token: string) => {
+    const { data: userProfile } = await api.get<UserProfile>("/auth/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setAuth(userProfile, token);
+    router.push("/dashboard");
+  };
+
   const backToForm = () => {
     setPending(null);
     setError(null);
     setNotice(null);
   };
+
+  if (setupToken) {
+    return (
+      <main id="main-content" className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <Card>
+            <CardHeader className="space-y-1">
+              <LogoMark className="h-12 w-12 mx-auto mb-2" />
+              <h1 className="text-2xl font-bold text-center">Organizzazione creata</h1>
+              <CardDescription className="text-center">
+                Ultimo passo: proteggi il tuo account amministratore.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TwoFactorEnrollment
+                setupToken={setupToken}
+                onComplete={startSession}
+                // The organization exists: the setup is asked again at the next login.
+                onCancel={() => router.push("/login")}
+                cancelLabel="Lo faccio più tardi, al prossimo accesso"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+    );
+  }
 
   if (pending) {
     return (

@@ -10,6 +10,11 @@ export interface TotpSetup {
   otpAuthUri: string;
 }
 
+export interface EnrollmentResult {
+  token: string;
+  recoveryCodes: string[];
+}
+
 export const twoFactorAuthService = {
   getStatus: async (): Promise<boolean> => {
     const res = await api.get<{ enabled: boolean }>("/users/me/2fa/status");
@@ -28,5 +33,17 @@ export const twoFactorAuthService = {
 
   disable: async (code: string): Promise<void> => {
     await api.post("/users/me/2fa/disable", { code });
+  },
+
+  /** Required setup before the first session: authorized by the setup token from login. */
+  enrollSetup: async (setupToken: string): Promise<TotpSetup> => {
+    const res = await api.post<TotpSetup>("/auth/2fa/enroll/setup", { setupToken });
+    return res.data;
+  },
+
+  /** Turns 2FA on and opens the session (the refresh cookie comes with the response). */
+  enrollConfirm: async (setupToken: string, code: string): Promise<EnrollmentResult> => {
+    const res = await api.post<EnrollmentResult>("/auth/2fa/enroll/confirm", { setupToken, code });
+    return res.data;
   },
 };

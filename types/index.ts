@@ -13,6 +13,8 @@ export interface User {
   verified: boolean;
   createdAt: string;
   canApproveContracts?: boolean;
+  /** Read-only, only in the admin's user list. */
+  twoFactorEnabled?: boolean | null;
   organizationName?: string | null;
   /** First name from the manager profile; sessions from before it was added lack it. */
   firstName?: string | null;

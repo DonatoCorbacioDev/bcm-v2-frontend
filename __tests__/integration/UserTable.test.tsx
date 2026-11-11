@@ -149,6 +149,23 @@ describe('UserTable', () => {
     expect(bobCells[4]).toHaveTextContent('No');
   });
 
+  it('shows the two-factor status of each user to the admin', () => {
+    (useUsers as jest.Mock).mockReturnValue({
+      data: [
+        { ...mockUsers[0], twoFactorEnabled: true },
+        { ...mockUsers[1], twoFactorEnabled: false },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+    render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    // "2FA" is the 6th cell (index 5), right after "Approva contratti".
+    const rows = screen.getAllByRole('row');
+    expect(within(rows[1]).getAllByRole('cell')[5]).toHaveTextContent('Attiva');
+    expect(within(rows[2]).getAllByRole('cell')[5]).toHaveTextContent('No');
+  });
+
   it('shows skeleton while loading', () => {
     (useUsers as jest.Mock).mockReturnValue({
       data: undefined,

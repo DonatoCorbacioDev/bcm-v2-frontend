@@ -88,6 +88,13 @@ export default function ContractDetailPage() {
     enabled: !!contractId,
   });
 
+  // Four eyes (backend ContractWorkflowService): an approver who is not an
+  // admin can't decide on a contract assigned to them or submitted by them.
+  const lastSubmitter = workflowEvents?.filter((e) => e.action === "SUBMIT").at(-1)?.actorUsername;
+  const needsAnotherApprover = !isAdmin && Boolean(contract) && (
+    (Boolean(user?.managerId) && user?.managerId === contract?.managerId) || (lastSubmitter !== undefined && lastSubmitter === user?.username)
+  );
+
   const invalidateWorkflow = () => {
     void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.detail(contractId) });
     void queryClient.invalidateQueries({ queryKey: ["contract-workflow-events", contractId] });
@@ -492,7 +499,12 @@ export default function ContractDetailPage() {
               {submitMutation.isPending ? "Invio..." : "Invia in revisione"}
             </Button>
           )}
-          {contract.workflowStage === "IN_REVIEW" && canApprove && (
+          {contract.workflowStage === "IN_REVIEW" && canApprove && needsAnotherApprover && (
+            <span className="text-sm text-muted-foreground self-center">
+              In attesa dell&apos;approvazione di un collega
+            </span>
+          )}
+          {contract.workflowStage === "IN_REVIEW" && canApprove && !needsAnotherApprover && (
             <>
               <Button
                 variant="outline"

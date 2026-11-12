@@ -159,6 +159,39 @@ describe('ContractDetailPage — approval workflow', () => {
     expect(screen.getByRole('button', { name: /rifiuta/i })).toBeInTheDocument();
   });
 
+  it('asks an approver for a colleague on a contract assigned to them, without the buttons', () => {
+    mockContract({ workflowStage: 'IN_REVIEW' });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5), canApproveContracts: true });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByText(/in attesa dell'approvazione di un collega/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /approva/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /rifiuta/i })).not.toBeInTheDocument();
+  });
+
+  it('asks for a colleague when the approver submitted the contract themselves', async () => {
+    mockContract({ workflowStage: 'IN_REVIEW' });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(999), canApproveContracts: true });
+    (contractWorkflowService.getEvents as jest.Mock).mockResolvedValue([
+      { id: uid(1), fromStage: 'DRAFT', toStage: 'IN_REVIEW', action: 'SUBMIT', actorUsername: 'user', comment: null, createdAt: '2026-11-01T10:00:00' },
+    ]);
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+
+    expect(await screen.findByText(/in attesa dell'approvazione di un collega/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /approva/i })).not.toBeInTheDocument();
+  });
+
+  it('lets an admin approve even their own contract', () => {
+    mockContract({ workflowStage: 'IN_REVIEW' });
+    mockAuthAs({ role: 'ADMIN', managerId: uid(5), canApproveContracts: false });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+
+    expect(screen.getByRole('button', { name: /approva/i })).toBeInTheDocument();
+  });
+
   it('does not show Approva/Rifiuta for a manager without the approval permission', () => {
     mockContract({ workflowStage: 'IN_REVIEW' });
     mockAuthAs({ role: 'MANAGER', managerId: uid(5), canApproveContracts: false });

@@ -9,7 +9,9 @@ const config = {
       tsconfig: {
         jsx: "react-jsx",
         esModuleInterop: true,
-        moduleResolution: "node",
+        module: "commonjs",
+        moduleResolution: "bundler",
+        rootDir: ".",
       },
     }],
   },

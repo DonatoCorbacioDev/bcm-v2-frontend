@@ -659,6 +659,19 @@ describe('UserForm', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Aggiornamento dell'utente non riuscito"));
   });
 
+  it('shows the reason the backend gives when it refuses the update', async () => {
+    const message = 'Accesso negato: non puoi impostare la password di un altro amministratore';
+    const refusal = Object.assign(new Error('Request failed with status code 403'), {
+      isAxiosError: true,
+      response: { status: 403, data: { message } },
+    });
+    const mutateAsync = jest.fn().mockRejectedValue(refusal);
+    (useUpsertUser as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<UserForm onClose={onClose} onSuccess={onSuccess} user={validUser} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(message));
+  });
+
   it('shows validation error when submitting empty create form', async () => {
     render(<UserForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));

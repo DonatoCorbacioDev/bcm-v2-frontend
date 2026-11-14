@@ -5,6 +5,7 @@
 
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isAxiosError } from "axios";
 import { toast } from "sonner";
 import {
   userCreateSchema,
@@ -92,11 +93,14 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
       onClose();
     } catch (error) {
       /* istanbul ignore next */
-      const message = isEditing
+      const fallback = isEditing
         ? "Aggiornamento dell'utente non riuscito"
         : "Creazione dell'utente non riuscita";
+      // A refusal says why, e.g. another administrator's password, which
+      // only they can reset (backend messages are written for the user).
+      const reason = isAxiosError<{ message?: string }>(error) ? error.response?.data?.message : undefined;
 
-      toast.error(message);
+      toast.error(reason || fallback);
       console.error("Upsert error:", error);
     }
   };

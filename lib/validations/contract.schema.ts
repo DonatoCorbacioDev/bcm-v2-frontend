@@ -39,7 +39,8 @@ export const contractSchema = z.object({
   projectName: z
     .string()
     .trim()
-    .max(200, "L'oggetto non può superare i 200 caratteri")
+    // The column holds 100 (the backend refuses more with 400).
+    .max(100, "L'oggetto non può superare i 100 caratteri")
     .refine((value) => value === "" || value.length >= 3, "L'oggetto deve contenere almeno 3 caratteri")
     .optional(),
 

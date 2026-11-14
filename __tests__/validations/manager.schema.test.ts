@@ -99,7 +99,7 @@ describe("managerSchema", () => {
     });
 
     it("rejects department names longer than 100 characters", () => {
-      const result = managerSchema.safeParse({ ...validData, department: "D".repeat(101) });
+      const result = managerSchema.safeParse({ ...validData, department: "D".repeat(51) });
       expect(result.success).toBe(false);
     });
 

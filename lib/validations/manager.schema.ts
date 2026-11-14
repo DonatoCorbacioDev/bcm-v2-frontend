@@ -47,7 +47,8 @@ export const managerSchema = z.object({
   department: z
     .string()
     .trim()
-    .max(100, "Il reparto non può superare i 100 caratteri")
+    // The column holds 50 (the backend refuses more with 400).
+    .max(50, "Il reparto non può superare i 50 caratteri")
     .refine((v) => v === "" || v.length >= 2, "Il reparto deve contenere almeno 2 caratteri")
     .optional(),
 });

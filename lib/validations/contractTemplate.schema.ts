@@ -61,7 +61,7 @@ export const instantiateTemplateSchema = z.object({
     .trim(),
 
   wbsCode: z.string().max(50).trim().optional().nullable(),
-  projectName: z.string().max(200).trim().optional().nullable(),
+  projectName: z.string().max(100).trim().optional().nullable(),
 
   startDate: z
     .string({ message: "La data di inizio è obbligatoria" })

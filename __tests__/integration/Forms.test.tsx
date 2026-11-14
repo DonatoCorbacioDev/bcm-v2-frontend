@@ -1239,12 +1239,12 @@ describe('ContractForm — with more than one area and responsabile', () => {
   it('flags an object and a WBS code that are too long', async () => {
     render(<ContractForm onClose={jest.fn()} />, { wrapper: createWrapper() });
 
-    fireEvent.change(await screen.findByLabelText(/^Oggetto/), { target: { value: 'A'.repeat(201) } });
+    fireEvent.change(await screen.findByLabelText(/^Oggetto/), { target: { value: 'A'.repeat(101) } });
     await userEvent.click(screen.getByText(/Altri dati/));
     fireEvent.change(screen.getByLabelText(/Codice WBS/), { target: { value: 'W'.repeat(51) } });
     await userEvent.click(screen.getByRole('button', { name: /crea contratto/i }));
 
-    expect(await screen.findByText("L'oggetto non può superare i 200 caratteri")).toBeInTheDocument();
+    expect(await screen.findByText("L'oggetto non può superare i 100 caratteri")).toBeInTheDocument();
     expect(screen.getByText('Il codice WBS non può superare i 50 caratteri')).toBeInTheDocument();
   });
 });

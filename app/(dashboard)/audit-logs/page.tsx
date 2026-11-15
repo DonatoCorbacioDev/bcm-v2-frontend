@@ -47,6 +47,17 @@ const ACTION_LABELS: Record<string, string> = {
   VERIFIED_IBAN_CONFIRMED: "IBAN verificato confermato",
   SEPA_IBAN_MISMATCH_BLOCKED: "Pagamento bloccato: IBAN diverso",
   TIER_CHANGED: "Cambio di piano",
+  // Security events (SecurityEvents on the backend).
+  SECURITY_LOGIN_FAILED: "Accesso fallito: password sbagliata",
+  SECURITY_MFA_FAILED: "Accesso fallito: codice 2FA sbagliato",
+  SECURITY_ACCOUNT_LOCKED: "Account bloccato per troppi tentativi",
+  SECURITY_REFRESH_REUSE: "Sessione rubata: sessioni chiuse",
+  SECURITY_ACCESS_DENIED: "Accesso negato",
+  SECURITY_RATE_LIMITED: "Troppe richieste",
+  SECURITY_COST_LIMITED: "Limite di operazioni superato",
+  SECURITY_DEMO_BLOCKED: "Azione disattivata nella demo",
+  SECURITY_REGISTRATION_CODE_REFUSED: "Codice di registrazione rifiutato",
+  SECURITY_DUPLICATE_PAYMENT_REFUSED: "Pagamento duplicato rifiutato",
 };
 
 const ENTITY_TYPE_LABELS: Record<string, string> = {

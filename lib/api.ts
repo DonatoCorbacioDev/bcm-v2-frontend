@@ -61,15 +61,26 @@ api.interceptors.request.use(
 
 let refreshInFlight: Promise<string> | null = null;
 
-// Session restoration and 401 recovery share one request per browser tab.
-// Raw axios prevents recursive refresh when the refresh cookie has expired.
-// Callers own state updates, including ignoring results after unmount.
-export function refreshAccessToken(): Promise<string> {
-  refreshInFlight ??= axios.post<{ token: string }>(
+const REFRESH_LOCK = "bcm-session-refresh";
+
+function postRefresh(): Promise<string> {
+  return axios.post<{ token: string }>(
     `${API_URL}/auth/refresh`,
     {},
     { withCredentials: true, timeout: 10000 }
-  ).then((response) => response.data.token).finally(() => {
+  ).then((response) => response.data.token);
+}
+
+// Session restoration and 401 recovery share one request per browser tab,
+// and the tabs take turns through a Web Lock: the refresh cookie is rotated
+// on every use, so two tabs sending the same one at once would look like a
+// stolen token to the backend and end the session. A tab that waited sends
+// the cookie the other tab just received.
+// Raw axios prevents recursive refresh when the refresh cookie has expired.
+// Callers own state updates, including ignoring results after unmount.
+export function refreshAccessToken(): Promise<string> {
+  const locks = globalThis.navigator?.locks;
+  refreshInFlight ??= (locks ? locks.request(REFRESH_LOCK, postRefresh) : postRefresh()).finally(() => {
     refreshInFlight = null;
   });
   return refreshInFlight;

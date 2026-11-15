@@ -116,6 +116,20 @@ describe('lib/api', () => {
     }));
   });
 
+  it('takes turns with the other tabs through a Web Lock, so they never send the same rotated cookie', async () => {
+    const request = jest.fn((_name: string, callback: () => Promise<string>) => callback());
+    Object.defineProperty(globalThis.navigator, 'locks', { value: { request }, configurable: true });
+    try {
+      const { mod } = loadModule('http://localhost:8080');
+      mockAxiosPost.mockResolvedValueOnce({ data: { token: 'locked-token' } });
+      await expect(mod.refreshAccessToken()).resolves.toBe('locked-token');
+      expect(request).toHaveBeenCalledWith('bcm-session-refresh', expect.any(Function));
+      expect(mockAxiosPost).toHaveBeenCalledTimes(1);
+    } finally {
+      delete (globalThis.navigator as { locks?: unknown }).locks;
+    }
+  });
+
   it('allows a later refresh after a shared request fails or succeeds', async () => {
     const { mod } = loadModule('http://localhost:8080');
     mockAxiosPost.mockRejectedValueOnce(new Error('expired'))

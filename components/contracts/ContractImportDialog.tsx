@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { contractsService } from "@/services/contracts.service";
+import { apiErrorMessage } from "@/lib/apiError";
 import type { ContractImportResult } from "@/types";
 
 function downloadBlob(blob: Blob, filename: string) {
@@ -64,8 +65,8 @@ export default function ContractImportDialog({ open, onOpenChange }: ContractImp
         toast.error(`${data.importedCount} importati, ${data.errorCount} righe con errori`);
       }
     },
-    onError: () => {
-      toast.error("Importazione non riuscita. Controlla che il file sia un .xlsx valido");
+    onError: async (error) => {
+      toast.error(await apiErrorMessage(error, "Importazione non riuscita. Controlla che il file sia un .xlsx valido"));
     },
   });
 

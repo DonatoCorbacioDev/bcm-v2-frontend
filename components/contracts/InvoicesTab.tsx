@@ -140,12 +140,12 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    onError: (error: AxiosError<{ message?: string }>) => {
+    onError: async (error: AxiosError<{ message?: string }>) => {
       if (error.response?.status === 409) {
         toast.error("Questa fattura è già stata caricata");
         return;
       }
-      toast.error("Caricamento della fattura non riuscito");
+      toast.error(await apiErrorMessage(error, "Caricamento della fattura non riuscito"));
     },
   });
 

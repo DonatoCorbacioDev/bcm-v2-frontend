@@ -266,6 +266,18 @@ describe('DocumentsTab', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Caricamento del documento non riuscito'));
   });
 
+  it('says why the backend refused the upload (antivirus, active content, antivirus not ready)', async () => {
+    (api.get as jest.Mock).mockResolvedValue({ data: [] });
+    (api.post as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('refused'), { isAxiosError: true, response: { status: 422, data: { message: "Il file è stato rifiutato dall'antivirus" } } })
+    );
+    render(<DocumentsTab contractId={uid(1)} isAdmin={true} onApply={onApply} />, { wrapper: createWrapper() });
+    expect(await screen.findByText(/carica pdf/i)).toBeInTheDocument();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [new File(['%PDF'], 'test.pdf', { type: 'application/pdf' })] } });
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Il file è stato rifiutato dall'antivirus"));
+  });
+
   it('shows error toast when delete fails', async () => {
     (api.get as jest.Mock).mockResolvedValue({ data: [doc] });
     (api.delete as jest.Mock).mockRejectedValue(new Error('delete failed'));

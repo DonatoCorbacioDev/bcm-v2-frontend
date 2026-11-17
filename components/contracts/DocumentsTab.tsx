@@ -7,6 +7,7 @@
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { apiErrorMessage } from "@/lib/apiError";
 import {
   Upload, Download, Trash2, FileText, Loader2, FileSearch, ChevronDown, ChevronUp,
   ShieldAlert, CheckCircle2, FilePlus2, History, CalendarClock,
@@ -113,7 +114,7 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       /* istanbul ignore next */
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    onError: () => toast.error("Caricamento del documento non riuscito"),
+    onError: async (error) => toast.error(await apiErrorMessage(error, "Caricamento del documento non riuscito")),
   });
 
   const uploadVersionMutation = useMutation({
@@ -132,7 +133,8 @@ export default function DocumentsTab({ contractId, isAdmin, onApply }: Documents
       /* istanbul ignore next */
       if (versionInputRef.current) versionInputRef.current.value = "";
     },
-    onError: () => toast.error("Caricamento della nuova versione non riuscito"),
+    onError: async (error) =>
+      toast.error(await apiErrorMessage(error, "Caricamento della nuova versione non riuscito")),
   });
 
   const deleteMutation = useMutation({

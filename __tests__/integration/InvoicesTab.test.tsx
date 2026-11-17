@@ -271,6 +271,20 @@ describe('InvoicesTab', () => {
     expect(toast.success).toHaveBeenCalledWith('Fattura caricata');
   });
 
+  it('says why the backend refused the invoice', async () => {
+    mockApiGet({ invoices: [] });
+    (api.post as jest.Mock).mockRejectedValue(
+      Object.assign(new Error('refused'), { isAxiosError: true, response: { status: 503, data: { message: 'Analisi antivirus non disponibile: riprova tra qualche minuto' } } })
+    );
+    renderTab();
+    expect(await screen.findByText(/carica fattura/i)).toBeInTheDocument();
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [new File(['<xml/>'], 'fattura.xml', { type: 'text/xml' })] } });
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith('Analisi antivirus non disponibile: riprova tra qualche minuto'),
+    );
+  });
+
   it('shows error toast when upload fails', async () => {
     mockApiGet({ invoices: [] });
     (api.post as jest.Mock).mockRejectedValue(new Error('upload failed'));

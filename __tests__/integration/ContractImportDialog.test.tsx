@@ -186,6 +186,19 @@ describe('ContractImportDialog', () => {
     );
   });
 
+  it('says why the backend refused the file', async () => {
+    (contractsService.importExcel as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error('refused'), {
+        isAxiosError: true,
+        response: { status: 400, data: { message: 'Il file non è un file Excel .xlsx valido' } },
+      }),
+    );
+    render(<ContractImportDialog open={true} onOpenChange={onOpenChange} />, { wrapper: createWrapper() });
+    await selectFile(screen.getByLabelText(/file excel/i), xlsxFile);
+    await userEvent.click(screen.getByRole('button', { name: /importa$/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Il file non è un file Excel .xlsx valido'));
+  });
+
   it('calls onOpenChange(false) when Chiudi is clicked', async () => {
     render(<ContractImportDialog open={true} onOpenChange={onOpenChange} />, { wrapper: createWrapper() });
     const [footerCloseButton] = screen.getAllByRole('button', { name: /chiudi/i });

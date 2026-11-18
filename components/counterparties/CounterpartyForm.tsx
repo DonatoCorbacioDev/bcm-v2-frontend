@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logError } from "@/lib/logError";
 
 const TYPE_LABELS: Record<CounterpartyFormData["type"], string> = {
   CUSTOMER: "Cliente",
@@ -81,7 +82,7 @@ export default function CounterpartyForm({ onClose, onSuccess, counterparty }: C
       toast.error(
         isEditing ? "Aggiornamento della controparte non riuscito" : "Creazione della controparte non riuscita"
       );
-      console.error("Upsert error:", error);
+      logError("Upsert error:", error);
     }
   };
 

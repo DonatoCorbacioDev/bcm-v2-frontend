@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 
 import { contractTemplateSchema, type ContractTemplateFormData } from "@/lib/validations/contractTemplate.schema";
+import { logError } from "@/lib/logError";
 
 interface ContractTemplateFormProps {
   readonly onClose: () => void;
@@ -101,7 +102,7 @@ export default function ContractTemplateForm({
         /* istanbul ignore next */
         template?.id ? "Aggiornamento del template non riuscito" : "Creazione del template non riuscita"
       );
-      console.error(error);
+      logError("Save error:", error);
     }
   };
 

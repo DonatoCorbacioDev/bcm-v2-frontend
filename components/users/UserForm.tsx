@@ -29,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logError } from "@/lib/logError";
 
 interface UserFormProps {
   readonly onClose: () => void;
@@ -101,7 +102,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
       const reason = isAxiosError<{ message?: string }>(error) ? error.response?.data?.message : undefined;
 
       toast.error(reason || fallback);
-      console.error("Upsert error:", error);
+      logError("Upsert error:", error);
     }
   };
 

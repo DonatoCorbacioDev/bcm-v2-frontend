@@ -32,6 +32,7 @@ import { computeNoticeDeadline } from "@/lib/statusConfig";
 import { SelectField } from "@/components/shared/SelectField";
 
 import { contractSchema, type ContractFormData } from "@/lib/validations/contract.schema";
+import { logError } from "@/lib/logError";
 
 function startOfToday(): Date {
   const now = new Date();
@@ -187,7 +188,7 @@ function ContractFormFields({
         /* istanbul ignore next */
         contract?.id ? "Aggiornamento del contratto non riuscito" : "Creazione del contratto non riuscita"
       );
-      console.error(error);
+      logError("Save error:", error);
     }
   };
 

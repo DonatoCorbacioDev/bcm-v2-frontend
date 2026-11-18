@@ -34,6 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { logError } from "@/lib/logError";
 
 type MissingPrerequisiteFlags = {
   missingAreas: boolean;
@@ -153,7 +154,7 @@ function ContractsPageContent() {
       await exportContracts(kind);
     } catch (error) {
       toast.error(EXPORT_CONFIG[kind].errorMessage);
-      console.error(`Export ${kind} error:`, error);
+      logError(`Export ${kind} error:`, error);
     } finally {
       setIsExporting(false);
     }

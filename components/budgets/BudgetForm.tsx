@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logError } from "@/lib/logError";
 
 interface BudgetFormProps {
   readonly onClose: () => void;
@@ -66,7 +67,7 @@ export default function BudgetForm({ onClose, onSuccess, budget }: BudgetFormPro
       onClose();
     } catch (error) {
       toast.error(isEditing ? "Aggiornamento del budget non riuscito" : "Creazione del budget non riuscita");
-      console.error("Upsert error:", error);
+      logError("Upsert error:", error);
     }
   };
 

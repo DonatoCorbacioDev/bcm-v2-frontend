@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logError } from "@/lib/logError";
 
 interface FinancialValueFormProps {
   readonly onClose: () => void;
@@ -101,7 +102,7 @@ export default function FinancialValueForm({
           ? "Aggiornamento del valore finanziario non riuscito"
           : "Creazione del valore finanziario non riuscita"
       );
-      console.error(error);
+      logError("Save error:", error);
     }
   };
 

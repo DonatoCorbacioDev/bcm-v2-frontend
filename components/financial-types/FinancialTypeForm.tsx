@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logError } from "@/lib/logError";
 
 interface FinancialTypeFormProps {
   readonly onClose: () => void;
@@ -52,7 +53,7 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
       onClose();
     } catch (error) {
       toast.error(isEditing ? "Aggiornamento del tipo finanziario non riuscito" : "Creazione del tipo finanziario non riuscita");
-      console.error("Upsert error:", error);
+      logError("Upsert error:", error);
     }
   };
 

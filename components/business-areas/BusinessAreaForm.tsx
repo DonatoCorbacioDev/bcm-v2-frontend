@@ -13,6 +13,7 @@ import type { BusinessArea } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { logError } from "@/lib/logError";
 
 interface BusinessAreaFormProps {
   readonly onClose: () => void;
@@ -61,7 +62,7 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
         : "Creazione dell'area di business non riuscita";
 
       toast.error(message);
-      console.error("Upsert error:", error);
+      logError("Upsert error:", error);
     }
   };
 

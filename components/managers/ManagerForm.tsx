@@ -15,6 +15,7 @@ import type { Manager } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { logError } from "@/lib/logError";
 
 interface ManagerFormProps {
   readonly onClose: () => void;
@@ -71,7 +72,7 @@ export default function ManagerForm({
       toast.error(
         manager?.id ? "Aggiornamento del responsabile non riuscito" : "Creazione del responsabile non riuscita"
       );
-      console.error(error);
+      logError("Save error:", error);
     }
   };
 

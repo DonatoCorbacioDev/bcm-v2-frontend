@@ -34,14 +34,20 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Create non-root user
+# Create non-root user. npm, npx and corepack go: the server runs with node
+# alone, and npm's own dependencies were the image's only known
+# vulnerabilities (undici, brace-expansion; Trivy, 2026-11-18).
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+    adduser --system --uid 1001 nextjs && \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 
-# Copy necessary files
+# Copy necessary files. Owned by root and read-only (555) to nextjs, which
+# runs the server (OWASP Docker Security, non-root user): it can execute the
+# app, not rewrite it. The root filesystem is read-only too (docker-compose.yml).
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs --chmod=555 /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs --chmod=555 /app/.next/static ./.next/static
+COPY --from=builder --chmod=555 /app/.next/standalone ./
+COPY --from=builder --chmod=555 /app/.next/static ./.next/static
 
 USER nextjs
 

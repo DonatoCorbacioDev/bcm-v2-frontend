@@ -5,7 +5,8 @@ import ErrorPage from '@/app/error';
 import GlobalError from '@/app/global-error';
 import NotFound from '@/app/not-found';
 
-const TOKEN = 'eyJhbGciOiJIUzI1NiJ9.secret.signature';
+// A plain fake: a value shaped like a real JWT trips the secret scanner.
+const TOKEN = 'test-access-token';
 
 /** A failed request the way axios hands it over: with the request it came from. */
 const failedRequest = (status: number, data: unknown) => {

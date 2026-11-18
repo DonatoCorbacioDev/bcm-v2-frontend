@@ -1,0 +1,15 @@
+# Secret scanning (gitleaks, in CI and on the whole history): the default
+# rules, with one exception. Every file is scanned in full; a new exception
+# names exactly what it covers and says why it holds no real secret.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Test-only fake values"
+commits = [
+  # __tests__/unit/logError.test.tsx as first committed: a made-up string
+  # shaped like a JWT ("eyJhbGciOiJIUzI1NiJ9.secret.signature"), the test's
+  # stand-in for an access token. The next commit replaced it with a plain
+  # fake; this keeps a scan of the whole history clean.
+  "3c8e0a17cd10dfe2e39033459ff7aa5b19879b62",
+]

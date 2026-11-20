@@ -2,6 +2,14 @@ import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
+import { AxiosError, type AxiosResponse } from 'axios';
+
+/** A 409 as the backend sends it: the record changed since the form was opened. */
+const STALE = 'Il dato è stato modificato da un altro utente nel frattempo: ricarica la pagina e riprova';
+const conflict = () =>
+  new AxiosError('Request failed with status code 409', 'ERR_BAD_REQUEST', undefined, undefined, {
+    status: 409, data: { message: STALE },
+  } as AxiosResponse);
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
@@ -274,6 +282,30 @@ describe('CounterpartyForm', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento della controparte non riuscito'));
+  });
+
+  it('sends back the version it was opened with, so a stale save is refused', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', version: 4 }} />,
+      { wrapper: createWrapper() }
+    );
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync.mock.calls[0][0].payload.version).toBe(4);
+  });
+
+  it('shows the server message when someone else saved it meanwhile (409)', async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(conflict());
+    (useUpsertCounterparty as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(
+      <CounterpartyForm onClose={onClose} onSuccess={onSuccess} counterparty={{ id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', version: 4 }} />,
+      { wrapper: createWrapper() }
+    );
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(STALE));
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('calls onClose when Cancel is clicked', async () => {
@@ -790,6 +822,23 @@ describe('ContractForm', () => {
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
     await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento del contratto non riuscito'));
+  });
+
+  it('sends back the version it was opened with, so a stale save is refused', async () => {
+    const mutateAsync = jest.fn().mockResolvedValue(undefined);
+    (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<ContractForm onClose={onClose} onSuccess={onSuccess} contract={{ ...validContract, version: 7 }} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
+    expect(mutateAsync.mock.calls[0][0].payload.version).toBe(7);
+  });
+
+  it('shows the server message when someone else saved it meanwhile (409)', async () => {
+    const mutateAsync = jest.fn().mockRejectedValue(conflict());
+    (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
+    render(<ContractForm onClose={onClose} contract={{ ...validContract, version: 7 }} />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(STALE));
   });
 
   it('calls onClose when Cancel is clicked', async () => {

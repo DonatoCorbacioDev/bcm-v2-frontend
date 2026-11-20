@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { logError } from "@/lib/logError";
+import { conflictMessage } from "@/lib/conflictMessage";
 
 const TYPE_LABELS: Record<CounterpartyFormData["type"], string> = {
   CUSTOMER: "Cliente",
@@ -72,7 +73,8 @@ export default function CounterpartyForm({ onClose, onSuccess, counterparty }: C
     try {
       await upsertMutation.mutateAsync({
         id: counterparty?.id,
-        payload: data,
+        // On an update, the version the form was opened with: refused if someone saved meanwhile.
+        payload: counterparty ? { ...data, version: counterparty.version } : data,
       });
 
       toast.success(isEditing ? "Controparte aggiornata" : "Controparte creata");
@@ -80,7 +82,8 @@ export default function CounterpartyForm({ onClose, onSuccess, counterparty }: C
       onClose();
     } catch (error) {
       toast.error(
-        isEditing ? "Aggiornamento della controparte non riuscito" : "Creazione della controparte non riuscita"
+        conflictMessage(error) ??
+          (isEditing ? "Aggiornamento della controparte non riuscito" : "Creazione della controparte non riuscita")
       );
       logError("Upsert error:", error);
     }

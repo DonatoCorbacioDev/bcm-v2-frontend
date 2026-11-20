@@ -16,6 +16,7 @@ import { useManagers } from "@/hooks/useManagers";
 import { useCounterparties } from "@/hooks/useCounterparties";
 import { useFinancialTypes } from "@/hooks/useFinancialTypes";
 import { CONTRACT_STATUS_LABELS } from "@/lib/utils";
+import { conflictMessage } from "@/lib/conflictMessage";
 
 const BILLING_FREQUENCY_LABELS: Record<string, string> = {
   MONTHLY: "Mensile",
@@ -169,7 +170,8 @@ function ContractFormFields({
         await upsertMutation.mutateAsync({
           mode: "update",
           id: contract.id,
-          payload: data,
+          // The version the form was opened with: refused if someone saved meanwhile.
+          payload: { ...data, version: contract.version },
         });
         toast.success("Contratto aggiornato");
       } else {
@@ -185,8 +187,9 @@ function ContractFormFields({
       onClose();
     } catch (error) {
       toast.error(
-        /* istanbul ignore next */
-        contract?.id ? "Aggiornamento del contratto non riuscito" : "Creazione del contratto non riuscita"
+        conflictMessage(error) ??
+          /* istanbul ignore next */
+          (contract?.id ? "Aggiornamento del contratto non riuscito" : "Creazione del contratto non riuscita")
       );
       logError("Save error:", error);
     }

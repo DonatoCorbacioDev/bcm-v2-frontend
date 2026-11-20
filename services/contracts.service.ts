@@ -24,6 +24,8 @@ export type ContractUpsertPayload = {
   autoRenew?: boolean | null;
   noticeDays?: number | null;
   renewalMonths?: number | null;
+  /** On an update: the version the form was opened with (see Contract.version). */
+  version?: number;
 };
 
 // Pagination types

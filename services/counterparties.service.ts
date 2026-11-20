@@ -20,6 +20,8 @@ export type CounterpartyUpsertPayload = {
   contactEmail?: string;
   contactPhone?: string;
   notes?: string;
+  /** On an update: the version the form was opened with (see Counterparty.version). */
+  version?: number;
 };
 
 export type VerifyIbanPayload = {

@@ -24,6 +24,27 @@ export const CONTRACT_STATUS_LABELS: Record<string, string> = Object.fromEntries
   Object.entries(CONTRACT_STATUS_CONFIG).map(([status, cfg]) => [status, cfg.label])
 );
 
+/**
+ * The statuses an edit may set, from the contract's current one: the
+ * backend's ContractStatusTransitions (docs/BUSINESS_RULES.md), which decides.
+ * A draft becomes active only through approval, nothing goes back to draft,
+ * a cancelled contract stays cancelled.
+ */
+const STATUS_TRANSITIONS: Record<string, readonly string[]> = {
+  DRAFT: ["DRAFT", "CANCELLED"],
+  ACTIVE: ["ACTIVE", "EXPIRED", "CANCELLED"],
+  EXPIRED: ["EXPIRED", "ACTIVE", "CANCELLED"],
+  CANCELLED: ["CANCELLED"],
+};
+
+/** Status options for the form: every one for a new contract, the reachable ones for an existing one. */
+export function contractStatusOptions(current?: string | null): { value: string; label: string }[] {
+  const reachable = current ? STATUS_TRANSITIONS[current] : undefined;
+  return Object.entries(CONTRACT_STATUS_LABELS)
+    .filter(([value]) => !reachable || reachable.includes(value))
+    .map(([value, label]) => ({ value, label }));
+}
+
 export function getContractStatusVariant(status: string): BadgeVariant {
   return CONTRACT_STATUS_CONFIG[status]?.variant ?? "default";
 }

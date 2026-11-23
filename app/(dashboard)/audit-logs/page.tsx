@@ -57,6 +57,7 @@ const ACTION_LABELS: Record<string, string> = {
   SECURITY_ACCESS_DENIED: "Accesso negato",
   SECURITY_RATE_LIMITED: "Troppe richieste",
   SECURITY_COST_LIMITED: "Limite di operazioni superato",
+  SECURITY_WRITE_LIMITED: "Troppe modifiche al minuto",
   SECURITY_DEMO_BLOCKED: "Azione disattivata nella demo",
   SECURITY_REGISTRATION_CODE_REFUSED: "Codice di registrazione rifiutato",
   SECURITY_DUPLICATE_PAYMENT_REFUSED: "Pagamento duplicato rifiutato",

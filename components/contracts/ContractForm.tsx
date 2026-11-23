@@ -15,7 +15,6 @@ import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
 import { useCounterparties } from "@/hooks/useCounterparties";
 import { useFinancialTypes } from "@/hooks/useFinancialTypes";
-import { CONTRACT_STATUS_LABELS } from "@/lib/utils";
 import { conflictMessage } from "@/lib/conflictMessage";
 
 const BILLING_FREQUENCY_LABELS: Record<string, string> = {
@@ -29,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { computeNoticeDeadline } from "@/lib/statusConfig";
+import { computeNoticeDeadline, contractStatusOptions } from "@/lib/statusConfig";
 import { SelectField } from "@/components/shared/SelectField";
 
 import { contractSchema, type ContractFormData } from "@/lib/validations/contract.schema";
@@ -284,7 +283,7 @@ function ContractFormFields({
             value={field.value}
             onValueChange={field.onChange}
             placeholder="Seleziona lo stato"
-            options={Object.entries(CONTRACT_STATUS_LABELS).map(([value, label]) => ({ value, label }))}
+            options={contractStatusOptions(contract?.status)}
             error={/* istanbul ignore next */ errors.status?.message}
           />
         )}

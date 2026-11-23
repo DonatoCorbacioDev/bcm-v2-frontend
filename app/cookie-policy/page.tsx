@@ -34,8 +34,10 @@ export default function CookiePolicyPage() {
         <p>BCM usa un solo cookie, impostato dal backend al login:</p>
         <ul>
           <li>
-            <strong>refresh_token</strong> — <code>HttpOnly</code>, <code>Secure</code>,{" "}
-            <code>SameSite</code>. Serve esclusivamente a mantenere la sessione attiva e a
+            <strong>__Secure-refresh_token</strong> — <code>HttpOnly</code>, <code>Secure</code>,{" "}
+            <code>SameSite=Strict</code>, inviato solo alle richieste di autenticazione. Il prefisso{" "}
+            <code>__Secure-</code> fa sì che il browser lo accetti solo su connessioni HTTPS. Serve
+            esclusivamente a mantenere la sessione attiva e a
             rinnovare il token di accesso. Non è leggibile da JavaScript, non è usato per
             profilazione o tracciamento, e non viene condiviso con nessun servizio esterno.
           </li>

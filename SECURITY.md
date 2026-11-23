@@ -87,7 +87,9 @@ Use DOMPurify or rely on React's built-in XSS protection
 
 #### Content Security Policy
 - ✅ **Real CSP, not a static header** - `proxy.ts` (Next.js 16's renamed `middleware.ts`) issues a fresh nonce per request and sets `script-src 'self' 'nonce-<value>' 'strict-dynamic'`, so Next's own inline bootstrap scripts work without `'unsafe-inline'`
-- ✅ `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()` - all set in `proxy.ts`, confirmed present on live response headers
+- ✅ `object-src 'none'` and `base-uri 'none'` (OWASP ASVS 3.4.3's minimum, since 2026-11-23), `frame-ancestors 'none'`, `form-action 'self'`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, `Cross-Origin-Opener-Policy: same-origin` - all set in `proxy.ts`, confirmed present on live response headers
+- ✅ `X-Content-Type-Options: nosniff` on every response, static files included (`next.config.ts` `headers()`: `proxy.ts` skips `/_next/static` and the favicon, which went out without it until 2026-11-23)
+- ⚠️ Left at Level 3: `style-src 'unsafe-inline'` (Next.js and the Radix components set inline styles), no Trusted Types, no CSP violation reports
 - ✅ `X-Powered-By` header disabled (`poweredByHeader: false` in `next.config.ts`) - don't advertise the framework for free
 
 #### Data Protection
@@ -188,7 +190,7 @@ Before deploying to production:
 
 - [x] **Environment Variables** - `.env` on the VM, gitignored, never committed (verified)
 - [x] **API URL** - HTTPS only in `docker-compose.prod.yml`
-- [x] **Cookie Flags** - `Secure` + `HttpOnly` + `SameSite=Lax`, scoped to `/auth`
+- [x] **Cookie Flags** - `__Secure-refresh_token`: `Secure` + `HttpOnly` + `SameSite=Strict`, scoped to `/api/v1/auth` (the `__Secure-` prefix since 2026-11-23, ASVS 3.3.1); the access token stays in memory, never in `localStorage`
 - [x] **CSP Headers** - nonce-based, `strict-dynamic` (see above)
 - [x] **HSTS** - enabled at the Caddy layer
 - [x] **X-Frame-Options / X-Content-Type-Options / Referrer-Policy** - all set
@@ -199,7 +201,7 @@ Before deploying to production:
 - [ ] **Error Tracking** - No Sentry/LogRocket yet
 - [x] **Uptime Monitoring** - UptimeRobot on backend health + frontend (added 2026-10-08, verified live with a real tested incident — see `bcm-v2-backend/docs/SECURITY.md`)
 
-Where the headers actually live, if you're checking: `proxy.ts` (CSP, frame-ancestors, permissions-policy, referrer-policy) and `bcm-v2-docker/Caddyfile` (HSTS, TLS termination, routing). Don't reintroduce a static header list in `next.config.ts` — it can't issue a per-request CSP nonce, which is why `proxy.ts` exists.
+Where the headers actually live, if you're checking: `proxy.ts` (CSP, frame-ancestors, permissions-policy, referrer-policy, COOP), `next.config.ts` (`nosniff` alone, for the static files `proxy.ts` skips) and `bcm-v2-docker/Caddyfile` (HSTS, TLS termination, routing). Don't move the CSP into `next.config.ts` — it can't issue a per-request nonce, which is why `proxy.ts` exists.
 
 ---
 
@@ -254,6 +256,7 @@ We follow **coordinated disclosure**:
 
 ### Version 2.0.x (Current)
 
+- **2026-11-23:** OWASP ASVS 5.0 V3: `object-src 'none'` and `base-uri 'none'` in the CSP, `Cross-Origin-Opener-Policy: same-origin`, `nosniff` on static files too, the session cookie renamed `__Secure-refresh_token` (every session ended once, at that deploy)
 - **2026-10-16:** Marked external uptime monitoring as done (UptimeRobot, added 2026-10-08) — was still listed as a gap from before that shipped.
 - **2026-09-06:** Full audit against production — CSP/HSTS/header claims corrected to match what's actually deployed, `next` bumped to 16.3.4 (0 known vulnerabilities, was 4 high), `X-Powered-By` disabled, HSTS added at the Caddy layer, this document rewritten to stop describing a 2025 snapshot
 - **2025-02-05:** Initial security policy published

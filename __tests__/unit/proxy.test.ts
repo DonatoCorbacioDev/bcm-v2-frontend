@@ -40,6 +40,17 @@ describe('proxy middleware', () => {
     expect(csp).toContain("frame-ancestors 'none'");
   });
 
+  it("carries ASVS 3.4.3's minimum (no plugins, no <base>) and isolates the window", () => {
+    const { proxy } = loadProxy();
+    const response = proxy(new NextRequest('http://localhost:3000/dashboard'));
+    const csp = response.headers.get('Content-Security-Policy');
+
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("base-uri 'none'");
+    expect(csp).not.toContain("'unsafe-inline' 'nonce");
+    expect(response.headers.get('Cross-Origin-Opener-Policy')).toBe('same-origin');
+  });
+
   it('issues a different nonce on every call', () => {
     const { proxy } = loadProxy();
     const request = new NextRequest('http://localhost:3000/dashboard');

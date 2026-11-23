@@ -43,8 +43,11 @@ export function proxy(request: NextRequest) {
     "img-src 'self' data:",
     "font-src 'self'",
     CONNECT_SRC,
+    // OWASP ASVS 3.4.3, the minimum of any policy: no plugin content at all,
+    // and no <base> element to redirect every relative URL (the app has none).
+    "object-src 'none'",
     "frame-ancestors 'none'",
-    "base-uri 'self'",
+    "base-uri 'none'",
     "form-action 'self'",
   ].join("; ");
 
@@ -60,6 +63,10 @@ export function proxy(request: NextRequest) {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  // A page of another site opened from here, or opening this one, gets no
+  // handle on this window (OWASP ASVS 3.4.8). Stripe is reached by navigating
+  // away (redirectToExternal), never through window.opener, so nothing breaks.
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   return response;
 }
 

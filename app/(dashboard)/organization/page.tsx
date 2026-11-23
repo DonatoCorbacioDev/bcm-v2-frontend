@@ -74,7 +74,14 @@ export default function OrganizationPage() {
 
   const portalMutation = useMutation({
     mutationFn: organizationService.openBillingPortal,
-    onSuccess: (url) => redirectToExternal(url),
+    onSuccess: (url) => {
+      try {
+        redirectToExternal(url);
+      } catch {
+        // Not a Stripe page: never followed.
+        toast.error("Impossibile aprire la gestione dell'abbonamento, riprova più tardi");
+      }
+    },
     onError: () => toast.error("Impossibile aprire la gestione dell'abbonamento, riprova più tardi"),
   });
 

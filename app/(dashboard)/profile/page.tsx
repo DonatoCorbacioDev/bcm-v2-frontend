@@ -255,7 +255,8 @@ export default function ProfilePage() {
               </div>
               <p className="text-xs text-muted-foreground">
                 Chiunque abbia questo link può vedere le scadenze dei tuoi contratti: rigeneralo se
-                pensi che sia stato condiviso per errore.
+                pensi che sia stato condiviso per errore. Il link cambia anche quando cambi la password
+                o la 2FA: in quel caso aggiungilo di nuovo al tuo calendario.
               </p>
             </>
           )}

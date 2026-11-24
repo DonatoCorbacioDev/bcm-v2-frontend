@@ -175,7 +175,7 @@ export default function ProfilePage() {
           {isDemo ? (
             <p className="text-sm text-muted-foreground">{DEMO_NOTE}</p>
           ) : (
-          <form onSubmit={handlePasswordChange} className="space-y-4">
+          <form method="post" onSubmit={handlePasswordChange} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="current-password">Password attuale</Label>
               <Input

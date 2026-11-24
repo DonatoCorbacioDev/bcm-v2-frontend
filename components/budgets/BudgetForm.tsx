@@ -88,7 +88,7 @@ export default function BudgetForm({ onClose, onSuccess, budget }: BudgetFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <Controller
         control={control}
         name="businessAreaId"

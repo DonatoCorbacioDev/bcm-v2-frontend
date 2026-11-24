@@ -98,7 +98,7 @@ export function AgentInsightsWidget() {
           </p>
         )}
 
-        <form onSubmit={handleAsk} className="mt-4 flex items-center gap-2">
+        <form method="post" onSubmit={handleAsk} className="mt-4 flex items-center gap-2">
           <Input
             value={question}
             onChange={(e) => setQuestion(e.target.value)}

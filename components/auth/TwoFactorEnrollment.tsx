@@ -107,6 +107,7 @@ export function TwoFactorEnrollment({ setupToken, onComplete, onCancel, cancelLa
 
   return (
     <form
+      method="post"
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();

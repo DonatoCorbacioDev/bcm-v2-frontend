@@ -56,7 +56,7 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+    <form method="post" onSubmit={handleSubmit} className="space-y-4 pt-2">
       <div className="space-y-2">
         <Label htmlFor="invite-username">Email</Label>
         <Input

@@ -67,7 +67,7 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Name Field */}
       <div>
         <label htmlFor="name" className="block text-sm font-medium mb-2">

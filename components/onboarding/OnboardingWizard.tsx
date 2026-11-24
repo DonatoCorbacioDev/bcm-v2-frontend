@@ -215,7 +215,7 @@ function BusinessAreaStep({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+      <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
         <div>
           <label htmlFor="ba-name" className="block text-sm font-medium mb-1.5">
             Nome <span className="text-destructive" aria-hidden="true">*</span>
@@ -359,7 +359,7 @@ function ManagerStep({
       )}
 
       {showForm && (
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+      <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="m-firstName" className="block text-sm font-medium mb-1.5">
@@ -532,7 +532,7 @@ function CounterpartyStep({
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <form method="post" onSubmit={onSubmit} className="space-y-4" noValidate>
         <div>
           <label htmlFor="c-name" className="block text-sm font-medium mb-1.5">
             Nome <span className="text-destructive" aria-hidden="true">*</span>

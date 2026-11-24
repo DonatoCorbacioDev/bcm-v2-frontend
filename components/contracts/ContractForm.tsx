@@ -201,7 +201,7 @@ function ContractFormFields({
   }, [upsertMutation.isPending, contract?.id]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Counterparty (Controller) */}
       <Controller
         control={control}

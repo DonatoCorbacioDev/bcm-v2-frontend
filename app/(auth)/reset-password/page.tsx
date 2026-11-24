@@ -67,7 +67,7 @@ function ResetPasswordContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form method="post" onSubmit={handleSubmit} className="space-y-4">
               <PasswordFields
                 password={password}
                 confirm={confirm}

@@ -154,7 +154,7 @@ export default function InstantiateTemplateDialog({
           />
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
+        <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
           {/* Counterparty */}
           <Controller
             control={control}

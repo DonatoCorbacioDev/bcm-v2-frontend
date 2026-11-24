@@ -235,6 +235,7 @@ export function DeleteOrganizationCard({ organizationName, deletionScheduledFor 
 
           {codeSent ? (
             <form
+              method="post"
               id="delete-org-confirm"
               className="space-y-4"
               onSubmit={(e) => {
@@ -264,6 +265,7 @@ export function DeleteOrganizationCard({ organizationName, deletionScheduledFor 
             </form>
           ) : (
             <form
+              method="post"
               id="delete-org-request"
               className="space-y-4"
               onSubmit={(e) => {

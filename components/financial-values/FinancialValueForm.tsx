@@ -126,7 +126,7 @@ export default function FinancialValueForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Month & Year Row */}
       <div className="grid grid-cols-2 gap-4">
         <Controller

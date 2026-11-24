@@ -261,7 +261,7 @@ export default function OrganizationPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label htmlFor="iban" className="block text-sm font-medium mb-2">
                 Nuovo IBAN

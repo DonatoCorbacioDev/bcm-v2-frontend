@@ -58,7 +58,7 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
         <label htmlFor="name" className="block text-sm font-medium mb-2">
           Nome *

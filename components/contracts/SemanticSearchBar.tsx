@@ -42,7 +42,7 @@ export function SemanticSearchBar() {
           <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
           <span className="text-xs font-semibold text-foreground">Ricerca AI nei documenti</span>
         </div>
-        <form onSubmit={handleSubmit} className="flex gap-2">
+        <form method="post" onSubmit={handleSubmit} className="flex gap-2">
           <div className="relative flex-1">
             <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <Input

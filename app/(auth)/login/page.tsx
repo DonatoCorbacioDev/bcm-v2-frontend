@@ -212,7 +212,7 @@ function LoginContent() {
               cancelLabel="Torna al login"
             />
           ) : mfaToken ? (
-            <form onSubmit={handleMfaSubmit} className="space-y-4">
+            <form method="post" onSubmit={handleMfaSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="mfa-code" className="text-[13px] font-medium">
                   Codice di verifica
@@ -259,7 +259,7 @@ function LoginContent() {
               </Button>
             </form>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form method="post" onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="username" className="text-[13px] font-medium">
                   Nome utente

@@ -77,7 +77,7 @@ export default function ManagerForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* First Name */}
       <div className="space-y-2">
         <Label htmlFor="firstName">

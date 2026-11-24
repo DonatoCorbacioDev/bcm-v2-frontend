@@ -119,6 +119,7 @@ export default function Header({
       {/* Search — jumps to the Contratti page pre-filtered by this term
           (same contractNumber/customerName match as its own search box). */}
       <form
+        method="post"
         onSubmit={handleSearchSubmit}
         className="hidden lg:flex items-center gap-2 h-9 w-[240px] px-3 rounded-lg border border-border bg-background text-[13px] focus-within:ring-1 focus-within:ring-ring"
       >

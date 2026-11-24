@@ -73,7 +73,7 @@ export function ReauthDialog() {
       }}
     >
       <DialogContent onInteractOutside={keepOpenOnOutsideClick}>
-        <form onSubmit={submit} className="space-y-4">
+        <form method="post" onSubmit={submit} className="space-y-4">
           <DialogHeader>
             <DialogTitle>Conferma la tua identità</DialogTitle>
             <DialogDescription>

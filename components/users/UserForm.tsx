@@ -107,7 +107,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Username Field */}
       <div>
         <label htmlFor="username" className="block text-sm font-medium mb-2">

@@ -241,7 +241,7 @@ export default function RegisterOrgPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleConfirm} className="space-y-4">
+          <form method="post" onSubmit={handleConfirm} className="space-y-4">
             {/* What the code signs, shown right where it is typed: the specific
                 approval must be attributable to this person and to these clauses. */}
             <div className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground space-y-2">
@@ -326,7 +326,7 @@ export default function RegisterOrgPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form method="post" onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="organizationName">Nome organizzazione</Label>
             <Input

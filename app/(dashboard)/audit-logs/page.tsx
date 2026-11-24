@@ -46,6 +46,7 @@ const ACTION_LABELS: Record<string, string> = {
   VERIFIED_IBAN_LEARNED: "IBAN verificato registrato",
   VERIFIED_IBAN_CONFIRMED: "IBAN verificato confermato",
   SEPA_IBAN_MISMATCH_BLOCKED: "Pagamento bloccato: IBAN diverso",
+  SEPA_UNVERIFIED_IBAN_REFUSED: "Pagamento bloccato: IBAN non ancora verificato",
   TIER_CHANGED: "Cambio di piano",
   ROLE_CHANGED: "Cambio di ruolo",
   NEW_DEVICE_SIGN_IN: "Accesso da un nuovo dispositivo",

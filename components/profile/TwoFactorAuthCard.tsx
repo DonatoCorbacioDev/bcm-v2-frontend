@@ -15,6 +15,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { apiErrorMessage } from "@/lib/apiError";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -38,7 +39,6 @@ export default function TwoFactorAuthCard() {
   const [otpAuthUri, setOtpAuthUri] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [confirmCode, setConfirmCode] = useState("");
-  const [disableCode, setDisableCode] = useState("");
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
 
   const { data: enabled, isLoading } = useQuery({
@@ -81,9 +81,8 @@ export default function TwoFactorAuthCard() {
   });
 
   const disableMutation = useMutation({
-    mutationFn: () => twoFactorAuthService.disable(disableCode),
+    mutationFn: () => twoFactorAuthService.disable(),
     onSuccess: async () => {
-      setDisableCode("");
       setStep("idle");
       if (isAdmin) {
         toast.success("2FA disattivata: accedi di nuovo per configurarla sul nuovo dispositivo");
@@ -94,7 +93,7 @@ export default function TwoFactorAuthCard() {
       toast.success("Autenticazione a due fattori disattivata");
       queryClient.setQueryData(["2fa-status"], false);
     },
-    onError: () => toast.error("Codice non valido"),
+    onError: async (error) => toast.error(await apiErrorMessage(error, "Disattivazione della 2FA non riuscita")),
   });
 
   const handleFinish = () => {
@@ -154,8 +153,8 @@ export default function TwoFactorAuthCard() {
             {step === "disabling" && (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  Inserisci un codice dalla tua app di autenticazione (o un codice di recupero)
-                  per confermare la disattivazione.
+                  Per confermare ti chiederemo la password e un codice dalla tua app di
+                  autenticazione (o un codice di recupero, se non hai più il telefono).
                 </p>
                 {isAdmin && (
                   <p className="text-sm text-foreground">
@@ -163,22 +162,16 @@ export default function TwoFactorAuthCard() {
                     prossimo accesso la configurerai di nuovo, per esempio su un nuovo telefono.
                   </p>
                 )}
-                <Input
-                  value={disableCode}
-                  onChange={(e) => setDisableCode(e.target.value)}
-                  placeholder="123456"
-                  className="max-w-[200px]"
-                />
                 <div className="flex gap-2">
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => disableMutation.mutate()}
-                    disabled={disableMutation.isPending || !disableCode.trim()}
+                    disabled={disableMutation.isPending}
                   >
                     {disableMutation.isPending ? "Disattivazione..." : "Conferma disattivazione"}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => { setStep("idle"); setDisableCode(""); }}>
+                  <Button variant="outline" size="sm" onClick={() => setStep("idle")}>
                     Annulla
                   </Button>
                 </div>

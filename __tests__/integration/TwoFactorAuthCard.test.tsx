@@ -113,7 +113,7 @@ describe('TwoFactorAuthCard', () => {
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Codice non valido'));
   });
 
-  it('disables 2FA after confirming with a valid code', async () => {
+  it('disables 2FA after confirming: the password and code are asked by the re-authentication dialog', async () => {
     mockGetStatus.mockResolvedValue(true);
     mockDisable.mockResolvedValue(undefined);
 
@@ -121,11 +121,11 @@ describe('TwoFactorAuthCard', () => {
     expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
 
-    const input = screen.getByPlaceholderText('123456');
-    await userEvent.type(input, '654321');
+    expect(screen.queryByPlaceholderText('123456')).not.toBeInTheDocument();
+    expect(screen.getByText(/ti chiederemo la password/i)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /conferma disattivazione/i }));
 
-    await waitFor(() => expect(mockDisable).toHaveBeenCalledWith('654321'));
+    await waitFor(() => expect(mockDisable).toHaveBeenCalledWith());
     expect(toast.success).toHaveBeenCalledWith('Autenticazione a due fattori disattivata');
   });
 
@@ -138,7 +138,6 @@ describe('TwoFactorAuthCard', () => {
     await userEvent.click(await screen.findByRole('button', { name: /cambia dispositivo/i }));
     expect(screen.getByText(/per gli amministratori la 2fa è obbligatoria/i)).toBeInTheDocument();
 
-    await userEvent.type(screen.getByPlaceholderText('123456'), '654321');
     await userEvent.click(screen.getByRole('button', { name: /conferma disattivazione/i }));
 
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/login'));
@@ -159,18 +158,17 @@ describe('TwoFactorAuthCard', () => {
     );
   });
 
-  it('shows an error toast when disabling with an invalid code', async () => {
+  it('shows an error toast when disabling fails or the confirmation is cancelled', async () => {
     mockGetStatus.mockResolvedValue(true);
-    mockDisable.mockRejectedValue(new Error('invalid code'));
+    mockDisable.mockRejectedValue(new Error('Operazione annullata'));
 
     renderCard();
     expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
 
-    await userEvent.type(screen.getByPlaceholderText('123456'), '000000');
     await userEvent.click(screen.getByRole('button', { name: /conferma disattivazione/i }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Codice non valido'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalled());
   });
 
   it('cancels disabling and returns to the idle step', async () => {
@@ -180,11 +178,11 @@ describe('TwoFactorAuthCard', () => {
     expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
 
-    await userEvent.type(screen.getByPlaceholderText('123456'), '000000');
     await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
 
     expect(screen.getByRole('button', { name: /disattiva/i })).toBeInTheDocument();
-    expect(screen.queryByPlaceholderText('123456')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /conferma disattivazione/i })).not.toBeInTheDocument();
+    expect(mockDisable).not.toHaveBeenCalled();
   });
 
   it('copies recovery codes to the clipboard', async () => {
@@ -264,7 +262,6 @@ describe('TwoFactorAuthCard', () => {
     renderCard();
     expect(await screen.findByRole('button', { name: /disattiva/i })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /disattiva/i }));
-    await userEvent.type(screen.getByPlaceholderText('123456'), '654321');
     await userEvent.click(screen.getByRole('button', { name: /conferma disattivazione/i }));
 
     expect(await screen.findByRole('button', { name: /disattivazione\.\.\./i })).toBeInTheDocument();

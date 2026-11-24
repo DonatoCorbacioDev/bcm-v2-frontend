@@ -8,7 +8,7 @@ import { create } from "zustand";
 /**
  * The password again before an operation that asks for it (the backend
  * answers 428: exporting the organization, changing an account's email,
- * setting another user's password; OWASP ASVS 7.5). `requestReauth()` opens
+ * setting another user's password, turning 2FA off; OWASP ASVS 7.5). `requestReauth()` opens
  * ReauthDialog and resolves with the token the backend issued, which lib/api.ts
  * sends back in X-Reauth-Token. The token is kept in memory only, for the five
  * minutes it is valid, so a few operations in a row ask once.

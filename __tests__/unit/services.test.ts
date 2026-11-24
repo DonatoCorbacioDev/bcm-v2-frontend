@@ -709,10 +709,10 @@ describe('twoFactorAuthService', () => {
     expect(result).toEqual(recoveryCodes);
   });
 
-  it('disable() calls POST /users/me/2fa/disable with code', async () => {
+  it('disable() calls POST /users/me/2fa/disable with no body (the re-authentication carries the code)', async () => {
     mockPost.mockResolvedValue({});
-    await twoFactorAuthService.disable('123456');
-    expect(mockPost).toHaveBeenCalledWith('/users/me/2fa/disable', { code: '123456' });
+    await twoFactorAuthService.disable();
+    expect(mockPost).toHaveBeenCalledWith('/users/me/2fa/disable');
   });
 });
 

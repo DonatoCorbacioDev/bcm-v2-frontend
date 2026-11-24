@@ -31,8 +31,9 @@ export const twoFactorAuthService = {
     return res.data.recoveryCodes;
   },
 
-  disable: async (code: string): Promise<void> => {
-    await api.post("/users/me/2fa/disable", { code });
+  /** Asks for the password and a code first: the backend answers 428 and lib/api.ts opens ReauthDialog. */
+  disable: async (): Promise<void> => {
+    await api.post("/users/me/2fa/disable");
   },
 
   /** Required setup before the first session: authorized by the setup token from login. */

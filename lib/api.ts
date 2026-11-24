@@ -5,6 +5,7 @@
 
 import axios, { AxiosError } from "axios";
 import { useAuthStore } from "@/store/authStore";
+import { requestReauth } from "@/lib/reauth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -107,7 +108,17 @@ function isAuthEndpointWithoutSession(url: string | undefined): boolean {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError & { userMessage?: string }) => {
-    const originalRequest = error.config as typeof error.config & { _retry?: boolean };
+    const originalRequest = error.config as typeof error.config & { _retry?: boolean; _reauth?: boolean };
+
+    // The operation wants the password again (OWASP ASVS 7.5): ask, then repeat
+    // it once with the confirmation. A cancelled dialog rejects as the 428 did.
+    if (error.response?.status === 428 && originalRequest && !originalRequest._reauth) {
+      originalRequest._reauth = true;
+      const reauthToken = await requestReauth();
+      originalRequest.headers = originalRequest.headers ?? {};
+      originalRequest.headers["X-Reauth-Token"] = reauthToken;
+      return api.request(originalRequest);
+    }
 
     if (error.response?.status === 429) {
       error.userMessage = "Troppi tentativi, riprova tra 1 minuto";

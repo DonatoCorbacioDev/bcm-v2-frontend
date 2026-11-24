@@ -94,6 +94,44 @@ describe('lib/api', () => {
     expect(mod.default).toBe(instance);
   });
 
+  // ── 428: the password again ────────────────────────────────────────────────
+
+  it('on a 428 asks for the password, then repeats the request once with the confirmation', async () => {
+    const requestReauth = jest.fn().mockResolvedValue('reauth-confirmation');
+    jest.doMock('@/lib/reauth', () => ({ requestReauth, clearReauth: jest.fn() }));
+    const { instance } = loadModule('http://localhost:8080');
+    instance.request.mockResolvedValue({ data: 'exported' });
+    const config: { headers: Record<string, string>; _reauth?: boolean } = { headers: {} };
+
+    await expect(resErrorFn!({ response: { status: 428 }, config })).resolves.toEqual({ data: 'exported' });
+
+    expect(requestReauth).toHaveBeenCalledTimes(1);
+    expect(instance.request).toHaveBeenCalledWith(expect.objectContaining({
+      headers: { 'X-Reauth-Token': 'reauth-confirmation' },
+    }));
+  });
+
+  it('a second 428 for the same request is not asked again: it fails', async () => {
+    const requestReauth = jest.fn();
+    jest.doMock('@/lib/reauth', () => ({ requestReauth, clearReauth: jest.fn() }));
+    loadModule('http://localhost:8080');
+    const error = { response: { status: 428 }, config: { headers: {}, _reauth: true } };
+
+    await expect(resErrorFn!(error)).rejects.toBe(error);
+    expect(requestReauth).not.toHaveBeenCalled();
+  });
+
+  it('a cancelled confirmation rejects the request', async () => {
+    jest.doMock('@/lib/reauth', () => ({
+      requestReauth: jest.fn().mockRejectedValue(new Error('Operazione annullata')),
+      clearReauth: jest.fn(),
+    }));
+    const { instance } = loadModule('http://localhost:8080');
+
+    await expect(resErrorFn!({ response: { status: 428 }, config: { headers: {} } })).rejects.toThrow('Operazione annullata');
+    expect(instance.request).not.toHaveBeenCalled();
+  });
+
   // ── Request interceptor ────────────────────────────────────────────────────
 
   it('shares one refresh across session restoration and concurrent 401 recovery', async () => {

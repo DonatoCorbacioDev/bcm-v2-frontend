@@ -6,6 +6,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@/types";
+import { clearReauth } from "@/lib/reauth";
 
 interface AuthState {
   user: User | null;
@@ -34,6 +35,8 @@ export const useAuthStore = create<AuthState>()(
       },
       setAccessToken: (token) => set({ accessToken: token }),
       clearAuth: () => {
+        // A recent re-authentication is the session's too: it ends with it.
+        clearReauth();
         set({ user: null, isAuthenticated: false, accessToken: null });
       },
       getToken: () => get().accessToken,

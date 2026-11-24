@@ -28,6 +28,7 @@ function LoginContent() {
 
   const resetSuccess = searchParams.get("reset") === "success";
   const inviteSuccess = searchParams.get("invite") === "success";
+  const idleSignOut = searchParams.get("reason") === "idle";
   const isDemo = searchParams.get("demo") === "1";
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -179,6 +180,15 @@ function LoginContent() {
               className="mb-4 text-sm text-[var(--status-green-fg)] bg-[var(--status-green-bg)] rounded-lg py-2.5 px-3 text-center"
             >
               Password reimpostata. Ora puoi accedere.
+            </div>
+          )}
+          {idleSignOut && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mb-4 text-sm text-muted-foreground bg-muted rounded-lg py-2.5 px-3 text-center"
+            >
+              Sessione chiusa dopo 30 minuti di inattività. Accedi di nuovo per continuare.
             </div>
           )}
           {inviteSuccess && (

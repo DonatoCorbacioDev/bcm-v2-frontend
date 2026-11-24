@@ -48,6 +48,7 @@ const ACTION_LABELS: Record<string, string> = {
   SEPA_IBAN_MISMATCH_BLOCKED: "Pagamento bloccato: IBAN diverso",
   TIER_CHANGED: "Cambio di piano",
   ROLE_CHANGED: "Cambio di ruolo",
+  NEW_DEVICE_SIGN_IN: "Accesso da un nuovo dispositivo",
   // Security events (SecurityEvents on the backend).
   SECURITY_LOGIN_FAILED: "Accesso fallito: password sbagliata",
   SECURITY_MFA_FAILED: "Accesso fallito: codice 2FA sbagliato",

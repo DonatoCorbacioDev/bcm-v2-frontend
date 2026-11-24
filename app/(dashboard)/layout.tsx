@@ -12,6 +12,8 @@ import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileSidebar from "@/components/layout/MobileSidebar";
 import { DeletionScheduledBanner } from "@/components/organization/DeletionScheduledBanner";
+import { ReauthDialog } from "@/components/auth/ReauthDialog";
+import { IdleSessionGuard } from "@/components/auth/IdleSessionGuard";
 
 export default function DashboardLayout({
   children,
@@ -77,6 +79,11 @@ export default function DashboardLayout({
           Vai al contenuto principale
         </a>
       </nav>
+
+      {/* Asks for the password again when an operation needs it (lib/reauth.ts). */}
+      <ReauthDialog />
+      {/* Signs out after 30 minutes without input (lib/idleSession.ts). */}
+      <IdleSessionGuard />
 
       {/* Desktop sidebar */}
       <Sidebar collapsed={collapsed} />

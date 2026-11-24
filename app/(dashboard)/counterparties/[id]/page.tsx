@@ -91,6 +91,7 @@ export default function CounterpartyDetailPage() {
             {summary && !summary.comparable
               ? "Le fatture emesse ai clienti non sono gestite in BCM: qui trovi il valore dei contratti"
               : "Costi previsti da inizio anno a oggi e fatture confermate dello stesso periodo, IVA esclusa"}
+            {!isAdmin && " (solo dei contratti assegnati a te)"}
           </CardDescription>
         </CardHeader>
         <CardContent>

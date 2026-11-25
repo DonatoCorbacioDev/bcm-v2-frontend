@@ -46,8 +46,8 @@ export function IbanCheckDialog({ open, onOpenChange, invoiceNumber, invoiceIban
         <DialogHeader>
           <DialogTitle>IBAN cambiato: come verificarlo</DialogTitle>
           <DialogDescription>
-            {invoiceNumber ? `La fattura ${invoiceNumber}` : "Questa fattura"} chiede il pagamento su un conto diverso da quello
-            verificato{supplier ? ` per ${supplier.name}` : ""}.
+            {/* No second full stop after a name that already ends with one ("S.r.l."). */}
+            {`${invoiceNumber ? `La fattura ${invoiceNumber}` : "Questa fattura"} chiede il pagamento su un conto diverso da quello verificato${supplier ? ` per ${supplier.name}` : ""}`.replace(/\.?$/, ".")}
           </DialogDescription>
         </DialogHeader>
 

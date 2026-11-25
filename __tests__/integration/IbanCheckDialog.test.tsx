@@ -15,6 +15,8 @@ describe('IbanCheckDialog', () => {
     expect(screen.getByText('IT...8400')).toBeInTheDocument();
     expect(screen.getByText(/numero che conosci già/)).toBeInTheDocument();
     expect(screen.getByText(/Non pagare questa fattura/)).toBeInTheDocument();
+    // A name ending with a full stop gets no second one.
+    expect(screen.getByText(/verificato per Ferri & Associati S\.r\.l\.$/)).toBeInTheDocument();
   });
 
   it("lets an administrator open the supplier's page to update the verified IBAN", () => {

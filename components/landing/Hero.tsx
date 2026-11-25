@@ -99,20 +99,19 @@ export function Hero() {
               </div>
             ) : (
               <>
+                {/* Two choices, the demo first: most visitors want to see BCM
+                    before signing up. "Accedi" is already in the top bar. */}
                 <div className="flex flex-wrap gap-3">
                   <Button asChild size="lg">
-                    <Link href="/register-org">
-                      Inizia gratis
-                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="/login">Accedi</Link>
-                  </Button>
-                  <Button asChild variant="secondary" size="lg">
                     <Link href="/login?demo=1">
                       <PlayCircle className="h-4 w-4" aria-hidden="true" />
                       Prova la demo
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg">
+                    <Link href="/register-org">
+                      Inizia gratis
+                      <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                     </Link>
                   </Button>
                 </div>
@@ -125,8 +124,9 @@ export function Hero() {
             )}
           </div>
 
-          {/* Mockup */}
-          <div className="hidden md:block">
+          {/* Mockup: shown on phones too, below the text, so a mobile visitor
+              also sees what BCM looks like. */}
+          <div>
             <DashboardMockup />
           </div>
         </div>

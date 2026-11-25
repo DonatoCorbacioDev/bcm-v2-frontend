@@ -24,8 +24,8 @@ const PLANS = [
     status: "Disponibile",
     cta: "Inizia gratis",
     ctaHref: "/register-org",
-    ctaVariant: "outline" as const,
-    highlighted: false,
+    ctaVariant: "default" as const,
+    highlighted: true,
     features: [
       "Fino a 15 contratti",
       "Scadenze, rinnovi taciti, termini di disdetta e promemoria email",
@@ -42,8 +42,9 @@ const PLANS = [
     status: "Non ancora acquistabile",
     cta: "Richiedi informazioni",
     ctaHref: PRO_INFO_HREF,
-    ctaVariant: "default" as const,
-    highlighted: true,
+    ctaVariant: "outline" as const,
+    // Not for sale yet: it must not look like the plan to pick.
+    highlighted: false,
     features: [
       "Fino a 200 contratti",
       "Tutte le funzionalità del piano Free",

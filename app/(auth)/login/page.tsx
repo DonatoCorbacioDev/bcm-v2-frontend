@@ -16,6 +16,10 @@ import { TwoFactorEnrollment } from "@/components/auth/TwoFactorEnrollment";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { ArrowLeft, ArrowRight, Lock, Moon, Sun } from "lucide-react";
 
+// Public on purpose: printed on this page and on the landing (seeded nightly
+// by bcm-v2-docker ops/demo/demo-reset.sh, MANAGER role, no 2FA).
+const DEMO_CREDENTIALS = { username: "demo", password: "BcmDemo#2026" } as const;
+
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -43,6 +47,13 @@ function LoginContent() {
     }
   };
 
+  // The public demo, one click from the landing's "Prova la demo". The
+  // credentials are public: they are printed on this page and on the landing.
+  const enterDemo = async () => {
+    const result = await login(DEMO_CREDENTIALS);
+    if (result.success) router.push("/dashboard");
+  };
+
   const handleMfaSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!mfaToken) return;
@@ -61,18 +72,6 @@ function LoginContent() {
             "linear-gradient(155deg,var(--brand-hero-from) 0%,var(--brand-hero-via) 48%,var(--brand-hero-to) 100%)",
         }}
       >
-        {/* Glow circles */}
-        <div
-          className="absolute -top-20 -right-20 h-80 w-80 rounded-full opacity-10 pointer-events-none"
-          style={{ background: "radial-gradient(circle, #fff 0%, transparent 70%)" }}
-          aria-hidden="true"
-        />
-        <div
-          className="absolute bottom-10 -left-20 h-60 w-60 rounded-full opacity-10 pointer-events-none"
-          style={{ background: "radial-gradient(circle, #fff 0%, transparent 70%)" }}
-          aria-hidden="true"
-        />
-
         {/* Logo */}
         <div className="flex items-center gap-3 relative z-10">
           <LogoMark size={36} />
@@ -83,12 +82,8 @@ function LoginContent() {
 
         {/* Headline */}
         <div className="relative z-10 max-w-md">
-          <h1
-            className="font-bold leading-tight mb-4"
-            style={{ fontSize: "38px", letterSpacing: "-0.01em" }}
-          >
-            La gestione dei contratti,{" "}
-            <span className="opacity-90">semplice e sicura.</span>
+          <h1 className="font-display mb-4 text-[42px] font-medium leading-[1.08] tracking-[-0.015em]">
+            Contratti, scadenze e fatture dei fornitori, in un posto solo.
           </h1>
           <p className="text-[15px] leading-relaxed opacity-75">
             Scadenze, valori e documenti di tutti i tuoi contratti, sempre sotto
@@ -145,10 +140,7 @@ function LoginContent() {
             <div className="flex justify-center mb-4">
               <LogoMark size={44} />
             </div>
-            <p className="text-[12px] font-semibold text-[var(--muted-foreground)] tracking-[0.08em] uppercase mb-2">
-              Area riservata
-            </p>
-            <h2 className="text-[21px] font-bold text-foreground tracking-tight">
+            <h2 className="font-display text-[28px] font-medium text-foreground tracking-[-0.01em]">
               Accedi al tuo account
             </h2>
             <p className="text-[13px] text-muted-foreground mt-1">
@@ -158,16 +150,23 @@ function LoginContent() {
 
           {/* Public demo callout */}
           {isDemo && (
-            <div className="mb-4 rounded-lg border border-border bg-muted/60 py-3 px-3.5 text-[13px] text-foreground">
-              <p className="font-medium mb-1">Account demo pubblico</p>
-              <p className="text-muted-foreground mb-2">
-                Dati di esempio, ripristinati automaticamente ogni notte. Copia le credenziali qui
-                sotto per accedere.
+            <div className="mb-6 rounded-lg border border-border bg-muted/60 p-4 text-[13px] text-foreground">
+              <p className="font-medium mb-1">Demo pubblica</p>
+              <p className="text-muted-foreground mb-3">
+                Un&apos;azienda di esempio con contratti, fatture e scadenze. I dati vengono
+                ripristinati ogni notte.
               </p>
-              <p className="font-mono text-[12px]">
-                Utente: <span className="font-semibold">demo</span>
-                <br />
-                Password: <span className="font-semibold">BcmDemo#2026</span>
+              <Button
+                type="button"
+                onClick={enterDemo}
+                disabled={isLoading}
+                className="w-full h-[44px] text-[14px] font-semibold"
+              >
+                {isLoading ? "Accesso in corso…" : "Entra nella demo"}
+              </Button>
+              <p className="mt-3 text-[12px] text-muted-foreground">
+                Oppure accedi qui sotto con utente <span className="font-mono font-semibold">{DEMO_CREDENTIALS.username}</span>{" "}
+                e password <span className="font-mono font-semibold">{DEMO_CREDENTIALS.password}</span>.
               </p>
             </div>
           )}

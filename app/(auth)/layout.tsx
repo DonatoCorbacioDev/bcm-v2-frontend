@@ -3,13 +3,16 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 
+import { displayFont } from "@/components/landing/fonts";
+
 export default function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    // Newsreader for the large headings (font-display), as on the landing.
+    <div className={`${displayFont.variable} min-h-screen flex flex-col bg-background`}>
       <nav aria-label="Salta al contenuto">
         <a
           href="#main-content"

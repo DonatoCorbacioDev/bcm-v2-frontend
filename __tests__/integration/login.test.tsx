@@ -3,9 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createWrapper } from '../mocks/wrapper';
 
+let mockSearch = '';
+const mockPush = jest.fn();
 jest.mock('next/navigation', () => ({
-  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
-  useSearchParams: () => new URLSearchParams(),
+  useRouter: () => ({ push: mockPush, replace: jest.fn(), back: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(mockSearch),
   usePathname: () => '/login',
 }));
 
@@ -42,6 +44,29 @@ const mockGet = api.get as jest.Mock;
 describe('LoginPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSearch = '';
+  });
+
+  it('opens the public demo in one click from "Prova la demo"', async () => {
+    mockSearch = 'demo=1';
+    mockPost.mockResolvedValueOnce({ data: { token: 'fake-jwt-token' } });
+    mockGet.mockResolvedValueOnce({
+      data: { id: uid(1), username: 'demo', managerId: uid(1), role: 'MANAGER', roleId: uid(2), verified: true, createdAt: '2024-01-01T00:00:00Z' },
+    });
+
+    render(<LoginPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('button', { name: 'Entra nella demo' }));
+
+    await waitFor(() => {
+      expect(mockPost).toHaveBeenCalledWith('/auth/login', { username: 'demo', password: 'BcmDemo#2026' });
+      expect(mockPush).toHaveBeenCalledWith('/dashboard');
+    });
+  });
+
+  it('shows the demo button only when the visitor came for the demo', () => {
+    render(<LoginPage />, { wrapper: createWrapper() });
+
+    expect(screen.queryByRole('button', { name: 'Entra nella demo' })).not.toBeInTheDocument();
   });
 
   it('renders username and password fields and the sign in button', () => {

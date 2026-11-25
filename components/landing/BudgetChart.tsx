@@ -41,7 +41,7 @@ export function BudgetChart() {
 
   return (
     <div>
-      <div className="h-44" role="img" aria-label={`Costi mensili dei fornitori rispetto al budget di ${euro(BUDGET)}: due mesi sopra il budget.`}>
+      <div className="h-44 md:h-64" role="img" aria-label={`Costi mensili dei fornitori rispetto al budget di ${euro(BUDGET)}: due mesi sopra il budget.`}>
         {data ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 8, right: 4, left: -18, bottom: 0 }} barCategoryGap="28%">

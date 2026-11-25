@@ -3,19 +3,21 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import dynamic from "next/dynamic";
-import { Archive, Building2, Download, Landmark } from "lucide-react";
+import { Archive, Building2, CalendarDays, Download, Landmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NoticeTimeline } from "@/components/landing/NoticeTimeline";
 import { IbanAlertPreview } from "@/components/landing/IbanAlertPreview";
 
 // Recharts is the heaviest part of the page: loaded only for this tile.
 const BudgetChart = dynamic(() => import("@/components/landing/BudgetChart").then((m) => m.BudgetChart), {
-  loading: () => <div className="h-44 rounded-md bg-muted/50" />,
+  loading: () => <div className="h-44 rounded-md bg-muted/50 md:h-64" />,
 });
 
 // Every claim matches the product and the demo organization's data: no
 // feature that is hidden or not reliable.
 const MORE = [
+  // The ICS feed (CalendarFeedController): end dates and last days to cancel.
+  { icon: CalendarDays, text: "Scadenze e ultimi giorni per disdire nel tuo Google Calendar, Outlook o Apple Calendar." },
   { icon: Archive, text: "Ogni contratto con i suoi PDF, le fatture e lo storico delle modifiche." },
   { icon: Landmark, text: "Il file per il bonifico SEPA, pronto da caricare in banca." },
   { icon: Download, text: "Tutti i tuoi dati esportabili in un file, quando vuoi." },

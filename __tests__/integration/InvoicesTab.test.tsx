@@ -520,8 +520,12 @@ describe('InvoicesTab', () => {
     renderTab();
     expect(await screen.findByText('IBAN cambiato: da verificare')).toBeInTheDocument();
     expect(screen.queryByText('Pronta per SEPA')).not.toBeInTheDocument();
-    expect(screen.getByText(/conferma il cambio sulla controparte/i)).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: /seleziona fattura/i })).toBeDisabled();
+
+    // The button opens what to do, in order (IbanCheckDialog).
+    await userEvent.click(screen.getByRole('button', { name: 'Verifica IBAN' }));
+    expect(await screen.findByRole('dialog', { name: 'IBAN cambiato: come verificarlo' })).toBeInTheDocument();
+    expect(screen.getByText(/numero che conosci già/)).toBeInTheDocument();
   });
 
   it('allows selecting an eligible invoice and shows the generate button with the count', async () => {

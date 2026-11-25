@@ -39,11 +39,14 @@ import { paymentKind, paymentMethodLabel } from "@/lib/paymentMethod";
 import { invoiceMatchingService } from "@/services/invoiceMatching.service";
 import { MATCH_STATUS_CONFIG, PAYMENT_STATUS_CONFIG } from "@/lib/statusConfig";
 import type { ElectronicInvoice } from "@/types";
+import { IbanCheckDialog, type IbanCheckSupplier } from "@/components/contracts/IbanCheckDialog";
 import { formatMoney, formatNumber } from "@/lib/formatMoney";
 
 interface InvoicesTabProps {
   readonly contractId: string;
   readonly isAdmin: boolean;
+  /** The contract's supplier, for the changed-IBAN check (its verified IBAN, masked). */
+  readonly supplier?: IbanCheckSupplier | null;
 }
 
 function capitalize(text: string): string {
@@ -98,8 +101,9 @@ function amountFacts(invoice: ElectronicInvoice): { label: string; value: string
   return facts;
 }
 
-export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
+export default function InvoicesTab({ contractId, isAdmin, supplier }: InvoicesTabProps) {
   const queryClient = useQueryClient();
+  const [ibanCheckInvoice, setIbanCheckInvoice] = useState<ElectronicInvoice | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<ElectronicInvoice | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
@@ -535,9 +539,19 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
                             <Badge variant={PAYMENT_STATUS_CONFIG.IBAN_CHANGED.variant}>
                               {PAYMENT_STATUS_CONFIG.IBAN_CHANGED.label}
                             </Badge>
-                            <p className="mt-1 text-xs text-muted-foreground whitespace-normal max-w-48">
-                              Diverso da quello verificato: conferma il cambio sulla controparte prima di pagare.
+                            <p className="mt-1 text-xs text-muted-foreground whitespace-normal max-w-52">
+                              In fattura <span className="font-mono">{invoice.supplierIban ?? "—"}</span>, verificato{" "}
+                              <span className="font-mono">{supplier?.verifiedIban ?? "nessuno"}</span>.
                             </p>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="mt-1.5 border-[var(--status-red-fg)]/40 text-[var(--status-red-fg)] hover:bg-[var(--status-red-bg)]"
+                              onClick={() => setIbanCheckInvoice(invoice)}
+                            >
+                              Verifica IBAN
+                            </Button>
                           </div>
                         );
                       }
@@ -830,6 +844,15 @@ export default function InvoicesTab({ contractId, isAdmin }: InvoicesTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <IbanCheckDialog
+        open={ibanCheckInvoice != null}
+        onOpenChange={(open) => { if (!open) setIbanCheckInvoice(null); }}
+        invoiceNumber={ibanCheckInvoice?.invoiceNumber}
+        invoiceIban={ibanCheckInvoice?.supplierIban}
+        supplier={supplier}
+        isAdmin={isAdmin}
+      />
     </div>
   );
 }

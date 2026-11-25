@@ -67,6 +67,16 @@ describe('nextAction: what to do about a contract now', () => {
       expect(action.tone).toBe('danger');
     });
 
+    it('names both accounts when it knows them, so the user sees what changed', () => {
+      const action = nextAction(
+        { ...base, counterparty: { verifiedIban: 'IT...8400' } } as never,
+        [inv({ ibanChanged: true, invoiceNumber: 'FA-2026-4T', supplierIban: 'IT...5519' })],
+      );
+
+      expect(action.detail).toBe('La fattura FA-2026-4T chiede il pagamento su IT...5519 invece che sul conto verificato IT...8400.');
+      expect(action.ibanInvoice).toMatchObject({ invoiceNumber: 'FA-2026-4T' });
+    });
+
     it('ignores a changed IBAN once the invoice is paid', () => {
       expect(nextAction({ ...base, daysUntilExpiry: 120 }, [inv({ ibanChanged: true, sepaBatchId: uid(7) })]).tone).toBe('ok');
     });

@@ -34,8 +34,18 @@ import api from "@/lib/api";
 import { CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
 import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import { NextActionCard } from "@/components/contracts/NextActionCard";
+import { IbanCheckDialog, type IbanCheckSupplier } from "@/components/contracts/IbanCheckDialog";
+import { CancellationLetterDialog, MarkCancellationSentDialog } from "@/components/contracts/CancellationDialogs";
+import { apiErrorMessage } from "@/lib/apiError";
+import { homeQueryKeys } from "@/hooks/useHomeAttention";
 import type { Contract, FinancialValue, ContractHistory, ContractWorkflowEvent, ElectronicInvoice } from "@/types";
 import { formatMoney } from "@/lib/formatMoney";
+
+/** The contract's supplier as the changed-IBAN check needs it (verified IBAN masked by the API). */
+function supplierForIbanCheck(contract: Contract): IbanCheckSupplier | null {
+  if (!contract.counterparty) return null;
+  return { id: contract.counterpartyId, name: contract.counterparty.name, verifiedIban: contract.counterparty.verifiedIban };
+}
 
 const FINANCIAL_VALUE_SOURCE_LABELS: Record<string, string> = {
   MANUAL: "Manuale",
@@ -74,6 +84,7 @@ export default function ContractDetailPage() {
     return requested && TABS.has(requested) ? (requested as Tab) : "documents";
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [ibanCheckInvoice, setIbanCheckInvoice] = useState<ElectronicInvoice | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [prefilledContract, setPrefilledContract] = useState<Contract | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -99,6 +110,41 @@ export default function ContractDetailPage() {
     void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.detail(contractId) });
     void queryClient.invalidateQueries({ queryKey: ["contract-workflow-events", contractId] });
   };
+
+  const [letterOpen, setLetterOpen] = useState(false);
+  const [markSentOpen, setMarkSentOpen] = useState(false);
+
+  // "Segna disdetta inviata": the tacit renewal off, through the ordinary
+  // contract update (same version check, same history entry). The notice
+  // alerts stop; the end-date alert stays.
+  const markCancellationSentMutation = useMutation({
+    mutationFn: (c: Contract) => contractsService.update(c.id, {
+      counterpartyId: c.counterpartyId,
+      contractNumber: c.contractNumber,
+      wbsCode: c.wbsCode,
+      projectName: c.projectName,
+      startDate: c.startDate,
+      endDate: c.endDate,
+      status: c.status,
+      areaId: c.areaId,
+      managerId: c.managerId,
+      financialTypeId: c.financialTypeId,
+      annualValue: c.annualValue,
+      billingFrequency: c.billingFrequency,
+      autoRenew: false,
+      noticeDays: c.noticeDays,
+      renewalMonths: c.renewalMonths,
+      version: c.version,
+    }),
+    onSuccess: () => {
+      setMarkSentOpen(false);
+      toast.success("Disdetta segnata: il contratto non si rinnoverà. Resta l'avviso di scadenza.");
+      void queryClient.invalidateQueries({ queryKey: contractsQueryKeys.all });
+      void queryClient.invalidateQueries({ queryKey: ["contract-history", "by-contract", contractId] });
+      void queryClient.invalidateQueries({ queryKey: homeQueryKeys.attention });
+    },
+    onError: async (error) => toast.error(await apiErrorMessage(error, "Salvataggio non riuscito: riprova")),
+  });
 
   const submitMutation = useMutation({
     mutationFn: () => contractWorkflowService.submit(contractId),
@@ -547,7 +593,29 @@ export default function ContractDetailPage() {
         </div>
       </div>
 
-      <NextActionCard contract={contract} invoices={invoices} />
+      <NextActionCard
+        contract={contract}
+        invoices={invoices}
+        onIbanCheck={setIbanCheckInvoice}
+        onPrepareCancellation={() => setLetterOpen(true)}
+        onMarkCancellationSent={isAdmin ? () => setMarkSentOpen(true) : undefined}
+      />
+      <CancellationLetterDialog open={letterOpen} onOpenChange={setLetterOpen} contract={contract} senderName={user?.organizationName} />
+      <MarkCancellationSentDialog
+        open={markSentOpen}
+        onOpenChange={setMarkSentOpen}
+        contract={contract}
+        onConfirm={() => markCancellationSentMutation.mutate(contract)}
+        isPending={markCancellationSentMutation.isPending}
+      />
+      <IbanCheckDialog
+        open={ibanCheckInvoice != null}
+        onOpenChange={(open) => { if (!open) setIbanCheckInvoice(null); }}
+        invoiceNumber={ibanCheckInvoice?.invoiceNumber}
+        invoiceIban={ibanCheckInvoice?.supplierIban}
+        supplier={supplierForIbanCheck(contract)}
+        isAdmin={isAdmin}
+      />
 
       {/* General Information */}
       <Card>
@@ -678,7 +746,7 @@ export default function ContractDetailPage() {
           {activeTab === "financials" && renderFinancialValues()}
           {activeTab === "history" && renderHistory()}
           {activeTab === "invoices" && (
-            <InvoicesTab contractId={contractId} isAdmin={isAdmin} />
+            <InvoicesTab contractId={contractId} isAdmin={isAdmin} supplier={supplierForIbanCheck(contract)} />
           )}
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
   AlertTriangle, CalendarClock, CheckCircle2, FileText, Info, Landmark, RefreshCw, type LucideIcon,
 } from "lucide-react";
 import { EXPIRING_SOON_DAYS } from "@/lib/statusConfig";
+import { Button } from "@/components/ui/button";
 import { dayWithArticle } from "@/lib/italianDate";
 import type { Contract, ElectronicInvoice, InvoiceMatchStatus } from "@/types";
 
@@ -29,6 +30,10 @@ interface NextAction {
   tone: Tone;
   title: string;
   detail?: string;
+  /** The invoice asking for another bank account, when that is the action. */
+  ibanInvoice?: ElectronicInvoice;
+  /** A tacit renewal whose last day to cancel has not passed: the user can still cancel it. */
+  cancellable?: boolean;
 }
 
 /** "2026-11-24" -> "24 novembre 2026", read as a calendar day (no timezone shift). */
@@ -71,6 +76,7 @@ function noticeAction(contract: Contract, noticeDeadline: string, days: number):
       tone: "warning",
       title: `Disdici entro ${dayWithArticle(noticeDeadline, true)} (${inDays(days)}) se non vuoi rinnovarlo`,
       detail: `Dopo questa data ${renewal}.`,
+      cancellable: true,
     };
   }
   if (days < 0) {
@@ -85,6 +91,7 @@ function noticeAction(contract: Contract, noticeDeadline: string, days: number):
     tone: "ok",
     title: `Nessuna azione nei prossimi ${EXPIRING_SOON_DAYS} giorni`,
     detail: `Ultimo giorno per disdire: ${formatDay(noticeDeadline)}.`,
+    cancellable: true,
   };
 }
 
@@ -131,11 +138,17 @@ function invoiceLabel(number: string | null | undefined, article = "La fattura")
 export function nextAction(contract: Contract, invoices: readonly ElectronicInvoice[] = []): NextAction {
   const ibanChanged = invoices.find((i) => i.ibanChanged && i.sepaBatchId == null);
   if (ibanChanged) {
+    // Both IBANs are masked by the API ("IT...5519"): enough to tell them apart.
+    const verified = contract.counterparty?.verifiedIban;
+    const asked = ibanChanged.supplierIban;
     return {
       icon: Landmark,
       tone: "danger",
       title: "IBAN cambiato: verifica prima di pagare",
-      detail: `${invoiceLabel(ibanChanged.invoiceNumber)} chiede il pagamento su un conto diverso da quello verificato.`,
+      detail: asked && verified
+        ? `${invoiceLabel(ibanChanged.invoiceNumber)} chiede il pagamento su ${asked} invece che sul conto verificato ${verified}.`
+        : `${invoiceLabel(ibanChanged.invoiceNumber)} chiede il pagamento su un conto diverso da quello verificato.`,
+      ibanInvoice: ibanChanged,
     };
   }
   const byDate = dateAction(contract);
@@ -158,17 +171,42 @@ export function nextAction(contract: Contract, invoices: readonly ElectronicInvo
 interface NextActionCardProps {
   readonly contract: Contract;
   readonly invoices?: readonly ElectronicInvoice[];
+  /** Opens the changed-IBAN steps for that invoice; without it no button is shown. */
+  readonly onIbanCheck?: (invoice: ElectronicInvoice) => void;
+  /** Opens the ready-to-send cancellation text; without it no button is shown. */
+  readonly onPrepareCancellation?: () => void;
+  /** Records that the cancellation was sent (administrators only); without it no button is shown. */
+  readonly onMarkCancellationSent?: () => void;
 }
 
 /** The first thing on a contract's page: what to do now, before all its data. */
-export function NextActionCard({ contract, invoices }: NextActionCardProps) {
-  const { icon: Icon, tone, title, detail } = nextAction(contract, invoices);
+export function NextActionCard({ contract, invoices, onIbanCheck, onPrepareCancellation, onMarkCancellationSent }: NextActionCardProps) {
+  const { icon: Icon, tone, title, detail, ibanInvoice, cancellable } = nextAction(contract, invoices);
   return (
     <section aria-label="Prossima azione" className={`flex items-start gap-3 rounded-lg border p-4 ${TONE[tone]}`}>
       <Icon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
       <div>
         <p className="font-semibold">{title}</p>
         {detail && <p className="mt-0.5 text-sm text-foreground">{detail}</p>}
+        {ibanInvoice && onIbanCheck && (
+          <Button type="button" size="sm" variant="outline" className="mt-3 bg-card" onClick={() => onIbanCheck(ibanInvoice)}>
+            Come verificarlo
+          </Button>
+        )}
+        {cancellable && (onPrepareCancellation || onMarkCancellationSent) && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {onPrepareCancellation && (
+              <Button type="button" size="sm" variant="outline" className="bg-card" onClick={onPrepareCancellation}>
+                Prepara la disdetta
+              </Button>
+            )}
+            {onMarkCancellationSent && (
+              <Button type="button" size="sm" variant="outline" className="bg-card" onClick={onMarkCancellationSent}>
+                Segna disdetta inviata
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </section>
   );

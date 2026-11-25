@@ -42,7 +42,10 @@ export default async function RootLayout({
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
-    <html lang="it" suppressHydrationWarning>
+    // The font variables sit on <html>: Tailwind sets the page's font-family
+    // there (var(--font-sans) -> var(--font-geist-sans)), and a variable
+    // defined only on <body> left every page in the OS font until 25/11/2026.
+    <html lang="it" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
         {/* The dev console shows a "didn't match" hydration warning on this
             script's nonce attribute — that's expected, not a bug here.
@@ -54,7 +57,7 @@ export default async function RootLayout({
             writing: https://github.com/vercel/next.js/issues/77952 */}
         <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="antialiased">
         <ReactQueryProvider>
           <SessionGuard />
           {children}

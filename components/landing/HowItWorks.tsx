@@ -27,7 +27,7 @@ export function HowItWorks() {
     <section id="how-it-works" className="scroll-mt-16 border-t border-border bg-muted/40 py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="max-w-2xl">
-          <h2 className="text-balance text-3xl font-semibold tracking-[-0.025em] text-foreground md:text-4xl">
+          <h2 className="font-display text-balance text-4xl font-medium tracking-[-0.01em] text-foreground md:text-5xl">
             Come funziona
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">

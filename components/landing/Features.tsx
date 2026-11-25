@@ -59,7 +59,7 @@ export function Features() {
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="grid gap-6 md:grid-cols-12 md:gap-12">
           <div className="md:col-span-4">
-            <h2 className="text-balance text-3xl font-semibold tracking-[-0.025em] text-foreground md:text-4xl">
+            <h2 className="font-display text-balance text-4xl font-medium tracking-[-0.01em] text-foreground md:text-5xl">
               Cosa fa BCM
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">

@@ -139,7 +139,7 @@ export function Hero() {
     <section className="pt-12 md:pt-16">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="grid items-end gap-8 md:grid-cols-12 md:gap-12">
-          <h1 className="text-balance text-[2.5rem] font-semibold leading-[1.04] tracking-[-0.035em] text-foreground sm:text-5xl md:col-span-7 lg:text-[4.25rem]">
+          <h1 className="font-display text-balance text-[2.6rem] font-medium leading-[1.04] tracking-[-0.015em] text-foreground sm:text-5xl md:col-span-7 lg:text-[4.5rem]">
             Gestione dei contratti e delle scadenze per le PMI
           </h1>
 

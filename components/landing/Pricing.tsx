@@ -58,7 +58,7 @@ export function Pricing() {
     <section id="pricing" className="scroll-mt-16 border-t border-border py-20 md:py-28">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="mb-12 max-w-2xl">
-          <h2 className="text-balance text-3xl font-semibold tracking-[-0.025em] text-foreground md:text-4xl">Piani</h2>
+          <h2 className="font-display text-balance text-4xl font-medium tracking-[-0.01em] text-foreground md:text-5xl">Piani</h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             Puoi iniziare gratis. Il piano Pro è in definizione: scrivici se ti interessa.
           </p>
@@ -77,7 +77,7 @@ export function Pricing() {
               <div>
                 <h3 className="font-semibold text-foreground text-lg">{plan.name}</h3>
                 <p className="text-sm text-muted-foreground">{plan.tagline}</p>
-                <p className="text-2xl font-bold text-foreground mt-2">{plan.price}</p>
+                <p className="font-display text-3xl font-medium text-foreground mt-2">{plan.price}</p>
                 <p className="text-sm text-muted-foreground mt-1">{plan.status}</p>
               </div>
 

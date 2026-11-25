@@ -58,6 +58,11 @@ Riservati ai grafici Recharts, **due usi distinti e non intercambiabili**:
 ## Tipografia
 
 - `--font-sans` = Geist Sans (UI, titoli, testo).
+- `--font-display` = **Newsreader**, solo nella landing pubblica (scelta di Donato, 25/11/2026), via la classe `font-display`.
+  - Caricato in `components/landing/fonts.ts` con `next/font` (self-hosted) e attivato sulla radice di `app/page.tsx`.
+  - Si usa solo sui titoli grandi: h1, h2 di sezione e prezzi dei piani. Peso `font-medium`, tracking quasi neutro (-0.01/-0.015em).
+  - I titoletti piccoli (h3, passi, voci di lista) restano in Geist: il serif piccolo e in grassetto pesa e sembra datato.
+  - Il colore di marca resta il blu `--primary`, legato al logo.
 - `--font-mono` = Geist Mono — riservato a **tutti i numeri che si allineano in colonna**: valori KPI, importi in tabella, tick degli assi. Sempre con `tabular-nums`.
 - Nessuna scala tipografica custom dichiarata: dimensioni per lo più esplicite (`text-[13px]`, `text-sm`, ecc.) coerenti per famiglia di componente più che per un sistema rigido a step.
 
@@ -73,7 +78,9 @@ Riservati ai grafici Recharts, **due usi distinti e non intercambiabili**:
 - **KPI card**: barra colorata a sinistra (`border-l-4`) + icona in cerchio con sfondo tenue, entrambe sullo stesso `--status-*` — mai due famiglie di colore diverse per lo stesso concetto nello stesso componente.
 - **Grafici Recharts**: riempimenti piatti con `fillOpacity` ridotta (0.10–0.15), mai gradienti (`<linearGradient>`); griglia orizzontale sottile (`CHART_GRID_STROKE`/`CHART_GRID_OPACITY` da `lib/chartTheme.ts`); tick/tooltip/legenda sempre da `lib/chartTheme.ts`, non ridefiniti per singolo grafico.
 - **Ranking a barre neutri** (`CapsuleBarList`): un solo colore (`--chart-1`), mai una palette che ruota per riga; tacche di riferimento (25/50/75%) disegnate **sopra** il riempimento (non sotto — altrimenti spariscono su barre >75%).
-- **Immagini**: l'app non usa fotografia. Login e landing pubblica usano gradienti astratti / un mockup UI disegnato a mano (`components/landing/Hero.tsx`) — scelta deliberata per un prodotto B2B tecnico, da mantenere salvo indicazione esplicita in senso contrario.
+- **Immagini**: l'app non usa fotografia, scelta deliberata per un prodotto B2B tecnico.
+  - L'hero della landing (`components/landing/Hero.tsx`) mostra la Home vera, costruita con i componenti dell'app (`KPICard`, `HomeAttentionList`) e i dati della demo, con le date calcolate nel browser a partire da oggi.
+  - Niente mockup disegnati a mano, gradienti decorativi o macchie sfocate.
 
 ## Cosa evitare
 

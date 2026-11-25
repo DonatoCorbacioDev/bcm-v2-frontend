@@ -30,6 +30,22 @@ describe('NextActionCard: cancellation', () => {
     expect(screen.queryByRole('button', { name: 'Segna disdetta inviata' })).not.toBeInTheDocument();
   });
 
+  it('takes the user to the invoices when one waits to be matched', async () => {
+    const openInvoices = jest.fn();
+    const quiet = { ...open, autoRenew: false, noticeDeadline: null, daysUntilNoticeDeadline: null, daysUntilExpiry: 200 } as unknown as Contract;
+    render(
+      <NextActionCard
+        contract={quiet}
+        invoices={[{ id: 'i1', invoiceNumber: 'NCS-2026-11', matchStatus: 'SUGGESTED', ibanChanged: false, sepaBatchId: null } as never]}
+        onOpenInvoices={openInvoices}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Apri le fatture' }));
+
+    expect(openInvoices).toHaveBeenCalled();
+  });
+
   it('offers nothing once the last day to cancel has passed', () => {
     render(
       <NextActionCard

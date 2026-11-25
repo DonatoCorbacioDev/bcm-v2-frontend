@@ -17,12 +17,7 @@ import { useCounterparties } from "@/hooks/useCounterparties";
 import { useFinancialTypes } from "@/hooks/useFinancialTypes";
 import { conflictMessage } from "@/lib/conflictMessage";
 
-const BILLING_FREQUENCY_LABELS: Record<string, string> = {
-  MONTHLY: "Mensile",
-  QUARTERLY: "Trimestrale",
-  SEMIANNUAL: "Semestrale",
-  ANNUAL: "Annuale",
-};
+import { BILLING_FREQUENCY_LABELS } from "@/lib/statusConfig";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

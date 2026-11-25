@@ -167,7 +167,6 @@ function ContractsPageContent() {
           <h1 className="text-3xl font-bold text-foreground">
             Contratti
           </h1>
-          <p className="text-muted-foreground mt-2">Gestisci tutti i contratti aziendali</p>
         </div>
         <div className="flex gap-2">
           {/* One "Esporta" menu instead of two buttons: exporting is occasional,

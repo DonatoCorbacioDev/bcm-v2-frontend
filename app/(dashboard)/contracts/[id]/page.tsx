@@ -31,10 +31,11 @@ import ContractForm from "@/components/contracts/ContractForm";
 import DocumentsTab from "@/components/contracts/DocumentsTab";
 import InvoicesTab from "@/components/contracts/InvoicesTab";
 import api from "@/lib/api";
-import { CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
+import { BILLING_FREQUENCY_LABELS, CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
 import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import { NextActionCard } from "@/components/contracts/NextActionCard";
 import { IbanCheckDialog, type IbanCheckSupplier } from "@/components/contracts/IbanCheckDialog";
+import { ContractTimeline } from "@/components/contracts/ContractTimeline";
 import { CancellationLetterDialog, MarkCancellationSentDialog } from "@/components/contracts/CancellationDialogs";
 import { apiErrorMessage } from "@/lib/apiError";
 import { homeQueryKeys } from "@/hooks/useHomeAttention";
@@ -324,70 +325,79 @@ export default function ContractDetailPage() {
         </div>
       );
     }
+    // In calendar order: the rows came in the order they were stored, so
+    // December 2025 could follow November 2026.
+    const rows = [...financialValues].sort((a, b) => a.year - b.year || a.month - b.month);
+    const totalRevenue = rows.filter((fv) => fv.category === "REVENUE").reduce((sum, fv) => sum + (fv.financialAmount || 0), 0);
+    const totalCost = rows.filter((fv) => fv.category === "COST").reduce((sum, fv) => sum + (fv.financialAmount || 0), 0);
+    // Totals only for what the contract has: a supplier contract has no
+    // revenue, and a "margin" of minus its costs said nothing true.
+    const totals = [
+      ...(totalRevenue > 0 ? [{ label: "Totale ricavi", value: totalRevenue }] : []),
+      ...(totalCost > 0 ? [{ label: "Totale costi", value: totalCost }] : []),
+      ...(totalRevenue > 0 && totalCost > 0 ? [{ label: "Margine netto", value: totalRevenue - totalCost }] : []),
+    ];
+    const now = new Date();
+    const thisMonth = now.getFullYear() * 12 + now.getMonth();
+    const th = "px-4 py-3 text-left text-xs font-medium text-muted-foreground";
     return (
       <div>
         {renderRegenerateButton()}
         <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-border">
-          <thead className="bg-muted">
+          <thead className="bg-muted/60">
             <tr>
-              {["Tipo", "Area di business", "Importo", "Mese/Anno", "Fonte"].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  {h}
-                </th>
-              ))}
+              <th className={th}>Mese</th>
+              <th className={th}>Tipo</th>
+              <th className={`${th} hidden md:table-cell`}>Area di business</th>
+              <th className={`${th} text-right`}>Importo</th>
+              <th className={th}>Fattura</th>
+              <th className={`${th} hidden md:table-cell`}>Fonte</th>
             </tr>
           </thead>
           <tbody className="bg-card divide-y divide-border">
-            {financialValues.map((fv: FinancialValue) => (
-              <tr key={fv.id} className="hover:bg-accent">
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.typeName || "N/D"}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.areaName || "N/D"}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-foreground">
-                  {formatMoney(fv.financialAmount ?? 0)}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                  {fv.month}/{fv.year}
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
-                  <Badge variant="outline" className="text-xs">
+            {rows.map((fv: FinancialValue) => {
+              // The supplier invoice matched (or suggested) for this month's instalment.
+              const invoice = invoices?.find((i) => i.matchedFinancialValueId === fv.id && (i.matchStatus === "CONFIRMED" || i.matchStatus === "SUGGESTED"));
+              const past = fv.year * 12 + (fv.month - 1) < thisMonth;
+              return (
+                <tr key={fv.id} className="hover:bg-accent">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground capitalize">
+                    {new Date(fv.year, fv.month - 1, 1).toLocaleDateString("it-IT", { month: "short", year: "numeric" })}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground">{fv.typeName || "N/D"}</td>
+                  <td className="hidden md:table-cell px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">{fv.areaName || "N/D"}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-semibold tabular-nums text-foreground">
+                    {formatMoney(fv.financialAmount ?? 0)}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm">
+                    {invoice ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="font-medium text-foreground">{invoice.invoiceNumber ?? "Fattura"}</span>
+                        <Badge variant={invoice.matchStatus === "CONFIRMED" ? "success" : "warning"} className="text-xs">
+                          {invoice.matchStatus === "CONFIRMED" ? "Abbinata" : "Da confermare"}
+                        </Badge>
+                      </span>
+                    ) : fv.category === "COST" && past ? (
+                      <span className="text-muted-foreground">Nessuna fattura</span>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="hidden md:table-cell px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                     {fv.source ? FINANCIAL_VALUE_SOURCE_LABELS[fv.source] : FINANCIAL_VALUE_SOURCE_LABELS.MANUAL}
-                  </Badge>
-                </td>
+                  </td>
+                </tr>
+              );
+            })}
+            {totals.map(({ label, value }) => (
+              <tr key={label} className="bg-muted/60 font-semibold">
+                <td colSpan={2} className="px-4 py-3 text-sm text-foreground">{label}</td>
+                <td className="hidden md:table-cell" />
+                <td className="px-4 py-3 text-right text-sm tabular-nums text-foreground">{formatMoney(value)}</td>
+                <td colSpan={2} />
               </tr>
             ))}
-            {(() => {
-              const totalRevenue = financialValues
-                .filter((fv: FinancialValue) => fv.category === "REVENUE")
-                .reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0);
-              const totalCost = financialValues
-                .filter((fv: FinancialValue) => fv.category === "COST")
-                .reduce((sum: number, fv: FinancialValue) => sum + (fv.financialAmount || 0), 0);
-              const formatEuro = (n: number) =>
-                formatMoney(n);
-              return (
-                <>
-                  <tr className="bg-muted font-bold">
-                    <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale ricavi</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalRevenue)}</td>
-                    <td />
-                    <td />
-                  </tr>
-                  <tr className="bg-muted font-bold">
-                    <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Totale costi</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalCost)}</td>
-                    <td />
-                    <td />
-                  </tr>
-                  <tr className="bg-muted font-bold">
-                    <td colSpan={2} className="px-4 py-3 text-sm text-foreground">Margine netto</td>
-                    <td className="px-4 py-3 text-sm text-foreground">{formatEuro(totalRevenue - totalCost)}</td>
-                    <td />
-                    <td />
-                  </tr>
-                </>
-              );
-            })()}
           </tbody>
         </table>
         </div>
@@ -599,6 +609,11 @@ export default function ContractDetailPage() {
         onIbanCheck={setIbanCheckInvoice}
         onPrepareCancellation={() => setLetterOpen(true)}
         onMarkCancellationSent={isAdmin ? () => setMarkSentOpen(true) : undefined}
+        onOpenInvoices={() => {
+          setActiveTab("invoices");
+          tabRefs.current.invoices?.scrollIntoView({ behavior: "smooth", block: "start" });
+          tabRefs.current.invoices?.focus({ preventScroll: true });
+        }}
       />
       <CancellationLetterDialog open={letterOpen} onOpenChange={setLetterOpen} contract={contract} senderName={user?.organizationName} />
       <MarkCancellationSentDialog
@@ -630,6 +645,13 @@ export default function ContractDetailPage() {
             { label: "Controparte", value: contract.counterparty?.name ?? "N/D" },
             { label: "Data inizio", value: new Date(contract.startDate).toLocaleDateString("it-IT") },
             { label: "Data fine", value: new Date(contract.endDate).toLocaleDateString("it-IT") },
+            // What the contract is worth, when stated: the first question about any contract.
+            ...(contract.annualValue
+              ? [{
+                  label: "Valore annuo",
+                  value: `${formatMoney(contract.annualValue)}${contract.billingFrequency ? ` · fatturazione ${(BILLING_FREQUENCY_LABELS[contract.billingFrequency] ?? "").toLowerCase()}` : ""}`,
+                }]
+              : []),
           ].map(({ label, value }) => (
             <div key={label}>
               <p className="text-sm text-muted-foreground">{label}</p>
@@ -684,6 +706,17 @@ export default function ContractDetailPage() {
             <div>
               <p className="text-sm text-muted-foreground">Rinnovo</p>
               <p className="text-base font-medium text-foreground">Non si rinnova</p>
+            </div>
+          )}
+          {/* A tacit renewal with its deadline known: the contract's year on one line. */}
+          {contract.autoRenew === true && contract.noticeDeadline && contract.status === "ACTIVE" && (
+            <div className="sm:col-span-2 lg:col-span-3 border-t border-border pt-4">
+              <ContractTimeline
+                startDate={contract.startDate}
+                endDate={contract.endDate}
+                noticeDeadline={contract.noticeDeadline}
+                renewalMonths={contract.renewalMonths}
+              />
             </div>
           )}
           {/* Bookkeeping data, rarely what one looks for: kept, but quieter. */}

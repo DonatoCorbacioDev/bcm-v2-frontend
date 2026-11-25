@@ -5,6 +5,8 @@
 
 import { Badge } from "@/components/ui/badge";
 import {
+  CONTRACT_STATUS_LABELS,
+  getContractStatusVariant,
   formatExpiresIn,
   formatNoticeIn,
   getExpiringSoonDays,
@@ -26,6 +28,25 @@ interface ExpiringSoonBadgeProps {
  * the end date alone would warn too late (and, once the deadline has
  * passed, warn about an expiry that won't happen). Renders nothing otherwise.
  */
+/**
+ * One badge per contract in a list: the deadline when something must be
+ * done within 30 days ("Disdetta in scadenza", "In scadenza"), otherwise
+ * the status. Two badges side by side ("Attivo" + "In scadenza") said the
+ * same thing twice; the detail page keeps both, with the days.
+ */
+export function ContractStatusBadge({ contract, className }: Readonly<{
+  contract: ExpiringSoonBadgeProps["contract"];
+  className?: string;
+}>) {
+  const soon = contract.noticeDeadline ? getNoticeDeadlineDays(contract) : getExpiringSoonDays(contract);
+  if (soon !== null) return <ExpiringSoonBadge contract={contract} className={className} />;
+  return (
+    <Badge variant={getContractStatusVariant(contract.status)} className={className}>
+      {CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}
+    </Badge>
+  );
+}
+
 export function ExpiringSoonBadge({ contract, showDays = false, className }: Readonly<ExpiringSoonBadgeProps>) {
   if (contract.noticeDeadline) {
     const days = getNoticeDeadlineDays(contract);

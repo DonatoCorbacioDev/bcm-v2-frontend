@@ -401,6 +401,37 @@ describe('ContractDetailPage — financial values tab', () => {
     expect(screen.getByText(eur(600))).toBeInTheDocument();
     expect(screen.queryByText(/^Totale$/)).not.toBeInTheDocument();
   });
+
+  it('lists the months in calendar order, names the matched invoice, and shows no margin for a costs-only contract', async () => {
+    mockContract({ workflowStage: 'DRAFT' });
+    mockAuthAs({ role: 'MANAGER', managerId: uid(5) });
+    (api.get as jest.Mock).mockImplementation((url: string) => {
+      if (url === `/financial-values/by-contract/${uid(1)}`) {
+        return Promise.resolve({
+          data: [
+            { id: uid(1), typeName: 'Costi', areaName: 'IT', financialAmount: 4800, month: 1, year: 2026, category: 'COST' },
+            { id: uid(2), typeName: 'Costi', areaName: 'IT', financialAmount: 4800, month: 12, year: 2025, category: 'COST' },
+          ],
+        });
+      }
+      if (url.includes('/invoices')) {
+        return Promise.resolve({ data: [{ id: uid(9), invoiceNumber: 'NCS-2026-01', matchStatus: 'CONFIRMED', matchedFinancialValueId: uid(1), ibanChanged: false, sepaBatchId: null }] });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<ContractDetailPage />, { wrapper: createWrapper() });
+    await userEvent.click(screen.getByRole('tab', { name: /importi previsti/i }));
+
+    expect(await screen.findByText('Totale costi')).toBeInTheDocument();
+    const months = screen.getAllByRole('row').slice(1, 3).map((r) => r.textContent ?? '');
+    expect(months[0]).toMatch(/dic 2025/i);
+    expect(months[1]).toMatch(/gen 2026/i);
+    expect(months[1]).toMatch(/NCS-2026-01\s*Abbinata/);
+    expect(months[0]).toMatch(/Nessuna fattura/);
+    expect(screen.queryByText('Totale ricavi')).not.toBeInTheDocument();
+    expect(screen.queryByText('Margine netto')).not.toBeInTheDocument();
+  });
 });
 
 describe('ContractDetailPage — history tab', () => {

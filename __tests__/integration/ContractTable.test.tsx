@@ -72,6 +72,12 @@ const mockAuthAs = (role: string) => {
 
 const mockPush = jest.fn();
 
+/** Opens the "⋯" actions menu of the given body row (1 = first contract). */
+async function openRowActions(rowIndex: number) {
+  const row = screen.getAllByRole('row')[rowIndex];
+  await userEvent.click(within(row).getByRole('button', { name: /azioni per/i }));
+}
+
 const makePageResponse = (contracts: Contract[], totalPages = 1) => ({
   content: contracts,
   totalElements: contracts.length,
@@ -249,7 +255,8 @@ describe('ContractTable', () => {
     expect(badges[0]).toHaveAttribute('title', 'Scade tra 12 giorni');
     const row = screen.getByText('CNT-001').closest('tr') as HTMLElement;
     expect(within(row).getByText('In scadenza')).toBeInTheDocument();
-    expect(within(row).getByText('Attivo')).toBeInTheDocument();
+    // One status per row: the deadline replaces "Attivo" instead of sitting beside it.
+    expect(within(row).queryByText('Attivo')).not.toBeInTheDocument();
   });
 
   it('shows fallback text for a contract without an assigned manager', () => {
@@ -433,22 +440,29 @@ describe('ContractTable', () => {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  it('navigates to the contract detail page when View is clicked', async () => {
+  it('opens the contract detail page when its row is clicked, and links its number', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    const viewButton = within(rows[1]).getByRole('button', { name: /visualizza/i });
-    await userEvent.click(viewButton);
+    await userEvent.click(within(rows[1]).getAllByRole('cell')[2]);
 
     expect(mockPush).toHaveBeenCalledWith(`/contracts/${uid(1)}`);
+    expect(within(rows[1]).getByRole('link', { name: 'CNT-001' })).toHaveAttribute('href', `/contracts/${uid(1)}`);
+  });
+
+  it('keeps a click on the actions menu from opening the contract', async () => {
+    render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
+
+    await openRowActions(1);
+
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('calls onEditClick with the correct contract when Edit is clicked', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const rows = screen.getAllByRole('row');
-    const editButton = within(rows[1]).getByRole('button', { name: /modifica/i });
-    await userEvent.click(editButton);
+    await openRowActions(1);
+    await userEvent.click(screen.getByRole('menuitem', { name: /modifica/i }));
 
     expect(onEditClick).toHaveBeenCalledTimes(1);
     expect(onEditClick).toHaveBeenCalledWith(
@@ -459,9 +473,8 @@ describe('ContractTable', () => {
   it('opens the delete confirmation dialog when Delete is clicked', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const rows = screen.getAllByRole('row');
-    const deleteButton = within(rows[1]).getByRole('button', { name: /elimina/i });
-    await userEvent.click(deleteButton);
+    await openRowActions(1);
+    await userEvent.click(screen.getByRole('menuitem', { name: /elimina/i }));
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
@@ -472,8 +485,8 @@ describe('ContractTable', () => {
   it('closes the delete dialog when Cancel is clicked', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await openRowActions(1);
+    await userEvent.click(screen.getByRole('menuitem', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
@@ -520,11 +533,11 @@ describe('ContractTable', () => {
 
   // ── Role-based visibility ─────────────────────────────────────────────────
 
-  it('shows Edit and Delete buttons for ADMIN', () => {
+  it('gives ADMIN an actions menu with Edit and Delete', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).getByRole('button', { name: /modifica/i })).toBeInTheDocument();
-    expect(within(rows[1]).getByRole('button', { name: /elimina/i })).toBeInTheDocument();
+    await openRowActions(1);
+    expect(screen.getByRole('menuitem', { name: /modifica/i })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /elimina/i })).toBeInTheDocument();
   });
 
   it('hides Edit and Delete buttons when user is not yet loaded', () => {
@@ -534,17 +547,15 @@ describe('ContractTable', () => {
     });
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).queryByRole('button', { name: /modifica/i })).not.toBeInTheDocument();
-    expect(within(rows[1]).queryByRole('button', { name: /elimina/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /azioni per/i })).not.toBeInTheDocument();
   });
 
   it('hides Edit and Delete buttons for MANAGER', () => {
     mockAuthAs('MANAGER');
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     const rows = screen.getAllByRole('row');
-    expect(within(rows[1]).queryByRole('button', { name: /modifica/i })).not.toBeInTheDocument();
-    expect(within(rows[1]).queryByRole('button', { name: /elimina/i })).not.toBeInTheDocument();
-    expect(within(rows[1]).getByRole('button', { name: /visualizza/i })).toBeInTheDocument();
+    expect(within(rows[1]).queryByRole('button', { name: /azioni per/i })).not.toBeInTheDocument();
+    expect(within(rows[1]).getByRole('link', { name: 'CNT-001' })).toBeInTheDocument();
   });
 
   // ── Pagination ────────────────────────────────────────────────────────────
@@ -591,8 +602,8 @@ describe('ContractTable', () => {
   it('confirms delete and shows success toast', async () => {
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await openRowActions(1);
+    await userEvent.click(screen.getByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
@@ -605,8 +616,8 @@ describe('ContractTable', () => {
     (contractsService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
     render(<ContractTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await openRowActions(1);
+    await userEvent.click(screen.getByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 

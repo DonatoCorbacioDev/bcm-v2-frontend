@@ -34,6 +34,8 @@ interface NextAction {
   ibanInvoice?: ElectronicInvoice;
   /** A tacit renewal whose last day to cancel has not passed: the user can still cancel it. */
   cancellable?: boolean;
+  /** Invoices wait to be matched: the action is in the Fatture tab. */
+  toMatch?: boolean;
 }
 
 /** "2026-11-24" -> "24 novembre 2026", read as a calendar day (no timezone shift). */
@@ -163,6 +165,7 @@ export function nextAction(contract: Contract, invoices: readonly ElectronicInvo
         ? `${invoiceLabel(toMatch[0].invoiceNumber, "Fattura")} da abbinare`
         : `${toMatch.length} fatture da abbinare`,
       detail: "Controlla l'abbinamento nella scheda Fatture.",
+      toMatch: true,
     };
   }
   return byDate;
@@ -177,11 +180,13 @@ interface NextActionCardProps {
   readonly onPrepareCancellation?: () => void;
   /** Records that the cancellation was sent (administrators only); without it no button is shown. */
   readonly onMarkCancellationSent?: () => void;
+  /** Opens the Fatture tab; without it no button is shown. */
+  readonly onOpenInvoices?: () => void;
 }
 
 /** The first thing on a contract's page: what to do now, before all its data. */
-export function NextActionCard({ contract, invoices, onIbanCheck, onPrepareCancellation, onMarkCancellationSent }: NextActionCardProps) {
-  const { icon: Icon, tone, title, detail, ibanInvoice, cancellable } = nextAction(contract, invoices);
+export function NextActionCard({ contract, invoices, onIbanCheck, onPrepareCancellation, onMarkCancellationSent, onOpenInvoices }: NextActionCardProps) {
+  const { icon: Icon, tone, title, detail, ibanInvoice, cancellable, toMatch } = nextAction(contract, invoices);
   return (
     <section aria-label="Prossima azione" className={`flex items-start gap-3 rounded-lg border p-4 ${TONE[tone]}`}>
       <Icon className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
@@ -191,6 +196,11 @@ export function NextActionCard({ contract, invoices, onIbanCheck, onPrepareCance
         {ibanInvoice && onIbanCheck && (
           <Button type="button" size="sm" variant="outline" className="mt-3 bg-card" onClick={() => onIbanCheck(ibanInvoice)}>
             Come verificarlo
+          </Button>
+        )}
+        {toMatch && onOpenInvoices && (
+          <Button type="button" size="sm" variant="outline" className="mt-3 bg-card" onClick={onOpenInvoices}>
+            Apri le fatture
           </Button>
         )}
         {cancellable && (onPrepareCancellation || onMarkCancellationSent) && (

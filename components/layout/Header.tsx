@@ -117,7 +117,10 @@ export default function Header({
       <div className="flex-1" />
 
       {/* Search — jumps to the Contratti page pre-filtered by this term
-          (same contractNumber/customerName match as its own search box). */}
+          (same contractNumber/customerName match as its own search box).
+          Not on that page itself, where its own box does the same: two
+          search fields on one screen asked which one to use. */}
+      {pathname !== "/contracts" && (
       <form
         method="post"
         onSubmit={handleSearchSubmit}
@@ -133,6 +136,7 @@ export default function Header({
           className="w-full bg-transparent outline-none placeholder:text-muted-foreground"
         />
       </form>
+      )}
 
       {/* Right cluster */}
       <div className="flex items-center gap-1">

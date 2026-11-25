@@ -44,7 +44,9 @@ test.describe("Accessibility: contracts table and form", () => {
   test("delete confirmation dialog has no detectable axe violations", async ({ page }) => {
     await page.goto("/contracts");
     const rows = page.getByRole("row");
-    await rows.nth(1).getByRole("button", { name: "Elimina" }).click();
+    // Edit and Delete sit in the row's actions menu.
+    await rows.nth(1).getByRole("button", { name: /Azioni per/ }).click();
+    await page.getByRole("menuitem", { name: "Elimina" }).click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();

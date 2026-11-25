@@ -5,7 +5,7 @@
 
 import type { InvoiceMatchStatus } from "@/types";
 
-export type BadgeVariant = "default" | "secondary" | "destructive" | "success" | "warning" | "info" | "outline";
+export type BadgeVariant = "default" | "secondary" | "destructive" | "danger" | "success" | "warning" | "info" | "outline";
 
 export interface StatusConfig {
   variant: BadgeVariant;
@@ -15,9 +15,17 @@ export interface StatusConfig {
 /** Single source of truth for contract status → badge variant + Italian label. */
 export const CONTRACT_STATUS_CONFIG: Record<string, StatusConfig> = {
   ACTIVE: { variant: "success", label: "Attivo" },
-  EXPIRED: { variant: "destructive", label: "Scaduto" },
+  EXPIRED: { variant: "danger", label: "Scaduto" },
   CANCELLED: { variant: "secondary", label: "Annullato" },
   DRAFT: { variant: "info", label: "Bozza" },
+};
+
+/** How often a contract is billed, as the form and the contract page name it. */
+export const BILLING_FREQUENCY_LABELS: Record<string, string> = {
+  MONTHLY: "Mensile",
+  QUARTERLY: "Trimestrale",
+  SEMIANNUAL: "Semestrale",
+  ANNUAL: "Annuale",
 };
 
 export const CONTRACT_STATUS_LABELS: Record<string, string> = Object.fromEntries(

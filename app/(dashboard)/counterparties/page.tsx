@@ -44,7 +44,6 @@ export default function CounterpartiesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Controparti</h1>
-          <p className="text-muted-foreground mt-2">Gestisci clienti e fornitori</p>
         </div>
         {isAdmin && <Button onClick={handleCreateClick}>+ Nuova controparte</Button>}
       </div>

@@ -28,7 +28,8 @@ describe('getContractStatusVariant', () => {
   });
 
   it('returns "destructive" for EXPIRED', () => {
-    expect(getContractStatusVariant('EXPIRED')).toBe('destructive');
+    // Tinted like the other states; solid red is kept for alarms (a changed IBAN).
+    expect(getContractStatusVariant('EXPIRED')).toBe('danger');
   });
 
   it('returns "secondary" for CANCELLED', () => {

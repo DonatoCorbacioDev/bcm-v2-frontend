@@ -13,8 +13,9 @@ import { useContractsPaged } from "@/hooks/useContractsPaged";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
 import { contractsService } from "@/services/contracts.service";
 import { useAuthStore } from "@/store/authStore";
-import { CONTRACT_STATUS_LABELS, getContractStatusVariant } from "@/lib/utils";
-import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
+import { CONTRACT_STATUS_LABELS } from "@/lib/utils";
+import { ContractStatusBadge } from "@/components/contracts/ExpiringSoonBadge";
+import Link from "next/link";
 import type { Contract } from "@/types";
 
 import {
@@ -25,7 +26,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,7 +51,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Trash2, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown, Trash2, Save, MoreHorizontal, Pencil } from "lucide-react";
 
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -545,12 +551,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-medium text-sm">{c.contractNumber}</span>
-                    <div className="flex flex-wrap justify-end gap-1">
-                      <Badge variant={getContractStatusVariant(c.status)} className="text-xs">
-                        {CONTRACT_STATUS_LABELS[c.status] ?? c.status}
-                      </Badge>
-                      <ExpiringSoonBadge contract={c} className="text-xs" />
-                    </div>
+                    <ContractStatusBadge contract={c} className="text-xs" />
                   </div>
                   <p className="text-sm text-foreground">{c.counterparty?.name ?? "N/D"}</p>
                   {c.projectName && <p className="text-sm text-muted-foreground">{c.projectName}</p>}
@@ -603,12 +604,23 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                   </TableHead>
                 );
               })}
-              <TableHead>Azioni</TableHead>
+              {isAdmin && <TableHead className="w-12"><span className="sr-only">Azioni</span></TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {contracts.map((c) => (
-              <TableRow key={c.id} data-state={selectedIds.has(c.id) ? "selected" : undefined}>
+              <TableRow
+                key={c.id}
+                data-state={selectedIds.has(c.id) ? "selected" : undefined}
+                // The whole row opens the contract; the number is the link for
+                // the keyboard and screen readers. Clicks on the checkbox or the
+                // actions menu stay theirs.
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest("a, button, [role='checkbox'], [role='menuitem']")) return;
+                  router.push(`/contracts/${c.id}`);
+                }}
+                className="cursor-pointer"
+              >
                 {isAdmin && (
                   <TableCell>
                     <Checkbox
@@ -619,54 +631,43 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                   </TableCell>
                 )}
                 <TableCell className="font-medium text-sm">
-                  {c.contractNumber}
+                  <Link
+                    href={`/contracts/${c.id}`}
+                    className="rounded-sm hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {c.contractNumber}
+                  </Link>
                 </TableCell>
                 <TableCell className="text-sm">{c.counterparty?.name ?? "N/D"}</TableCell>
                 <TableCell className="hidden md:table-cell text-sm">{c.projectName}</TableCell>
                 <TableCell className="hidden lg:table-cell text-sm">{c.managerName || "Non assegnato"}</TableCell>
                 <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    <Badge variant={getContractStatusVariant(c.status)} className="text-xs">
-                      {CONTRACT_STATUS_LABELS[c.status] ?? c.status}
-                    </Badge>
-                    <ExpiringSoonBadge contract={c} className="text-xs" />
-                  </div>
+                  <ContractStatusBadge contract={c} className="text-xs" />
                 </TableCell>
                 <TableCell className="hidden md:table-cell text-sm whitespace-nowrap">
                   <NextDeadline contract={c} />
                 </TableCell>
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => router.push(`/contracts/${c.id}`)}
-                      className="text-xs px-2"
-                    >
-                      Visualizza
-                    </Button>
-                    {isAdmin && (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditClick(c)}
-                          className="text-primary hover:text-primary text-xs px-2 hidden sm:inline-flex dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
-                        >
+                {isAdmin && (
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={`Azioni per ${c.contractNumber}`}>
+                          <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onSelect={() => onEditClick(c)}>
+                          <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
                           Modifica
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(c)}
-                          className="text-destructive hover:text-destructive text-xs px-2 hidden sm:inline-flex"
-                        >
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleDeleteClick(c)} className="text-destructive focus:text-destructive">
+                          <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
                           Elimina
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </TableCell>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

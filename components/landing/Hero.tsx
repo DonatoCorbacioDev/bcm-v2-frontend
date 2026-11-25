@@ -6,12 +6,12 @@
  */
 import Link from "next/link";
 import { isoInDays, useToday } from "@/components/landing/useToday";
-import { ArrowRight, CalendarClock, FileText, Handshake, Home, Landmark, Search } from "lucide-react";
+import { ArrowRight, FileText, Handshake, Home, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
 import { LogoMark } from "@/components/layout/Logo";
-import KPICard from "@/components/dashboard/KPICard";
 import { HomeAttentionList } from "@/components/dashboard/HomeAttentionList";
+import { DeadlineRunway } from "@/components/dashboard/DeadlineRunway";
 import type { HomeAttentionItem } from "@/types";
 
 /**
@@ -96,11 +96,10 @@ function ProductFrame() {
               <p className="text-2xl font-bold text-foreground">Ciao, Marco</p>
               <p className="mt-1 text-muted-foreground">Cosa richiede attenzione nei prossimi 30 giorni</p>
             </div>
-            {/* On a phone the three counters would fill the frame: the to-do list is the point. */}
-            <div className="hidden gap-4 sm:grid sm:grid-cols-3">
-              <KPICard title="Da fare entro 30 giorni" value={4} icon={<CalendarClock className="h-6 w-6" aria-hidden="true" />} variant="warning" />
-              <KPICard title="Fatture da abbinare" value={2} icon={<FileText className="h-6 w-6" aria-hidden="true" />} />
-              <KPICard title="Avvisi IBAN" value={1} icon={<Landmark className="h-6 w-6" aria-hidden="true" />} variant="danger" />
+            {/* The frame shows what is BCM's own: the deadline runway, then the
+                to-do list (the counters are on the real Home, not needed here). */}
+            <div className="hidden sm:block">
+              <DeadlineRunway items={demoItems(today)} windowDays={30} today={today} />
             </div>
             <div className="space-y-3">
               <p className="text-lg font-semibold text-foreground">Da fare</p>

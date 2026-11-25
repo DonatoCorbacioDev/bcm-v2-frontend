@@ -16,6 +16,7 @@ import { CalendarClock, FileText, Landmark } from "lucide-react";
 import KPICard from "@/components/dashboard/KPICard";
 import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
 import { HomeAttentionList } from "@/components/dashboard/HomeAttentionList";
+import { DeadlineRunway } from "@/components/dashboard/DeadlineRunway";
 import { SupplierInvoicesSummary } from "@/components/dashboard/SupplierInvoicesSummary";
 import { AnalyticsSections } from "@/components/dashboard/AnalyticsSections";
 
@@ -116,6 +117,8 @@ export default function DashboardPage() {
             variant={attention.ibanAlertsCount > 0 ? "danger" : "default"}
           />
         </div>
+
+        <DeadlineRunway items={attention.items} windowDays={windowDays} today={new Date()} />
 
         <section aria-labelledby="home-todo" className="space-y-3">
           <h2 id="home-todo" className="text-lg font-semibold text-foreground">Da fare</h2>

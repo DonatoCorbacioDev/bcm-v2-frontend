@@ -10,6 +10,7 @@ import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pricing } from "@/components/landing/Pricing";
 import { HowItsBuilt } from "@/components/landing/HowItsBuilt";
+import { CalculatorSection } from "@/components/landing/CalculatorSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { displayFont } from "@/components/landing/fonts";
 
@@ -51,6 +52,7 @@ export default function LandingPage() {
       <main>
         <Hero />
         <Features />
+        <CalculatorSection />
         <HowItWorks />
         <Pricing />
         <HowItsBuilt />

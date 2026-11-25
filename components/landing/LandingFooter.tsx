@@ -44,9 +44,12 @@ export function LandingFooter({ headingLevel = "h4" }: LandingFooterProps) {
             <HeadingTag className="text-sm font-semibold text-foreground mb-3">Prodotto</HeadingTag>
             <ul className="space-y-2">
               {[
-                { href: "#features", label: "Funzionalità" },
-                { href: "#how-it-works", label: "Come funziona" },
-                { href: "#pricing", label: "Piani" },
+                // "/#…" so the links also work from the legal pages and the calculator.
+                { href: "/#features", label: "Funzionalità" },
+                { href: "/#how-it-works", label: "Come funziona" },
+                { href: "/calcolo-disdetta", label: "Calcolo disdetta" },
+                { href: "/#pricing", label: "Piani" },
+                { href: "/#how-its-built", label: "Come è fatto" },
               ].map((link) => (
                 <li key={link.href}>
                   <a

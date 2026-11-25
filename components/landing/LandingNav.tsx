@@ -18,10 +18,11 @@ export function LandingNav() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "#features", label: "Funzionalità" },
-    { href: "#how-it-works", label: "Come funziona" },
-    { href: "#pricing", label: "Piani" },
-    { href: "#how-its-built", label: "Come è fatto" },
+    // "/#…" so the links also work from the other public pages.
+    { href: "/#features", label: "Funzionalità" },
+    { href: "/calcolo-disdetta", label: "Calcolo disdetta" },
+    { href: "/#pricing", label: "Piani" },
+    { href: "/#how-its-built", label: "Come è fatto" },
   ];
 
   return (

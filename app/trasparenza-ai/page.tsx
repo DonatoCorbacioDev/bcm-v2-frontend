@@ -16,7 +16,7 @@ const CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 
 export default function TrasparenzaAiPage() {
   return (
-    <LegalPageShell title="Trasparenza sull'uso dell'intelligenza artificiale" lastUpdated="20 luglio 2026">
+    <LegalPageShell title="Trasparenza sull'uso dell'intelligenza artificiale" lastUpdated="25 novembre 2026">
       <p className="rounded-md border border-border bg-muted px-4 py-3">
         <strong>
           Le funzionalità di analisi AI descritte in questa pagina non sono attualmente disponibili
@@ -35,7 +35,28 @@ export default function TrasparenzaAiPage() {
       </section>
 
       <section>
-        <h2>2. Punteggio di rischio contrattuale</h2>
+        <h2>2. Scopo previsto e usi esclusi</h2>
+        <p>
+          Le funzioni di intelligenza artificiale di BCM servono ad aiutare un&apos;azienda a leggere e
+          tenere sotto controllo i propri contratti con fornitori e clienti: scadenze, rinnovi, termini
+          di disdetta, clausole da guardare con attenzione e valori economici collegati.
+        </p>
+        <p>Non sono progettate per:</p>
+        <ul>
+          <li>valutare, selezionare o controllare persone, per esempio dipendenti, candidati o collaboratori;</li>
+          <li>valutare l&apos;affidabilità creditizia di persone fisiche;</li>
+          <li>prendere decisioni con effetti giuridici al posto di una persona.</li>
+        </ul>
+        <p>
+          Quando queste funzioni saranno disponibili, i valori proposti da un modello, per esempio una
+          data o un preavviso letti da un documento, verranno mostrati come proposte, accanto alla frase
+          da cui provengono, e diventeranno dati del contratto solo dopo la conferma di una persona. Le
+          risposte scritte da un modello linguistico saranno indicate come tali.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Punteggio di rischio contrattuale</h2>
         <p>
           Ogni contratto riceve un punteggio di rischio (Basso / Medio / Alto) calcolato da
           due componenti:
@@ -60,7 +81,7 @@ export default function TrasparenzaAiPage() {
       </section>
 
       <section>
-        <h2>3. Analisi delle clausole a rischio</h2>
+        <h2>4. Analisi delle clausole a rischio</h2>
         <p>
           Sui documenti contrattuali caricati, un modello linguistico può individuare ed
           evidenziare clausole potenzialmente rischiose (es. rinnovo automatico, penali, foro
@@ -74,7 +95,7 @@ export default function TrasparenzaAiPage() {
       </section>
 
       <section>
-        <h2>4. Dove girano i modelli</h2>
+        <h2>5. Dove girano i modelli</h2>
         <p>
           Entrambe le funzioni usano modelli ospitati internamente (self-hosted), nella stessa
           infrastruttura del titolare/responsabile del trattamento. Non c&apos;è alcun invio
@@ -88,7 +109,7 @@ export default function TrasparenzaAiPage() {
       </section>
 
       <section>
-        <h2>5. Nessuna decisione automatizzata</h2>
+        <h2>6. Nessuna decisione automatizzata</h2>
         <p>
           Né il punteggio di rischio né l&apos;analisi delle clausole modificano, approvano o
           rifiutano un contratto in autonomia. Ogni azione sul contratto — approvazione,
@@ -98,7 +119,7 @@ export default function TrasparenzaAiPage() {
       </section>
 
       <section>
-        <h2>6. Stato rispetto all&apos;AI Act</h2>
+        <h2>7. Stato rispetto all&apos;AI Act</h2>
         <p>
           Una classificazione formale ai sensi del Regolamento UE sull&apos;intelligenza
           artificiale (AI Act) non è ancora stata effettuata da un professionista legale.
@@ -111,7 +132,7 @@ export default function TrasparenzaAiPage() {
       </section>
 
       <section>
-        <h2>7. Domande</h2>
+        <h2>8. Domande</h2>
         <p>
           Per qualsiasi domanda su queste funzioni, scrivi a{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2 decoration-primary/40 hover:decoration-primary dark:text-[var(--accent-foreground)] dark:decoration-[var(--accent-foreground)]/40 dark:hover:decoration-[var(--accent-foreground)]">

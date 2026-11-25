@@ -49,24 +49,26 @@ export default function KPICard({
   return (
     <div
       className={cn(
-        "bg-card rounded-xl border border-border shadow-sm border-l-4 p-5",
+        // Compact on phones (three side by side, no icon), so the list under
+        // the counters starts on the first screen.
+        "bg-card rounded-xl border border-border shadow-sm border-l-4 p-3 sm:p-5",
         config.accent
       )}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-xs font-medium leading-snug text-muted-foreground sm:text-sm">{title}</p>
           {isLoading ? (
             <output
               className="block h-9 w-32 mt-2 rounded bg-muted-foreground/20 animate-pulse"
               aria-label={`${title}: caricamento`}
             />
           ) : (
-            <p className="text-3xl font-bold text-foreground mt-2 tabular-nums">{value}</p>
+            <p className="mt-1 text-2xl font-bold text-foreground tabular-nums sm:mt-2 sm:text-3xl">{value}</p>
           )}
         </div>
         {icon && (
-          <div className={cn("p-3 rounded-xl", config.iconBg, config.iconColor)}>
+          <div className={cn("hidden p-3 rounded-xl sm:block", config.iconBg, config.iconColor)}>
             {icon}
           </div>
         )}

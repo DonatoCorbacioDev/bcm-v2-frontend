@@ -78,7 +78,7 @@ export default function DashboardPage() {
   if (isLoading || isSetupChecking) {
     body = (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-3 sm:gap-6">
           {[1, 2, 3].map((i) => (
             <KPICardSkeleton key={i} />
           ))}
@@ -96,7 +96,7 @@ export default function DashboardPage() {
   } else {
     body = (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-3 gap-3 sm:gap-6">
           <KPICard
             title={`Da fare entro ${windowDays} giorni`}
             value={attention.dueSoonCount}

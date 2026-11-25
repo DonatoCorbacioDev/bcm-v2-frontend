@@ -36,6 +36,7 @@ import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import { NextActionCard } from "@/components/contracts/NextActionCard";
 import { IbanCheckDialog, type IbanCheckSupplier } from "@/components/contracts/IbanCheckDialog";
 import { ContractTimeline } from "@/components/contracts/ContractTimeline";
+import { AddToCalendarMenu } from "@/components/calendar/AddToCalendarMenu";
 import { CancellationLetterDialog, MarkCancellationSentDialog } from "@/components/contracts/CancellationDialogs";
 import { apiErrorMessage } from "@/lib/apiError";
 import { homeQueryKeys } from "@/hooks/useHomeAttention";
@@ -717,6 +718,16 @@ export default function ContractDetailPage() {
                 noticeDeadline={contract.noticeDeadline}
                 renewalMonths={contract.renewalMonths}
               />
+              <div className="mt-3">
+                <AddToCalendarMenu
+                  uid={`notice-${contract.id}-${contract.noticeDeadline.slice(0, 10)}`}
+                  event={{
+                    title: `Disdici ${contract.contractNumber} - ${contract.counterparty?.name ?? contract.projectName}`,
+                    date: contract.noticeDeadline.slice(0, 10),
+                    details: `Ultimo giorno per disdire il contratto ${contract.contractNumber}: dopo si rinnova da solo.`,
+                  }}
+                />
+              </div>
             </div>
           )}
           {/* Bookkeeping data, rarely what one looks for: kept, but quieter. */}

@@ -62,9 +62,9 @@ describe('Sidebar', () => {
   const navLinks = () =>
     screen.getAllByRole('link').filter((link) => link.closest('nav')).map((link) => link.textContent);
 
-  it('shows ADMIN the four main entries, Impostazioni included', () => {
+  it('shows ADMIN the five main entries, Impostazioni included', () => {
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(navLinks()).toEqual(['Home', 'Contratti', 'Controparti', 'Impostazioni']);
+    expect(navLinks()).toEqual(['Home', 'Contratti', 'Calendario', 'Controparti', 'Impostazioni']);
     expect(screen.getByRole('link', { name: 'Impostazioni' })).toHaveAttribute('href', '/settings');
   });
 
@@ -73,13 +73,13 @@ describe('Sidebar', () => {
       selector({ user: null, isAuthenticated: false })
     );
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(navLinks()).toEqual(['Home', 'Contratti', 'Controparti']);
+    expect(navLinks()).toEqual(['Home', 'Contratti', 'Calendario', 'Controparti']);
   });
 
-  it('shows MANAGER the three main entries, without Impostazioni', () => {
+  it('shows MANAGER the four main entries, without Impostazioni', () => {
     mockUser('MANAGER');
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(navLinks()).toEqual(['Home', 'Contratti', 'Controparti']);
+    expect(navLinks()).toEqual(['Home', 'Contratti', 'Calendario', 'Controparti']);
     expect(screen.queryByText('AMMINISTRAZIONE')).not.toBeInTheDocument();
   });
 

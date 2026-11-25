@@ -6,6 +6,7 @@
 import {
   Home,
   FileText,
+  CalendarDays,
   Handshake,
   Settings,
   type LucideIcon,
@@ -53,6 +54,7 @@ export const navGroups: { title: string; items: NavItem[] }[] = [
     items: [
       { label: "Home",        href: "/dashboard",      icon: Home },
       { label: "Contratti",   href: "/contracts",      icon: FileText },
+      { label: "Calendario",  href: "/calendar",       icon: CalendarDays },
       { label: "Controparti", href: "/counterparties", icon: Handshake },
     ],
   },

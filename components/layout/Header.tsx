@@ -20,6 +20,7 @@ import Link from "next/link";
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard":          "Home",
   "/contracts":          "Contratti",
+  "/calendar":           "Calendario",
   "/counterparties":     "Controparti",
   "/settings":           "Impostazioni",
   "/contract-templates": "Modelli di contratto",

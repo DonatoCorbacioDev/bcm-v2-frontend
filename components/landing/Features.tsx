@@ -3,7 +3,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import dynamic from "next/dynamic";
-import { Archive, Building2, CalendarDays, Download, Landmark } from "lucide-react";
+import { Archive, CalendarDays, Download, FileSpreadsheet, Landmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NoticeTimeline } from "@/components/landing/NoticeTimeline";
 import { IbanAlertPreview } from "@/components/landing/IbanAlertPreview";
@@ -18,10 +18,10 @@ const BudgetChart = dynamic(() => import("@/components/landing/BudgetChart").the
 const MORE = [
   // The ICS feed (CalendarFeedController): end dates and last days to cancel.
   { icon: CalendarDays, text: "Scadenze e ultimi giorni per disdire nel tuo Google Calendar, Outlook o Apple Calendar." },
+  { icon: FileSpreadsheet, text: "I contratti che hai già in Excel, caricati tutti insieme con un modello pronto." },
   { icon: Archive, text: "Ogni contratto con i suoi PDF, le fatture e lo storico delle modifiche." },
   { icon: Landmark, text: "Il file per il bonifico SEPA, pronto da caricare in banca." },
   { icon: Download, text: "Tutti i tuoi dati esportabili in un file, quando vuoi." },
-  { icon: Building2, text: "Ogni azienda nel suo spazio separato, su server in Italia." },
 ];
 
 function Tile({ title, children, visual, className = "" }: {

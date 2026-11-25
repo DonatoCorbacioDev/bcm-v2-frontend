@@ -13,7 +13,7 @@ const STEPS = [
   {
     title: "Carica i tuoi contratti",
     description:
-      "Inserisci i contratti che hai già, uno alla volta o da un file Excel, e collega a ognuno i suoi documenti PDF e le fatture.",
+      "Se li hai già in Excel, scarichi il modello, lo compili e li carichi tutti insieme: le righe da correggere te le indica una per una. Poi colleghi a ogni contratto i suoi PDF e le fatture.",
   },
   {
     title: "Ricevi gli avvisi",

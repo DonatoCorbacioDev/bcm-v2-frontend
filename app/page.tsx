@@ -11,6 +11,7 @@ import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pricing } from "@/components/landing/Pricing";
 import { HowItsBuilt } from "@/components/landing/HowItsBuilt";
 import { CalculatorSection } from "@/components/landing/CalculatorSection";
+import { TrustSection } from "@/components/landing/TrustSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 import { displayFont } from "@/components/landing/fonts";
 
@@ -54,6 +55,7 @@ export default function LandingPage() {
         <Features />
         <CalculatorSection />
         <HowItWorks />
+        <TrustSection />
         <Pricing />
         <HowItsBuilt />
       </main>

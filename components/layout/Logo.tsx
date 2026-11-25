@@ -12,16 +12,16 @@ interface LogoMarkProps {
 }
 
 /**
- * BCM logo mark: a solid seal with a checkmark cut through it — the
- * checkmark's long stroke breaks past the seal's own edge instead of
- * staying contained, so the silhouette itself is distinctive, not just
- * the checkmark inside it.
+ * BCM logo mark: the round seal with its check, whose long stroke leaves the
+ * seal and runs on as a line, going all the way. A circle with a tail is a
+ * rarer silhouette than a check in a rounded square (checked on TMview,
+ * 2026-11-25). Drawn for BCM, not taken from another mark; one colour, the
+ * same in light and dark mode.
  */
 export function LogoMark({ className, size = 32 }: LogoMarkProps) {
   // Desktop and mobile sidebars can both be mounted at once (one hidden via
-  // CSS, not unmounted) — a fixed mask id would collide and silently break
-  // the second instance's mask.
-  const maskId = `bcm-seal-mask-${useId()}`;
+  // CSS, not unmounted): a fixed mask id would collide and break the second.
+  const maskId = `bcm-mark-mask-${useId()}`;
 
   return (
     <svg
@@ -34,17 +34,11 @@ export function LogoMark({ className, size = 32 }: LogoMarkProps) {
       className={className}
     >
       <mask id={maskId}>
-        <circle cx="50" cy="50" r="40" fill="white" />
-        <path
-          d="M28 52 L43 67 L82 20"
-          stroke="black"
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
+        <rect width="100" height="100" fill="white" />
+        <path d="M18 52 L32 66 L56 40 L94 40" stroke="black" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" />
       </mask>
-      <circle cx="50" cy="50" r="40" fill="#2563eb" mask={`url(#${maskId})`} />
+      <circle cx="42" cy="52" r="38" fill="#2563eb" mask={`url(#${maskId})`} />
+      <path d="M18 52 L32 66 L56 40 L92 40" stroke="#2563eb" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

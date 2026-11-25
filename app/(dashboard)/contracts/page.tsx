@@ -191,23 +191,33 @@ function ContractsPageContent() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          {isAdmin && (
-            <Button
-              variant="outline"
-              onClick={() => setImportDialogOpen(true)}
-              className="hidden sm:flex"
-            >
-              <Upload className="mr-2 h-4 w-4" />
-              Importa
-            </Button>
-          )}
-          {isAdmin && (
-            <Button onClick={handleCreateClick} disabled={hasMissingPrerequisite}>
-              + Nuovo contratto
-            </Button>
-          )}
+          {/* Shown to everyone, so a manager (and the public demo) sees how
+              contracts get in; only an administrator can use them. */}
+          <Button
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="hidden sm:flex"
+            disabled={!isAdmin}
+            aria-describedby={isAdmin ? undefined : "contracts-admin-only"}
+          >
+            <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+            Importa
+          </Button>
+          <Button
+            onClick={handleCreateClick}
+            disabled={!isAdmin || hasMissingPrerequisite}
+            aria-describedby={isAdmin ? undefined : "contracts-admin-only"}
+          >
+            + Nuovo contratto
+          </Button>
         </div>
       </div>
+
+      {!isAdmin && (
+        <p id="contracts-admin-only" className="-mt-2 text-sm text-muted-foreground sm:text-right">
+          Solo l&apos;amministratore dell&apos;organizzazione può importare i contratti da Excel o crearne di nuovi.
+        </p>
+      )}
 
       {hasMissingPrerequisite && (
         <MissingPrerequisiteBanner message={prerequisiteMessage} actions={prerequisiteActions} />

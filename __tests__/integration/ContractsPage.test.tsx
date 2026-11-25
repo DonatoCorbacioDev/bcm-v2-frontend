@@ -53,11 +53,15 @@ beforeEach(() => {
 });
 
 describe('ContractsPage — create button authorization', () => {
-  it('hides "+ Nuovo contratto" for a MANAGER — POST /contracts is ADMIN-only server-side', () => {
+  it('shows a MANAGER "+ Nuovo contratto" and "Importa" disabled, saying why — POST /contracts is ADMIN-only server-side', () => {
     (useAuthStore as unknown as jest.Mock).mockReturnValue({ user: { role: 'MANAGER' } });
     render(<ContractsPage />, { wrapper: createWrapper() });
 
-    expect(screen.queryByRole('button', { name: '+ Nuovo contratto' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '+ Nuovo contratto' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Importa' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '+ Nuovo contratto' })).toHaveAccessibleDescription(
+      "Solo l'amministratore dell'organizzazione può importare i contratti da Excel o crearne di nuovi.",
+    );
   });
 
   it('shows "+ Nuovo contratto" for an ADMIN', () => {

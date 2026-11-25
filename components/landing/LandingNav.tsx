@@ -21,6 +21,7 @@ export function LandingNav() {
     { href: "#features", label: "Funzionalità" },
     { href: "#how-it-works", label: "Come funziona" },
     { href: "#pricing", label: "Piani" },
+    { href: "#how-its-built", label: "Come è fatto" },
   ];
 
   return (

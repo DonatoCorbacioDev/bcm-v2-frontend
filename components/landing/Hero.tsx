@@ -4,8 +4,8 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { useSyncExternalStore } from "react";
 import Link from "next/link";
+import { isoInDays, useToday } from "@/components/landing/useToday";
 import { ArrowRight, CalendarClock, FileText, Handshake, Home, Landmark, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/store/authStore";
@@ -13,25 +13,6 @@ import { LogoMark } from "@/components/layout/Logo";
 import KPICard from "@/components/dashboard/KPICard";
 import { HomeAttentionList } from "@/components/dashboard/HomeAttentionList";
 import type { HomeAttentionItem } from "@/types";
-
-/** YYYY-MM-DD for today plus `days`, in the visitor's own time zone. */
-function isoInDays(today: Date, days: number): string {
-  const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + days);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-const subscribeNever = () => () => {};
-
-/**
- * Today in the browser, or null while the page is rendered on the server.
- * The page is built once and served for weeks, so a date fixed at build time
- * would soon be in the past.
- */
-function useToday(): Date | null {
-  const iso = useSyncExternalStore(subscribeNever, () => isoInDays(new Date(), 0), () => null);
-  return iso ? new Date(`${iso}T00:00:00`) : null;
-}
 
 /**
  * The demo organization's real to-do list (Nortiva Solutions), with dates

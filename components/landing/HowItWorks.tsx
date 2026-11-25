@@ -3,26 +3,19 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 
-import { ClipboardList, Settings, BellRing } from "lucide-react";
-
+// A real sequence, so the steps carry numbers.
 const STEPS = [
   {
-    number: "01",
-    icon: Settings,
     title: "Registra la tua organizzazione",
     description:
       "Crei l'account dell'amministratore e lo confermi con il codice che ricevi per email. Poi aggiungi le aree di business e le persone che seguono i contratti.",
   },
   {
-    number: "02",
-    icon: ClipboardList,
     title: "Carica i tuoi contratti",
     description:
       "Inserisci i contratti che hai già, uno alla volta o da un file Excel, e collega a ognuno i suoi documenti PDF e le fatture.",
   },
   {
-    number: "03",
-    icon: BellRing,
     title: "Ricevi gli avvisi",
     description:
       "BCM controlla ogni giorno scadenze e termini di disdetta e ti scrive quando serve. In Home trovi sempre cosa fare nei prossimi 30 giorni.",
@@ -31,43 +24,26 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20">
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="text-center mb-14 space-y-3">
-          <h2 className="text-3xl font-bold text-foreground">Come funziona</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
+    <section id="how-it-works" className="scroll-mt-16 border-t border-border bg-muted/40 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="max-w-2xl">
+          <h2 className="text-balance text-3xl font-semibold tracking-[-0.025em] text-foreground md:text-4xl">
+            Come funziona
+          </h2>
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             Si usa dal browser, senza installare niente.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {STEPS.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <div key={step.number} className="relative flex flex-col items-center text-center">
-                {/* Connector line between steps */}
-                {index < STEPS.length - 1 && (
-                  <div
-                    className="hidden md:block absolute top-8 left-[calc(50%+2.5rem)] w-[calc(100%-5rem)] h-0.5 bg-border"
-                    aria-hidden="true"
-                  />
-                )}
-
-                <div className="relative w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4 shrink-0">
-                  <Icon className="h-7 w-7 text-primary" aria-hidden="true" />
-                  <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
-                    {index + 1}
-                  </span>
-                </div>
-
-                <h3 className="font-semibold text-foreground mb-2">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
-            );
-          })}
-        </div>
+        <ol className="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
+          {STEPS.map((step, index) => (
+            <li key={step.title} className="border-t-2 border-primary pt-6">
+              <span className="text-sm font-semibold tabular-nums text-primary">Passo {index + 1}</span>
+              <h3 className="mt-2 text-lg font-semibold text-foreground">{step.title}</h3>
+              <p className="mt-2 leading-relaxed text-muted-foreground">{step.description}</p>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );

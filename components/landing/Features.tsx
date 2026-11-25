@@ -12,76 +12,73 @@ import {
   Building2,
 } from "lucide-react";
 
+// Each title says what BCM does, each line one concrete detail. Every claim
+// must match the product: no feature that is hidden or not reliable.
 const FEATURES = [
   {
-    icon: FileText,
-    title: "Tutti i contratti in un archivio",
-    description:
-      "Trovi ogni contratto per cliente, numero o stato, e per ognuno vedi documenti, fatture e storico delle modifiche.",
-  },
-  {
     icon: Bell,
-    title: "Avvisi di scadenza e disdetta",
+    title: "Avvisa prima di scadenze e disdette",
     description:
-      "Ricevi un'email 30, 14, 7 e 1 giorno prima della scadenza o, per i contratti che si rinnovano da soli, prima dell'ultimo giorno per disdirli. Ogni lunedì arriva anche il riepilogo della settimana.",
+      "Un'email prima della scadenza o, per i contratti che si rinnovano da soli, prima dell'ultimo giorno per disdirli. Ogni lunedì il riepilogo della settimana.",
   },
   {
     icon: ListChecks,
-    title: "Cosa fare questa settimana",
+    title: "Mostra cosa fare questa settimana",
     description:
-      "Appena entri vedi cosa richiede attenzione: disdette da inviare, contratti in scadenza, fatture da abbinare, IBAN cambiati. Ogni voce ti porta dove intervenire.",
-  },
-  {
-    icon: BarChart2,
-    title: "Ricavi, costi e budget",
-    description:
-      "Vedi ricavi e costi per contratto e per area di business, confrontati con il budget dell'anno.",
+      "Appena entri vedi disdette da inviare, contratti in scadenza, fatture da abbinare e IBAN cambiati. Ogni voce porta dove intervenire.",
   },
   {
     icon: Receipt,
-    title: "Fatture e bonifici",
+    title: "Controlla le fatture dei fornitori",
     description:
-      "Carichi le fatture elettroniche FatturaPA: BCM le controlla, le abbina al contratto e ti avvisa se il fornitore chiede il pagamento su un IBAN diverso. Da lì prepari anche il bonifico SEPA.",
+      "Importa le fatture elettroniche FatturaPA, le abbina al contratto e segnala un IBAN diverso da quello registrato. Da lì prepari il bonifico SEPA.",
+  },
+  {
+    icon: FileText,
+    title: "Archivia ogni contratto con i suoi documenti",
+    description:
+      "Trovi un contratto per cliente, numero o stato, con i PDF, le fatture e lo storico delle modifiche.",
+  },
+  {
+    icon: BarChart2,
+    title: "Confronta costi e ricavi con il budget",
+    description:
+      "Per contratto e per area di business, rispetto al budget dell'anno.",
   },
   {
     icon: Building2,
-    title: "I tuoi dati restano tuoi",
+    title: "Tiene separati i dati di ogni azienda",
     description:
-      "Ogni azienda ha il suo spazio separato e nessun altro cliente può vedere i tuoi contratti. I server sono in Italia.",
+      "Nessun altro cliente può vedere i tuoi contratti. I server sono in Italia.",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="py-20 bg-muted/30">
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="text-center mb-14 space-y-3">
-          <h2 className="text-3xl font-bold text-foreground">
-            Cosa puoi fare con BCM
-          </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Pensato per chi in azienda segue acquisti, contratti e amministrazione.
-          </p>
-        </div>
+    <section id="features" className="scroll-mt-16 border-t border-border py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="grid gap-6 md:grid-cols-12 md:gap-12">
+          <div className="md:col-span-4">
+            <h2 className="text-balance text-3xl font-semibold tracking-[-0.025em] text-foreground md:text-4xl">
+              Cosa fa BCM
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              Per chi in azienda segue acquisti, contratti e amministrazione.
+            </p>
+          </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURES.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <div
-                key={feature.title}
-                className="rounded-xl border border-border bg-card p-6 space-y-3 hover:shadow-md transition-shadow"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
+          {/* A list, not a wall of cards: each item reads in one line of sight. */}
+          <ul className="grid gap-x-10 sm:grid-cols-2 md:col-span-8">
+            {FEATURES.map(({ icon: Icon, title, description }) => (
+              <li key={title} className="flex gap-4 border-t border-border py-6">
+                <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+                <div>
+                  <h3 className="font-semibold text-foreground">{title}</h3>
+                  <p className="mt-1.5 leading-relaxed text-muted-foreground">{description}</p>
                 </div>
-                <h3 className="font-semibold text-foreground">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            );
-          })}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

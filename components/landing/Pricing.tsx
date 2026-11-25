@@ -55,16 +55,16 @@ const PLANS = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="py-20 bg-muted/30">
-      <div className="max-w-4xl mx-auto px-4 md:px-8">
-        <div className="text-center mb-14 space-y-3">
-          <h2 className="text-3xl font-bold text-foreground">Piani</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
+    <section id="pricing" className="scroll-mt-16 border-t border-border py-20 md:py-28">
+      <div className="max-w-6xl mx-auto px-4 md:px-8">
+        <div className="mb-12 max-w-2xl">
+          <h2 className="text-balance text-3xl font-semibold tracking-[-0.025em] text-foreground md:text-4xl">Piani</h2>
+          <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             Puoi iniziare gratis. Il piano Pro è in definizione: scrivici se ti interessa.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 items-stretch">
+        <div className="grid md:grid-cols-2 gap-6 items-stretch max-w-4xl">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
@@ -75,8 +75,8 @@ export function Pricing() {
               }`}
             >
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{plan.tagline}</p>
-                <h3 className="font-semibold text-foreground text-lg mt-1">{plan.name}</h3>
+                <h3 className="font-semibold text-foreground text-lg">{plan.name}</h3>
+                <p className="text-sm text-muted-foreground">{plan.tagline}</p>
                 <p className="text-2xl font-bold text-foreground mt-2">{plan.price}</p>
                 <p className="text-sm text-muted-foreground mt-1">{plan.status}</p>
               </div>
@@ -97,7 +97,7 @@ export function Pricing() {
           ))}
         </div>
 
-        <p className="mt-8 text-center text-sm text-muted-foreground">
+        <p className="mt-8 text-sm text-muted-foreground">
           Hai esigenze particolari o gestisci più di 200 contratti?{" "}
           <a href={CUSTOM_NEEDS_HREF} className="font-medium text-primary underline-offset-4 hover:underline">
             Scrivici per parlarne

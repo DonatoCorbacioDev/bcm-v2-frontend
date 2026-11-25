@@ -9,7 +9,7 @@ import { Moon, Sun, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useDarkMode } from "@/hooks/useDarkMode";
-import Logo from "@/components/layout/Logo";
+import { LogoMark } from "@/components/layout/Logo";
 import { Button } from "@/components/ui/button";
 
 export function LandingNav() {
@@ -26,8 +26,13 @@ export function LandingNav() {
   return (
     <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-        <Link href="/" aria-label="Home BCM">
-          <Logo />
+        <Link href="/" aria-label="Home BCM" className="inline-flex items-center gap-2.5">
+          <LogoMark size={32} />
+          {/* The full name on three lines crowds a phone's bar: the short one there. */}
+          <span className="text-[15px] font-bold leading-tight tracking-tight text-foreground" aria-hidden="true">
+            <span className="sm:hidden">BCM</span>
+            <span className="hidden sm:inline">Business Contracts Manager</span>
+          </span>
         </Link>
 
         {/* Desktop nav */}
@@ -88,21 +93,21 @@ export function LandingNav() {
       {/* Mobile menu */}
       {menuOpen && (
         <nav
-          className="md:hidden border-t border-border bg-background px-4 py-4 flex flex-col gap-4"
+          className="md:hidden border-t border-border bg-background px-4 py-2 flex flex-col"
           aria-label="Navigazione mobile"
         >
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="py-3 text-base text-muted-foreground hover:text-foreground"
               onClick={() => setMenuOpen(false)}
             >
               {link.label}
             </a>
           ))}
           {!isAuthenticated && (
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground">
+            <Link href="/login" className="py-3 text-base text-muted-foreground hover:text-foreground">
               Accedi
             </Link>
           )}

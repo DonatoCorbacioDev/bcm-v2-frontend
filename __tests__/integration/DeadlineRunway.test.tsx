@@ -27,6 +27,14 @@ describe('DeadlineRunway', () => {
     expect(screen.queryByText('Troppo lontano')).not.toBeInTheDocument();
   });
 
+  it('makes each row a link to its contract, saying how far the day is', () => {
+    render(<DeadlineRunway items={items} windowDays={30} today={new Date(2026, 10, 25)} />);
+
+    const links = screen.getAllByRole('link');
+    expect(links.map((l) => l.getAttribute('href'))).toEqual(['/contracts/b', '/contracts/a']);
+    expect(links[0]).toHaveTextContent('tra 6 giorni');
+  });
+
   it('shows nothing when no deadline falls in the window', () => {
     const { container } = render(<DeadlineRunway items={[items[2], items[3]]} windowDays={30} today={new Date(2026, 10, 25)} />);
 

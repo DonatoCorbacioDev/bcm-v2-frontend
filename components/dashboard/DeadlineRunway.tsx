@@ -2,10 +2,17 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import Link from "next/link";
 import { dayWithArticle } from "@/lib/italianDate";
 import type { HomeAttentionItem } from "@/types";
 
 const DAY_MS = 86_400_000;
+
+// The calendar's chips: a tint with a solid edge, the words in the edge's colour.
+const KIND = {
+  notice: { what: "Disdetta entro", chip: "bg-[var(--status-red-bg)] border-[var(--status-red-fg)]", text: "text-[var(--status-red-fg)]" },
+  expiry: { what: "Scade", chip: "bg-[var(--status-amber-bg)] border-[var(--status-amber-fg)]", text: "text-[var(--status-amber-fg)]" },
+} as const;
 
 function parse(iso: string): Date {
   const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
@@ -25,10 +32,11 @@ interface DeadlineRunwayProps {
 
 /**
  * BCM's signature: the next days on one line, as on a contract's timeline.
- * Today on the left; for each deadline, the hatched amber of the days left
- * and a mark on the day itself, red for the last day to cancel (miss it and
- * the contract renews), amber for an end date. The same visual language as
- * the contract page and the landing, so it reads as BCM at a glance.
+ * Today on the left; for each deadline a bar of the days left, ending on the
+ * day itself with how far it is in words: red for the last day to cancel
+ * (miss it and the contract renews), amber for an end date. The same tinted
+ * chips as the calendar, so the colours are learnt once. Each row opens its
+ * contract.
  */
 export function DeadlineRunway({ items, windowDays, today }: DeadlineRunwayProps) {
   const rows = items
@@ -43,26 +51,26 @@ export function DeadlineRunway({ items, windowDays, today }: DeadlineRunwayProps
     <section aria-labelledby="runway-title" className="rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="runway-title" className="text-base font-semibold text-foreground">Le prossime scadenze</h2>
-        <p className="flex items-center gap-4 text-xs text-muted-foreground">
+        <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-3 w-0.5 rounded bg-[var(--status-red-fg)]" aria-hidden="true" />
-            ultimo giorno per disdire
+            <span className={`inline-block h-3.5 w-5 rounded-[3px] border-l-[3px] ${KIND.notice.chip}`} aria-hidden="true" />
+            Ultimo giorno per disdire
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-3 w-0.5 rounded bg-[var(--status-amber-fg)]" aria-hidden="true" />
-            scadenza
+            <span className={`inline-block h-3.5 w-5 rounded-[3px] border-l-[3px] ${KIND.expiry.chip}`} aria-hidden="true" />
+            Scadenza
           </span>
         </p>
       </div>
 
       {/* The axis: today, then a mark a week apart. */}
-      <div className="mt-4 hidden grid-cols-[13rem_minmax(0,1fr)] gap-4 sm:grid" aria-hidden="true">
+      <div className="mt-4 hidden grid-cols-[14rem_minmax(0,1fr)] gap-4 px-2 sm:grid" aria-hidden="true">
         <span />
-        <div className="relative h-4 text-[11px] text-muted-foreground">
+        <div className="relative h-5 text-xs text-muted-foreground">
           {ticks.map((d) => (
             <span
               key={d}
-              className={`absolute top-0 whitespace-nowrap ${d === 0 ? "font-medium text-foreground" : ""} ${d === windowDays ? "-translate-x-full" : d > 0 ? "-translate-x-1/2" : ""}`}
+              className={`absolute top-0 whitespace-nowrap ${d === 0 ? "font-semibold text-foreground" : ""} ${d === windowDays ? "-translate-x-full" : d > 0 ? "-translate-x-1/2" : ""}`}
               style={{ left: at(d) }}
             >
               {d === 0 ? "oggi" : today ? shortDay(new Date(today.getTime() + d * DAY_MS)) : `+${d} gg`}
@@ -71,42 +79,44 @@ export function DeadlineRunway({ items, windowDays, today }: DeadlineRunwayProps
         </div>
       </div>
 
-      <ul className="mt-2 space-y-3 sm:space-y-2">
+      <ul className="mt-1 space-y-1">
         {rows.map((item) => {
           const days = item.daysLeft ?? 0;
-          const notice = item.type === "NOTICE_DEADLINE";
+          const kind = item.type === "NOTICE_DEADLINE" ? KIND.notice : KIND.expiry;
           const name = item.projectName ?? item.counterpartyName ?? item.contractNumber;
           const when = days === 0 ? "oggi" : days === 1 ? "domani" : `tra ${days} giorni`;
-          const what = notice ? "Disdetta entro" : "Scade";
           const dateText = item.dueDate ? dayWithArticle(item.dueDate) : "";
+          // Near the far end the words go inside the bar, so they never overflow.
+          const inside = days / windowDays > 0.6;
           return (
-            <li key={`${item.type}-${item.contractId}`} className="grid gap-1.5 sm:grid-cols-[13rem_minmax(0,1fr)] sm:items-center sm:gap-4">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">{name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {what} {dateText}, {when}
-                </p>
-              </div>
-              <div className="relative h-7" aria-hidden="true">
-                <div className="absolute inset-x-0 top-3 h-1.5 rounded-full bg-muted" />
-                <div
-                  className="absolute left-0 top-3 h-1.5 rounded-l-full bg-[repeating-linear-gradient(135deg,var(--status-amber-fg)_0_5px,transparent_5px_10px)] opacity-70"
-                  style={{ width: at(days) }}
-                />
-                <div className="absolute left-0 top-0.5 h-6 w-0.5 rounded bg-foreground" />
-                <div
-                  className={`absolute top-0.5 h-6 w-0.5 rounded ${notice ? "bg-[var(--status-red-fg)]" : "bg-[var(--status-amber-fg)]"}`}
-                  style={{ left: at(days) }}
-                />
-                {item.dueDate && (
+            <li key={`${item.type}-${item.contractId}`}>
+              <Link
+                href={`/contracts/${item.contractId}`}
+                className="group grid gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:grid-cols-[14rem_minmax(0,1fr)] sm:items-center sm:gap-4"
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-foreground group-hover:underline underline-offset-2">{name}</span>
+                  <span className="block text-sm text-muted-foreground">
+                    {kind.what} {dateText}
+                    <span className="sr-only">, {when}</span>
+                  </span>
+                </span>
+                <span className="relative block h-8" aria-hidden="true">
+                  <span className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-muted" />
+                  <span className="absolute left-0 top-0 h-8 w-0.5 rounded bg-foreground/70" />
                   <span
-                    className={`absolute -top-0.5 whitespace-nowrap pl-1.5 text-[11px] font-medium ${notice ? "text-[var(--status-red-fg)]" : "text-[var(--status-amber-fg)]"} ${days / windowDays > 0.8 ? "-translate-x-full pr-1.5 pl-0" : ""}`}
+                    className={`absolute left-0 top-1 h-6 rounded-r-md border-r-[3px] ${kind.chip}`}
+                    style={{ width: `max(${at(days)}, 3px)` }}
+                  />
+                  <span
+                    className={`absolute top-1/2 -translate-y-1/2 whitespace-nowrap text-sm font-semibold ${kind.text} ${inside ? "-translate-x-full pr-2.5" : "pl-2"}`}
                     style={{ left: at(days) }}
                   >
-                    {shortDay(parse(item.dueDate))}
+                    {when}
+                    {item.dueDate && <span className="hidden font-normal sm:inline"> · {shortDay(parse(item.dueDate))}</span>}
                   </span>
-                )}
-              </div>
+                </span>
+              </Link>
             </li>
           );
         })}

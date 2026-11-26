@@ -16,7 +16,7 @@ const CONTACT_EMAIL = "donatocorbacio92@gmail.com";
 
 export default function PrivacyPage() {
   return (
-    <LegalPageShell title="Informativa sulla privacy" lastUpdated="28 ottobre 2026">
+    <LegalPageShell title="Informativa sulla privacy" lastUpdated="26 novembre 2026">
       <section>
         <h2>1. Titolare e responsabile del trattamento</h2>
         <p>
@@ -42,6 +42,11 @@ export default function PrivacyPage() {
           <li>Contenuto dei documenti contrattuali caricati — può includere qualunque dato personale presente nel contratto stesso</li>
           <li>Log applicativi di sicurezza (azione, tipo di operazione, utente, organizzazione — mai il contenuto dei documenti)</li>
           <li>
+            Registro tecnico delle richieste al sito: indirizzo IP, data e ora, pagina richiesta
+            (senza i codici segreti che alcuni link contengono), esito e durata. Non contiene
+            cookie né il contenuto di ciò che viene inviato o ricevuto
+          </li>
+          <li>
             Prova dell&apos;accettazione dei Termini di servizio alla registrazione: versione accettata,
             data e ora, email a cui è stato inviato il codice di conferma, indirizzo IP e browser
             utilizzati
@@ -60,7 +65,7 @@ export default function PrivacyPage() {
         <ul>
           <li>Dati di dipendenti/responsabili e credenziali: esecuzione del rapporto con l&apos;organizzazione cliente (art. 6.1.b GDPR)</li>
           <li>Documenti contrattuali: esecuzione del contratto tra l&apos;organizzazione cliente e la propria controparte — BCM è lo strumento di gestione, non parte del contratto (art. 6.1.b GDPR)</li>
-          <li>Log di sicurezza: legittimo interesse alla sicurezza e alla tracciabilità (art. 6.1.f GDPR)</li>
+          <li>Log di sicurezza e registro tecnico delle richieste: legittimo interesse alla sicurezza del servizio, a riconoscere e ricostruire gli attacchi (art. 6.1.f GDPR)</li>
           <li>Prova dell&apos;accettazione dei Termini: legittimo interesse a poter dimostrare il contratto concluso e a difendersi in caso di contestazione (art. 6.1.f GDPR)</li>
         </ul>
       </section>
@@ -115,6 +120,7 @@ export default function PrivacyPage() {
           <li>I documenti restano archiviati finché non vengono eliminati esplicitamente dall&apos;organizzazione titolare.</li>
           <li>Utenti e responsabili possono essere rimossi su richiesta dell&apos;organizzazione titolare, salvo obblighi di conservazione fiscale o contrattuale su dati storici collegati.</li>
           <li>I refresh token di accesso hanno una durata limitata e vengono ruotati automaticamente per motivi di sicurezza.</li>
+          <li>Il registro tecnico delle richieste al sito viene cancellato automaticamente dopo 14 giorni.</li>
           <li>
             Alla chiusura dell&apos;account dell&apos;organizzazione i dati restano esportabili per 30
             giorni, poi vengono cancellati definitivamente. Le copie di backup sono eliminate

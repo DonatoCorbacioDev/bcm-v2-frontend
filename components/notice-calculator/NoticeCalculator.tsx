@@ -183,7 +183,7 @@ function Outcome({ result }: { readonly result: ReturnType<typeof computeNoticeD
           BCM fa questo calcolo per tutti i tuoi contratti e ti avvisa 30, 14, 7 e 1 giorno prima.
         </p>
         <Button asChild variant="outline" className="mt-3">
-          <Link href="/login?demo=1">Prova la demo</Link>
+          <Link href="/demo">Prova la demo</Link>
         </Button>
       </div>
     </div>

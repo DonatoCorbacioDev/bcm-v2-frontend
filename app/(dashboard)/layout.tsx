@@ -12,6 +12,7 @@ import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileSidebar from "@/components/layout/MobileSidebar";
 import { DeletionScheduledBanner } from "@/components/organization/DeletionScheduledBanner";
+import { DemoBanner } from "@/components/demo/DemoBanner";
 import { ReauthDialog } from "@/components/auth/ReauthDialog";
 import { IdleSessionGuard } from "@/components/auth/IdleSessionGuard";
 
@@ -109,6 +110,7 @@ export default function DashboardLayout({
 
       {/* Content area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <DemoBanner />
         <Header
           collapsed={collapsed}
           onCollapseToggle={() => setCollapsed((c) => !c)}

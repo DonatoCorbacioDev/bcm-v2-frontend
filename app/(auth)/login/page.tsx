@@ -15,10 +15,8 @@ import { LogoMark } from "@/components/layout/Logo";
 import { TwoFactorEnrollment } from "@/components/auth/TwoFactorEnrollment";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { ArrowLeft, ArrowRight, Lock, Moon, Sun } from "lucide-react";
+import { DEMO_CREDENTIALS } from "@/lib/demo";
 
-// Public on purpose: printed on this page and on the landing (seeded nightly
-// by bcm-v2-docker ops/demo/demo-reset.sh, MANAGER role, no 2FA).
-const DEMO_CREDENTIALS = { username: "demo", password: "BcmDemo#2026" } as const;
 
 function LoginContent() {
   const router = useRouter();

@@ -142,7 +142,7 @@ export function Hero() {
                     "Accedi" is already in the top bar. */}
                 <div className="flex flex-wrap gap-3">
                   <Button asChild size="lg">
-                    <Link href="/login?demo=1">Prova la demo</Link>
+                    <Link href="/demo">Prova la demo</Link>
                   </Button>
                   <Button asChild variant="outline" size="lg">
                     <Link href="/register-org">Inizia gratis</Link>

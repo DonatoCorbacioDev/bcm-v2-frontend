@@ -30,7 +30,7 @@ describe('NoticeCalculator', () => {
     expect(screen.getByText(/15 dicembre 2026/)).toBeInTheDocument();
     expect(screen.getByText('tra 20 giorni')).toBeInTheDocument();
     expect(screen.getByText('arrivare')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Prova la demo' })).toHaveAttribute('href', '/login?demo=1');
+    expect(screen.getByRole('link', { name: 'Prova la demo' })).toHaveAttribute('href', '/demo');
   });
 
   it('warns when the last day is a Saturday or a Sunday', () => {

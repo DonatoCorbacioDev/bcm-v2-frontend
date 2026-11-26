@@ -23,7 +23,7 @@ const SHARE_IMAGE = {
   url: "/og-image.png",
   width: 1200,
   height: 627,
-  alt: "Dashboard di BCM con contratti attivi, in scadenza e andamento mensile",
+  alt: "La Home di BCM: le prossime scadenze su una linea, con gli ultimi giorni per disdire, e le cose da fare",
 };
 
 // Link previews for the public homepage only; the URLs are made absolute by

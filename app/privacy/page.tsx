@@ -47,6 +47,12 @@ export default function PrivacyPage() {
             cookie né il contenuto di ciò che viene inviato o ricevuto
           </li>
           <li>
+            Segnalazioni di attacchi: quando un indirizzo IP si comporta da attaccante (per esempio
+            molti tentativi di accesso falliti o la ricerca di file riservati), l&apos;indirizzo, il
+            tipo di attacco e l&apos;ora. Gli indirizzi di chi usa il sito normalmente non vengono
+            segnalati
+          </li>
+          <li>
             Prova dell&apos;accettazione dei Termini di servizio alla registrazione: versione accettata,
             data e ora, email a cui è stato inviato il codice di conferma, indirizzo IP e browser
             utilizzati
@@ -65,7 +71,7 @@ export default function PrivacyPage() {
         <ul>
           <li>Dati di dipendenti/responsabili e credenziali: esecuzione del rapporto con l&apos;organizzazione cliente (art. 6.1.b GDPR)</li>
           <li>Documenti contrattuali: esecuzione del contratto tra l&apos;organizzazione cliente e la propria controparte — BCM è lo strumento di gestione, non parte del contratto (art. 6.1.b GDPR)</li>
-          <li>Log di sicurezza e registro tecnico delle richieste: legittimo interesse alla sicurezza del servizio, a riconoscere e ricostruire gli attacchi (art. 6.1.f GDPR)</li>
+          <li>Log di sicurezza, registro tecnico delle richieste e segnalazioni di attacchi: legittimo interesse alla sicurezza del servizio, a riconoscere, bloccare e ricostruire gli attacchi (art. 6.1.f GDPR)</li>
           <li>Prova dell&apos;accettazione dei Termini: legittimo interesse a poter dimostrare il contratto concluso e a difendersi in caso di contestazione (art. 6.1.f GDPR)</li>
         </ul>
       </section>
@@ -95,6 +101,16 @@ export default function PrivacyPage() {
             dal GDPR (Data Privacy Framework e clausole contrattuali standard).
           </li>
         </ul>
+        <p className="mt-3">
+          Per la sicurezza del sito, le sole segnalazioni di attacchi (indirizzo IP
+          dell&apos;attaccante, tipo di attacco, ora) sono condivise con <strong>CrowdSec</strong>{" "}
+          (CrowdSec SAS, Francia, UE), una rete di sicurezza che in cambio fornisce l&apos;elenco
+          degli indirizzi noti per attacchi, così da bloccarli prima che arrivino. CrowdSec le
+          tratta come titolare autonomo secondo la propria informativa: conserva un indirizzo per
+          al massimo 3 mesi, poi lo rende progressivamente non identificabile, e può usare
+          fornitori fuori dall&apos;UE con le clausole contrattuali standard della Commissione
+          europea. Non riceve mai dati dei clienti, degli utenti o dei documenti.
+        </p>
         <p className="mt-3">Elaborazioni eseguite direttamente sull&apos;infrastruttura di BCM, senza terzi:</p>
         <ul>
           <li>
@@ -120,7 +136,7 @@ export default function PrivacyPage() {
           <li>I documenti restano archiviati finché non vengono eliminati esplicitamente dall&apos;organizzazione titolare.</li>
           <li>Utenti e responsabili possono essere rimossi su richiesta dell&apos;organizzazione titolare, salvo obblighi di conservazione fiscale o contrattuale su dati storici collegati.</li>
           <li>I refresh token di accesso hanno una durata limitata e vengono ruotati automaticamente per motivi di sicurezza.</li>
-          <li>Il registro tecnico delle richieste al sito viene cancellato automaticamente dopo 14 giorni.</li>
+          <li>Il registro tecnico delle richieste al sito e le segnalazioni di attacchi conservate sul server vengono cancellati automaticamente dopo 14 giorni.</li>
           <li>
             Alla chiusura dell&apos;account dell&apos;organizzazione i dati restano esportabili per 30
             giorni, poi vengono cancellati definitivamente. Le copie di backup sono eliminate

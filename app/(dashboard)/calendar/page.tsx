@@ -8,7 +8,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useContracts } from "@/hooks/useContracts";
+import { useQuery } from "@tanstack/react-query";
+import { contractsService } from "@/services/contracts.service";
 import { SubscribeCalendar } from "@/components/calendar/SubscribeCalendar";
 import { contractCalendarEntries, isoDay, monthGrid, type CalendarEntry, type CalendarEntryKind } from "@/lib/contractCalendar";
 
@@ -47,7 +48,14 @@ function EntryLink({ entry, compact = false }: { readonly entry: CalendarEntry; 
 export default function CalendarPage() {
   const today = new Date();
   const [cursor, setCursor] = useState(() => ({ year: today.getFullYear(), month: today.getMonth() }));
-  const { data: contracts, isLoading, isError } = useContracts();
+  // The search, not the full list: GET /contracts is for admins only, while
+  // the search serves both roles, each seeing only the contracts it may (a
+  // manager its own). Only active contracts have dates to show; 1000 is the
+  // backend's page cap, well above a plan's contract limit.
+  const { data: contracts, isLoading, isError } = useQuery({
+    queryKey: ["contracts", "calendar", "active"],
+    queryFn: async () => (await contractsService.searchPaged({ page: 0, size: 1000, status: "ACTIVE" })).content,
+  });
 
   const entries = contractCalendarEntries(contracts ?? []);
   const byDay = new Map<string, CalendarEntry[]>();

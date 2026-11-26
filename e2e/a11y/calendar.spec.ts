@@ -22,7 +22,9 @@ test.describe("Accessibility: calendar", () => {
   test.beforeEach(async ({ page }) => {
     await mockAuthenticatedSession(page);
     await mockApi(page, {
-      "**/api/v1/contracts": (route) => route.fulfill({ json: contracts }),
+      // Only the search answers: like production, where GET /contracts is admin-only.
+      "**/api/v1/contracts": (route) => route.fulfill({ status: 403, json: {} }),
+      "**/api/v1/contracts/search*": (route) => route.fulfill({ json: { content: contracts, totalElements: contracts.length, totalPages: 1, number: 0, size: 1000 } }),
     });
   });
 

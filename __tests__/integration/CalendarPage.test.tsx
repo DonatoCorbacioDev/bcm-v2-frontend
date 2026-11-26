@@ -10,8 +10,9 @@ const contracts = [
   { id: 'b', counterpartyId: 'x', contractNumber: 'NRT-104', projectName: 'Audit di Conformità', status: 'ACTIVE', endDate: '2026-12-07' },
 ] as Contract[];
 
-jest.mock('@/hooks/useContracts', () => ({
-  useContracts: () => ({ data: contracts, isLoading: false, isError: false }),
+const searchPaged = jest.fn();
+jest.mock('@/services/contracts.service', () => ({
+  contractsService: { searchPaged: (...args: unknown[]) => searchPaged(...args) },
 }));
 jest.mock('@/services/calendarFeed.service', () => ({
   calendarFeedService: { getUrl: jest.fn().mockResolvedValue('https://bcm.example/api/v1/calendar/fake-feed-token.ics') },
@@ -25,6 +26,7 @@ function renderPage() {
 /** The month's deadlines, and the buttons that put them in the user's own calendar. */
 describe('CalendarPage', () => {
   beforeEach(() => {
+    searchPaged.mockResolvedValue({ content: contracts, totalElements: contracts.length, totalPages: 1, number: 0, size: 1000 });
     jest.useFakeTimers({ now: new Date(2026, 10, 25, 10), doNotFake: ['queueMicrotask', 'setImmediate', 'setTimeout', 'setInterval'] });
   });
   afterEach(() => jest.useRealTimers());
@@ -34,6 +36,9 @@ describe('CalendarPage', () => {
     renderPage();
 
     expect(screen.getByText(/novembre 2026/i)).toBeInTheDocument();
+    // The search both roles may use (GET /contracts is admin-only), active contracts only.
+    expect(searchPaged).toHaveBeenCalledWith({ page: 0, size: 1000, status: 'ACTIVE' });
+    await screen.findAllByRole('link', { name: /NRT-123/ });
     await user.click(screen.getByRole('button', { name: 'Mese successivo' }));
     expect(screen.getByText(/dicembre 2026/i)).toBeInTheDocument();
 

@@ -13,13 +13,13 @@ import { contractsService } from "@/services/contracts.service";
 import { SubscribeCalendar } from "@/components/calendar/SubscribeCalendar";
 import { contractCalendarEntries, isoDay, monthGrid, type CalendarEntry, type CalendarEntryKind } from "@/lib/contractCalendar";
 
-// A tinted chip with a solid edge: the tint tells the kinds apart at a glance,
-// the edge keeps them apart where tints are hard to see; the label (visible on
-// phones, read out everywhere) means colour is never the only cue.
-const KIND: Record<CalendarEntryKind, { label: string; chip: string; text: string }> = {
-  notice: { label: "Ultimo giorno per disdire", chip: "bg-[var(--status-red-bg)] border-[var(--status-red-fg)]", text: "text-[var(--status-red-fg)]" },
-  expiry: { label: "Scadenza", chip: "bg-[var(--status-amber-bg)] border-[var(--status-amber-fg)]", text: "text-[var(--status-amber-fg)]" },
-  renewal: { label: "Si rinnova", chip: "bg-[var(--status-slate-bg)] border-[var(--status-slate-fg)]", text: "text-[var(--status-slate-fg)]" },
+// One solid dot per kind, the same as the Home's runway and this page's
+// legend, so the colours are learnt once; the label (visible on phones, read
+// out everywhere) means colour is never the only cue.
+const KIND: Record<CalendarEntryKind, { label: string; mark: string; text: string }> = {
+  notice: { label: "Ultimo giorno per disdire", mark: "bg-[var(--status-red-mark)]", text: "text-[var(--status-red-fg)]" },
+  expiry: { label: "Scadenza", mark: "bg-[var(--status-amber-mark)]", text: "text-[var(--status-amber-fg)]" },
+  renewal: { label: "Si rinnova", mark: "bg-[var(--status-slate-fg)]", text: "text-[var(--status-slate-fg)]" },
 };
 
 const WEEKDAYS = ["lun", "mar", "mer", "gio", "ven", "sab", "dom"];
@@ -29,9 +29,10 @@ function EntryLink({ entry, compact = false }: { readonly entry: CalendarEntry; 
   return (
     <Link
       href={`/contracts/${entry.contractId}`}
-      className={`group flex rounded-sm border-l-[3px] px-1.5 py-0.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${kind.chip}`}
+      className="group flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-0.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       title={`${kind.label}: ${entry.contractNumber} · ${entry.name}`}
     >
+      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${kind.mark}`} aria-hidden="true" />
       <span className={`min-w-0 ${compact ? "truncate text-xs" : "text-sm"} text-foreground group-hover:underline underline-offset-2`}>
         <span className="sr-only">{kind.label}: </span>
         {entry.contractNumber} · {entry.name}
@@ -81,7 +82,7 @@ export default function CalendarPage() {
           <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             {(Object.keys(KIND) as CalendarEntryKind[]).map((k) => (
               <span key={k} className="inline-flex items-center gap-1.5">
-                <span className={`inline-block h-3.5 w-5 rounded-[3px] border-l-[3px] ${KIND[k].chip}`} aria-hidden="true" />
+                <span className={`inline-block h-3 w-3 rounded-full ${KIND[k].mark}`} aria-hidden="true" />
                 {KIND[k].label}
               </span>
             ))}
@@ -102,6 +103,24 @@ export default function CalendarPage() {
       </div>
 
       {isError && <p className="text-sm text-[var(--status-red-fg)]">Impossibile caricare i contratti: riprova tra qualche istante.</p>}
+
+      {/* An empty month says so on every screen, and an organization with no
+          dated contract yet is told where they come from. */}
+      {!isLoading && !isError && monthEntries.length === 0 && (
+        <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+          {entries.length === 0 ? (
+            <>
+              Non ci sono ancora contratti attivi con una data: le scadenze compaiono qui quando{" "}
+              <Link href="/contracts" className="font-medium text-primary underline-offset-4 hover:underline">
+                aggiungi un contratto
+              </Link>
+              .
+            </>
+          ) : (
+            <>Nessuna scadenza a {monthLabel}.</>
+          )}
+        </p>
+      )}
 
       {/* Wide screens: the month as a grid. */}
       <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block" aria-busy={isLoading}>
@@ -134,9 +153,7 @@ export default function CalendarPage() {
 
       {/* Phones: the month's days with something on them. */}
       <div className="space-y-3 md:hidden">
-        {monthEntries.length === 0 ? (
-          <p className="rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Nessuna scadenza in questo mese.</p>
-        ) : (
+        {monthEntries.length === 0 ? null : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {monthEntries.map((e) => (
               <li key={`${e.contractId}-${e.kind}`} className="flex gap-3 p-3">

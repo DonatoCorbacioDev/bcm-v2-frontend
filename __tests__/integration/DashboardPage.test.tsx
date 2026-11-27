@@ -89,9 +89,10 @@ describe('Home', () => {
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Da fare entro 30 giorni').closest('div')!.parentElement).toHaveTextContent('1');
-    expect(screen.getByText('Fatture da abbinare').closest('div')!.parentElement).toHaveTextContent('1');
-    expect(screen.getByText('Avvisi IBAN').closest('div')!.parentElement).toHaveTextContent('0');
+    // The counters strip: each number in the same link as its label.
+    expect(screen.getByText('da fare entro 30 giorni').closest('a')).toHaveTextContent('1');
+    expect(screen.getByText('fattura da abbinare').closest('a')).toHaveTextContent('1');
+    expect(screen.getByText('IBAN da verificare').closest('a')).toHaveTextContent('0');
   });
 
   it('reassures when there is nothing to do', () => {

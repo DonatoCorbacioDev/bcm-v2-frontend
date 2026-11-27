@@ -4,135 +4,28 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import {
-  CHART_GRID_OPACITY,
-  CHART_GRID_STROKE,
-  CHART_TICK_STYLE,
-  CHART_TOOLTIP_CONTENT_STYLE,
-  CHART_TOOLTIP_ITEM_STYLE,
-  CHART_TOOLTIP_LABEL_STYLE,
-} from "@/lib/chartTheme";
-import { useEffect, useRef, useState } from "react";
+import { CostsVsBudgetChart } from "@/components/charts/CostsVsBudgetChart";
 import { useToday } from "@/components/landing/useToday";
 
-// The demo organization's monthly supplier costs, in thousands of euro, for
-// the eight months up to this one, against a budget of 4.5 a month.
-const COSTS = [3.9, 4.2, 4.6, 4.1, 5.1, 4.3, 3.7, 4.4];
-const BUDGET = 4.5;
-const OVER = "var(--status-amber-mark)";
-// The words over the bars, in the readable shade of the same colour.
-const OVER_TEXT = "var(--status-amber-fg)";
-const WITHIN = "var(--chart-1)";
+// The demo organization's monthly supplier costs, in euro, for the eight
+// months up to this one, against a budget of 4,500 a month.
+const COSTS = [3900, 4200, 4600, 4100, 5100, 4300, 3700, 4400];
+const BUDGET = 4500;
 
-const euro = (k: number) => `${k.toLocaleString("it-IT", { minimumFractionDigits: 1 })}k €`;
-/** How much a month went over, in whole euro: "+600 €". */
-const overBy = (k: number) => `+${Math.round((k - BUDGET) * 1000).toLocaleString("it-IT")} €`;
-
-/**
- * One series, so no legend box: the heading names it, the dashed line is the
- * budget (labelled on the chart), and the months over it are amber with how
- * much they went over written above the bar, so the number carries the
- * message and the colour only backs it up. Amber, not red: in BCM red means
- * a date to act by; a month over budget is a warning.
- */
+/** The Home's chart with the demo's numbers; the months follow today. */
 export function BudgetChart() {
   const today = useToday();
-  const data = today
-    ? COSTS.map((cost, i) => {
-        const month = new Date(today.getFullYear(), today.getMonth() - (COSTS.length - 1 - i), 1);
-        return { month: month.toLocaleDateString("it-IT", { month: "short" }), cost };
-      })
-    : null;
-  const over = data?.filter((d) => d.cost > BUDGET).map((d) => d.month) ?? [];
+  if (!today) return <div className="h-44 rounded-md bg-muted/50 md:h-64" />;
 
-  // The bars rise once, when the chart scrolls into view; drawn still under
-  // reduced motion, or when the browser cannot tell what is in view.
-  const box = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<"waiting" | "still" | "rising">(() =>
-    typeof IntersectionObserver === "undefined" ? "still" : "waiting",
-  );
-  useEffect(() => {
-    const el = box.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      observer.disconnect();
-      setView(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "still" : "rising");
-    }, { threshold: 0.5 });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
+  const data = COSTS.map((cost, i) => {
+    const month = new Date(today.getFullYear(), today.getMonth() - (COSTS.length - 1 - i), 1);
+    return { label: month.toLocaleDateString("it-IT", { month: "short" }), cost };
+  });
   return (
-    <div>
-      <div ref={box} className="h-44 md:h-64" role="img" aria-label={`Costi mensili dei fornitori rispetto al budget di ${euro(BUDGET)}: due mesi sopra il budget.`}>
-        {data && view !== "waiting" ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 22, right: 4, left: -8, bottom: 0 }} barCategoryGap="38%">
-              <CartesianGrid horizontal vertical={false} stroke={CHART_GRID_STROKE} strokeOpacity={CHART_GRID_OPACITY} />
-              <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
-              <YAxis
-                domain={[0, 6]}
-                ticks={[0, 2, 4, 6]}
-                tickFormatter={(k: number) => (k === 0 ? "0" : `${k}k €`)}
-                tick={CHART_TICK_STYLE}
-                axisLine={false}
-                tickLine={false}
-                width={52}
-              />
-              <Tooltip
-                cursor={{ fill: "var(--muted)", opacity: 0.5 }}
-                formatter={(value) => {
-                  const v = value as number;
-                  return [`${euro(v)}${v > BUDGET ? `, ${overBy(v)} sopra il budget` : ""}`, "Costi"];
-                }}
-                contentStyle={CHART_TOOLTIP_CONTENT_STYLE}
-                labelStyle={CHART_TOOLTIP_LABEL_STYLE}
-                itemStyle={CHART_TOOLTIP_ITEM_STYLE}
-              />
-              <ReferenceLine
-                y={BUDGET}
-                stroke="var(--foreground)"
-                strokeOpacity={0.55}
-                strokeDasharray="5 4"
-                label={{ value: "Budget", position: "insideTopLeft", fill: "var(--muted-foreground)", fontSize: 12, dy: -16 }}
-              />
-              <Bar dataKey="cost" radius={[4, 4, 0, 0]} isAnimationActive={view === "rising"} animationDuration={700}>
-                {data.map((d) => (
-                  // The months within budget stay quiet, so the two over it stand out.
-                  <Cell key={d.month} fill={d.cost > BUDGET ? OVER : WITHIN} fillOpacity={d.cost > BUDGET ? 1 : 0.4} />
-                ))}
-                <LabelList
-                  dataKey="cost"
-                  // Drawn by hand: the default label wraps at the bar's width ("+600" / "€").
-                  content={({ x, y, width, value }) => {
-                    const v = Number(value);
-                    if (!(v > BUDGET)) return null;
-                    return (
-                      <text x={Number(x) + Number(width) / 2} y={Number(y) - 6} textAnchor="middle" fill={OVER_TEXT} fontSize={12} fontWeight={600}>
-                        {overBy(v)}
-                      </text>
-                    );
-                  }}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-full rounded-md bg-muted/50" />
-        )}
-      </div>
-      <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span className="inline-flex items-center gap-2">
-          <span className="inline-block h-0 w-5 border-t-2 border-dashed border-foreground/60" aria-hidden="true" />
-          Budget {euro(BUDGET)} al mese
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <span className="inline-block h-3 w-3 rounded-sm" style={{ background: OVER }} aria-hidden="true" />
-          Sopra il budget{over.length > 0 ? `: ${over.join(", ")}` : ""}
-        </span>
-      </p>
-    </div>
+    <CostsVsBudgetChart
+      data={data}
+      budget={BUDGET}
+      ariaLabel="Costi mensili dei fornitori rispetto al budget di 4.500 € al mese: due mesi sopra il budget."
+    />
   );
 }

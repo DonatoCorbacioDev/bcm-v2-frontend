@@ -4,8 +4,8 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import UserTable from "@/components/users/UserTable";
@@ -20,10 +20,14 @@ import {
 } from "@/components/ui/dialog";
 import type { User } from "@/types";
 
-export default function UsersPage() {
+function UsersPageContent() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const isAdmin = user?.role === "ADMIN";
+  // "Invita" in the Home's first steps links here with ?invite=1: the invite
+  // form opens straight away; closing it drops the parameter.
+  const searchParams = useSearchParams();
+  const inviteFromLink = searchParams.get("invite") === "1";
 
   const [formDialog, setFormDialog] = useState<{
     open: boolean;
@@ -48,6 +52,11 @@ export default function UsersPage() {
 
   const handleCloseForm = () => {
     setFormDialog({ open: false, user: null });
+  };
+
+  const closeInvite = () => {
+    setInviteOpen(false);
+    if (inviteFromLink) router.replace("/users");
   };
 
   return (
@@ -84,14 +93,22 @@ export default function UsersPage() {
       </Dialog>
 
       {/* Invite User Dialog */}
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+      <Dialog open={inviteOpen || inviteFromLink} onOpenChange={(open) => (open ? setInviteOpen(true) : closeInvite())}>
         <DialogContent className="max-w-md" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>Invita utente</DialogTitle>
           </DialogHeader>
-          <InviteUserForm onClose={() => setInviteOpen(false)} />
+          <InviteUserForm onClose={closeInvite} />
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function UsersPage() {
+  return (
+    <Suspense>
+      <UsersPageContent />
+    </Suspense>
   );
 }

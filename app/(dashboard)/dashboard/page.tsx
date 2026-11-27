@@ -12,9 +12,9 @@ import { useAuthStore } from "@/store/authStore";
 import { businessAreasService } from "@/services/businessAreas.service";
 import { managersService } from "@/services/managers.service";
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
-import { CalendarClock, FileText, Landmark } from "lucide-react";
-import KPICard from "@/components/dashboard/KPICard";
-import KPICardSkeleton from "@/components/dashboard/KPICardSkeleton";
+import { FirstSteps } from "@/components/dashboard/FirstSteps";
+import { HomeCounters } from "@/components/dashboard/HomeCounters";
+import { HomeCostsCard } from "@/components/dashboard/HomeCostsCard";
 import { HomeAttentionList } from "@/components/dashboard/HomeAttentionList";
 import { DeadlineRunway } from "@/components/dashboard/DeadlineRunway";
 import { SupplierInvoicesSummary } from "@/components/dashboard/SupplierInvoicesSummary";
@@ -79,11 +79,7 @@ export default function DashboardPage() {
   if (isLoading || isSetupChecking) {
     body = (
       <>
-        <div className="grid grid-cols-3 gap-3 sm:gap-6">
-          {[1, 2, 3].map((i) => (
-            <KPICardSkeleton key={i} />
-          ))}
-        </div>
+        <div className="h-16 rounded-xl border border-border bg-card animate-pulse" aria-hidden="true" />
         <div className="h-48 rounded-lg border border-border bg-card animate-pulse" aria-hidden="true" />
       </>
     );
@@ -95,28 +91,21 @@ export default function DashboardPage() {
       </div>
     );
   } else {
+    // A new organization opens on its first steps (administrators only); the
+    // counters come once there is something to count.
+    const isEmpty = attention.items.length === 0 && attention.invoicesToMatchCount === 0;
     body = (
       <>
-        <div className="grid grid-cols-3 gap-3 sm:gap-6">
-          <KPICard
-            title={`Da fare entro ${windowDays} giorni`}
-            value={attention.dueSoonCount}
-            icon={<CalendarClock className="h-6 w-6" aria-hidden="true" />}
-            variant={attention.dueSoonCount > 0 ? "warning" : "default"}
+        {isAdmin && user?.id && <FirstSteps userId={String(user.id)} name={name ?? ""} />}
+
+        {!isEmpty && (
+          <HomeCounters
+            windowDays={windowDays}
+            dueSoon={attention.dueSoonCount}
+            invoicesToMatch={attention.invoicesToMatchCount}
+            ibanAlerts={attention.ibanAlertsCount}
           />
-          <KPICard
-            title="Fatture da abbinare"
-            value={attention.invoicesToMatchCount}
-            icon={<FileText className="h-6 w-6" aria-hidden="true" />}
-            variant="default"
-          />
-          <KPICard
-            title="Avvisi IBAN"
-            value={attention.ibanAlertsCount}
-            icon={<Landmark className="h-6 w-6" aria-hidden="true" />}
-            variant={attention.ibanAlertsCount > 0 ? "danger" : "default"}
-          />
-        </div>
+        )}
 
         <DeadlineRunway items={attention.items} windowDays={windowDays} today={new Date()} />
 
@@ -126,6 +115,8 @@ export default function DashboardPage() {
         </section>
 
         <SupplierInvoicesSummary invoicesToMatch={attention.invoicesToMatchCount} />
+
+        {isAdmin && <HomeCostsCard />}
       </>
     );
   }

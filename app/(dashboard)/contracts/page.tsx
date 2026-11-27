@@ -126,6 +126,9 @@ function ContractsPageContent() {
   const router = useRouter();
   const openedFromLink = useRef(false);
   const wantsNewContract = searchParams.get("new") === "1";
+  // "Importa da Excel" in the Home's first steps: the import dialog opens
+  // straight away; closing it drops the parameter.
+  const importFromLink = isAdmin && searchParams.get("import") === "1";
   const prerequisitesLoaded =
     businessAreasQuery.isSuccess && managersQuery.isSuccess && counterpartiesQuery.isSuccess;
   useEffect(() => {
@@ -227,7 +230,13 @@ function ContractsPageContent() {
       <ContractTable onEditClick={handleEditClick} initialSearchQuery={initialSearchQuery} />
 
       {isAdmin && (
-        <ContractImportDialog open={importDialogOpen} onOpenChange={setImportDialogOpen} />
+        <ContractImportDialog
+          open={importDialogOpen || importFromLink}
+          onOpenChange={(open) => {
+            setImportDialogOpen(open);
+            if (!open && importFromLink) router.replace("/contracts");
+          }}
+        />
       )}
 
       <Dialog open={formDialog.open} onOpenChange={(open) => !open && handleCloseForm()}>

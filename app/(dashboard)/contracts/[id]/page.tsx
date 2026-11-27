@@ -13,10 +13,16 @@ import { useAuthStore } from "@/store/authStore";
 import { contractsService } from "@/services/contracts.service";
 import { contractWorkflowService } from "@/services/contractWorkflow.service";
 import { contractsQueryKeys } from "@/hooks/queries/contracts.queryKeys";
-import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText, Receipt, Send, CheckCircle2, XCircle } from "lucide-react";
+import Link from "next/link";
+import { Loader2, ArrowLeft, Pencil, Trash2, DollarSign, History, FileText, Receipt, Send, CheckCircle2, XCircle, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -64,6 +70,12 @@ const WORKFLOW_ACTION_LABELS: Record<string, string> = {
 type Tab = "documents" | "financials" | "history" | "invoices";
 const TABS: ReadonlySet<string> = new Set<Tab>(["documents", "financials", "history", "invoices"]);
 
+/** "17 marzo 2026", from the API's ISO date, without a time-zone shift. */
+function longDay(iso: string): string {
+  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
+}
+
 function renewalLabel(months: number | null | undefined): string {
   if (!months) return "Tacito, durata non indicata";
   const unit = months === 1 ? "mese" : "mesi";
@@ -84,7 +96,7 @@ export default function ContractDetailPage() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Tab>(() => {
     const requested = searchParams.get("tab");
-    return requested && TABS.has(requested) ? (requested as Tab) : "documents";
+    return requested && TABS.has(requested) ? (requested as Tab) : "invoices";
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ibanCheckInvoice, setIbanCheckInvoice] = useState<ElectronicInvoice | null>(null);
@@ -213,6 +225,16 @@ export default function ContractDetailPage() {
     enabled: !!contractId,
   });
 
+  // Same query as the documents tab (shared cache), for the count on its tab.
+  const { data: documents } = useQuery<{ id: string }[]>({
+    queryKey: ["documents", contractId],
+    queryFn: async () => {
+      const res = await api.get(`/contracts/${contractId}/documents`);
+      return res.data;
+    },
+    enabled: !!contractId,
+  });
+
   const { data: contractHistory, isLoading: isLoadingHistory } = useQuery<ContractHistory[]>({
     queryKey: ["contract-history", "by-contract", contractId],
     queryFn: async () => {
@@ -254,14 +276,14 @@ export default function ContractDetailPage() {
     setEditDialogOpen(true);
   };
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    // Invoices next to the documents: received invoices are what the contract
-    // is checked against. "Importi previsti" says what those values are (what
-    // the contract expects), which "Valori finanziari" left open.
-    { id: "documents", label: "Documenti", icon: <FileText className="h-4 w-4" /> },
-    { id: "invoices", label: "Fatture", icon: <Receipt className="h-4 w-4" /> },
-    { id: "financials", label: "Importi previsti", icon: <DollarSign className="h-4 w-4" /> },
-    { id: "history", label: "Cronologia modifiche", icon: <History className="h-4 w-4" /> },
+  // In order of use: the invoices first (checked every month, and what the
+  // contract is checked against), then the documents, the expected amounts
+  // and the history. Each says how many it holds, so none is opened in vain.
+  const tabs: { id: Tab; label: string; icon: React.ReactNode; count?: number }[] = [
+    { id: "invoices", label: "Fatture", icon: <Receipt className="h-4 w-4" />, count: invoices?.length },
+    { id: "documents", label: "Documenti", icon: <FileText className="h-4 w-4" />, count: documents?.length },
+    { id: "financials", label: "Importi previsti", icon: <DollarSign className="h-4 w-4" />, count: financialValues?.length },
+    { id: "history", label: "Cronologia", icon: <History className="h-4 w-4" />, count: contractHistory?.length },
   ];
 
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({});
@@ -543,7 +565,26 @@ export default function ContractDetailPage() {
             {contract.contractNumber}
             {contract.projectName && <span className="font-normal text-muted-foreground"> · {contract.projectName}</span>}
           </h1>
-          <p className="text-muted-foreground mt-1">{contract.counterparty?.name ?? "N/D"}</p>
+          {/* Who and in what state, on one line: the counterparty opens its page. */}
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {contract.counterparty ? (
+              <Link
+                href={`/counterparties/${contract.counterpartyId}`}
+                className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              >
+                {contract.counterparty.name}
+              </Link>
+            ) : (
+              <span className="text-muted-foreground">N/D</span>
+            )}
+            <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
+            <ExpiringSoonBadge contract={contract} showDays />
+            {contract.workflowStage && contract.workflowStage !== "DRAFT" && (SHOW_APPROVAL_WORKFLOW || contract.workflowStage === "IN_REVIEW") && (
+              <Badge variant={(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).variant}>
+                {(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).label}
+              </Badge>
+            )}
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           {SHOW_APPROVAL_WORKFLOW && contract.workflowStage === "DRAFT" && isOwnContract && (
@@ -591,16 +632,25 @@ export default function ContractDetailPage() {
               Modifica
             </Button>
           )}
+          {/* Delete is one step away, as on every table row; it still asks to confirm. */}
           {isAdmin && (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setDeleteDialogOpen(true)}
-              disabled={deleteMutation.isPending}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Elimina
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="h-8 w-8" aria-label="Altre azioni sul contratto">
+                  <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() => setDeleteDialogOpen(true)}
+                  disabled={deleteMutation.isPending}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Elimina contratto
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
@@ -634,110 +684,87 @@ export default function ContractDetailPage() {
         isAdmin={isAdmin}
       />
 
-      {/* General Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" aria-hidden="true" />
-            Informazioni generali
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-          {[
-            { label: "Controparte", value: contract.counterparty?.name ?? "N/D" },
-            { label: "Data inizio", value: new Date(contract.startDate).toLocaleDateString("it-IT") },
-            { label: "Data fine", value: new Date(contract.endDate).toLocaleDateString("it-IT") },
-            // What the contract is worth, when stated: the first question about any contract.
-            ...(contract.annualValue
-              ? [{
-                  label: "Valore annuo",
-                  value: `${formatMoney(contract.annualValue)}${contract.billingFrequency ? ` · fatturazione ${(BILLING_FREQUENCY_LABELS[contract.billingFrequency] ?? "").toLowerCase()}` : ""}`,
-                }]
-              : []),
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <p className="text-sm text-muted-foreground">{label}</p>
-              <p className="text-base font-medium text-foreground">{value}</p>
-            </div>
-          ))}
-          <div>
-            <p className="text-sm text-muted-foreground">Stato</p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
-              <ExpiringSoonBadge contract={contract} showDays />
-              {contract.workflowStage && contract.workflowStage !== "DRAFT" && (SHOW_APPROVAL_WORKFLOW || contract.workflowStage === "IN_REVIEW") && (
-                <Badge variant={(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).variant}>
-                  {(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).label}
-                </Badge>
-              )}
-            </div>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Responsabile</p>
-            <p className="text-base font-medium text-foreground">
-              {contract.manager ? `${contract.manager.firstName} ${contract.manager.lastName}` : "Non assegnato"}
-            </p>
-          </div>
-          {/* Shown only when stated: "not stated" is the default for every
-              existing contract and isn't worth a row. */}
-          {contract.autoRenew === true && (
-            <>
-              <div>
-                <p className="text-sm text-muted-foreground">Rinnovo</p>
-                <p className="text-base font-medium text-foreground">
-                  {renewalLabel(contract.renewalMonths)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Preavviso per la disdetta</p>
-                <p className="text-base font-medium text-foreground">
-                  {contract.noticeDays != null ? `${contract.noticeDays} giorni` : "Non indicato"}
-                </p>
-              </div>
-              {contract.noticeDeadline && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Ultimo giorno per disdire</p>
-                  <p className="text-base font-semibold text-foreground">
-                    {new Date(contract.noticeDeadline).toLocaleDateString("it-IT")}
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-          {contract.autoRenew === false && (
-            <div>
-              <p className="text-sm text-muted-foreground">Rinnovo</p>
-              <p className="text-base font-medium text-foreground">Non si rinnova</p>
-            </div>
-          )}
-          {/* A tacit renewal with its deadline known: the contract's year on one line. */}
-          {contract.autoRenew === true && contract.noticeDeadline && contract.status === "ACTIVE" && (
-            <div className="sm:col-span-2 lg:col-span-3 border-t border-border pt-4">
-              <ContractTimeline
-                startDate={contract.startDate}
-                endDate={contract.endDate}
-                noticeDeadline={contract.noticeDeadline}
-                renewalMonths={contract.renewalMonths}
-              />
-              <div className="mt-3">
-                <AddToCalendarMenu
-                  uid={`notice-${contract.id}-${contract.noticeDeadline.slice(0, 10)}`}
-                  event={{
-                    title: `Disdici ${contract.contractNumber} - ${contract.counterparty?.name ?? contract.projectName}`,
-                    date: contract.noticeDeadline.slice(0, 10),
-                    details: `Ultimo giorno per disdire il contratto ${contract.contractNumber}: dopo si rinnova da solo.`,
-                  }}
+      {/* The contract at a glance: its timeline (what BCM is for) next to the
+          few facts one looks for. Dates are said once, on the timeline. */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <section aria-labelledby="contract-period" className="rounded-xl border border-border bg-card p-5 lg:col-span-2">
+          <h2 id="contract-period" className="text-base font-semibold text-foreground">Periodo e disdetta</h2>
+          <div className="mt-4">
+            {contract.autoRenew === true && contract.noticeDeadline && contract.status === "ACTIVE" ? (
+              <>
+                <ContractTimeline
+                  startDate={contract.startDate}
+                  endDate={contract.endDate}
+                  noticeDeadline={contract.noticeDeadline}
+                  renewalMonths={contract.renewalMonths}
                 />
+                <div className="mt-4">
+                  <AddToCalendarMenu
+                    uid={`notice-${contract.id}-${contract.noticeDeadline.slice(0, 10)}`}
+                    event={{
+                      title: `Disdici ${contract.contractNumber} - ${contract.counterparty?.name ?? contract.projectName}`,
+                      date: contract.noticeDeadline.slice(0, 10),
+                      details: `Ultimo giorno per disdire il contratto ${contract.contractNumber}: dopo si rinnova da solo.`,
+                    }}
+                  />
+                </div>
+              </>
+            ) : (
+              <dl className="grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-muted-foreground">Dal</dt>
+                  <dd className="text-base font-medium text-foreground">{longDay(contract.startDate)}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Al</dt>
+                  <dd className="text-base font-medium text-foreground">{longDay(contract.endDate)}</dd>
+                </div>
+                {contract.autoRenew === true && !contract.noticeDeadline && (
+                  <p className="text-sm text-muted-foreground sm:col-span-2">
+                    Si rinnova da solo: indica il preavviso nel contratto e BCM calcola l&apos;ultimo giorno per disdire.
+                  </p>
+                )}
+              </dl>
+            )}
+          </div>
+        </section>
+
+        <section aria-labelledby="contract-facts" className="rounded-xl border border-border bg-card p-5">
+          <h2 id="contract-facts" className="text-base font-semibold text-foreground">Dati del contratto</h2>
+          <dl className="mt-4 space-y-3 text-sm">
+            {contract.annualValue ? (
+              <div>
+                <dt className="text-muted-foreground">Valore annuo (IVA esclusa)</dt>
+                <dd className="text-base font-semibold tabular-nums text-foreground">{formatMoney(contract.annualValue)}</dd>
+                {contract.billingFrequency && (
+                  <dd className="text-muted-foreground">Fatturazione {(BILLING_FREQUENCY_LABELS[contract.billingFrequency] ?? "").toLowerCase()}</dd>
+                )}
               </div>
+            ) : null}
+            <div>
+              <dt className="text-muted-foreground">Responsabile</dt>
+              <dd className="font-medium text-foreground">
+                {contract.manager ? `${contract.manager.firstName} ${contract.manager.lastName}` : "Non assegnato"}
+              </dd>
             </div>
-          )}
-          {/* Bookkeeping data, rarely what one looks for: kept, but quieter. */}
-          <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3 border-t border-border pt-3">
-            Reparto: {contract.area?.name || "non assegnato"}
-            {contract.wbsCode && <> · Codice WBS: {contract.wbsCode}</>}
-          </p>
-        </CardContent>
-      </Card>
+            <div>
+              <dt className="text-muted-foreground">Reparto</dt>
+              <dd className="font-medium text-foreground">{contract.area?.name || "Non assegnato"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Rinnovo</dt>
+              <dd className="font-medium text-foreground">
+                {contract.autoRenew === true ? renewalLabel(contract.renewalMonths) : contract.autoRenew === false ? "Non si rinnova" : "Non indicato"}
+              </dd>
+              {contract.autoRenew === true && (
+                <dd className="text-muted-foreground">
+                  Preavviso: {contract.noticeDays != null ? `${contract.noticeDays} giorni` : "non indicato"}
+                </dd>
+              )}
+            </div>
+          </dl>
+        </section>
+      </div>
 
       {/* Tabs (WAI-ARIA tabs pattern: arrow keys move between tabs, only the
           active one is in the Tab order, the panel is labelled by its tab). */}
@@ -769,6 +796,13 @@ export default function ContractDetailPage() {
               >
                 <span aria-hidden="true">{tab.icon}</span>
                 {tab.label}
+                {tab.count != null && (
+                  <span
+                    className={`rounded-full px-1.5 text-xs tabular-nums ${selected ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
               </button>
             );
           })}

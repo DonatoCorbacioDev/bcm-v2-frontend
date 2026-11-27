@@ -30,9 +30,11 @@ interface ContractTimelineProps {
 }
 
 /**
- * The contract's current period on one line, as on the landing: how much has
- * passed, the 30 days of alerts, today and the last day to cancel. What
- * BCM is for, drawn where the user reads the contract.
+ * The contract's current period on one line, as on the landing and the Home:
+ * the time passed (light blue) up to "oggi", written on the line, the 30 days
+ * of email alerts (BCM's solid blue: BCM is the one at work) and the last day
+ * to cancel as a red dot. Each mark is named in the list below, with the same
+ * swatch, so nothing needs decoding.
  */
 export function ContractTimeline({ startDate, endDate, noticeDeadline, renewalMonths, today = new Date() }: ContractTimelineProps) {
   const start = parse(startDate);
@@ -65,30 +67,48 @@ export function ContractTimeline({ startDate, endDate, noticeDeadline, renewalMo
       role="img"
       aria-label={`Periodo dal ${longDate(start)} al ${longDate(end)}. Ultimo giorno per disdire ${dayWithArticle(noticeDeadline, true)}, ${deadlineText}.`}
     >
-      <div className="relative h-10 sm:h-14" aria-hidden="true">
-        <div className="absolute inset-x-0 top-3 h-2.5 rounded-full bg-muted" />
-        <div className="absolute left-0 top-3 h-2.5 rounded-l-full bg-primary/30" style={{ width: pct(at(now)) }} />
+      <div className="relative h-14 sm:h-20" aria-hidden="true">
+        {at(now) >= 0 && at(now) <= 1 && (
+          <span className="absolute top-0 -translate-x-1/2 text-xs font-semibold text-foreground" style={{ left: pct(at(now)) }}>
+            oggi
+          </span>
+        )}
+        <div className="absolute inset-x-0 top-8 h-2 rounded-full bg-muted" />
+        <div className="absolute left-0 top-8 h-2 rounded-l-full bg-primary/35" style={{ width: pct(at(now)) }} />
         <div
-          className="absolute top-3 h-2.5 bg-[repeating-linear-gradient(135deg,var(--status-amber-fg)_0_5px,transparent_5px_10px)] opacity-70"
+          className="absolute top-8 h-2 bg-primary"
           style={{ left: pct(at(alertsFrom)), width: pct(at(deadline) - clamp(at(alertsFrom))) }}
         />
         {at(now) >= 0 && at(now) <= 1 && (
-          <div className="absolute top-0 h-8 w-0.5 rounded bg-foreground" style={{ left: pct(at(now)) }} />
+          <div className="absolute top-5 h-8 w-0.5 rounded bg-foreground" style={{ left: pct(at(now)) }} />
         )}
-        <div className="absolute top-0 h-8 w-0.5 rounded bg-[var(--status-red-fg)]" style={{ left: pct(at(deadline)) }} />
+        <div
+          className="absolute top-9 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--status-red-mark)] ring-[3px] ring-card"
+          style={{ left: pct(at(deadline)) }}
+        />
         {ticks.filter((_, i) => i % step === 0).map(({ at: x, label }) => (
-          <span key={`${label}-${x}`} className="absolute top-8 hidden pl-1 text-xs text-muted-foreground sm:block" style={{ left: pct(x) }}>
+          <span key={`${label}-${x}`} className="absolute top-14 hidden pl-1 text-xs text-muted-foreground sm:block" style={{ left: pct(x) }}>
             {label}
           </span>
         ))}
       </div>
-      <dl className="mt-1 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-3">
+      <dl className="mt-1 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-muted-foreground">Periodo</dt>
           <dd className="font-medium text-foreground">{longDate(start)} – {longDate(end)}</dd>
         </div>
         <div>
-          <dt className="text-muted-foreground">Ultimo giorno per disdire</dt>
+          <dt className="flex items-center gap-2 text-muted-foreground">
+            <span className="inline-block h-2 w-5 rounded-full bg-primary" aria-hidden="true" />
+            Avvisi via email
+          </dt>
+          <dd className="font-medium text-foreground">Dal {longDate(alertsFrom)}, a 30, 14, 7 e 1 giorno</dd>
+        </div>
+        <div>
+          <dt className="flex items-center gap-2 text-muted-foreground">
+            <span className="inline-block h-3 w-3 rounded-full bg-[var(--status-red-mark)]" aria-hidden="true" />
+            Ultimo giorno per disdire
+          </dt>
           <dd className={`font-medium ${daysLeft >= 0 ? "text-[var(--status-red-fg)]" : "text-foreground"}`}>
             {longDate(deadline)}, {deadlineText}
           </dd>

@@ -307,25 +307,28 @@ describe('ContractDetailPage — section tabs', () => {
     mockAuthAs({ role: 'ADMIN' });
   });
 
-  it('exposes the sections as a labelled tablist with one selected tab and its panel', () => {
+  // A tab's name is its label, then how many items it holds once loaded.
+  const tab = (label: string) => screen.getByRole('tab', { name: new RegExp(`^${label}`) });
+
+  it('exposes the sections as a labelled tablist, invoices first and open', () => {
     render(<ContractDetailPage />, { wrapper: createWrapper() });
 
     expect(screen.getByRole('tablist', { name: 'Sezioni del contratto' })).toBeInTheDocument();
     const tabs = screen.getAllByRole('tab');
-    expect(tabs.map((t) => t.textContent)).toEqual(['Documenti', 'Fatture', 'Importi previsti', 'Cronologia modifiche']);
+    expect(tabs.map((t) => t.textContent?.replace(/\d+$/, ''))).toEqual(['Fatture', 'Documenti', 'Importi previsti', 'Cronologia']);
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     expect(tabs[1]).toHaveAttribute('aria-selected', 'false');
     // Only the active tab is in the Tab order (roving tabindex).
     expect(tabs[0]).toHaveAttribute('tabindex', '0');
     expect(tabs[1]).toHaveAttribute('tabindex', '-1');
-    expect(screen.getByRole('tabpanel', { name: 'Documenti' })).toBeInTheDocument();
+    expect(screen.getByRole('tabpanel', { name: /^Fatture/ })).toBeInTheDocument();
   });
 
-  it('opens the tab named in the link, as the home page links invoices (?tab=invoices)', () => {
-    mockSearchParams = new URLSearchParams('tab=invoices');
+  it('opens the tab named in the link (?tab=documents)', () => {
+    mockSearchParams = new URLSearchParams('tab=documents');
     try {
       render(<ContractDetailPage />, { wrapper: createWrapper() });
-      expect(screen.getByRole('tab', { name: 'Fatture' })).toHaveAttribute('aria-selected', 'true');
+      expect(tab('Documenti')).toHaveAttribute('aria-selected', 'true');
     } finally {
       mockSearchParams = new URLSearchParams();
     }
@@ -335,7 +338,7 @@ describe('ContractDetailPage — section tabs', () => {
     mockSearchParams = new URLSearchParams('tab=nope');
     try {
       render(<ContractDetailPage />, { wrapper: createWrapper() });
-      expect(screen.getByRole('tab', { name: 'Documenti' })).toHaveAttribute('aria-selected', 'true');
+      expect(tab('Fatture')).toHaveAttribute('aria-selected', 'true');
     } finally {
       mockSearchParams = new URLSearchParams();
     }
@@ -343,34 +346,33 @@ describe('ContractDetailPage — section tabs', () => {
 
   it('moves between tabs with the arrow, Home and End keys', async () => {
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    const tab = (name: string) => screen.getByRole('tab', { name });
 
-    tab('Documenti').focus();
+    tab('Fatture').focus();
     await userEvent.keyboard('{ArrowRight}');
-    expect(tab('Fatture')).toHaveAttribute('aria-selected', 'true');
-    expect(tab('Fatture')).toHaveFocus();
-
-    await userEvent.keyboard('{End}');
-    expect(tab('Cronologia modifiche')).toHaveFocus();
-    expect(screen.getByRole('tabpanel', { name: 'Cronologia modifiche' })).toBeInTheDocument();
-
-    await userEvent.keyboard('{ArrowRight}');
+    expect(tab('Documenti')).toHaveAttribute('aria-selected', 'true');
     expect(tab('Documenti')).toHaveFocus();
 
+    await userEvent.keyboard('{End}');
+    expect(tab('Cronologia')).toHaveFocus();
+    expect(screen.getByRole('tabpanel', { name: /^Cronologia/ })).toBeInTheDocument();
+
+    await userEvent.keyboard('{ArrowRight}');
+    expect(tab('Fatture')).toHaveFocus();
+
     await userEvent.keyboard('{ArrowLeft}');
-    expect(tab('Cronologia modifiche')).toHaveFocus();
+    expect(tab('Cronologia')).toHaveFocus();
 
     await userEvent.keyboard('{Home}');
-    expect(tab('Documenti')).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Fatture')).toHaveAttribute('aria-selected', 'true');
   });
 
   it('ignores other keys on the tablist', async () => {
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    screen.getByRole('tab', { name: 'Documenti' }).focus();
+    tab('Fatture').focus();
 
     await userEvent.keyboard('{ArrowDown}');
 
-    expect(screen.getByRole('tab', { name: 'Documenti' })).toHaveAttribute('aria-selected', 'true');
+    expect(tab('Fatture')).toHaveAttribute('aria-selected', 'true');
   });
 });
 
@@ -463,7 +465,7 @@ describe('ContractDetailPage — history tab', () => {
     ]);
 
     render(<ContractDetailPage />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('tab', { name: /cronologia modifiche/i }));
+    await userEvent.click(screen.getByRole('tab', { name: /^cronologia/i }));
 
     const named = await screen.findByText('Da: Marco Bellini');
     expect(screen.getByText('Da: Sistema')).toBeInTheDocument();

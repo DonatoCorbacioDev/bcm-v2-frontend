@@ -3,6 +3,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 
+import { formatMoney } from "@/lib/formatMoney";
 import {
   AlertTriangle, CalendarClock, CheckCircle2, FileText, Info, Landmark, RefreshCw, type LucideIcon,
 } from "lucide-react";
@@ -69,6 +70,12 @@ function renewalPhrase(months: number | null | undefined): string {
   return months === 1 ? "si rinnova per un altro mese" : `si rinnova per altri ${months} mesi`;
 }
 
+/** What the renewal costs, when the contract says: ": 6.000,00 € (IVA esclusa)". */
+function renewalCost(contract: Contract): string {
+  if (!contract.annualValue || !contract.renewalMonths) return "";
+  return `: ${formatMoney((contract.annualValue * contract.renewalMonths) / 12)} (IVA esclusa)`;
+}
+
 /** A tacit renewal with its notice deadline known: disdici, passed, or nothing yet. */
 function noticeAction(contract: Contract, noticeDeadline: string, days: number): NextAction {
   const renewal = renewalPhrase(contract.renewalMonths);
@@ -77,7 +84,7 @@ function noticeAction(contract: Contract, noticeDeadline: string, days: number):
       icon: CalendarClock,
       tone: "warning",
       title: `Disdici entro ${dayWithArticle(noticeDeadline, true)} (${inDays(days)}) se non vuoi rinnovarlo`,
-      detail: `Dopo questa data ${renewal}.`,
+      detail: `Dopo questa data ${renewal}${renewalCost(contract)}.`,
       cancellable: true,
     };
   }
@@ -205,8 +212,9 @@ export function NextActionCard({ contract, invoices, onIbanCheck, onPrepareCance
         )}
         {cancellable && (onPrepareCancellation || onMarkCancellationSent) && (
           <div className="mt-3 flex flex-wrap gap-2">
+            {/* The one action that matters here: in sight, and saying what it does. */}
             {onPrepareCancellation && (
-              <Button type="button" size="sm" variant="outline" className="bg-card" onClick={onPrepareCancellation}>
+              <Button type="button" size="sm" onClick={onPrepareCancellation}>
                 Prepara la disdetta
               </Button>
             )}
@@ -216,6 +224,11 @@ export function NextActionCard({ contract, invoices, onIbanCheck, onPrepareCance
               </Button>
             )}
           </div>
+        )}
+        {cancellable && onPrepareCancellation && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Crea la lettera già compilata da inviare con PEC o raccomandata.
+          </p>
         )}
       </div>
     </section>

@@ -9,7 +9,8 @@ test.describe("Accessibility: contract detail page", () => {
   });
 
   test("documents tab has no detectable axe violations", async ({ page }) => {
-    await page.goto(`/contracts/${CONTRACT_ID}`);
+    // The invoices open first; the documents are one link away.
+    await page.goto(`/contracts/${CONTRACT_ID}?tab=documents`);
     await expect(page.getByText("msa.pdf")).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();

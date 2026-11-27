@@ -64,7 +64,7 @@ const alfa: Counterparty = {
   id: uid(1),
   name: 'Alfa Srl',
   type: 'CUSTOMER',
-  vatNumber: 'IT01234567890',
+  vatNumber: 'IT01234567897',
 };
 
 const beta: Counterparty = {

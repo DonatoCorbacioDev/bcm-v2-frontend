@@ -342,7 +342,7 @@ describe('CounterpartyForm', () => {
           id: uid(1),
           name: 'Alfa Srl',
           type: 'CUSTOMER',
-          vatNumber: 'IT01234567890',
+          vatNumber: 'IT01234567897',
           taxCode: 'ALFSRL80A01H501Z',
           address: 'Via Roma 1',
           contactName: 'Mario Rossi',
@@ -353,7 +353,7 @@ describe('CounterpartyForm', () => {
       />,
       { wrapper: createWrapper() }
     );
-    expect(screen.getByDisplayValue('IT01234567890')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('IT01234567897')).toBeInTheDocument();
     expect(screen.getByDisplayValue('ALFSRL80A01H501Z')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Via Roma 1')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Mario Rossi')).toBeInTheDocument();

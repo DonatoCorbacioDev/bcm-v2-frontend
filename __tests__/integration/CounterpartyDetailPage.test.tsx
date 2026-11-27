@@ -55,7 +55,7 @@ describe('CounterpartyDetailPage', () => {
 
   it('renders the counterparty name, type and invoicing summary', () => {
     (useCounterparty as jest.Mock).mockReturnValue({
-      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567890' },
+      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567897' },
       isLoading: false,
       isError: false,
     });
@@ -78,7 +78,7 @@ describe('CounterpartyDetailPage', () => {
 
     expect(screen.getByRole('heading', { name: 'Alfa Srl' })).toBeInTheDocument();
     expect(screen.getByText('Cliente')).toBeInTheDocument();
-    expect(screen.getByText('IT01234567890')).toBeInTheDocument();
+    expect(screen.getByText('IT01234567897')).toBeInTheDocument();
     expect(screen.getByText('Contratti attivi')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
     expect(screen.getByText(/ultima il 28\/08\/2026/)).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('CounterpartyDetailPage', () => {
 
   it('shows only the contracted value for a customer: its invoices are not in BCM', () => {
     (useCounterparty as jest.Mock).mockReturnValue({
-      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567890' },
+      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567897' },
       isLoading: false,
       isError: false,
     });
@@ -147,7 +147,7 @@ describe('CounterpartyDetailPage', () => {
 
   it('shows "Non impostato" and lets an admin set the verified IBAN for the first time', () => {
     (useCounterparty as jest.Mock).mockReturnValue({
-      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567890', verifiedIban: null },
+      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567897', verifiedIban: null },
       isLoading: false,
       isError: false,
     });
@@ -165,7 +165,7 @@ describe('CounterpartyDetailPage', () => {
         id: uid(1),
         name: 'Alfa Srl',
         type: 'CUSTOMER',
-        vatNumber: 'IT01234567890',
+        vatNumber: 'IT01234567897',
         verifiedIban: 'IT...3456',
         verifiedBic: 'BPPIITRRXXX',
       },
@@ -184,7 +184,7 @@ describe('CounterpartyDetailPage', () => {
   it('hides the verified-IBAN action for a non-admin user', () => {
     mockAuthAs('MANAGER');
     (useCounterparty as jest.Mock).mockReturnValue({
-      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567890', verifiedIban: 'IT...3456' },
+      data: { id: uid(1), name: 'Alfa Srl', type: 'CUSTOMER', vatNumber: 'IT01234567897', verifiedIban: 'IT...3456' },
       isLoading: false,
       isError: false,
     });

@@ -13,7 +13,7 @@ describe("counterpartySchema", () => {
   it("accepts all optional fields filled in", () => {
     const result = counterpartySchema.safeParse({
       ...validData,
-      vatNumber: "IT01234567890",
+      vatNumber: "IT01234567897",
       taxCode: "ALFSRL80A01H501X",
       address: "Via Roma 1, Milano",
       contactName: "Mario Rossi",
@@ -22,6 +22,21 @@ describe("counterpartySchema", () => {
       notes: "Cliente storico",
     });
     expect(result.success).toBe(true);
+  });
+
+  describe("vatNumber", () => {
+    it.each(["IT01234567897", "01234567897", "it 0123 4567 897", "DE123456789"])("accepts %s", (vatNumber) => {
+      expect(counterpartySchema.safeParse({ ...validData, vatNumber }).success).toBe(true);
+    });
+
+    // IT00000000 is the one found in the interface review: 8 digits instead of 11.
+    it.each(["IT00000000", "IT01234567890", "IT00000000000", "1234"])("rejects %s", (vatNumber) => {
+      expect(counterpartySchema.safeParse({ ...validData, vatNumber }).success).toBe(false);
+    });
+
+    it("stays optional", () => {
+      expect(counterpartySchema.safeParse({ ...validData, vatNumber: "" }).success).toBe(true);
+    });
   });
 
   describe("name", () => {

@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { isValidVatNumber, VAT_NUMBER_INVALID } from "@/lib/vatNumber";
 
 export const counterpartySchema = z.object({
   name: z
@@ -16,7 +17,13 @@ export const counterpartySchema = z.object({
     message: "Il tipo deve essere Cliente, Fornitore o Entrambi",
   }),
 
-  vatNumber: z.string().max(50, "La partita IVA non può superare i 50 caratteri").trim().optional().or(z.literal("")),
+  vatNumber: z
+    .string()
+    .max(50, "La partita IVA non può superare i 50 caratteri")
+    .trim()
+    .refine((v) => v === "" || isValidVatNumber(v), VAT_NUMBER_INVALID)
+    .optional()
+    .or(z.literal("")),
   taxCode: z.string().max(50, "Il codice fiscale non può superare i 50 caratteri").trim().optional().or(z.literal("")),
   address: z.string().max(500, "L'indirizzo non può superare i 500 caratteri").trim().optional().or(z.literal("")),
   postalCode: z.string().max(10, "Il CAP non può superare i 10 caratteri").trim().optional().or(z.literal("")),

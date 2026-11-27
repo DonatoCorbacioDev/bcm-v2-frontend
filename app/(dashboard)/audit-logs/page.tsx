@@ -50,9 +50,16 @@ const ACTION_LABELS: Record<string, string> = {
   TIER_CHANGED: "Cambio di piano",
   ROLE_CHANGED: "Cambio di ruolo",
   NEW_DEVICE_SIGN_IN: "Accesso da un nuovo dispositivo",
+  TOTP_ENABLED: "Verifica in 2 passaggi attivata",
+  TOTP_DISABLED: "Verifica in 2 passaggi disattivata",
+  PASSWORD_CHANGED: "Password cambiata",
+  PASSWORD_RESET: "Password reimpostata con il link via email",
+  USER_INVITED: "Utente invitato",
+  INVITE_ACCEPTED: "Invito accettato",
+  CALENDAR_FEED_REGENERATED: "Link del calendario rigenerato",
   // Security events (SecurityEvents on the backend).
   SECURITY_LOGIN_FAILED: "Accesso fallito: password sbagliata",
-  SECURITY_MFA_FAILED: "Accesso fallito: codice 2FA sbagliato",
+  SECURITY_MFA_FAILED: "Accesso fallito: codice della verifica in 2 passaggi sbagliato",
   SECURITY_ACCOUNT_LOCKED: "Account bloccato per troppi tentativi",
   SECURITY_REFRESH_REUSE: "Sessione rubata: sessioni chiuse",
   SECURITY_INVALID_TOKEN: "Token di sessione non valido",
@@ -90,30 +97,62 @@ const ENTITY_TYPE_LABELS: Record<string, string> = {
   SepaPayment: "Pagamento SEPA",
 };
 
+// What a create, change or delete was about, in words: "un contratto".
+const ENTITY_PHRASES: Record<string, string> = {
+  Contract: "un contratto",
+  Counterparty: "una controparte",
+  Billing: "l'abbonamento",
+  ContractTemplate: "un modello di contratto",
+  ContractDocument: "un documento di un contratto",
+  ContractHistory: "lo storico di un contratto",
+  ElectronicInvoice: "una fattura elettronica",
+  BusinessArea: "un'area di business",
+  Budget: "un budget",
+  Manager: "un responsabile",
+  FinancialType: "un tipo finanziario",
+  FinancialValue: "un valore finanziario",
+  Organization: "i dati dell'organizzazione",
+  User: "un utente",
+  Role: "un ruolo",
+  Notification: "una notifica",
+  LocalStorage: "un file",
+  RiskFeedback: "un riscontro sul rischio",
+  SepaPayment: "un pagamento SEPA",
+};
+
+const VERBS: Record<string, string> = { CREATE: "Ha creato", UPDATE: "Ha modificato", DELETE: "Ha eliminato" };
+
 function actionLabel(action: string): string {
-  return ACTION_LABELS[action] ?? action;
+  // A code not translated yet still reads as words: "SOME_EVENT" → "some event".
+  return ACTION_LABELS[action] ?? action.toLowerCase().replaceAll("_", " ");
 }
 
 function entityTypeLabel(entityType: string): string {
   return ENTITY_TYPE_LABELS[entityType] ?? entityType;
 }
 
-function actionBadgeVariant(action: string): "default" | "secondary" | "destructive" | "outline" {
-  if (action === "CREATE") return "default";
-  if (action === "DELETE") return "destructive";
-  return "secondary";
+/** The kind of event, for the badge: four words to scan the list by. */
+function kindOf(action: string): { label: string; className: string } {
+  if (action === "CREATE") return { label: "Creazione", className: "bg-[var(--status-green-bg)] text-[var(--status-green-fg)]" };
+  if (action === "UPDATE") return { label: "Modifica", className: "bg-primary/10 text-primary" };
+  if (action === "DELETE") return { label: "Eliminazione", className: "bg-[var(--status-red-bg)] text-[var(--status-red-fg)]" };
+  if (action.startsWith("SECURITY_") || action.startsWith("SEPA_")) {
+    return { label: "Sicurezza", className: "bg-[var(--status-amber-bg)] text-[var(--status-amber-fg)]" };
+  }
+  return { label: "Account", className: "bg-muted text-muted-foreground" };
 }
 
-function actionBadgeClass(action: string): string {
-  if (action === "CREATE") return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
-  if (action === "DELETE") return "bg-destructive/10 text-destructive";
-  return "bg-primary/10 text-primary";
+/** The event as a sentence: "Ha creato un budget", "Verifica in 2 passaggi attivata". */
+function sentenceOf(log: Pick<AuditLogDTO, "action" | "entityType">): string {
+  const verb = VERBS[log.action];
+  if (!verb) return actionLabel(log.action);
+  return `${verb} ${ENTITY_PHRASES[log.entityType] ?? entityTypeLabel(log.entityType).toLowerCase()}`;
 }
 
-function summaryText(log: AuditLogDTO): string {
-  const entity = entityTypeLabel(log.entityType);
-  const action = actionLabel(log.action).toLowerCase();
-  return log.entityId == null ? `${entity} — ${action}` : `${entity} #${shortId(log.entityId)} — ${action}`;
+/** For support: the record's type and short id, on hover only. */
+function technicalHint(log: AuditLogDTO): string {
+  const ref = log.entityId == null ? entityTypeLabel(log.entityType) : `${entityTypeLabel(log.entityType)} #${shortId(log.entityId)}`;
+  return log.details ? `${ref} · ${log.details}` : ref;
 }
 
 const PAGE_SIZE = 20;
@@ -157,10 +196,10 @@ function AuditLogsContent({
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted">
               <tr>
-                {["Data e ora", "Azione", "Tipo entità", "ID entità", "Utente", "Dettagli"].map((h) => (
+                {["Quando", "Chi", "Cosa è successo", "Tipo"].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                    className="px-4 py-3 text-left text-xs font-medium text-muted-foreground"
                   >
                     {h}
                   </th>
@@ -180,25 +219,16 @@ function AuditLogsContent({
                       second: "2-digit",
                     })}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <Badge
-                      variant={actionBadgeVariant(log.action)}
-                      className={actionBadgeClass(log.action)}
-                    >
-                      {actionLabel(log.action)}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
-                    {entityTypeLabel(log.entityType)}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
-                    {log.entityId}
-                  </td>
                   <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
                     {log.username}
                   </td>
-                  <td className="px-4 py-3 text-sm text-muted-foreground max-w-[240px]">
-                    <span title={log.details ?? undefined}>{summaryText(log)}</span>
+                  <td className="px-4 py-3 text-sm text-foreground">
+                    <span title={technicalHint(log)}>{sentenceOf(log)}</span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <Badge variant="secondary" className={kindOf(log.action).className}>
+                      {kindOf(log.action).label}
+                    </Badge>
                   </td>
                 </tr>
               ))}
@@ -249,7 +279,7 @@ function AuditLogsContent({
         <div>
           <h1 className="text-3xl font-bold text-foreground">Registro attività</h1>
           <p className="text-muted-foreground text-sm mt-0.5">
-            Cronologia delle operazioni di sistema
+            Chi ha fatto cosa, e quando: serve a ricostruire una modifica o un accesso sospetto.
           </p>
         </div>
       </div>

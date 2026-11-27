@@ -307,7 +307,8 @@ describe('FinancialValueTable', () => {
   it('opens delete confirmation dialog when Delete is clicked', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await expand('Acme Corp');
-    await userEvent.click(screen.getByRole('button', { name: /elimina/i }));
+    await userEvent.click(screen.getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByText(/sei sicuro/i)).toBeInTheDocument();
@@ -316,7 +317,8 @@ describe('FinancialValueTable', () => {
   it('closes the delete dialog when Cancel is clicked', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await expand('Acme Corp');
-    await userEvent.click(screen.getByRole('button', { name: /elimina/i }));
+    await userEvent.click(screen.getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
     await waitFor(() => {
@@ -327,7 +329,8 @@ describe('FinancialValueTable', () => {
   it('confirms delete and shows success toast', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await expand('Acme Corp');
-    await userEvent.click(screen.getByRole('button', { name: /elimina/i }));
+    await userEvent.click(screen.getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
@@ -339,7 +342,8 @@ describe('FinancialValueTable', () => {
     (financialValuesService.delete as jest.Mock).mockRejectedValueOnce(new Error('fail'));
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await expand('Acme Corp');
-    await userEvent.click(screen.getByRole('button', { name: /elimina/i }));
+    await userEvent.click(screen.getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {

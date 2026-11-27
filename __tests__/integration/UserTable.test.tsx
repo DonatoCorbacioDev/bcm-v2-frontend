@@ -238,10 +238,10 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    const deleteButton = within(rows[1]).getByRole('button', { name: /elimina/i });
-    await userEvent.click(deleteButton);
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
 
-    const dialog = screen.getByRole('dialog');
+    const dialog = await screen.findByRole('dialog');
     expect(dialog).toBeInTheDocument();
     expect(within(dialog).getByText(/sei sicuro/i)).toBeInTheDocument();
     // The dialog shows the username in its description
@@ -252,7 +252,8 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
@@ -276,7 +277,8 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
@@ -290,7 +292,8 @@ describe('UserTable', () => {
     render(<UserTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 

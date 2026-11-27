@@ -6,13 +6,11 @@
  */
 import { useState } from "react";
 import { isAxiosError } from "axios";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Copy, RefreshCw } from "lucide-react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import { PasswordFields } from "@/components/auth/PasswordFields";
-import { calendarFeedService } from "@/services/calendarFeed.service";
 import { roleLabel } from "@/lib/roleLabels";
 import TwoFactorAuthCard from "@/components/profile/TwoFactorAuthCard";
 import DataPrivacyCard from "@/components/profile/DataPrivacyCard";
@@ -53,7 +51,6 @@ function errorMessage(error: unknown, fallback: string): string {
 export default function ProfilePage() {
   const { user } = useAuthStore();
   const [currentPassword, setCurrentPassword] = useState("");
-  const queryClient = useQueryClient();
 
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ["auth", "me"],
@@ -63,29 +60,6 @@ export default function ProfilePage() {
     },
   });
 
-  const { data: calendarFeedUrl, isLoading: isLoadingFeedUrl } = useQuery({
-    queryKey: ["calendar-feed-url"],
-    queryFn: calendarFeedService.getUrl,
-  });
-
-  const regenerateFeedMutation = useMutation({
-    mutationFn: calendarFeedService.regenerate,
-    onSuccess: (url) => {
-      queryClient.setQueryData(["calendar-feed-url"], url);
-      toast.success("Link del calendario rigenerato: quello precedente non funziona più");
-    },
-    onError: () => toast.error("Rigenerazione del link non riuscita"),
-  });
-
-  const handleCopyFeedUrl = async () => {
-    if (!calendarFeedUrl) return;
-    try {
-      await navigator.clipboard.writeText(calendarFeedUrl);
-      toast.success("Link copiato negli appunti");
-    } catch {
-      toast.error("Copia negli appunti non riuscita");
-    }
-  };
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -217,51 +191,6 @@ export default function ProfilePage() {
 
       <DataPrivacyCard />
 
-      {/* Calendar feed */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Calendario scadenze</CardTitle>
-          <CardDescription>
-            Iscriviti a questo link da Google Calendar, Outlook o Apple Calendar per vedere le
-            scadenze dei tuoi contratti direttamente nel tuo calendario
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {isLoadingFeedUrl ? (
-            <p className="text-sm text-muted-foreground">Caricamento...</p>
-          ) : (
-            <>
-              <div className="flex items-center gap-2">
-                <Input
-                  readOnly
-                  value={calendarFeedUrl ?? ""}
-                  aria-label="Link del feed calendario"
-                  className="font-mono text-xs"
-                />
-                <Button variant="outline" size="sm" onClick={handleCopyFeedUrl} aria-label="Copia link">
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => regenerateFeedMutation.mutate()}
-                  disabled={regenerateFeedMutation.isPending}
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  {regenerateFeedMutation.isPending ? "Rigenerazione..." : "Rigenera link"}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Chiunque abbia questo link può vedere le scadenze dei tuoi contratti: rigeneralo se
-                pensi che sia stato condiviso per errore. Il link cambia anche quando cambi la password
-                o la 2FA: in quel caso aggiungilo di nuovo al tuo calendario.
-              </p>
-            </>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

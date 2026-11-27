@@ -220,7 +220,7 @@ export default function OrganizationPage() {
         <CardHeader>
           <CardTitle>Conto di addebito SEPA</CardTitle>
           <CardDescription>
-            IBAN e BIC usati come conto debitore quando generi un pagamento SEPA per una fattura fornitore
+            Il conto da cui paghi i fornitori: BCM lo scrive nel file del bonifico SEPA che prepari per una fattura
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">

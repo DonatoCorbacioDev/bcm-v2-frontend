@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { RowActions } from "@/components/shared/RowActions";
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -199,24 +200,7 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
                   <TableCell className="hidden lg:table-cell text-sm">{cp.contactName || "—"}</TableCell>
                   {isAdmin && (
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditClick(cp)}
-                          className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
-                        >
-                          Modifica
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteClick(cp)}
-                          className="text-destructive hover:text-destructive text-xs px-2"
-                        >
-                          Elimina
-                        </Button>
-                      </div>
+                      <RowActions name={cp.name} onEdit={() => onEditClick(cp)} onDelete={() => handleDeleteClick(cp)} />
                     </TableCell>
                   )}
                 </TableRow>

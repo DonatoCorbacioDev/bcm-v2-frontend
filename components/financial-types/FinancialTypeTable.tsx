@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { RowActions } from "@/components/shared/RowActions";
 import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -137,24 +138,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
                   </TableCell>
                   <TableCell className="hidden md:table-cell max-w-md truncate text-sm">{ft.description}</TableCell>
                   <TableCell>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEditClick(ft)}
-                        className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
-                      >
-                        Modifica
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteDialog({ open: true, financialType: ft })}
-                        className="text-destructive hover:text-destructive text-xs px-2"
-                      >
-                        Elimina
-                      </Button>
-                    </div>
+                    <RowActions name={ft.name} onEdit={() => onEditClick(ft)} onDelete={() => setDeleteDialog({ open: true, financialType: ft })} />
                   </TableCell>
                 </TableRow>
               ))}

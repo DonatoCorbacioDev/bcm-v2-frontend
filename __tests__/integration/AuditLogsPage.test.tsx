@@ -73,7 +73,7 @@ describe('AuditLogsPage — Italian labels', () => {
 
     render(<AuditLogsPage />, { wrapper: createWrapper() });
 
-    expect(await screen.findByText('Controparte #0d4704b8 — creazione')).toBeInTheDocument();
+    expect(await screen.findByText('Ha creato una controparte')).toBeInTheDocument();
     expect(screen.getAllByText('Pagamento bloccato: IBAN diverso').length).toBeGreaterThan(0);
     expect(screen.queryByText(/Counterparty/)).not.toBeInTheDocument();
   });

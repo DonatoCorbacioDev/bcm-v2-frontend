@@ -227,7 +227,8 @@ describe('CounterpartyTable', () => {
     render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
@@ -239,7 +240,8 @@ describe('CounterpartyTable', () => {
     render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /annulla/i }));
@@ -253,7 +255,8 @@ describe('CounterpartyTable', () => {
     render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
@@ -267,7 +270,8 @@ describe('CounterpartyTable', () => {
     render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
     const rows = screen.getAllByRole('row');
-    await userEvent.click(within(rows[1]).getByRole('button', { name: /elimina/i }));
+    await userEvent.click(within(rows[1]).getByRole('button', { name: /altre azioni/i }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: /elimina/i }));
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
@@ -293,7 +297,7 @@ describe('CounterpartyTable', () => {
 
     expect(screen.queryByRole('columnheader', { name: /azioni/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /modifica/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /elimina/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /altre azioni/i })).not.toBeInTheDocument();
     // Data is still visible — the page is read-only, not blocked entirely.
     expect(screen.getByText('Alfa Srl')).toBeInTheDocument();
   });

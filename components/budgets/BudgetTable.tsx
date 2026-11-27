@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { RowActions } from "@/components/shared/RowActions";
 import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -139,9 +140,9 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
                         {b.category === "REVENUE" ? "Ricavo" : "Costo"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm font-mono tabular-nums">{b.year}</TableCell>
-                    <TableCell className="text-sm font-mono tabular-nums">{formatMoney(b.targetAmount)}</TableCell>
-                    <TableCell className="text-sm font-mono tabular-nums">{formatMoney(b.actualAmount)}</TableCell>
+                    <TableCell className="text-sm tabular-nums">{b.year}</TableCell>
+                    <TableCell className="text-sm tabular-nums">{formatMoney(b.targetAmount)}</TableCell>
+                    <TableCell className="text-sm tabular-nums">{formatMoney(b.actualAmount)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="w-full h-1.5 bg-muted rounded-full">
@@ -150,30 +151,13 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
                             style={{ width: `${Math.min(b.percentUsed, 100)}%` }}
                           />
                         </div>
-                        <span className={`text-xs font-mono tabular-nums shrink-0 ${tone.text}`}>
+                        <span className={`text-xs tabular-nums shrink-0 ${tone.text}`}>
                           {b.percentUsed.toFixed(0)}%
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEditClick(b)}
-                          className="text-primary hover:text-primary text-xs px-2 dark:text-[var(--accent-foreground)] dark:hover:text-[var(--accent-foreground)]"
-                        >
-                          Modifica
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteDialog({ open: true, budget: b })}
-                          className="text-destructive hover:text-destructive text-xs px-2"
-                        >
-                          Elimina
-                        </Button>
-                      </div>
+                      <RowActions name={`${b.areaName} ${b.year}`} onEdit={() => onEditClick(b)} onDelete={() => setDeleteDialog({ open: true, budget: b })} />
                     </TableCell>
                   </TableRow>
                 );

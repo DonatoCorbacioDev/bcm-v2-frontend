@@ -33,7 +33,7 @@ test.describe("Accessibility: contracts table and form", () => {
 
     const dialog = page.getByRole("dialog");
     await dialog.getByLabel("Data fine").fill("2026-12-31");
-    await dialog.getByRole("checkbox", { name: "Si rinnova tacitamente" }).click();
+    await dialog.getByRole("checkbox", { name: /si rinnova da solo/i }).click();
     await dialog.getByLabel("Preavviso per la disdetta (giorni)").fill("90");
     await expect(dialog.getByText("Ultimo giorno per disdire:")).toContainText("2 ottobre 2026");
 

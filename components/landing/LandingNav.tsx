@@ -22,7 +22,7 @@ export function LandingNav() {
     { href: "/#features", label: "Funzionalità" },
     { href: "/calcolo-disdetta", label: "Calcolo disdetta" },
     { href: "/#pricing", label: "Piani" },
-    { href: "/#how-its-built", label: "Come è fatto" },
+    { href: "/come-e-fatto", label: "Come è fatto" },
   ];
 
   return (

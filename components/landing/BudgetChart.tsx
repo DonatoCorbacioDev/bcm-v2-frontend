@@ -13,13 +13,16 @@ import {
   CHART_TOOLTIP_ITEM_STYLE,
   CHART_TOOLTIP_LABEL_STYLE,
 } from "@/lib/chartTheme";
+import { useEffect, useRef, useState } from "react";
 import { useToday } from "@/components/landing/useToday";
 
 // The demo organization's monthly supplier costs, in thousands of euro, for
 // the eight months up to this one, against a budget of 4.5 a month.
 const COSTS = [3.9, 4.2, 4.6, 4.1, 5.1, 4.3, 3.7, 4.4];
 const BUDGET = 4.5;
-const OVER = "var(--status-amber-fg)";
+const OVER = "var(--status-amber-mark)";
+// The words over the bars, in the readable shade of the same colour.
+const OVER_TEXT = "var(--status-amber-fg)";
 const WITHIN = "var(--chart-1)";
 
 const euro = (k: number) => `${k.toLocaleString("it-IT", { minimumFractionDigits: 1 })}k €`;
@@ -43,15 +46,41 @@ export function BudgetChart() {
     : null;
   const over = data?.filter((d) => d.cost > BUDGET).map((d) => d.month) ?? [];
 
+  // The bars rise once, when the chart scrolls into view; drawn still under
+  // reduced motion, or when the browser cannot tell what is in view.
+  const box = useRef<HTMLDivElement>(null);
+  const [view, setView] = useState<"waiting" | "still" | "rising">(() =>
+    typeof IntersectionObserver === "undefined" ? "still" : "waiting",
+  );
+  useEffect(() => {
+    const el = box.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      setView(globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "still" : "rising");
+    }, { threshold: 0.5 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div>
-      <div className="h-44 md:h-64" role="img" aria-label={`Costi mensili dei fornitori rispetto al budget di ${euro(BUDGET)}: due mesi sopra il budget.`}>
-        {data ? (
+      <div ref={box} className="h-44 md:h-64" role="img" aria-label={`Costi mensili dei fornitori rispetto al budget di ${euro(BUDGET)}: due mesi sopra il budget.`}>
+        {data && view !== "waiting" ? (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 22, right: 4, left: -18, bottom: 0 }} barCategoryGap="28%">
+            <BarChart data={data} margin={{ top: 22, right: 4, left: -8, bottom: 0 }} barCategoryGap="38%">
               <CartesianGrid horizontal vertical={false} stroke={CHART_GRID_STROKE} strokeOpacity={CHART_GRID_OPACITY} />
               <XAxis dataKey="month" tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
-              <YAxis domain={[0, 6]} ticks={[0, 2, 4, 6]} tick={CHART_TICK_STYLE} axisLine={false} tickLine={false} />
+              <YAxis
+                domain={[0, 6]}
+                ticks={[0, 2, 4, 6]}
+                tickFormatter={(k: number) => (k === 0 ? "0" : `${k}k €`)}
+                tick={CHART_TICK_STYLE}
+                axisLine={false}
+                tickLine={false}
+                width={52}
+              />
               <Tooltip
                 cursor={{ fill: "var(--muted)", opacity: 0.5 }}
                 formatter={(value) => {
@@ -69,9 +98,10 @@ export function BudgetChart() {
                 strokeDasharray="5 4"
                 label={{ value: "Budget", position: "insideTopLeft", fill: "var(--muted-foreground)", fontSize: 12, dy: -16 }}
               />
-              <Bar dataKey="cost" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+              <Bar dataKey="cost" radius={[4, 4, 0, 0]} isAnimationActive={view === "rising"} animationDuration={700}>
                 {data.map((d) => (
-                  <Cell key={d.month} fill={d.cost > BUDGET ? OVER : WITHIN} />
+                  // The months within budget stay quiet, so the two over it stand out.
+                  <Cell key={d.month} fill={d.cost > BUDGET ? OVER : WITHIN} fillOpacity={d.cost > BUDGET ? 1 : 0.4} />
                 ))}
                 <LabelList
                   dataKey="cost"
@@ -80,7 +110,7 @@ export function BudgetChart() {
                     const v = Number(value);
                     if (!(v > BUDGET)) return null;
                     return (
-                      <text x={Number(x) + Number(width) / 2} y={Number(y) - 6} textAnchor="middle" fill={OVER} fontSize={12} fontWeight={600}>
+                      <text x={Number(x) + Number(width) / 2} y={Number(y) - 6} textAnchor="middle" fill={OVER_TEXT} fontSize={12} fontWeight={600}>
                         {overBy(v)}
                       </text>
                     );

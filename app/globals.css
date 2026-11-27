@@ -109,6 +109,9 @@
   --status-amber-bg:  #fdf0d3;
   --status-red-fg:    #b91c1c;
   --status-red-bg:    #fde4e4;
+  /* Marks (dots, segments, bars): brighter than the text colours, still 3:1 on white. */
+  --status-amber-mark: #d97706;
+  --status-red-mark:   #dc2626;
   --status-blue-fg:   #1d4ed8;
   --status-blue-bg:   #e2ecff;
   --status-slate-fg:  #475569;
@@ -167,6 +170,8 @@
   --status-amber-bg:  #33260a;
   --status-red-fg:    #f87171;
   --status-red-bg:    #321518;
+  --status-amber-mark: #fbbf24;
+  --status-red-mark:   #f87171;
   --status-blue-fg:   #7aa7ff;
   --status-blue-bg:   #15233f;
   --status-slate-fg:  #aeb9ca;

@@ -12,7 +12,7 @@ export function CalculatorSection() {
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="max-w-2xl">
           <h2 className="font-display text-balance text-4xl font-medium tracking-[-0.01em] text-foreground md:text-5xl">
-            Calcolo della disdetta, gratis
+            Prova il calcolo su un tuo contratto
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
             Per un contratto alla volta, senza registrarti. Lo trovi anche nella{" "}

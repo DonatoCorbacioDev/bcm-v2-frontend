@@ -9,7 +9,7 @@ import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pricing } from "@/components/landing/Pricing";
-import { HowItsBuilt } from "@/components/landing/HowItsBuilt";
+import { BuiltBy } from "@/components/landing/HowItsBuilt";
 import { CalculatorSection } from "@/components/landing/CalculatorSection";
 import { TrustSection } from "@/components/landing/TrustSection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
@@ -57,7 +57,7 @@ export default function LandingPage() {
         <HowItWorks />
         <TrustSection />
         <Pricing />
-        <HowItsBuilt />
+        <BuiltBy />
       </main>
       <LandingFooter />
     </div>

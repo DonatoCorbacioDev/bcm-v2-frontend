@@ -39,7 +39,7 @@ function monthTicks(start: Date): { at: number; label: string }[] {
 
 /**
  * A contract's year drawn on one line: where today is, when the alerts start
- * and the last day to send the cancellation. The elapsed part fills once when
+ * (BCM's blue: BCM is the one at work) and the last day to send the cancellation. The elapsed part fills once when
  * the strip scrolls into view (never under reduced motion, and never for a
  * strip already on screen when the page opens).
  */
@@ -82,18 +82,26 @@ export function NoticeTimeline() {
         <p className="text-sm text-muted-foreground">Rinnovo tacito di 12 mesi, preavviso di 90 giorni</p>
       </div>
 
-      <div className="relative mt-6 h-10 sm:h-16" aria-hidden="true">
-        <div className="absolute inset-x-0 top-3 h-3 rounded-full bg-muted" />
-        <div ref={fill} className="absolute left-0 top-3 h-3 origin-left rounded-l-full bg-primary/30" style={{ width: pct(TODAY) }} />
+      {/* Today is named on the line itself; the alerts and the last day are
+          named by the swatches in the list below. */}
+      <div className="relative mt-4 h-14 sm:h-20" aria-hidden="true">
+        <span className="absolute top-0 -translate-x-1/2 text-xs font-semibold text-foreground" style={{ left: pct(TODAY) }}>
+          oggi
+        </span>
+        <div className="absolute inset-x-0 top-8 h-2 rounded-full bg-muted" />
+        <div ref={fill} className="absolute left-0 top-8 h-2 origin-left rounded-l-full bg-primary/35" style={{ width: pct(TODAY) }} />
         <div
-          className="absolute top-3 h-3 bg-[repeating-linear-gradient(135deg,var(--status-amber-fg)_0_5px,transparent_5px_10px)] opacity-70"
+          className="absolute top-8 h-2 bg-primary"
           style={{ left: pct(ALERTS_FROM), width: pct(DEADLINE - ALERTS_FROM) }}
         />
-        <div className="absolute top-0 h-9 w-0.5 rounded bg-foreground" style={{ left: pct(TODAY) }} />
-        <div className="absolute top-0 h-9 w-0.5 rounded bg-[var(--status-red-fg)]" style={{ left: pct(DEADLINE) }} />
+        <div className="absolute top-5 h-8 w-0.5 rounded bg-foreground" style={{ left: pct(TODAY) }} />
+        <div
+          className="absolute top-9 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--status-red-mark)] ring-[3px] ring-card"
+          style={{ left: pct(DEADLINE) }}
+        />
         {start &&
           monthTicks(start).map(({ at, label }) => (
-            <span key={label} className="absolute top-9 hidden pl-1 text-xs text-muted-foreground sm:block" style={{ left: pct(at) }}>
+            <span key={label} className="absolute top-14 hidden pl-1 text-xs text-muted-foreground sm:block" style={{ left: pct(at) }}>
               {label}
             </span>
           ))}
@@ -101,11 +109,17 @@ export function NoticeTimeline() {
 
       <dl className="mt-2 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
         <div>
-          <dt className="text-muted-foreground">Oggi</dt>
-          <dd className="font-medium text-foreground">Avvisi già partiti a 30 giorni</dd>
+          <dt className="flex items-center gap-2 text-muted-foreground">
+            <span className="inline-block h-2 w-5 rounded-full bg-primary" aria-hidden="true" />
+            Avvisi via email
+          </dt>
+          <dd className="font-medium text-foreground">Il primo è già partito</dd>
         </div>
         <div>
-          <dt className="text-muted-foreground">Ultimo giorno per disdire</dt>
+          <dt className="flex items-center gap-2 text-muted-foreground">
+            <span className="inline-block h-3 w-3 rounded-full bg-[var(--status-red-mark)]" aria-hidden="true" />
+            Ultimo giorno per disdire
+          </dt>
           <dd className="font-medium text-[var(--status-red-fg)]">
             {deadline ? `${dayWithArticle(deadline).replace(/^(il|l')\s?/, "")}, ` : ""}tra {DAYS_LEFT} giorni
           </dd>

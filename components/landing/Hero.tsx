@@ -123,7 +123,7 @@ export function Hero() {
             Gestione dei contratti e delle scadenze per le PMI
           </h1>
 
-          <div className="space-y-6 md:col-span-5">
+          <div className="space-y-6 md:col-span-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-500">
             <p className="text-lg leading-relaxed text-muted-foreground">
               BCM calcola l&apos;ultimo giorno per disdire ogni contratto e ti avvisa 30, 14, 7 e 1 giorno prima.
               Controlla anche le fatture FatturaPA dei fornitori e l&apos;IBAN su cui chiedono di pagare.

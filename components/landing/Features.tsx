@@ -3,7 +3,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import dynamic from "next/dynamic";
-import { Archive, CalendarDays, Download, FileSpreadsheet, Landmark } from "lucide-react";
+import { Archive, CalendarDays, FileSpreadsheet, Landmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { NoticeTimeline } from "@/components/landing/NoticeTimeline";
 import { IbanAlertPreview } from "@/components/landing/IbanAlertPreview";
@@ -21,7 +21,6 @@ const MORE = [
   { icon: FileSpreadsheet, text: "I contratti che hai già in Excel, caricati tutti insieme con un modello pronto." },
   { icon: Archive, text: "Ogni contratto con i suoi PDF, le fatture e lo storico delle modifiche." },
   { icon: Landmark, text: "Il file per il bonifico SEPA, pronto da caricare in banca." },
-  { icon: Download, text: "Tutti i tuoi dati esportabili in un file, quando vuoi." },
 ];
 
 function Tile({ title, children, visual, className = "" }: {
@@ -54,12 +53,11 @@ export function Features() {
         </div>
 
         <div className="mt-12 grid gap-5 md:grid-cols-6">
-          <Tile className="md:col-span-6" title="Calcola l'ultimo giorno per disdire" visual={<NoticeTimeline />}>
-            Da durata e preavviso di ogni contratto. Le email partono 30, 14, 7 e 1 giorno prima, e ogni lunedì arriva il
-            riepilogo della settimana.
+          <Tile className="md:col-span-6" title="Ultimo giorno per disdire, calcolato per ogni contratto" visual={<NoticeTimeline />}>
+            Da durata e preavviso di ogni contratto, con un riepilogo ogni lunedì.
           </Tile>
 
-          <Tile className="md:col-span-3" title="Segnala un IBAN cambiato" visual={<IbanAlertPreview />}>
+          <Tile className="md:col-span-3" title="Ti avvisa se cambia l'IBAN" visual={<IbanAlertPreview />}>
             Se una fattura chiede il pagamento su un conto diverso da quello verificato, l&apos;avviso va in cima alla Home.
           </Tile>
 

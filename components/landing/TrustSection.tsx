@@ -28,7 +28,7 @@ const PROMISES = [
   {
     icon: ShieldCheck,
     title: "Nessuna AI esterna sui documenti",
-    text: "I tuoi documenti non vengono inviati a servizi di intelligenza artificiale di terze parti.",
+    text: "Restano sui server di BCM: non vengono mandati a servizi di intelligenza artificiale di altre aziende.",
   },
 ];
 

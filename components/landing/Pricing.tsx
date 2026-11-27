@@ -48,7 +48,6 @@ const PLANS = [
     features: [
       "Fino a 200 contratti",
       "Tutte le funzionalità del piano Free",
-      "Pensato per aziende con più contratti da gestire",
     ],
   },
 ];
@@ -60,7 +59,7 @@ export function Pricing() {
         <div className="mb-12 max-w-2xl">
           <h2 className="font-display text-balance text-4xl font-medium tracking-[-0.01em] text-foreground md:text-5xl">Piani</h2>
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-            Puoi iniziare gratis. Il piano Pro è in definizione: scrivici se ti interessa.
+            Puoi iniziare subito con il piano gratuito.
           </p>
         </div>
 

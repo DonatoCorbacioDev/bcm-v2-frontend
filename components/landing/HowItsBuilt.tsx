@@ -2,13 +2,15 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import Link from "next/link";
 
-// For technical readers (recruiters, a customer's IT). Every line is a fact
+// For technical readers (recruiters, a customer's IT), on /come-e-fatto;
+// the homepage keeps one plain line (BuiltBy). Every line is a fact
 // checked in the repositories on 25/11/2026; update it when the facts move:
 // versions in the pom/package/requirements, ASVS in bcm-v2-backend
 // docs/SECURITY.md, the test counts from the three suites (2809 unit + 181
 // integration backend, 1627 frontend), the region in bcm-v2-docker.
-const FACTS = [
+export const FACTS = [
   {
     title: "Backend",
     text: "Java 21 e Spring Boot 4, API REST con MySQL e Redis.",
@@ -35,29 +37,36 @@ const FACTS = [
   },
 ];
 
-export function HowItsBuilt() {
+/** The technical facts, one per item, under the page's h1. */
+export function HowItsBuiltFacts() {
   return (
-    <section id="how-its-built" className="scroll-mt-16 border-t border-border py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="grid gap-10 md:grid-cols-12 md:gap-12">
-          <div className="md:col-span-4">
-            <h2 className="font-display text-balance text-4xl font-medium tracking-[-0.01em] text-foreground md:text-5xl">
-              Come è fatto
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-              BCM è progettato, scritto e messo in produzione da una persona, Donato Corbacio.
-            </p>
-          </div>
+    <ul className="grid gap-x-10 sm:grid-cols-2">
+      {FACTS.map(({ title, text }) => (
+        <li key={title} className="border-t border-border py-6">
+          <h2 className="font-semibold text-foreground">{title}</h2>
+          <p className="mt-1.5 leading-relaxed text-muted-foreground">{text}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
-          <ul className="grid gap-x-10 sm:grid-cols-2 md:col-span-8">
-            {FACTS.map(({ title, text }) => (
-              <li key={title} className="border-t border-border py-6">
-                <h3 className="font-semibold text-foreground">{title}</h3>
-                <p className="mt-1.5 leading-relaxed text-muted-foreground">{text}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
+/**
+ * The homepage's line about who builds BCM, in words a small company reads;
+ * the stack and the checks are one click away for whoever wants them.
+ */
+export function BuiltBy() {
+  return (
+    <section id="how-its-built" className="scroll-mt-16 border-t border-border py-12 md:py-16">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">
+          BCM è progettato, scritto e gestito da una persona, Donato Corbacio, con la sicurezza verificata secondo gli
+          standard internazionali OWASP.{" "}
+          <Link href="/come-e-fatto" className="font-medium text-primary underline-offset-4 hover:underline">
+            Vedi come è fatto
+          </Link>
+          .
+        </p>
       </div>
     </section>
   );

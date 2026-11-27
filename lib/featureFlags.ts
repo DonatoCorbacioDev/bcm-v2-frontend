@@ -9,3 +9,12 @@
  * (field extraction, clause risk). Off unless NEXT_PUBLIC_EXPERIMENTAL_AI=true.
  */
 export const SHOW_EXPERIMENTAL_AI = process.env.NEXT_PUBLIC_EXPERIMENTAL_AI === "true";
+
+/**
+ * Kept for larger organizations, hidden until one asks: contract templates
+ * (a small company receives its suppliers' contracts, it rarely writes them)
+ * and the approval workflow (draft, review, approve). A contract already in
+ * review still shows its Approve/Reject buttons, so nothing is ever stuck.
+ */
+export const SHOW_CONTRACT_TEMPLATES = process.env.NEXT_PUBLIC_CONTRACT_TEMPLATES === "true";
+export const SHOW_APPROVAL_WORKFLOW = process.env.NEXT_PUBLIC_APPROVAL_WORKFLOW === "true";

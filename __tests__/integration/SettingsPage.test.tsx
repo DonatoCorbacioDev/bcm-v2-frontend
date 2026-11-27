@@ -14,7 +14,7 @@ jest.mock('@/store/authStore', () => ({
 
 import { useAuthStore } from '@/store/authStore';
 import SettingsPage from '@/app/(dashboard)/settings/page';
-import { SETTINGS_SECTIONS } from '@/components/settings/settingsSections';
+import { HIDDEN_ROUTES, SETTINGS_SECTIONS } from '@/components/settings/settingsSections';
 import { SETTINGS_ROUTES, navGroups } from '@/components/layout/sidebarNavConfig';
 import { uid } from "../mocks/ids";
 
@@ -58,14 +58,15 @@ describe('the short menu leaves no page unreachable', () => {
   const inMenu = navGroups.flatMap((group) => group.items.map((item) => item.href));
 
   it('lists on the settings page exactly the routes that keep Impostazioni highlighted', () => {
-    expect([...listed].sort()).toEqual([...SETTINGS_ROUTES].sort());
+    expect([...listed].sort()).toEqual(SETTINGS_ROUTES.filter((r) => !HIDDEN_ROUTES.includes(r)).sort());
   });
 
   it('reaches every dashboard page from the menu or from Impostazioni', () => {
     const dashboardDir = path.join(process.cwd(), 'app', '(dashboard)');
     // Detail pages ([id]) are reached from their list; onboarding and profile
     // from the first-run flow and the header.
-    const notInNavigation = new Set(['/onboarding', '/profile']);
+    // Pages switched off by a feature flag are hidden on purpose.
+    const notInNavigation = new Set(['/onboarding', '/profile', ...HIDDEN_ROUTES]);
     const topLevelPages = fs.readdirSync(dashboardDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory() && fs.existsSync(path.join(dashboardDir, entry.name, 'page.tsx')))
       .map((entry) => `/${entry.name}`)

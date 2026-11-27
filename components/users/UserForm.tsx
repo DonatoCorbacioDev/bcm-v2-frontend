@@ -3,6 +3,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 
+import { SHOW_APPROVAL_WORKFLOW } from "@/lib/featureFlags";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
@@ -228,8 +229,8 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
         </label>
       </div>
 
-      {/* Can approve contracts checkbox */}
-      <div className="flex items-center space-x-2">
+      {/* Can approve contracts checkbox: only with the approval workflow on. */}
+      {SHOW_APPROVAL_WORKFLOW && (<div className="flex items-center space-x-2">
         <Controller
           name="canApproveContracts"
           control={control}
@@ -247,7 +248,7 @@ export default function UserForm({ onClose, onSuccess, user }: UserFormProps) {
         >
           Può approvare contratti
         </label>
-      </div>
+      </div>)}
 
       {/* Actions */}
       <div className="flex justify-end gap-3 pt-4">

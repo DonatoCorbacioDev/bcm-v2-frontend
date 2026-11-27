@@ -34,6 +34,7 @@ import api from "@/lib/api";
 import { BILLING_FREQUENCY_LABELS, CONTRACT_STATUS_LABELS, getContractStatusVariant, WORKFLOW_STAGE_CONFIG } from "@/lib/statusConfig";
 import { ExpiringSoonBadge } from "@/components/contracts/ExpiringSoonBadge";
 import { NextActionCard } from "@/components/contracts/NextActionCard";
+import { SHOW_APPROVAL_WORKFLOW } from "@/lib/featureFlags";
 import { IbanCheckDialog, type IbanCheckSupplier } from "@/components/contracts/IbanCheckDialog";
 import { ContractTimeline } from "@/components/contracts/ContractTimeline";
 import { AddToCalendarMenu } from "@/components/calendar/AddToCalendarMenu";
@@ -545,7 +546,7 @@ export default function ContractDetailPage() {
           <p className="text-muted-foreground mt-1">{contract.counterparty?.name ?? "N/D"}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          {contract.workflowStage === "DRAFT" && isOwnContract && (
+          {SHOW_APPROVAL_WORKFLOW && contract.workflowStage === "DRAFT" && isOwnContract && (
             <Button
               variant="outline"
               size="sm"
@@ -664,7 +665,7 @@ export default function ContractDetailPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant={getContractStatusVariant(contract.status)}>{CONTRACT_STATUS_LABELS[contract.status] ?? contract.status}</Badge>
               <ExpiringSoonBadge contract={contract} showDays />
-              {contract.workflowStage && contract.workflowStage !== "DRAFT" && (
+              {contract.workflowStage && contract.workflowStage !== "DRAFT" && (SHOW_APPROVAL_WORKFLOW || contract.workflowStage === "IN_REVIEW") && (
                 <Badge variant={(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).variant}>
                   {(WORKFLOW_STAGE_CONFIG[contract.workflowStage] ?? WORKFLOW_STAGE_CONFIG.DRAFT).label}
                 </Badge>

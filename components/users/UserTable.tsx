@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { SHOW_APPROVAL_WORKFLOW } from "@/lib/featureFlags";
 import { RowActions } from "@/components/shared/RowActions";
 import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -217,7 +218,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                 <TableHead className="hidden md:table-cell">Responsabile</TableHead>
                 <TableHead className="hidden md:table-cell">Ruolo</TableHead>
                 <TableHead>Email confermata</TableHead>
-                <TableHead className="hidden md:table-cell">Può approvare</TableHead>
+                {SHOW_APPROVAL_WORKFLOW && <TableHead className="hidden md:table-cell">Può approvare</TableHead>}
                 <TableHead className="hidden md:table-cell">Verifica in 2 passaggi</TableHead>
                 <TableHead className="hidden lg:table-cell">Data creazione</TableHead>
                 <TableHead>Azioni</TableHead>
@@ -234,11 +235,13 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                       {user.verified ? "Sì" : "No"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <Badge variant={user.canApproveContracts ? "success" : "secondary"}>
-                      {user.canApproveContracts ? "Sì" : "No"}
-                    </Badge>
-                  </TableCell>
+                  {SHOW_APPROVAL_WORKFLOW && (
+                    <TableCell className="hidden md:table-cell">
+                      <Badge variant={user.canApproveContracts ? "success" : "secondary"}>
+                        {user.canApproveContracts ? "Sì" : "No"}
+                      </Badge>
+                    </TableCell>
+                  )}
                   <TableCell className="hidden md:table-cell">
                     <Badge variant={user.twoFactorEnabled ? "success" : "secondary"}>
                       {user.twoFactorEnabled ? "Attiva" : "No"}

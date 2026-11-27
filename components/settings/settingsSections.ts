@@ -14,6 +14,7 @@ import {
   Shield,
   type LucideIcon,
 } from "lucide-react";
+import { SHOW_CONTRACT_TEMPLATES } from "@/lib/featureFlags";
 
 export interface SettingsLink {
   readonly href: string;
@@ -27,7 +28,10 @@ export interface SettingsLink {
  * unreachable. Keep in sync with SETTINGS_ROUTES in sidebarNavConfig (a test
  * checks it).
  */
-export const SETTINGS_SECTIONS: { id: string; title: string; links: SettingsLink[] }[] = [
+/** Pages switched off by a feature flag: still in the code, not listed. */
+export const HIDDEN_ROUTES: readonly string[] = SHOW_CONTRACT_TEMPLATES ? [] : ["/contract-templates"];
+
+const ALL_SECTIONS: { id: string; title: string; links: SettingsLink[] }[] = [
   {
     id: "access",
     title: "Organizzazione e accessi",
@@ -71,3 +75,8 @@ export const SETTINGS_SECTIONS: { id: string; title: string; links: SettingsLink
     ],
   },
 ];
+
+export const SETTINGS_SECTIONS = ALL_SECTIONS.map((section) => ({
+  ...section,
+  links: section.links.filter((link) => !HIDDEN_ROUTES.includes(link.href)),
+})).filter((section) => section.links.length > 0);

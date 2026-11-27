@@ -5,6 +5,12 @@ import type { User, Manager } from '@/types';
 import { createWrapper } from '../mocks/wrapper';
 import UserTable from '@/components/users/UserTable';
 
+// These tests cover the approval workflow, off by default (lib/featureFlags): switched on here.
+jest.mock('@/lib/featureFlags', () => ({
+  ...jest.requireActual('@/lib/featureFlags'),
+  SHOW_APPROVAL_WORKFLOW: true,
+}));
+
 jest.mock('sonner', () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

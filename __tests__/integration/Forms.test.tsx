@@ -13,6 +13,12 @@ const conflict = () =>
 
 // ─── Module mocks ────────────────────────────────────────────────────────────
 
+// These tests cover the approval workflow, off by default (lib/featureFlags): switched on here.
+jest.mock('@/lib/featureFlags', () => ({
+  ...jest.requireActual('@/lib/featureFlags'),
+  SHOW_APPROVAL_WORKFLOW: true,
+}));
+
 jest.mock('sonner', () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));

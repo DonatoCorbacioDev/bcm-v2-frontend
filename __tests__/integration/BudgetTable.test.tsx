@@ -112,20 +112,20 @@ describe('BudgetTable', () => {
 
   it('filters budgets by area on search', async () => {
     render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca per area/i), 'IT');
+    await userEvent.type(screen.getByPlaceholderText(/cerca per reparto/i), 'IT');
     expect(screen.getByText('IT')).toBeInTheDocument();
     expect(screen.queryByText('Sales')).not.toBeInTheDocument();
   });
 
   it('shows no match message when search has no results', async () => {
     render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca per area/i), 'xyz-no-match');
+    await userEvent.type(screen.getByPlaceholderText(/cerca per reparto/i), 'xyz-no-match');
     expect(screen.getByText(/nessun budget corrisponde alla ricerca/i)).toBeInTheDocument();
   });
 
   it('shows Clear button when search is active', async () => {
     render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca per area/i), 'IT');
+    await userEvent.type(screen.getByPlaceholderText(/cerca per reparto/i), 'IT');
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
@@ -140,13 +140,13 @@ describe('BudgetTable', () => {
       const { container } = render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
       expect(screen.getByText('85%')).toBeInTheDocument();
-      expect(container.querySelector('.bg-\\[var\\(--status-amber-fg\\)\\]')).toBeInTheDocument();
+      expect(container.querySelector('.bg-\\[var\\(--status-amber-mark\\)\\]')).toBeInTheDocument();
     } finally {
       jest.useRealTimers();
     }
   });
 
-  it("uses the green tone for a closed year's cost budget within its target", () => {
+  it("uses the in-line tone (blue bar) for a closed year's cost budget within its target", () => {
     const closedYear: Budget = {
       id: uid(3), businessAreaId: uid(3), areaName: 'Marketing', category: 'COST',
       year: 2025, targetAmount: 10000, actualAmount: 8500, percentUsed: 85,
@@ -154,7 +154,7 @@ describe('BudgetTable', () => {
     (useBudgets as jest.Mock).mockReturnValue({ data: [closedYear], isLoading: false, isError: false });
     const { container } = render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(container.querySelector('.bg-\\[var\\(--status-green-fg\\)\\]')).toBeInTheDocument();
+    expect(container.querySelector('.bg-primary')).toBeInTheDocument();
   });
 
   it('uses the green tone for a revenue budget that exceeds 100% (target beaten is good news)', () => {
@@ -168,7 +168,7 @@ describe('BudgetTable', () => {
     expect(screen.getByText('127%')).toHaveClass('text-[var(--status-green-fg)]');
   });
 
-  it('uses the red tone for a cost budget that exceeds 100% (over budget is bad news)', () => {
+  it('uses amber, not red, for a cost budget that exceeds 100% (a warning, not a deadline)', () => {
     const overBudget: Budget = {
       id: uid(5), businessAreaId: uid(5), areaName: 'Ops', category: 'COST',
       year: 2025, targetAmount: 10000, actualAmount: 12700, percentUsed: 127,
@@ -176,7 +176,7 @@ describe('BudgetTable', () => {
     (useBudgets as jest.Mock).mockReturnValue({ data: [overBudget], isLoading: false, isError: false });
     render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-red-fg)]');
+    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-amber-fg)]');
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -237,8 +237,8 @@ describe('BudgetTable', () => {
 
   it('clears the search field when Clear is clicked', async () => {
     render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca per area/i), 'IT');
+    await userEvent.type(screen.getByPlaceholderText(/cerca per reparto/i), 'IT');
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
-    expect(screen.getByPlaceholderText(/cerca per area/i)).toHaveValue('');
+    expect(screen.getByPlaceholderText(/cerca per reparto/i)).toHaveValue('');
   });
 });

@@ -157,7 +157,7 @@ export default function OrganizationPage() {
   if (!isAdmin) return null;
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-5xl space-y-6 lg:[&_[data-slot=card]]:grid lg:[&_[data-slot=card]]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:[&_[data-slot=card]]:gap-x-8 lg:[&_[data-slot=card]]:items-start lg:[&_[data-slot=card-header]]:pr-0 lg:[&_[data-slot=card-content]]:col-start-2 lg:[&_[data-slot=card-content]]:row-start-1 lg:[&_[data-slot=card-content]]:row-span-2 lg:[&_[data-slot=card-content]]:pl-0 lg:[&_[data-slot=card-footer]]:col-start-2">
       <PageHeader
         title="Organizzazione"
         description="I dati della tua azienda, il piano, il conto da cui paghi i fornitori e i tuoi dati."
@@ -174,11 +174,11 @@ export default function OrganizationPage() {
             <p className="text-sm text-muted-foreground">Caricamento...</p>
           ) : (
             <>
-              <div className="flex items-center justify-between py-2 border-b border-border">
+              <div className="grid gap-1 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center border-b border-border">
                 <span className="text-sm text-muted-foreground">Nome</span>
                 <span className="text-sm font-medium">{organization?.name}</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b border-border">
+              <div className="grid gap-1 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center border-b border-border">
                 <span className="text-sm text-muted-foreground">Piano</span>
                 <span className="flex items-center gap-3">
                   <Badge variant="secondary">{organization?.subscriptionTier ? tierLabel(organization.subscriptionTier) : ""}</Badge>
@@ -202,7 +202,7 @@ export default function OrganizationPage() {
                 </span>
               </div>
               {usage && (
-                <div className="flex items-center justify-between py-2">
+                <div className="grid gap-1 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
                   <span className="text-sm text-muted-foreground">Contratti</span>
                   <span className="text-sm font-medium">
                     {usage.contractsLimit === null
@@ -225,7 +225,7 @@ export default function OrganizationPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2 text-sm">
-            <div className="flex items-center justify-between py-1">
+            <div className="grid gap-1 py-1 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
               <span className="text-muted-foreground">IBAN attuale</span>
               <span className="flex items-center gap-2">
                 {organization?.iban ? <span className="font-mono">{organization.iban}</span> : <span className="text-muted-foreground">Non impostato</span>}
@@ -240,7 +240,7 @@ export default function OrganizationPage() {
                 )}
               </span>
             </div>
-            <div className="flex items-center justify-between py-1">
+            <div className="grid gap-1 py-1 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
               <span className="text-muted-foreground">BIC attuale</span>
               <span className="flex items-center gap-2">
                 {organization?.bic ? <span className="font-mono">{organization.bic}</span> : <span className="text-muted-foreground">Non impostato</span>}

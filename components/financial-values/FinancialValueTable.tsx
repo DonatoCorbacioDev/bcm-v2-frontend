@@ -359,7 +359,7 @@ export default function FinancialValueTable({ onEditClick, year = null, areaId =
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Cerca per controparte, contratto, area o importo..."
+            placeholder="Cerca per controparte, contratto, reparto o importo..."
             aria-label="Cerca movimenti"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

@@ -189,7 +189,7 @@ export default function TwoFactorAuthCard() {
                   <img src={qrDataUrl} alt="QR code per l'app di autenticazione" className="h-40 w-40" />
                 )}
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">
+                  <p className="text-xs text-muted-foreground font-medium mb-1">
                     Chiave manuale
                   </p>
                   <code className="text-sm font-mono bg-muted px-2 py-1 rounded break-all">{secret}</code>

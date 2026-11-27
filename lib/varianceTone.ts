@@ -28,24 +28,18 @@ export function expectedBudgetPercent(year: number, today: Date = new Date()): n
 /**
  * Color for "percent of budget used" (Budget / FinancialValueSummary),
  * measured against `expectedPercent` (see expectedBudgetPercent; 100 = the
- * whole yearly target). Direction depends on the budget's category:
- * - REVENUE: green once on pace, amber within 80% of the pace, red below.
- * - COST: red over the yearly budget, amber when spending ahead of the
- *   pace, green otherwise.
+ * whole yearly target), with BCM's one meaning per colour: blue bar when in
+ * line, amber when off the pace. Never red: in BCM red is a date to act by or
+ * a payment to stop, and a budget off its pace is a warning.
+ * - REVENUE: in line once on pace, amber below it.
+ * - COST: in line up to the pace, amber ahead of it (and over the budget).
  */
 export function budgetUsageTone(percentUsed: number, category: "REVENUE" | "COST", expectedPercent = 100): Tone {
-  const GREEN: Tone = { bar: "bg-[var(--status-green-fg)]", text: "text-[var(--status-green-fg)]" };
-  const AMBER: Tone = { bar: "bg-[var(--status-amber-fg)]", text: "text-[var(--status-amber-fg)]" };
-  const RED: Tone = { bar: "bg-[var(--status-red-fg)]", text: "text-[var(--status-red-fg)]" };
+  const IN_LINE: Tone = { bar: "bg-primary", text: "text-[var(--status-green-fg)]" };
+  const AMBER: Tone = { bar: "bg-[var(--status-amber-mark)]", text: "text-[var(--status-amber-fg)]" };
 
-  if (category === "REVENUE") {
-    if (percentUsed >= expectedPercent) return GREEN;
-    if (percentUsed >= expectedPercent * 0.8) return AMBER;
-    return RED;
-  }
-  if (percentUsed > 100) return RED;
-  if (percentUsed > expectedPercent) return AMBER;
-  return GREEN;
+  if (category === "REVENUE") return percentUsed >= expectedPercent ? IN_LINE : AMBER;
+  return percentUsed > expectedPercent ? AMBER : IN_LINE;
 }
 
 /**

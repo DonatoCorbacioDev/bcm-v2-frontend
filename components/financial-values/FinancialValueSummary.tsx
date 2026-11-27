@@ -6,7 +6,6 @@
  */
 import { useMemo } from "react";
 import Link from "next/link";
-import KPICard from "@/components/dashboard/KPICard";
 import { budgetUsageTone, expectedBudgetPercent } from "@/lib/varianceTone";
 import type { Budget, FinancialValue } from "@/types";
 import { formatMoney } from "@/lib/formatMoney";
@@ -127,7 +126,6 @@ export default function FinancialValueSummary({
     };
   }, [financialValues, year]);
 
-  const netMargin = revenueTotal - costTotal;
   const formatTotal = (amount: number) => (isError ? "N/D" : formatMoney(amount, { decimals: 0 }));
 
   const expectedPercent = year === null ? 100 : expectedBudgetPercent(year);
@@ -154,26 +152,19 @@ export default function FinancialValueSummary({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <KPICard
-          title={year === null ? "Ricavi (tutti gli anni)" : `Ricavi ${year}`}
-          value={formatTotal(revenueTotal)}
-          variant="success"
-          isLoading={isLoading}
-        />
-        <KPICard
-          title={year === null ? "Costi (tutti gli anni)" : `Costi ${year}`}
-          value={formatTotal(costTotal)}
-          variant="danger"
-          isLoading={isLoading}
-        />
-        <KPICard
-          title={year === null ? "Margine netto (tutti gli anni)" : `Margine netto ${year}`}
-          value={formatTotal(netMargin)}
-          variant={isError || netMargin >= 0 ? "success" : "danger"}
-          isLoading={isLoading}
-        />
-      </div>
+      {/* The same quiet strip as "Costi e budget": costs and revenues, no
+          "net margin" (with suppliers only it is always negative and frightens
+          for nothing), and no red: having costs is normal. */}
+      <dl className="grid divide-y divide-border rounded-xl border border-border bg-card sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+        <div className="px-5 py-4">
+          <dt className="text-sm text-muted-foreground">{year === null ? "Costi (tutti gli anni)" : `Costi ${year}`}</dt>
+          <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground">{isLoading ? <span role="status" aria-label="Caricamento">…</span> : formatTotal(costTotal)}</dd>
+        </div>
+        <div className="px-5 py-4">
+          <dt className="text-sm text-muted-foreground">{year === null ? "Ricavi (tutti gli anni)" : `Ricavi ${year}`}</dt>
+          <dd className="mt-1 text-2xl font-semibold tabular-nums text-foreground">{isLoading ? <span role="status" aria-label="Caricamento">…</span> : formatTotal(revenueTotal)}</dd>
+        </div>
+      </dl>
 
       {year !== null && yearBudgets.length > 0 && (
         <div className="bg-card rounded-lg border border-border p-4">
@@ -195,7 +186,7 @@ export default function FinancialValueSummary({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
             {revenueBudgets.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--status-green-fg)] mb-2">
+                <h3 className="mb-2 text-sm font-medium text-foreground">
                   Ricavi
                 </h3>
                 <div className="space-y-2">
@@ -213,7 +204,7 @@ export default function FinancialValueSummary({
             )}
             {costBudgets.length > 0 && (
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--status-red-fg)] mb-2">
+                <h3 className="mb-2 text-sm font-medium text-foreground">
                   Costi
                 </h3>
                 <div className="space-y-2">

@@ -59,14 +59,14 @@ describe('FinancialValueSummary', () => {
     render(<FinancialValueSummary financialValues={[]} budgets={[]} year={2026} isAdmin={false} isLoading />);
 
     expect(screen.queryByText(eur(0))).not.toBeInTheDocument();
-    expect(screen.getAllByRole('status')).toHaveLength(3);
+    expect(screen.getAllByRole('status')).toHaveLength(2);
   });
 
   it('shows N/D instead of 0 € when the values failed to load', () => {
     render(<FinancialValueSummary financialValues={[]} budgets={[]} year={2026} isAdmin={false} isError />);
 
     expect(screen.queryByText(eur(0))).not.toBeInTheDocument();
-    expect(screen.getAllByText('N/D')).toHaveLength(3);
+    expect(screen.getAllByText('N/D')).toHaveLength(2);
   });
 
   it('sums revenue and cost for the selected year only', () => {
@@ -81,8 +81,8 @@ describe('FinancialValueSummary', () => {
     expect(screen.getByText(eur(1000))).toBeInTheDocument();
     expect(screen.getByText('Costi 2026')).toBeInTheDocument();
     expect(screen.getByText(eur(400))).toBeInTheDocument();
-    expect(screen.getByText('Margine netto 2026')).toBeInTheDocument();
-    expect(screen.getByText(eur(600))).toBeInTheDocument();
+    // No "net margin": with suppliers only it is always negative and frightens for nothing.
+    expect(screen.queryByText(/Margine netto/)).not.toBeInTheDocument();
   });
 
   it('aggregates across all years when year is null', () => {
@@ -99,18 +99,11 @@ describe('FinancialValueSummary', () => {
     expect(screen.getByText(eur(200))).toBeInTheDocument();
   });
 
-  it('shows a danger variant net margin when costs exceed revenue', () => {
-    const values = [
-      fv({ id: uid(1), category: 'REVENUE', financialAmount: 100 }),
-      fv({ id: uid(2), category: 'COST', financialAmount: 300 }),
-    ];
-    render(
-      <FinancialValueSummary financialValues={values} budgets={[]} year={2026} isAdmin={false} />
-    );
+  it('shows costs in a neutral colour: having costs is normal, not an alarm', () => {
+    const values = [fv({ id: uid(2), category: 'COST', financialAmount: 300 })];
+    render(<FinancialValueSummary financialValues={values} budgets={[]} year={2026} isAdmin={false} />);
 
-    expect(screen.getByText(eur(-200))).toBeInTheDocument();
-    const marginCard = screen.getByText('Margine netto 2026').closest('div')?.parentElement?.parentElement;
-    expect(marginCard).toHaveClass('border-l-[var(--status-red-fg)]');
+    expect(screen.getByText(eur(300))).toHaveClass('text-foreground');
   });
 
   it('does not show the budget section when no year is selected', () => {
@@ -206,7 +199,7 @@ describe('FinancialValueSummary', () => {
     expect(bar).toHaveStyle({ width: '100%' });
   });
 
-  it('uses the green tone for a revenue budget over 100% achieved (target exceeded is good news)', () => {
+  it('uses the in-line tone for a revenue budget over 100% achieved (target exceeded is good news)', () => {
     const { container } = render(
       <FinancialValueSummary
         financialValues={[]}
@@ -218,10 +211,10 @@ describe('FinancialValueSummary', () => {
 
     expect(screen.getByText('127%')).toHaveClass('text-[var(--status-green-fg)]');
     const bar = container.querySelector('[style*="width"]');
-    expect(bar).toHaveClass('bg-[var(--status-green-fg)]');
+    expect(bar).toHaveClass('bg-primary');
   });
 
-  it('uses the red tone for a cost budget over 100% used (over budget is bad news)', () => {
+  it('uses amber, not red, for a cost budget over 100% used (a warning, not a deadline)', () => {
     const { container } = render(
       <FinancialValueSummary
         financialValues={[]}
@@ -231,9 +224,9 @@ describe('FinancialValueSummary', () => {
       />
     );
 
-    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-red-fg)]');
+    expect(screen.getByText('127%')).toHaveClass('text-[var(--status-amber-fg)]');
     const bar = container.querySelector('[style*="width"]');
-    expect(bar).toHaveClass('bg-[var(--status-red-fg)]');
+    expect(bar).toHaveClass('bg-[var(--status-amber-mark)]');
   });
 
   it('uses the amber tone for a budget between 80% and 100% used', () => {
@@ -248,7 +241,7 @@ describe('FinancialValueSummary', () => {
 
     expect(screen.getByText('85%')).toHaveClass('text-[var(--status-amber-fg)]');
     const bar = container.querySelector('[style*="width"]');
-    expect(bar).toHaveClass('bg-[var(--status-amber-fg)]');
+    expect(bar).toHaveClass('bg-[var(--status-amber-mark)]');
   });
 
   it('calls onAreaClick with the area id and name when a budget row is clicked', async () => {
@@ -333,7 +326,7 @@ describe('FinancialValueSummary — pace within the year', () => {
 
     expect(screen.getByText('90%')).toHaveClass('text-[var(--status-green-fg)]');
     expect(screen.getByText('70%')).toHaveClass('text-[var(--status-amber-fg)]');
-    expect(screen.getByText('18%')).toHaveClass('text-[var(--status-red-fg)]');
+    expect(screen.getByText('18%')).toHaveClass('text-[var(--status-amber-fg)]');
   });
 
   it('describes each row for screen readers, including the expected share', () => {

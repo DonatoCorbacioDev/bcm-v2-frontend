@@ -11,7 +11,8 @@ test.describe("Accessibility: short menu and settings page", () => {
   test("settings page has no detectable axe violations and reaches the moved pages", async ({ page }) => {
     await page.goto("/settings");
     await expect(page.getByRole("heading", { level: 1, name: "Impostazioni" })).toBeVisible();
-    const nav = page.getByRole("navigation", { name: "Navigazione principale" }).first();
+    // Impostazioni sits at the foot of the menu, apart from the everyday pages.
+    const nav = page.getByRole("navigation", { name: "Impostazioni e aiuto" }).first();
     await expect(nav.getByRole("link", { name: "Impostazioni" })).toHaveAttribute("aria-current", "page");
 
     const results = await new AxeBuilder({ page }).analyze();

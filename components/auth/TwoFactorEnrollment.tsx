@@ -142,7 +142,7 @@ export function TwoFactorEnrollment({ setupToken, onComplete, onCancel, cancelLa
             <img src={qrDataUrl} alt="Codice QR per l'app di autenticazione" className="h-40 w-40 mx-auto" />
           )}
           <div>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">Chiave manuale</p>
+            <p className="text-xs text-muted-foreground font-medium mb-1">Chiave manuale</p>
             <code className="text-sm font-mono bg-muted px-2 py-1 rounded break-all">{setup.data.secret}</code>
           </div>
           <div className="space-y-1.5">

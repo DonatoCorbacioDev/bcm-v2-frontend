@@ -94,7 +94,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Cerca per area..."
+            placeholder="Cerca per reparto..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"

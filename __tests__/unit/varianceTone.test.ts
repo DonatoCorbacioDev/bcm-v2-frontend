@@ -1,69 +1,41 @@
 import { budgetUsageTone, expectedBudgetPercent, invoicingVarianceTone, invoicingVarianceVariant } from '@/lib/varianceTone';
 
-const GREEN = { bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' };
-const AMBER = { bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' };
-const RED = { bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' };
+const IN_LINE = { bar: 'bg-primary', text: 'text-[var(--status-green-fg)]' };
+const AMBER = { bar: 'bg-[var(--status-amber-mark)]', text: 'text-[var(--status-amber-fg)]' };
 
+// One meaning per colour: blue bar in line, amber off the pace, never red
+// (red is for a date to act by or a payment to stop).
 describe('budgetUsageTone', () => {
-  describe('COST budgets (higher usage is worse)', () => {
-    it('is red when over 100% used', () => {
-      expect(budgetUsageTone(101, 'COST')).toEqual({ bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' });
+  describe('COST budgets (spending ahead of the pace is the warning)', () => {
+    it("is in line up to 100% of a closed year's budget", () => {
+      expect(budgetUsageTone(0, 'COST')).toEqual(IN_LINE);
+      expect(budgetUsageTone(100, 'COST')).toEqual(IN_LINE);
     });
 
-    it("is green up to 100% of a closed year's budget", () => {
-      expect(budgetUsageTone(0, 'COST')).toEqual(GREEN);
-      expect(budgetUsageTone(85, 'COST')).toEqual(GREEN);
-      expect(budgetUsageTone(100, 'COST')).toEqual(GREEN);
+    it('is amber over the budget, whatever the pace, and never red', () => {
+      expect(budgetUsageTone(101, 'COST')).toEqual(AMBER);
+      expect(budgetUsageTone(101, 'COST', 50)).toEqual(AMBER);
     });
 
-    it("is amber when spending ahead of the year's pace", () => {
+    it("is amber when spending ahead of the year's pace, in line at or behind it", () => {
       expect(budgetUsageTone(60, 'COST', 50)).toEqual(AMBER);
-    });
-
-    it('is green when spending at or behind the pace', () => {
-      expect(budgetUsageTone(50, 'COST', 50)).toEqual(GREEN);
-      expect(budgetUsageTone(26, 'COST', 84)).toEqual(GREEN);
-    });
-
-    it('stays red over the yearly budget whatever the pace', () => {
-      expect(budgetUsageTone(101, 'COST', 50)).toEqual(RED);
+      expect(budgetUsageTone(50, 'COST', 50)).toEqual(IN_LINE);
+      expect(budgetUsageTone(26, 'COST', 84)).toEqual(IN_LINE);
     });
   });
 
-  describe('REVENUE budgets (higher achievement is better)', () => {
-    it('is green at or above 100% achieved, including well over target', () => {
-      expect(budgetUsageTone(100, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
-      expect(budgetUsageTone(127, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-green-fg)]', text: 'text-[var(--status-green-fg)]' });
+  describe('REVENUE budgets (falling behind the pace is the warning)', () => {
+    it('is in line at or above the target, including well over it', () => {
+      expect(budgetUsageTone(100, 'REVENUE')).toEqual(IN_LINE);
+      expect(budgetUsageTone(127, 'REVENUE')).toEqual(IN_LINE);
     });
 
-    it('is amber between 80% and 100% achieved', () => {
-      expect(budgetUsageTone(80, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
-      expect(budgetUsageTone(99, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-amber-fg)]', text: 'text-[var(--status-amber-fg)]' });
+    it('is amber below the pace, and never red', () => {
+      expect(budgetUsageTone(0, 'REVENUE')).toEqual(AMBER);
+      expect(budgetUsageTone(99, 'REVENUE')).toEqual(AMBER);
+      expect(budgetUsageTone(70, 'REVENUE', 84)).toEqual(AMBER);
+      expect(budgetUsageTone(84, 'REVENUE', 84)).toEqual(IN_LINE);
     });
-
-    it('is red under 80% achieved', () => {
-      expect(budgetUsageTone(0, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' });
-      expect(budgetUsageTone(79, 'REVENUE')).toEqual({ bar: 'bg-[var(--status-red-fg)]', text: 'text-[var(--status-red-fg)]' });
-    });
-  });
-});
-
-describe("budgetUsageTone — REVENUE against the year's pace", () => {
-  // 3 Nov: ~84% of the year gone.
-  it('is green once on pace', () => {
-    expect(budgetUsageTone(84, 'REVENUE', 84)).toEqual(GREEN);
-  });
-
-  it('is amber within 80% of the pace', () => {
-    expect(budgetUsageTone(70, 'REVENUE', 84)).toEqual(AMBER);
-  });
-
-  it('is red well behind the pace', () => {
-    expect(budgetUsageTone(18, 'REVENUE', 84)).toEqual(RED);
-  });
-
-  it('is never red in a year that has not started', () => {
-    expect(budgetUsageTone(0, 'REVENUE', 0)).toEqual(GREEN);
   });
 });
 

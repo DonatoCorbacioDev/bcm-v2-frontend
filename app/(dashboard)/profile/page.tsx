@@ -100,7 +100,7 @@ export default function ProfilePage() {
   const isDemo = profile?.demoAccount === true;
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-5xl space-y-6 lg:[&_[data-slot=card]]:grid lg:[&_[data-slot=card]]:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:[&_[data-slot=card]]:gap-x-8 lg:[&_[data-slot=card]]:items-start lg:[&_[data-slot=card-header]]:pr-0 lg:[&_[data-slot=card-content]]:col-start-2 lg:[&_[data-slot=card-content]]:row-start-1 lg:[&_[data-slot=card-content]]:row-span-2 lg:[&_[data-slot=card-content]]:pl-0 lg:[&_[data-slot=card-footer]]:col-start-2">
       <PageHeader title="Il mio profilo" description="Il tuo account, la password, la verifica in 2 passaggi e i tuoi dati." />
 
       {/* Account Info */}
@@ -114,17 +114,17 @@ export default function ProfilePage() {
             <p className="text-sm text-muted-foreground">Caricamento...</p>
           ) : (
             <>
-              <div className="flex items-center justify-between py-2 border-b border-border">
+              <div className="grid gap-1 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center border-b border-border">
                 <span className="text-sm text-muted-foreground">Nome utente</span>
                 <span className="text-sm font-medium">{displayProfile?.username}</span>
               </div>
-              <div className="flex items-center justify-between py-2 border-b border-border">
+              <div className="grid gap-1 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center border-b border-border">
                 <span className="text-sm text-muted-foreground">Ruolo</span>
                 <Badge variant="secondary">
                   {displayProfile?.role ? roleLabel(displayProfile.role) : ""}
                 </Badge>
               </div>
-              <div className="flex items-center justify-between py-2">
+              <div className="grid gap-1 py-2 sm:grid-cols-[11rem_minmax(0,1fr)] sm:items-center">
                 <span className="text-sm text-muted-foreground">Stato account</span>
                 {displayProfile?.verified ? (
                   <Badge variant="success">Verificato</Badge>

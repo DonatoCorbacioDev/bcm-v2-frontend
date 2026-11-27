@@ -103,13 +103,6 @@ describe('MobileSidebar', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls logout and onClose when Esci is clicked', async () => {
-    const onClose = jest.fn();
-    renderMobileSidebar({ isOpen: true, onClose });
-    await userEvent.click(screen.getByRole('button', { name: /esci/i }));
-    expect(mockLogout).toHaveBeenCalledTimes(1);
-    expect(onClose).toHaveBeenCalled();
-  });
 
   it('marks the active route with aria-current="page", sub-pages included', () => {
     (usePathname as jest.Mock).mockReturnValue(`/contracts/${uid(12)}`);
@@ -117,11 +110,6 @@ describe('MobileSidebar', () => {
     expect(screen.getByRole('link', { name: /contratti$/i })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('shows GENERALE and AMMINISTRAZIONE section labels', () => {
-    renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
-    expect(screen.getByText('GENERALE')).toBeInTheDocument();
-    expect(screen.getByText('AMMINISTRAZIONE')).toBeInTheDocument();
-  });
 
   it('shows the organization name for ADMIN', async () => {
     (api.get as jest.Mock).mockResolvedValue({
@@ -131,16 +119,13 @@ describe('MobileSidebar', () => {
     expect(await screen.findByText('Acme S.r.l.')).toBeInTheDocument();
   });
 
-  it('shows the Privacy and Trasparenza AI legal links', () => {
-    renderMobileSidebar({ isOpen: true, onClose: jest.fn() });
-    expect(screen.getByRole('link', { name: /privacy/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /trasparenza ai/i })).toBeInTheDocument();
-  });
-
-  it('calls onClose when a legal footer link is clicked', async () => {
+  it('keeps Privacy and Trasparenza AI under Aiuto, and closes the menu when one is followed', async () => {
     const onClose = jest.fn();
     renderMobileSidebar({ isOpen: true, onClose });
-    await userEvent.click(screen.getByRole('link', { name: /privacy/i }));
+    await userEvent.click(screen.getByRole('button', { name: 'Aiuto' }));
+    expect(await screen.findByRole('menuitem', { name: /trasparenza/i })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('menuitem', { name: /privacy/i }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

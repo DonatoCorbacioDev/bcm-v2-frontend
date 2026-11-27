@@ -13,11 +13,9 @@ import { businessAreasService } from "@/services/businessAreas.service";
 import { managersService } from "@/services/managers.service";
 import { referenceQueryKeys } from "@/hooks/queries/reference.queryKeys";
 import { FirstSteps } from "@/components/dashboard/FirstSteps";
-import { HomeCounters } from "@/components/dashboard/HomeCounters";
 import { HomeCostsCard } from "@/components/dashboard/HomeCostsCard";
-import { HomeAttentionList } from "@/components/dashboard/HomeAttentionList";
+import { HomeInvoices, HomeNow, summarySentence } from "@/components/dashboard/HomeNow";
 import { DeadlineRunway } from "@/components/dashboard/DeadlineRunway";
-import { SupplierInvoicesSummary } from "@/components/dashboard/SupplierInvoicesSummary";
 import { AnalyticsSections } from "@/components/dashboard/AnalyticsSections";
 
 /** The former charts and AI widgets, off until their numbers are reliable (see AnalyticsSections). */
@@ -91,32 +89,17 @@ export default function DashboardPage() {
       </div>
     );
   } else {
-    // A new organization opens on its first steps (administrators only); the
-    // counters come once there is something to count.
-    const isEmpty = attention.items.length === 0 && attention.invoicesToMatchCount === 0;
+    // In order of reading: what to do now, then when (the timeline holds every
+    // deadline, listed once), then the invoices and the year's costs side by side.
     body = (
       <>
         {isAdmin && user?.id && <FirstSteps userId={String(user.id)} name={name ?? ""} />}
-
-        {!isEmpty && (
-          <HomeCounters
-            windowDays={windowDays}
-            dueSoon={attention.dueSoonCount}
-            invoicesToMatch={attention.invoicesToMatchCount}
-            ibanAlerts={attention.ibanAlertsCount}
-          />
-        )}
-
+        <HomeNow items={attention.items} />
         <DeadlineRunway items={attention.items} windowDays={windowDays} today={new Date()} />
-
-        <section aria-labelledby="home-todo" className="space-y-3">
-          <h2 id="home-todo" className="text-lg font-semibold text-foreground">Da fare</h2>
-          <HomeAttentionList items={attention.items} windowDays={windowDays} />
-        </section>
-
-        <SupplierInvoicesSummary invoicesToMatch={attention.invoicesToMatchCount} />
-
-        {isAdmin && <HomeCostsCard />}
+        <div className="grid gap-4 lg:grid-cols-2">
+          <HomeInvoices items={attention.items} />
+          {isAdmin && <HomeCostsCard />}
+        </div>
       </>
     );
   }
@@ -125,7 +108,10 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">{greeting}</h1>
-        <p className="text-muted-foreground mt-2">Cosa richiede attenzione nei prossimi {windowDays} giorni</p>
+        {/* The page in one sentence: what waits, before any box. */}
+        <p className="mt-2 max-w-3xl text-lg text-muted-foreground">
+          {attention ? summarySentence(attention.items, windowDays) : `Cosa richiede attenzione nei prossimi ${windowDays} giorni`}
+        </p>
       </div>
 
       {body}

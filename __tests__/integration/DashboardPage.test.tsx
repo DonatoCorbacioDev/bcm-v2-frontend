@@ -60,9 +60,10 @@ beforeEach(() => {
 });
 
 describe('Home', () => {
-  it('says what to do, by when and who follows it, each linked to where it gets done', () => {
+  it('lists only what asks for an action now, each with its own button', () => {
     showing(home([
       item({ type: 'IBAN_CHANGED', contractId: uid(8), counterpartyName: 'Ferri & Associati S.r.l.', invoiceId: uid(31), invoiceNumber: 'FA-2026-11', dueDate: '2026-11-01', daysLeft: -3 }),
+      item({ type: 'NOTICE_DEADLINE', contractId: uid(10), projectName: 'Licenza', counterpartyName: 'Gestio S.r.l.', dueDate: '2026-11-09', daysLeft: 5, renewalMonths: 12 }),
       item({ type: 'NOTICE_DEADLINE', contractId: uid(9), projectName: 'Manutenzione impianti', counterpartyName: 'Rossi Impianti S.r.l.', dueDate: '2026-11-24', daysLeft: 20, renewalMonths: 12 }),
       item({}),
       item({ type: 'INVOICE_TO_MATCH', contractId: uid(7), counterpartyName: 'Nuvola Cloud Services S.r.l.', invoiceId: uid(30), invoiceNumber: '2026/118', invoiceAmount: 4800, dueDate: '2026-11-01', daysLeft: -3 }),
@@ -70,29 +71,33 @@ describe('Home', () => {
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    const rows = within(screen.getByRole('region', { name: 'Da fare' })).getAllByRole('link');
-    expect(rows.map((r) => r.getAttribute('href'))).toEqual([
-      `/contracts/${uid(8)}?tab=invoices`, `/contracts/${uid(9)}`, `/contracts/${uid(1)}`, `/contracts/${uid(7)}?tab=invoices`,
+    const now = within(screen.getByRole('region', { name: 'Da fare adesso' }));
+    const actions = now.getAllByRole('link');
+    expect(actions.map((a) => [a.textContent, a.getAttribute('href')])).toEqual([
+      ['Verifica', `/contracts/${uid(8)}?tab=invoices`],
+      ['Prepara la disdetta', `/contracts/${uid(10)}`],
     ]);
-    expect(rows[0]).toHaveTextContent('IBAN cambiato: verifica prima di pagare');
-    expect(rows[0]).toHaveTextContent('La fattura FA-2026-11 di Ferri & Associati S.r.l.');
-    expect(rows[1]).toHaveTextContent('Disdici entro il 24 novembre se non vuoi rinnovarlo (tra 20 giorni)');
-    expect(rows[1]).toHaveTextContent('dopo si rinnova per altri 12 mesi');
-    expect(rows[2]).toHaveTextContent('Scade il 16 novembre (tra 12 giorni)');
-    expect(rows[2]).toHaveTextContent('Responsabile: Marco Bellini');
-    expect(rows[3]).toHaveTextContent('Fattura 2026/118 da abbinare');
-    expect(rows[3]).toHaveTextContent('4.800,00');
+    expect(now.getByText('IBAN cambiato: Ferri & Associati S.r.l.')).toBeInTheDocument();
+    expect(now.getByText(/se non disdici si rinnova per altri 12 mesi/)).toBeInTheDocument();
+    // Deadlines further away are on the timeline only, never listed twice.
+    expect(now.queryByText(/Manutenzione impianti/)).not.toBeInTheDocument();
+
+    const invoices = within(screen.getByRole('region', { name: /Fatture da abbinare/ }));
+    expect(invoices.getByText('2026/118')).toBeInTheDocument();
+    expect(invoices.getByRole('link', { name: 'Abbina' })).toHaveAttribute('href', `/contracts/${uid(7)}?tab=invoices`);
   });
 
-  it('shows the counters of that same list', () => {
-    showing(home([item({}), item({ type: 'INVOICE_TO_MATCH', invoiceId: uid(30), invoiceNumber: '1' })]));
+  it('says it all in one sentence at the top', () => {
+    showing(home([
+      item({ type: 'IBAN_CHANGED', invoiceId: uid(31), daysLeft: null, dueDate: null }),
+      item({ type: 'NOTICE_DEADLINE', dueDate: '2026-11-09', daysLeft: 5 }),
+      item({ type: 'INVOICE_TO_MATCH', invoiceId: uid(30), invoiceNumber: '1' }),
+      item({ type: 'INVOICE_TO_MATCH', invoiceId: uid(32), invoiceNumber: '2' }),
+    ]));
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    // The counters strip: each number in the same link as its label.
-    expect(screen.getByText('da fare entro 30 giorni').closest('a')).toHaveTextContent('1');
-    expect(screen.getByText('fattura da abbinare').closest('a')).toHaveTextContent('1');
-    expect(screen.getByText('IBAN da verificare').closest('a')).toHaveTextContent('0');
+    expect(screen.getByText('Hai 1 IBAN da verificare, 1 contratto da disdire entro 14 giorni e 2 fatture da abbinare.')).toBeInTheDocument();
   });
 
   it('reassures when there is nothing to do', () => {
@@ -108,7 +113,8 @@ describe('Home', () => {
 
     render(<DashboardPage />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Verifica il rinnovo')).toBeInTheDocument();
+    expect(screen.getByText('Completa il rinnovo')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Completa i dati' })).toBeInTheDocument();
   });
 
   it('says when the list could not be loaded', () => {

@@ -5,79 +5,62 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import Link from "next/link";
-import { Wallet } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { CostsVsBudgetChart, compactEuro } from "@/components/charts/CostsVsBudgetChart";
 import { useBudgets } from "@/hooks/useBudgets";
 import { useFinancialValues } from "@/hooks/useFinancialValues";
+import { buildCostsOverview } from "@/lib/costsOverview";
+import { formatMoney } from "@/lib/formatMoney";
+
+const euro = (n: number) => formatMoney(n, { decimals: 0 });
 
 /**
- * The Home's one chart, for administrators (budgets are theirs): this year's
- * supplier costs month by month against the cost budget, spread evenly over
- * the year. Without a cost budget for this year it invites to set one, since
- * the chart would have nothing to compare with (once there are costs at all).
+ * The Home's glance at this year's costs, for administrators (budgets are
+ * theirs): one number, one bar against the budget with today's tick, one
+ * word. The chart and the details are on "Costi e budget". Nothing at all
+ * for an organization with no costs yet: the first steps come first.
  */
 export function HomeCostsCard() {
   const { data: budgets, isLoading: loadingBudgets } = useBudgets();
   const { data: values, isLoading: loadingValues } = useFinancialValues();
   if (loadingBudgets || loadingValues) return null;
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const yearlyBudget = (budgets ?? [])
-    .filter((b) => b.year === year && b.category === "COST")
-    .reduce((sum, b) => sum + b.targetAmount, 0);
+  const year = new Date().getFullYear();
+  const o = buildCostsOverview(values ?? [], budgets ?? [], year, "COST");
+  if (o.yearForecast === 0 && o.budget === 0) return null;
 
-  if (yearlyBudget <= 0) {
-    // A new organization has no costs yet either: nothing to invite to.
-    if ((values ?? []).length === 0) return null;
-    return (
-      <section aria-labelledby="home-costs" className="flex flex-col gap-4 rounded-xl border border-dashed border-border bg-card p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-start gap-3">
-          <Wallet className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-          <div>
-            <h2 id="home-costs" className="font-semibold text-foreground">Costi rispetto al budget</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Imposta un budget di costo per il {year} e qui vedrai i costi dei fornitori mese per mese.
-            </p>
-          </div>
-        </div>
-        <Button asChild variant="outline" className="shrink-0">
-          <Link href="/budgets">Imposta un budget</Link>
-        </Button>
-      </section>
-    );
-  }
-
-  const monthly = yearlyBudget / 12;
-  const totals = new Map<number, number>();
-  for (const v of values ?? []) {
-    if (v.year !== year || v.category !== "COST") continue;
-    totals.set(v.month, (totals.get(v.month) ?? 0) + v.financialAmount);
-  }
-  const data = Array.from({ length: now.getMonth() + 1 }, (_, i) => ({
-    label: new Date(year, i, 1).toLocaleDateString("it-IT", { month: "short" }),
-    cost: totals.get(i + 1) ?? 0,
-  }));
-  const overCount = data.filter((d) => d.cost > monthly).length;
+  const hasBudget = o.budget > 0;
+  const share = hasBudget ? o.toDate / o.budget : 0;
+  const expected = hasBudget ? o.paceToday / o.budget : 0;
+  const over = hasBudget && o.toDate > o.paceToday;
 
   return (
     <section aria-labelledby="home-costs" className="rounded-xl border border-border bg-card p-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="home-costs" className="text-base font-semibold text-foreground">Costi dei fornitori nel {year}</h2>
-        <Link href="/budgets" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
-          Vedi i budget
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="home-costs" className="text-base font-semibold text-foreground">Costi del {year}</h2>
+        <Link href="/costs" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+          Apri Costi e budget
         </Link>
       </div>
-      <div className="mt-4">
-        <CostsVsBudgetChart
-          data={data}
-          budget={monthly}
-          ariaLabel={`Costi mensili dei fornitori nel ${year} rispetto al budget di ${compactEuro(monthly)} al mese: ${
-            overCount === 0 ? "nessun mese sopra il budget" : overCount === 1 ? "un mese sopra il budget" : `${overCount} mesi sopra il budget`
-          }.`}
-        />
-      </div>
+      <p className="mt-3 text-2xl font-semibold tabular-nums text-foreground">
+        {euro(o.toDate)}
+        {hasBudget && <span className="text-base font-normal text-muted-foreground"> su {euro(o.budget)} di budget</span>}
+      </p>
+      {hasBudget ? (
+        <>
+          <div className="relative mt-3 h-2 rounded-full bg-muted" aria-hidden="true">
+            <div className={`h-2 rounded-full ${over ? "bg-[var(--status-amber-mark)]" : "bg-primary"}`} style={{ width: `${Math.min(100, share * 100)}%` }} />
+            <div className="absolute -top-1 h-4 w-0.5 rounded bg-foreground" style={{ left: `${expected * 100}%` }} />
+          </div>
+          <p className={`mt-2 text-sm ${over ? "text-[var(--status-amber-fg)]" : "text-[var(--status-green-fg)]"}`}>
+            {over ? `Sopra il ritmo di ${euro(o.toDate - o.paceToday)}` : "In linea con il budget"}
+          </p>
+        </>
+      ) : (
+        <p className="mt-2 text-sm text-muted-foreground">
+          Spesi fino a oggi, IVA esclusa.{" "}
+          <Link href="/budgets" className="font-medium text-primary underline-offset-4 hover:underline">Imposta un budget</Link>{" "}
+          per vedere se sei in linea.
+        </p>
+      )}
     </section>
   );
 }

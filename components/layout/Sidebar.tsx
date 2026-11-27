@@ -4,17 +4,16 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
-import { CalculatorLink, FeedbackLink } from "@/components/layout/FeedbackLink";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { HelpMenu } from "@/components/layout/HelpMenu";
+import { useHomeAttention } from "@/hooks/useHomeAttention";
+import { isNow } from "@/components/dashboard/HomeNow";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/authStore";
-import { useAuth } from "@/hooks/useAuth";
 import { LogoMark } from "@/components/layout/Logo";
 import { navGroups, isNavItemActive } from "@/components/layout/sidebarNavConfig";
 import { NavLink } from "@/components/layout/NavLink";
 import { OrgSwitcher } from "@/components/layout/OrgSwitcher";
-import { SidebarLogoutButton } from "@/components/layout/SidebarLogoutButton";
 
 interface SidebarProps {
   readonly collapsed: boolean;
@@ -22,15 +21,13 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const user = useAuthStore((state) => state.user);
-  const { logout } = useAuth();
   const isAdmin = user?.role === "ADMIN";
+  // How many things wait on the Home: the same list, from the same cache.
+  const { data: attention } = useHomeAttention();
+  // The same things the Home's sentence names: what to do now, and the invoices to match.
+  const todo = attention?.items?.filter((i) => isNow(i) || i.type === "INVOICE_TO_MATCH").length;
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-  };
 
   return (
     <aside
@@ -74,51 +71,37 @@ export default function Sidebar({ collapsed }: SidebarProps) {
       {/* Navigation */}
       <nav
         aria-label="Navigazione principale"
-        className="flex-1 overflow-y-auto py-3 space-y-1"
+        className="flex-1 overflow-y-auto py-3"
       >
-        {navGroups.map((group) => {
+        {navGroups.filter((group) => !group.bottom).map((group) => {
           const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin);
           if (visibleItems.length === 0) return null;
-
           return (
-            <div key={group.title}>
-              {!collapsed && (
-                <p className="px-4 pb-1 pt-2 text-[10.5px] font-semibold text-[var(--muted-foreground)] tracking-[0.07em] uppercase">
-                  {group.title}
-                </p>
-              )}
-              <div className={cn("space-y-0.5 px-2")}>
-                {visibleItems.map((item) => (
-                  <NavLink
-                    key={item.href}
-                    item={item}
-                    isActive={isNavItemActive(item, pathname)}
-                    collapsed={collapsed}
-                  />
-                ))}
-              </div>
+            <div key={group.title} className="space-y-1 px-2">
+              {visibleItems.map((item) => (
+                <NavLink
+                  key={item.href}
+                  item={item}
+                  isActive={isNavItemActive(item, pathname)}
+                  collapsed={collapsed}
+                  count={item.href === "/dashboard" ? todo : undefined}
+                />
+              ))}
             </div>
           );
         })}
       </nav>
 
-      {/* Footer */}
-      <div className="border-t border-[var(--sidebar-border)] shrink-0 py-3 px-2">
-        <CalculatorLink collapsed={collapsed} />
-        <FeedbackLink collapsed={collapsed} />
-        {!collapsed && (
-          <div className="flex items-center gap-2 px-2.5 pb-2 text-[10.5px] text-[var(--muted-foreground)]">
-            <Link href="/privacy" className="hover:text-foreground hover:underline">
-              Privacy
-            </Link>
-            <span aria-hidden="true">·</span>
-            <Link href="/trasparenza-ai" className="hover:text-foreground hover:underline">
-              Trasparenza AI
-            </Link>
-          </div>
-        )}
-        <SidebarLogoutButton onLogout={handleLogout} collapsed={collapsed} />
-      </div>
+      {/* Foot: settings and help, apart from the everyday pages. Logout is in the
+          user menu, top right. */}
+      <nav aria-label="Impostazioni e aiuto" className="border-t border-[var(--sidebar-border)] shrink-0 space-y-1 px-2 py-3">
+        {navGroups.filter((group) => group.bottom).flatMap((group) => group.items)
+          .filter((item) => !item.adminOnly || isAdmin)
+          .map((item) => (
+            <NavLink key={item.href} item={item} isActive={isNavItemActive(item, pathname)} collapsed={collapsed} />
+          ))}
+        <HelpMenu collapsed={collapsed} />
+      </nav>
     </aside>
   );
 }

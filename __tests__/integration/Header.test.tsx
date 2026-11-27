@@ -179,4 +179,16 @@ describe('Header', () => {
       expect(mockPush).toHaveBeenCalledWith('/contracts');
     });
   });
+
+  it('opens the user menu with the profile and Esci, which logs out', async () => {
+    const logout = jest.fn().mockResolvedValue(undefined);
+    (useAuth as jest.Mock).mockReturnValue({ logout });
+    render(<Header {...defaultProps} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Menu utente' }));
+    expect(await screen.findByRole('menuitem', { name: /il mio profilo/i })).toHaveAttribute('href', '/profile');
+    await userEvent.click(screen.getByRole('menuitem', { name: /esci/i }));
+
+    expect(logout).toHaveBeenCalledTimes(1);
+  });
 });

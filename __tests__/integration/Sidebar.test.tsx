@@ -124,25 +124,20 @@ describe('Sidebar', () => {
     expect(screen.getByRole('link', { name: /contratti$/i })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('renders the logout button in the footer', () => {
+  it('gathers the occasional links under Aiuto, and leaves logout to the user menu', async () => {
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(screen.getByRole('button', { name: /esci/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /esci/i })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Aiuto' }));
+
+    expect(await screen.findByRole('menuitem', { name: /calcolo disdetta/i })).toHaveAttribute('href', '/calcolo-disdetta');
+    expect(screen.getByRole('menuitem', { name: /dai un parere/i }).getAttribute('href')).toMatch(/^mailto:/);
+    expect(screen.getByRole('menuitem', { name: /privacy/i })).toHaveAttribute('href', '/privacy');
+    expect(screen.getByRole('menuitem', { name: /trasparenza/i })).toHaveAttribute('href', '/trasparenza-ai');
   });
 
-  it('calls logout when the logout button is clicked', async () => {
+  it('has no section titles in capitals: the entries speak for themselves', () => {
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('button', { name: /esci/i }));
-    expect(mockLogout).toHaveBeenCalledTimes(1);
-  });
-
-  it('shows section group labels when not collapsed', () => {
-    render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(screen.getByText('GENERALE')).toBeInTheDocument();
-    expect(screen.getByText('AMMINISTRAZIONE')).toBeInTheDocument();
-  });
-
-  it('hides section group labels when collapsed', () => {
-    render(<Sidebar collapsed={true} />, { wrapper: createWrapper() });
     expect(screen.queryByText('GENERALE')).not.toBeInTheDocument();
     expect(screen.queryByText('AMMINISTRAZIONE')).not.toBeInTheDocument();
   });

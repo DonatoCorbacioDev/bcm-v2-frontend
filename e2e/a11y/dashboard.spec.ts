@@ -11,7 +11,9 @@ test.describe("Accessibility: home", () => {
   test("has no detectable axe violations", async ({ page }) => {
     await page.goto("/dashboard");
     await expect(page.getByRole("heading", { name: "Ciao, admin" })).toBeVisible();
-    await expect(page.getByRole("region", { name: "Da fare" }).getByRole("link")).toHaveCount(5);
+    // What to do now, each with its button; the invoices beside the costs.
+    await expect(page.getByRole("region", { name: "Da fare adesso" }).getByRole("link")).toHaveCount(2);
+    await expect(page.getByRole("region", { name: /Fatture da abbinare/ }).getByRole("link", { name: "Abbina" })).toHaveCount(1);
 
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations).toEqual([]);

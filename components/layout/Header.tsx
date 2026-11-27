@@ -7,7 +7,16 @@
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
-import { Search, Moon, Sun, PanelLeft, ChevronDown } from "lucide-react";
+import { Search, Moon, Sun, PanelLeft, ChevronDown, LogOut, UserRound } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { cn } from "@/lib/utils";
@@ -71,6 +80,11 @@ export default function Header({
   const title = getPageTitle(pathname);
   const initials = getUserInitials(user?.username);
   const [searchValue, setSearchValue] = useState("");
+  const { logout } = useAuth();
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   const handleSearchSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -159,11 +173,11 @@ export default function Header({
 
         <div className="h-5 w-px bg-border mx-1" aria-hidden="true" />
 
-        {/* User button */}
-        <Link
-          href="/profile"
-          className="flex items-center gap-2 h-9 px-2 rounded-lg hover:bg-muted transition-colors group"
-          aria-label="Vai al profilo"
+        {/* User menu: the profile and logging out, where every app keeps them. */}
+        <DropdownMenu>
+        <DropdownMenuTrigger
+          className="flex items-center gap-2 h-9 px-2 rounded-lg hover:bg-muted transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Menu utente"
         >
           <span className="h-7 w-7 rounded-md bg-[var(--primary)] text-primary-foreground text-[11px] font-bold flex items-center justify-center shrink-0">
             {initials}
@@ -177,7 +191,25 @@ export default function Header({
             </span>
           </div>
           <ChevronDown className="hidden sm:block h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
-        </Link>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel className="font-normal">
+            <span className="block text-sm font-medium text-foreground">{user?.username ?? "Utente"}</span>
+            {user?.organizationName && <span className="block text-xs text-muted-foreground">{user.organizationName}</span>}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href="/profile">
+              <UserRound className="mr-2 h-4 w-4" aria-hidden="true" />
+              Il mio profilo
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void handleLogout()}>
+            <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+            Esci
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

@@ -47,7 +47,7 @@ export const SETTINGS_ROUTES = [
  * belongs to (a contract's documents, invoices and financial values live in
  * the contract).
  */
-export const navGroups: { title: string; items: NavItem[] }[] = [
+export const navGroups: { title: string; items: NavItem[]; bottom?: boolean }[] = [
   {
     title: "GENERALE",
     items: [
@@ -61,6 +61,8 @@ export const navGroups: { title: string; items: NavItem[] }[] = [
   },
   {
     title: "AMMINISTRAZIONE",
+    // At the foot of the menu, apart from the everyday pages.
+    bottom: true,
     items: [
       { label: "Impostazioni", href: "/settings", icon: Settings, adminOnly: true, activeFor: SETTINGS_ROUTES },
     ],

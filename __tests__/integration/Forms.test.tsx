@@ -857,11 +857,11 @@ describe('ContractForm', () => {
 
   // ── Tacit renewal ───────────────────────────────────────────────────────
 
-  it('asks for notice and renewal length only once "Si rinnova tacitamente" is ticked', async () => {
+  it('asks for notice and renewal length only once "Si rinnova da solo" is ticked', async () => {
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
     expect(screen.queryByLabelText(/preavviso per la disdetta/i)).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova tacitamente/i }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova da solo/i }));
 
     expect(screen.getByLabelText(/preavviso per la disdetta/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/durata del rinnovo/i)).toBeInTheDocument();
@@ -869,7 +869,7 @@ describe('ContractForm', () => {
 
   it('previews the last day to give notice: 31 December with 90 days is 2 October', async () => {
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova tacitamente/i }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova da solo/i }));
     await userEvent.type(screen.getByLabelText(/preavviso per la disdetta/i), '90');
 
     expect(screen.getByText(/ultimo giorno per disdire/i)).toHaveTextContent('2 ottobre 2024');
@@ -879,7 +879,7 @@ describe('ContractForm', () => {
     const mutateAsync = jest.fn().mockResolvedValue(undefined);
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova tacitamente/i }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova da solo/i }));
     await userEvent.click(screen.getByRole('button', { name: /aggiorna contratto/i }));
 
     expect(await screen.findByText('Indica i giorni di preavviso previsti dal contratto')).toBeInTheDocument();
@@ -900,7 +900,7 @@ describe('ContractForm', () => {
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     // validContract ends on 2024-12-31: any notice puts the deadline in the past.
     render(<ContractForm onClose={onClose} contract={validContract} />, { wrapper: createWrapper() });
-    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova tacitamente/i }));
+    await userEvent.click(screen.getByRole('checkbox', { name: /si rinnova da solo/i }));
     expect(screen.queryByText(/il termine per disdire è già passato/i)).not.toBeInTheDocument();
 
     await userEvent.type(screen.getByLabelText(/preavviso per la disdetta/i), '90');
@@ -944,7 +944,7 @@ describe('ContractForm', () => {
       <ContractForm onClose={onClose} contract={{ ...validContract, autoRenew: true, noticeDays: 60, renewalMonths: 12 }} />,
       { wrapper: createWrapper() });
 
-    expect(screen.getByRole('checkbox', { name: /si rinnova tacitamente/i })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /si rinnova da solo/i })).toBeChecked();
     expect(screen.getByLabelText(/preavviso per la disdetta/i)).toHaveValue(60);
     expect(screen.getByLabelText(/durata del rinnovo/i)).toHaveValue(12);
   });

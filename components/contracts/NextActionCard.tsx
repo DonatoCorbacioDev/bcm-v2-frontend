@@ -111,7 +111,7 @@ function dateAction(contract: Contract): NextAction {
       icon: RefreshCw,
       tone: "warning",
       title: "Verifica il rinnovo",
-      detail: "Si rinnova tacitamente, ma mancano preavviso o durata del rinnovo: completa i dati del contratto.",
+      detail: "Si rinnova da solo (rinnovo tacito), ma mancano preavviso o durata del rinnovo: completa i dati del contratto.",
     };
   }
 

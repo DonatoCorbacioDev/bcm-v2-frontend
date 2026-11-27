@@ -80,7 +80,7 @@ function present(item: HomeAttentionItem): Presentation {
       icon: RefreshCw,
       tone: "warning",
       title: "Verifica il rinnovo",
-      detail: `${subject} — si rinnova tacitamente, ma mancano preavviso o durata del rinnovo`,
+      detail: `${subject} — si rinnova da solo (rinnovo tacito), ma mancano preavviso o durata del rinnovo`,
       href: contractHref,
     }),
     INVOICE_TO_MATCH: () => ({

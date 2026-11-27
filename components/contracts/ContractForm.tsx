@@ -15,6 +15,7 @@ import { useBusinessAreas } from "@/hooks/useBusinessAreas";
 import { useManagers } from "@/hooks/useManagers";
 import { useCounterparties } from "@/hooks/useCounterparties";
 import { useFinancialTypes } from "@/hooks/useFinancialTypes";
+import { useAuthStore } from "@/store/authStore";
 import { conflictMessage } from "@/lib/conflictMessage";
 
 import { BILLING_FREQUENCY_LABELS } from "@/lib/statusConfig";
@@ -111,6 +112,7 @@ function ContractFormFields({
   financialTypes,
 }: ContractFormFieldsProps) {
   const upsertMutation = useUpsertContract();
+  const ownManagerId = useAuthStore((state) => state.user?.managerId);
 
   const {
     register,
@@ -139,9 +141,13 @@ function ContractFormFields({
         }
       : {
           status: "ACTIVE",
-          // A single area or responsabile: nothing to choose, so it's chosen already.
+          // A single area: nothing to choose, so it's chosen already. The
+          // responsabile is whoever is creating the contract (when they are
+          // one), else the only one there is.
           areaId: businessAreas.length === 1 ? businessAreas[0].id : undefined,
-          managerId: managers.length === 1 ? managers[0].id : undefined,
+          managerId: managers.some((m) => m.id === ownManagerId)
+            ? ownManagerId
+            : managers.length === 1 ? managers[0].id : undefined,
         },
   });
 
@@ -325,7 +331,7 @@ function ContractFormFields({
         <div>
           <p className="text-sm font-medium text-foreground">Rinnovo e disdetta (opzionale)</p>
           <p className="text-xs text-muted-foreground mt-1">
-            Per i contratti che si rinnovano da soli se non vengono disdetti in tempo.
+            Spunta se alla scadenza il contratto riparte da solo: BCM calcola entro quando disdirlo e ti avvisa prima.
           </p>
         </div>
 
@@ -340,7 +346,7 @@ function ContractFormFields({
                 onCheckedChange={(checked) => field.onChange(checked === true)}
               />
               <Label htmlFor="autoRenew" className="font-normal">
-                Si rinnova tacitamente
+                Si rinnova da solo se non lo disdici (rinnovo tacito)
               </Label>
             </div>
           )}
@@ -422,7 +428,7 @@ function ContractFormFields({
           render={({ field }) => (
             <SelectField
               id="financialTypeId"
-              label="Tipo finanziario"
+              label="Tipo finanziario (categoria di costo o ricavo)"
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
               placeholder="Seleziona il tipo finanziario"

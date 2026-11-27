@@ -50,7 +50,7 @@ async function fillForm(user: User = userEvent.setup()) {
 
 const declarations = () => [
   screen.getByRole('checkbox', { name: /accetto i termini di servizio/i }),
-  screen.getByRole('checkbox', { name: /scopi imprenditoriali o professionali/i }),
+  screen.getByRole('checkbox', { name: /non come consumatore/i }),
   screen.getByRole('checkbox', { name: /artt\. 1341 e 1342/i }),
 ];
 

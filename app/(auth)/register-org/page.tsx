@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { LogoMark } from "@/components/layout/Logo";
 import { TwoFactorEnrollment } from "@/components/auth/TwoFactorEnrollment";
-import { ONEROUS_CLAUSES, TERMS_VERSION } from "@/lib/legal";
+import { ONEROUS_CLAUSE_LIST, ONEROUS_CLAUSES, TERMS_VERSION } from "@/lib/legal";
 import { passwordViolation } from "@/lib/validations/password";
 
 interface RegisterOrgForm {
@@ -440,7 +440,7 @@ export default function RegisterOrgPage() {
                 required
                 className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
               />
-              <span>Dichiaro di agire per scopi imprenditoriali o professionali, e non come consumatore.</span>
+              <span>Uso BCM per la mia azienda o attività professionale, non come consumatore privato.</span>
             </label>
             <label className="flex items-start gap-2 text-sm text-muted-foreground">
               <input
@@ -449,13 +449,17 @@ export default function RegisterOrgPage() {
                 checked={declarations.onerousClausesApproved}
                 onChange={handleDeclaration}
                 required
+                aria-describedby="onerous-clauses"
                 className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
               />
-              <span>
-                Ai sensi degli artt. 1341 e 1342 c.c. approvo specificamente le clausole dei Termini
-                n. {ONEROUS_CLAUSES}.
-              </span>
+              <span>Approvo in modo specifico queste clausole dei Termini (artt. 1341 e 1342 c.c.):</span>
             </label>
+            {/* The same clauses, word for word, one per line: easier to read, same approval. */}
+            <ul id="onerous-clauses" className="-mt-1 list-disc space-y-0.5 pl-12 text-sm text-muted-foreground">
+              {ONEROUS_CLAUSE_LIST.map((clause) => (
+                <li key={clause}>n. {clause}</li>
+              ))}
+            </ul>
             <p className="text-xs text-muted-foreground">
               Ti invieremo un codice via email: inserendolo confermi l&apos;indirizzo e firmi queste
               dichiarazioni.

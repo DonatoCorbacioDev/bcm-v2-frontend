@@ -135,7 +135,8 @@ function LoginContent() {
         <div className="w-full max-w-[380px]">
           {/* Logo (mobile) + heading */}
           <div className="mb-8 text-center">
-            <div className="flex justify-center mb-4">
+            {/* Phones only: on a wide screen the blue panel already shows the logo. */}
+            <div className="flex justify-center mb-4 md:hidden">
               <LogoMark size={44} />
             </div>
             <h2 className="font-display text-[28px] font-medium text-foreground tracking-[-0.01em]">

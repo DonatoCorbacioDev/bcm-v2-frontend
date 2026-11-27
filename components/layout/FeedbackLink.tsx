@@ -5,7 +5,7 @@
  * Licensed under the terms of the LICENSE file at the repository root.
  */
 import { usePathname } from "next/navigation";
-import { MessageSquare } from "lucide-react";
+import { Calculator, MessageSquare } from "lucide-react";
 
 // The same public address as the privacy and cookie pages.
 const FEEDBACK_EMAIL = "donatocorbacio92@gmail.com";
@@ -35,6 +35,32 @@ export function FeedbackLink({ collapsed = false, onClick }: { readonly collapse
     >
       <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />
       {!collapsed && "Dai un parere"}
+    </a>
+  );
+}
+
+/**
+ * The public notice calculator, for a quick check before a contract is in
+ * BCM (inside BCM every contract is calculated already). A new tab, so the
+ * page one is working on stays where it is.
+ */
+export function CalculatorLink({ collapsed = false, onClick }: { readonly collapsed?: boolean; readonly onClick?: () => void }) {
+  return (
+    <a
+      href="/calcolo-disdetta"
+      target="_blank"
+      rel="noopener"
+      onClick={onClick}
+      aria-label={collapsed ? "Calcolo disdetta (si apre in una nuova scheda)" : undefined}
+      title={collapsed ? "Calcolo disdetta" : undefined}
+      className={`flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${collapsed ? "justify-center" : ""}`}
+    >
+      <Calculator className="h-4 w-4 shrink-0" aria-hidden="true" />
+      {!collapsed && (
+        <>
+          Calcolo disdetta<span className="sr-only"> (si apre in una nuova scheda)</span>
+        </>
+      )}
     </a>
   );
 }

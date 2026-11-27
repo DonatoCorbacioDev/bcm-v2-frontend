@@ -40,8 +40,17 @@ const subscribe = (onChange: () => void) => {
     globalThis.removeEventListener("storage", onChange);
   };
 };
-function useStoredFlag(key: string): boolean {
-  return useSyncExternalStore(subscribe, () => read(key), () => true);
+function useStoredFlag(key: string, onServer = true): boolean {
+  return useSyncExternalStore(subscribe, () => read(key), () => onServer);
+}
+
+/** The calendar step, shared with the Calendar page: a click there ticks it here. */
+const calendarStepKey = (userId: string) => `bcm-first-steps-calendar-${userId}`;
+export function markCalendarConnected(userId: string): void {
+  write(calendarStepKey(userId));
+}
+export function useCalendarConnected(userId: string): boolean {
+  return useStoredFlag(calendarStepKey(userId), false);
 }
 
 interface Step {
@@ -59,7 +68,7 @@ interface Step {
  */
 export function FirstSteps({ userId, name }: { readonly userId: string; readonly name: string }) {
   const hiddenKey = `bcm-first-steps-hidden-${userId}`;
-  const calendarKey = `bcm-first-steps-calendar-${userId}`;
+  const calendarKey = calendarStepKey(userId);
   const hidden = useStoredFlag(hiddenKey);
   const calendarDone = useStoredFlag(calendarKey);
 

@@ -51,9 +51,11 @@ describe('CalendarPage', () => {
     renderPage();
 
     const section = screen.getByRole('region', { name: 'Le scadenze nel tuo calendario' });
-    const google = await within(section).findByRole('link', { name: 'Google Calendar' });
+    // Each tile is named by its service, then the line that tells it apart.
+    const google = await within(section).findByRole('link', { name: /^Google Calendar/ });
     expect(google.getAttribute('href')).toContain('calendar.google.com/calendar/r?cid=webcal');
-    expect(within(section).getByRole('link', { name: 'Apple Calendar' })).toHaveAttribute('href', 'webcal://bcm.example/api/v1/calendar/fake-feed-token.ics');
-    expect(within(section).getByRole('link', { name: 'Outlook.com' }).getAttribute('href')).toContain('outlook.live.com');
+    expect(within(section).getByRole('link', { name: /^Calendario Apple/ })).toHaveAttribute('href', 'webcal://bcm.example/api/v1/calendar/fake-feed-token.ics');
+    expect(within(section).getByRole('link', { name: /^Outlook personale/ }).getAttribute('href')).toContain('outlook.live.com');
+    expect(within(section).getByRole('link', { name: /^Outlook aziendale/ }).getAttribute('href')).toContain('outlook.office.com');
   });
 });

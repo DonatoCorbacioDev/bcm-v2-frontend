@@ -147,10 +147,10 @@ export default function InstantiateTemplateDialog({
           <MissingPrerequisiteBanner
             message={
               isAdmin
-                ? "Questo template non ha un'area di business predefinita e l'organizzazione non ne ha ancora nessuna: serve prima crearne una."
-                : "Questo template non ha un'area di business predefinita e l'organizzazione non ne ha ancora nessuna. Contatta un amministratore."
+                ? "Questo template non ha un reparto predefinito e l'organizzazione non ne ha ancora nessuna: serve prima crearne una."
+                : "Questo template non ha un reparto predefinito e l'organizzazione non ne ha ancora nessuna. Contatta un amministratore."
             }
-            actions={isAdmin ? [{ label: "Crea un'area di business", href: "/business-areas" }] : []}
+            actions={isAdmin ? [{ label: "Crea un reparto", href: "/business-areas" }] : []}
           />
         )}
 
@@ -248,7 +248,7 @@ export default function InstantiateTemplateDialog({
                 id="inst-businessAreaId"
                 label={
                   <>
-                    Area di business
+                    Reparto
                     {!template?.businessAreaId && <span className="text-destructive ml-1">*</span>}
                   </>
                 }

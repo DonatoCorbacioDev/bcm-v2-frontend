@@ -51,10 +51,10 @@ export default function BusinessAreasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Aree di business</h1>
-          <p className="text-muted-foreground mt-2">Gestisci le aree di business</p>
+          <h1 className="text-3xl font-bold text-foreground">Reparti</h1>
+          <p className="text-muted-foreground mt-2">I reparti in cui dividi i contratti, per esempio IT, Acquisti o Produzione</p>
         </div>
-        <Button onClick={handleCreateClick}>+ Nuova area di business</Button>
+        <Button onClick={handleCreateClick}>+ Nuovo reparto</Button>
       </div>
 
       <BusinessAreaTable onEditClick={handleEditClick} />
@@ -64,7 +64,7 @@ export default function BusinessAreasPage() {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={keepOpenOnOutsideClick}>
           <DialogHeader>
             <DialogTitle>
-              {formDialog.businessArea ? "Modifica area di business" : "Crea nuova area di business"}
+              {formDialog.businessArea ? "Modifica reparto" : "Crea nuovo reparto"}
             </DialogTitle>
           </DialogHeader>
           <BusinessAreaForm

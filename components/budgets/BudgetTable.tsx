@@ -120,7 +120,7 @@ export default function BudgetTable({ onEditClick }: BudgetTableProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Area</TableHead>
+                <TableHead>Reparto</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Anno</TableHead>
                 <TableHead>Obiettivo</TableHead>

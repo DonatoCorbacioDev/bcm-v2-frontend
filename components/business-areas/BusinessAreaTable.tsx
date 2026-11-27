@@ -79,11 +79,11 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.businessAreas });
-      toast.success("Area di business eliminata");
+      toast.success("Reparto eliminato");
       setDeleteDialog({ open: false, businessArea: null });
     },
     onError: () => {
-      toast.error("Eliminazione dell'area di business non riuscita");
+      toast.error("Eliminazione del reparto non riuscita");
     },
   });
 
@@ -105,7 +105,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   if (isError) {
     return (
       <div className="text-center py-8 text-destructive">
-        Impossibile caricare le aree di business. Riprova.
+        Impossibile caricare i reparti. Riprova.
       </div>
     );
   }
@@ -113,7 +113,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
   if (businessAreas.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nessuna area di business trovata
+        Nessun reparto trovato
       </div>
     );
   }
@@ -124,7 +124,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            aria-label="Cerca aree di business"
+            aria-label="Cerca reparti"
             placeholder="Cerca aree..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -151,7 +151,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       {/* Empty state after search */}
       {filteredBusinessAreas.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          Nessuna area di business corrisponde alla ricerca
+          Nessun reparto corrisponde alla ricerca
         </div>
       )}
 
@@ -188,7 +188,7 @@ export default function BusinessAreaTable({ onEditClick }: BusinessAreaTableProp
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Elimina area di business</DialogTitle>
+            <DialogTitle>Elimina reparto</DialogTitle>
             <DialogDescription>
               Sei sicuro di voler eliminare{" "}
               <span className="font-semibold">{deleteDialog.businessArea?.name}</span>? L&apos;operazione non può essere annullata.

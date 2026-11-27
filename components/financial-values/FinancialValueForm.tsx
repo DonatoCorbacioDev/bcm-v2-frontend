@@ -232,7 +232,7 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="financialTypeId">
-              Tipo finanziario <span className="text-destructive">*</span>
+              Categoria <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}
@@ -265,7 +265,7 @@ export default function FinancialValueForm({
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="businessAreaId">
-              Area di business <span className="text-destructive">*</span>
+              Reparto <span className="text-destructive">*</span>
             </Label>
             <Select
               value={field.value ? String(field.value) : ""}

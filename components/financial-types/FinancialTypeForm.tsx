@@ -48,11 +48,11 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
   const onSubmit = async (data: FinancialTypeFormData) => {
     try {
       await upsertMutation.mutateAsync({ id: financialType?.id, payload: data });
-      toast.success(isEditing ? "Tipo finanziario aggiornato" : "Tipo finanziario creato");
+      toast.success(isEditing ? "Categoria aggiornata" : "Categoria creata");
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error(isEditing ? "Aggiornamento del tipo finanziario non riuscito" : "Creazione del tipo finanziario non riuscita");
+      toast.error(isEditing ? "Aggiornamento della categoria non riuscito" : "Creazione della categoria non riuscita");
       logError("Upsert error:", error);
     }
   };
@@ -81,7 +81,7 @@ export default function FinancialTypeForm({ onClose, onSuccess, financialType }:
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Descrivi questo tipo finanziario..."
+          placeholder="Descrivi questa categoria..."
           rows={4}
           className={errors.description ? "border-destructive" : ""}
         />

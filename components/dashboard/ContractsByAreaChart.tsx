@@ -15,8 +15,8 @@ export function ContractsByAreaChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contratti per area di business</CardTitle>
-          <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
+          <CardTitle>Contratti per reparto</CardTitle>
+          <CardDescription>Distribuzione dei contratti per reparto</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Caricamento...</p>
@@ -29,8 +29,8 @@ export function ContractsByAreaChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contratti per area di business</CardTitle>
-          <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
+          <CardTitle>Contratti per reparto</CardTitle>
+          <CardDescription>Distribuzione dei contratti per reparto</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-destructive text-sm">Impossibile caricare i dati del grafico</p>
@@ -43,8 +43,8 @@ export function ContractsByAreaChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Contratti per area di business</CardTitle>
-          <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
+          <CardTitle>Contratti per reparto</CardTitle>
+          <CardDescription>Distribuzione dei contratti per reparto</CardDescription>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
           <p className="text-muted-foreground">Nessun dato disponibile</p>
@@ -56,8 +56,8 @@ export function ContractsByAreaChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contratti per area di business</CardTitle>
-        <CardDescription>Distribuzione dei contratti per area di business</CardDescription>
+        <CardTitle>Contratti per reparto</CardTitle>
+        <CardDescription>Distribuzione dei contratti per reparto</CardDescription>
       </CardHeader>
       <CardContent>
         <CapsuleBarList

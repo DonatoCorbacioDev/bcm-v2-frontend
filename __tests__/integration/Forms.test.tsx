@@ -180,7 +180,7 @@ describe('BusinessAreaForm', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Area di business aggiornata');
+    expect(toast.success).toHaveBeenCalledWith('Reparto aggiornato');
     expect(onSuccess).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
@@ -193,7 +193,7 @@ describe('BusinessAreaForm', () => {
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Aggiornamento dell'area di business non riuscito"));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Aggiornamento del reparto non riuscito"));
   });
 
   it('calls onClose when Cancel is clicked', async () => {
@@ -207,9 +207,9 @@ describe('BusinessAreaForm', () => {
     (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<BusinessAreaForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
     await userEvent.type(screen.getByPlaceholderText(/reparto it/i), 'Sales');
-    await userEvent.type(screen.getByPlaceholderText(/descrivi l.area di business/i), 'Sales department handles revenue');
+    await userEvent.type(screen.getByPlaceholderText(/descrivi il reparto/i), 'Sales department handles revenue');
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Creazione dell'area di business non riuscita"));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Creazione del reparto non riuscita"));
   });
 
   it('calls create (no id) when submitting new business area', async () => {
@@ -217,10 +217,10 @@ describe('BusinessAreaForm', () => {
     (useUpsertBusinessArea as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<BusinessAreaForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
     await userEvent.type(screen.getByPlaceholderText(/reparto it/i), 'Sales');
-    await userEvent.type(screen.getByPlaceholderText(/descrivi l.area di business/i), 'Sales department handles revenue');
+    await userEvent.type(screen.getByPlaceholderText(/descrivi il reparto/i), 'Sales department handles revenue');
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Area di business creata');
+    expect(toast.success).toHaveBeenCalledWith('Reparto creato');
   });
 });
 
@@ -432,7 +432,7 @@ describe('FinancialTypeForm', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Tipo finanziario aggiornato');
+    expect(toast.success).toHaveBeenCalledWith('Categoria aggiornata');
   });
 
   it('calls create on submit in create mode', async () => {
@@ -440,10 +440,10 @@ describe('FinancialTypeForm', () => {
     (useUpsertFinancialType as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<FinancialTypeForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
     await userEvent.type(screen.getByPlaceholderText(/es. ricavi/i), 'Cost');
-    await userEvent.type(screen.getByPlaceholderText(/descrivi questo tipo finanziario/i), 'Cost type description here');
+    await userEvent.type(screen.getByPlaceholderText(/descrivi questa categoria/i), 'Cost type description here');
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalled());
-    expect(toast.success).toHaveBeenCalledWith('Tipo finanziario creato');
+    expect(toast.success).toHaveBeenCalledWith('Categoria creata');
   });
 
   it('shows error toast when mutation throws', async () => {
@@ -454,7 +454,7 @@ describe('FinancialTypeForm', () => {
       { wrapper: createWrapper() }
     );
     await userEvent.click(screen.getByRole('button', { name: /aggiorna/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento del tipo finanziario non riuscito'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Aggiornamento della categoria non riuscito'));
   });
 
   it('shows error toast in create mode when mutation throws', async () => {
@@ -462,9 +462,9 @@ describe('FinancialTypeForm', () => {
     (useUpsertFinancialType as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<FinancialTypeForm onClose={onClose} onSuccess={onSuccess} />, { wrapper: createWrapper() });
     await userEvent.type(screen.getByPlaceholderText(/es. ricavi/i), 'Cost');
-    await userEvent.type(screen.getByPlaceholderText(/descrivi questo tipo finanziario/i), 'Cost type description here');
+    await userEvent.type(screen.getByPlaceholderText(/descrivi questa categoria/i), 'Cost type description here');
     await userEvent.click(screen.getByRole('button', { name: /crea/i }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Creazione del tipo finanziario non riuscita'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Creazione della categoria non riuscita'));
   });
 
   it('calls onClose when Cancel is clicked', async () => {
@@ -786,7 +786,7 @@ describe('ContractForm', () => {
   it('shows error state when reference data fails', () => {
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: true });
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/impossibile caricare aree di business/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare reparti/i)).toBeInTheDocument();
   });
 
   it('renders form fields in create mode', () => {
@@ -960,7 +960,7 @@ describe('ContractForm', () => {
   it('renders the optional financial terms section with all three fields', () => {
     render(<ContractForm onClose={onClose} />, { wrapper: createWrapper() });
     expect(screen.getByText(/valori economici \(opzionale\)/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/tipo finanziario/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/categoria/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/valore annuo/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/frequenza fatturazione/i)).toBeInTheDocument();
   });
@@ -973,7 +973,7 @@ describe('ContractForm', () => {
       />,
       { wrapper: createWrapper() }
     );
-    expect(screen.getByRole('combobox', { name: /tipo finanziario/i })).toHaveTextContent('Revenue');
+    expect(screen.getByRole('combobox', { name: /categoria/i })).toHaveTextContent('Revenue');
     expect(screen.getByDisplayValue('36000')).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: /frequenza fatturazione/i })).toHaveTextContent('Mensile');
   });
@@ -983,7 +983,7 @@ describe('ContractForm', () => {
     (useUpsertContract as jest.Mock).mockReturnValue(mockMutation({ mutateAsync }));
     render(<ContractForm onClose={onClose} onSuccess={onSuccess} contract={validContract} />, { wrapper: createWrapper() });
 
-    await userEvent.click(screen.getByRole('combobox', { name: /tipo finanziario/i }));
+    await userEvent.click(screen.getByRole('combobox', { name: /categoria/i }));
     await userEvent.click(await screen.findByRole('option', { name: 'Revenue' }));
     await userEvent.type(screen.getByLabelText(/valore annuo/i), '36000');
     await userEvent.click(screen.getByRole('combobox', { name: /frequenza fatturazione/i }));
@@ -1170,7 +1170,7 @@ describe('BudgetForm', () => {
   });
 
   const fillValidCreateForm = async () => {
-    await userEvent.click(screen.getByRole('combobox', { name: /area di business/i }));
+    await userEvent.click(screen.getByRole('combobox', { name: /reparto/i }));
     await userEvent.click(await screen.findByRole('option', { name: 'Engineering' }));
     const yearInput = screen.getByPlaceholderText('2025');
     await userEvent.clear(yearInput);
@@ -1286,7 +1286,7 @@ describe('ContractForm — with more than one area and responsabile', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: /crea contratto/i }));
 
-    expect(await screen.findByText("L'area di business è obbligatoria")).toBeInTheDocument();
+    expect(await screen.findByText("Il reparto è obbligatorio")).toBeInTheDocument();
     expect(screen.getByText('Il responsabile è obbligatorio')).toBeInTheDocument();
     expect(mutateAsync).not.toHaveBeenCalled();
   });

@@ -26,9 +26,9 @@ export const financialValueSchema = z.object({
     .number({ message: "L'importo è obbligatorio" })
     .positive("L'importo deve essere positivo"),
 
-  financialTypeId: z.uuid("Il tipo finanziario è obbligatorio"),
+  financialTypeId: z.uuid("La categoria è obbligatoria"),
 
-  businessAreaId: z.uuid("L'area di business è obbligatoria"),
+  businessAreaId: z.uuid("Il reparto è obbligatorio"),
 
   contractId: z.uuid("Il contratto è obbligatorio"),
 });

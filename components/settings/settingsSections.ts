@@ -48,10 +48,10 @@ const ALL_SECTIONS: { id: string; title: string; links: SettingsLink[] }[] = [
     id: "master-data",
     title: "Dati di base",
     links: [
-      { href: "/business-areas", label: "Aree di business", icon: Building2,
+      { href: "/business-areas", label: "Reparti", icon: Building2,
         description: "Come raggruppi i contratti, per esempio IT o Operazioni" },
-      { href: "/financial-types", label: "Tipi finanziari", icon: Tag,
-        description: "Le categorie di ricavi e costi" },
+      { href: "/financial-types", label: "Categorie di costo e ricavo", icon: Tag,
+        description: "Per dividere le spese, per esempio Licenze software, Manutenzione o Consulenze" },
     ],
   },
   {

@@ -50,16 +50,16 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
       });
 
       const message = isEditing
-        ? "Area di business aggiornata"
-        : "Area di business creata";
+        ? "Reparto aggiornato"
+        : "Reparto creato";
 
       toast.success(message);
       onSuccess();
       onClose();
     } catch (error) {
       const message = isEditing
-        ? "Aggiornamento dell'area di business non riuscito"
-        : "Creazione dell'area di business non riuscita";
+        ? "Aggiornamento del reparto non riuscito"
+        : "Creazione del reparto non riuscita";
 
       toast.error(message);
       logError("Upsert error:", error);
@@ -92,7 +92,7 @@ export default function BusinessAreaForm({ onClose, onSuccess, businessArea }: B
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Descrivi l'area di business..."
+          placeholder="Descrivi il reparto..."
           rows={4}
           className={errors.description ? "border-destructive" : ""}
         />

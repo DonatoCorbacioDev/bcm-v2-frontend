@@ -172,7 +172,7 @@ describe('ContractsByAreaChart', () => {
       isError: false,
     });
     render(<ContractsByAreaChart />);
-    expect(screen.getByText(/^contratti per area di business$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^contratti per reparto$/i)).toBeInTheDocument();
   });
 });
 

@@ -69,7 +69,7 @@ describe('OnboardingWizard', () => {
   it('advances to the Business Area step when "Inizia" is clicked', async () => {
     render(<OnboardingWizard />);
     await userEvent.click(screen.getByRole('button', { name: /inizia la configurazione/i }));
-    expect(screen.getByText(/crea un'area di business/i)).toBeInTheDocument();
+    expect(screen.getByText(/crea un reparto/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/nome/i)).toBeInTheDocument();
   });
 
@@ -115,7 +115,7 @@ describe('OnboardingWizard', () => {
     await userEvent.click(screen.getByRole('button', { name: /^salta$/i }));
     await userEvent.click(screen.getByRole('button', { name: /indietro/i }));
 
-    expect(screen.getByText(/crea un'area di business/i)).toBeInTheDocument();
+    expect(screen.getByText(/crea un reparto/i)).toBeInTheDocument();
   });
 
   it('submits the Manager form and advances to the Done step', async () => {

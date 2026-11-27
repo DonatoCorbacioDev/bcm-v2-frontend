@@ -23,7 +23,7 @@ const BAR_COLOR = "var(--chart-1)";
 const SCALE_TICKS = [25, 50, 75];
 
 /** Minimal label + pill-track comparison, matching the design mockup's
- * "Valore per area di business" — no charting library, just proportional fills. */
+ * "Valore per reparto" — no charting library, just proportional fills. */
 export function CapsuleBarList({ rows }: { readonly rows: CapsuleBarRow[] }) {
   const max = Math.max(...rows.map((r) => r.value), 1);
 

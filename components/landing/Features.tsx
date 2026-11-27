@@ -90,7 +90,7 @@ export function Features() {
           </Tile>
 
           <Tile className="md:col-span-4" title="Confronta i costi con il budget" visual={<BudgetChart />}>
-            Mese per mese, per contratto e per area di business.
+            Mese per mese, per contratto e per reparto.
           </Tile>
 
           <div className="rounded-xl border border-border bg-card p-6 md:col-span-2 md:p-8">

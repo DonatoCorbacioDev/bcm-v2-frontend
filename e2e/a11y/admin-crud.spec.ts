@@ -25,7 +25,7 @@ test.describe("Accessibility: admin CRUD pages", () => {
 
   test("business areas page has no detectable axe violations", async ({ page }) => {
     await page.goto("/business-areas");
-    await expect(page.getByRole("heading", { name: "Aree di business" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Reparti" })).toBeVisible();
     await expect(page.getByRole("table")).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();
@@ -43,7 +43,7 @@ test.describe("Accessibility: admin CRUD pages", () => {
 
   test("financial types page has no detectable axe violations", async ({ page }) => {
     await page.goto("/financial-types");
-    await expect(page.getByRole("heading", { name: "Tipi finanziari" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Categorie di costo e ricavo" })).toBeVisible();
     await expect(page.getByRole("table")).toBeVisible();
 
     const results = await new AxeBuilder({ page }).analyze();

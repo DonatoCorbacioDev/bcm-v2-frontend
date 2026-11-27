@@ -95,7 +95,7 @@ export default function BudgetForm({ onClose, onSuccess, budget }: BudgetFormPro
         render={({ field }) => (
           <div className="space-y-2">
             <Label htmlFor="businessAreaId">
-              Area di business <span className="text-destructive">*</span>
+              Reparto <span className="text-destructive">*</span>
             </Label>
             <Select
               value={/* istanbul ignore next */ field.value ? String(field.value) : ""}

@@ -50,17 +50,17 @@ function FinancialValuesPageContent() {
 
   const missingLabels = [
     missingContracts ? "un contratto" : null,
-    missingTypes ? "un tipo finanziario" : null,
-    missingAreas ? "un'area di business" : null,
+    missingTypes ? "una categoria" : null,
+    missingAreas ? "un reparto" : null,
   ].filter((label): label is string => label !== null);
   const adminOnlyMissing = missingTypes || missingAreas;
   const prerequisiteMessage = `Per creare un valore finanziario serve prima ${missingLabels.join(
     ", "
-  )}.${!isAdmin && adminOnlyMissing ? " Contatta un amministratore per l'area di business/il tipo finanziario." : ""}`;
+  )}.${!isAdmin && adminOnlyMissing ? " Contatta un amministratore per il reparto/la categoria." : ""}`;
   const prerequisiteActions = [
     missingContracts ? { label: "Crea un contratto", href: "/contracts" } : null,
-    missingTypes && isAdmin ? { label: "Crea un tipo finanziario", href: "/financial-types" } : null,
-    missingAreas && isAdmin ? { label: "Crea un'area di business", href: "/business-areas" } : null,
+    missingTypes && isAdmin ? { label: "Crea una categoria", href: "/financial-types" } : null,
+    missingAreas && isAdmin ? { label: "Crea un reparto", href: "/business-areas" } : null,
   ].filter((action): action is { label: string; href: string } => action !== null);
 
   const {
@@ -156,7 +156,7 @@ function FinancialValuesPageContent() {
               onClick={() => setAreaFilter(null)}
               className="inline-flex items-center gap-1.5 text-xs rounded-full border border-border bg-muted px-2.5 py-1 text-secondary-foreground hover:bg-accent"
             >
-              Area: {areaFilter.name}
+              Reparto: {areaFilter.name}
               <span aria-hidden="true">×</span>
             </button>
           )}

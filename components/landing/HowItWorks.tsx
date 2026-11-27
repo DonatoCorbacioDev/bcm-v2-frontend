@@ -8,7 +8,7 @@ const STEPS = [
   {
     title: "Registra la tua organizzazione",
     description:
-      "Crei l'account dell'amministratore e lo confermi con il codice che ricevi per email. Poi aggiungi le aree di business e le persone che seguono i contratti.",
+      "Crei l'account dell'amministratore e lo confermi con il codice che ricevi per email. Poi aggiungi i reparti e le persone che seguono i contratti.",
   },
   {
     title: "Carica i tuoi contratti",

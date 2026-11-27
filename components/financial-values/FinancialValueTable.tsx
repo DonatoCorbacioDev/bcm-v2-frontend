@@ -198,7 +198,7 @@ function CategorySection({
             <TableHeader>
               <TableRow>
                 <TableHead>Contratto</TableHead>
-                <TableHead className="hidden md:table-cell">Area di business</TableHead>
+                <TableHead className="hidden md:table-cell">Reparto</TableHead>
                 <TableHead className="text-right">Importo</TableHead>
                 {/* Fixed width: the edit/delete buttons only appear on expanded
                     rows, and the amounts must not shift when a contract opens. */}

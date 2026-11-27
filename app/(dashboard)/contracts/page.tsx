@@ -43,7 +43,7 @@ type MissingPrerequisiteFlags = {
 };
 
 const PREREQUISITE_ITEMS = [
-  { flag: "missingAreas", label: "un'area di business", action: { label: "Crea un'area di business", href: "/business-areas" } },
+  { flag: "missingAreas", label: "un reparto", action: { label: "Crea un reparto", href: "/business-areas" } },
   { flag: "missingManagers", label: "un responsabile", action: { label: "Crea un responsabile", href: "/managers" } },
   { flag: "missingCounterparties", label: "una controparte", action: { label: "Crea una controparte", href: "/counterparties" } },
 ] as const;

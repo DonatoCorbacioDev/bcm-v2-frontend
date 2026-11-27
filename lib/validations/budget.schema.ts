@@ -10,7 +10,7 @@ import { z } from "zod";
  * Used for both CREATE and UPDATE operations
  */
 export const budgetSchema = z.object({
-  businessAreaId: z.uuid("L'area di business è obbligatoria"),
+  businessAreaId: z.uuid("Il reparto è obbligatorio"),
 
   category: z.enum(["REVENUE", "COST"], { message: "Seleziona una categoria" }),
 

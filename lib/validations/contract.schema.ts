@@ -68,7 +68,7 @@ export const contractSchema = z.object({
   }),
 
   // Business area ID (foreign key)
-  areaId: z.uuid("L'area di business è obbligatoria"),
+  areaId: z.uuid("Il reparto è obbligatorio"),
 
   // Manager ID (foreign key)
   managerId: z.uuid("Il responsabile è obbligatorio"),

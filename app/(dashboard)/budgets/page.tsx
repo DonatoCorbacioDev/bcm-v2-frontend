@@ -49,7 +49,7 @@ export default function BudgetsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Budget</h1>
-          <p className="text-muted-foreground mt-2">Obiettivi di ricavo e costo per area di business</p>
+          <p className="text-muted-foreground mt-2">Obiettivi di ricavo e costo per reparto</p>
         </div>
         <Button
           onClick={() => setFormDialog({ open: true, budget: null })}
@@ -61,8 +61,8 @@ export default function BudgetsPage() {
 
       {hasNoBusinessAreas && (
         <MissingPrerequisiteBanner
-          message="Per creare un budget serve prima almeno un'area di business a cui assegnarlo."
-          actions={[{ label: "Crea un'area di business", href: "/business-areas" }]}
+          message="Per creare un budget serve prima almeno un reparto a cui assegnarlo."
+          actions={[{ label: "Crea un reparto", href: "/business-areas" }]}
         />
       )}
 

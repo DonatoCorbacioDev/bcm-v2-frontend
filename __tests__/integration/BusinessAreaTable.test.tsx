@@ -97,7 +97,7 @@ describe('BusinessAreaTable', () => {
 
     render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/impossibile caricare le aree di business/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare i reparti/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no business areas exist', () => {
@@ -109,7 +109,7 @@ describe('BusinessAreaTable', () => {
 
     render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/nessuna area di business trovata/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun reparto trovato/i)).toBeInTheDocument();
   });
 
   // ── Data rendering ────────────────────────────────────────────────────────
@@ -132,13 +132,13 @@ describe('BusinessAreaTable', () => {
   it('search input has an accessible label', () => {
     render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByRole('textbox', { name: /cerca aree di business/i })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /cerca reparti/i })).toBeInTheDocument();
   });
 
   it('filters areas by name on search', async () => {
     render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /cerca aree di business/i }), 'Engineering');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca reparti/i }), 'Engineering');
 
     expect(screen.getByText('Engineering')).toBeInTheDocument();
     expect(screen.queryByText('Sales')).not.toBeInTheDocument();
@@ -147,9 +147,9 @@ describe('BusinessAreaTable', () => {
   it('shows "no business areas match" when search has no results', async () => {
     render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /cerca aree di business/i }), 'xyz-no-match');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca reparti/i }), 'xyz-no-match');
 
-    expect(screen.getByText(/nessuna area di business corrisponde alla ricerca/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun reparto corrisponde alla ricerca/i)).toBeInTheDocument();
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -203,7 +203,7 @@ describe('BusinessAreaTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Area di business eliminata');
+      expect(toast.success).toHaveBeenCalledWith('Reparto eliminato');
     });
   });
 
@@ -218,16 +218,16 @@ describe('BusinessAreaTable', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Eliminazione dell'area di business non riuscita");
+      expect(toast.error).toHaveBeenCalledWith("Eliminazione del reparto non riuscita");
     });
   });
 
   it('clears the search field when Clear is clicked', async () => {
     render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    await userEvent.type(screen.getByRole('textbox', { name: /cerca aree di business/i }), 'Eng');
+    await userEvent.type(screen.getByRole('textbox', { name: /cerca reparti/i }), 'Eng');
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
 
-    expect(screen.getByRole('textbox', { name: /cerca aree di business/i })).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: /cerca reparti/i })).toHaveValue('');
   });
 });

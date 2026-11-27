@@ -23,7 +23,7 @@ describe('ContractForm — single area or responsabile', () => {
     (useManagers as jest.Mock).mockReturnValue(loaded([manager]));
     render(<ContractForm onClose={jest.fn()} />, { wrapper: createWrapper() });
 
-    await waitFor(() => expect(screen.getByRole('combobox', { name: /area di business/i })).toHaveTextContent('Acquisti'));
+    await waitFor(() => expect(screen.getByRole('combobox', { name: /reparto/i })).toHaveTextContent('Acquisti'));
     expect(screen.getByRole('combobox', { name: /responsabile/i })).toHaveTextContent('Lucia Verdi');
   });
 
@@ -37,7 +37,7 @@ describe('ContractForm — single area or responsabile', () => {
     (useManagers as jest.Mock).mockReturnValue(loaded([manager]));
     rerender(<ContractForm onClose={jest.fn()} />);
 
-    await waitFor(() => expect(screen.getByRole('combobox', { name: /area di business/i })).toHaveTextContent('Acquisti'));
+    await waitFor(() => expect(screen.getByRole('combobox', { name: /reparto/i })).toHaveTextContent('Acquisti'));
   });
 
   it('leaves the choice open when there are several business areas', () => {
@@ -45,7 +45,7 @@ describe('ContractForm — single area or responsabile', () => {
     (useManagers as jest.Mock).mockReturnValue(loaded([manager]));
     render(<ContractForm onClose={jest.fn()} />, { wrapper: createWrapper() });
 
-    expect(screen.getByRole('combobox', { name: /area di business/i })).toHaveTextContent(/seleziona/i);
+    expect(screen.getByRole('combobox', { name: /reparto/i })).toHaveTextContent(/seleziona/i);
     expect(screen.getByRole('combobox', { name: /responsabile/i })).toHaveTextContent('Lucia Verdi');
   });
 });

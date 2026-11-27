@@ -148,7 +148,7 @@ function WelcomeStep({ onNext }: { readonly onNext: () => void }) {
         <li className="flex items-center gap-2">
           <Building2 className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
           <span>
-            Un&apos;<strong className="text-foreground">area di business</strong> per raggruppare i
+            Un <strong className="text-foreground">reparto</strong> per raggruppare i
             contratti
           </span>
         </li>
@@ -197,7 +197,7 @@ function BusinessAreaStep({
 
   const onSubmit = async (data: BusinessAreaFormData) => {
     await upsert.mutateAsync({ payload: data });
-    toast.success("Area di business creata!");
+    toast.success("Reparto creato!");
     onNext();
   };
 
@@ -208,7 +208,7 @@ function BusinessAreaStep({
           <Building2 className="w-5 h-5 text-primary" aria-hidden="true" />
         </div>
         <div>
-          <h2 className="font-semibold">Crea un&apos;area di business</h2>
+          <h2 className="font-semibold">Crea un reparto</h2>
           <p className="text-sm text-muted-foreground">
             Le aree raggruppano i contratti per settore o dipartimento
           </p>

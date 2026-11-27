@@ -77,7 +77,7 @@ describe('ContractTemplateForm', () => {
   it('shows error state when reference data fails', () => {
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: true });
     render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/impossibile caricare aree di business/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare reparti/i)).toBeInTheDocument();
   });
 
   it('pre-fills name when editing an existing template', () => {
@@ -172,7 +172,7 @@ describe('ContractTemplateForm', () => {
   it('shows a hint with a link to create one when no business areas exist yet', () => {
     (useBusinessAreas as jest.Mock).mockReturnValue({ data: [], isLoading: false, isError: false });
     render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/nessuna area di business creata ancora/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessun reparto creato ancora/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /creane una/i })).toHaveAttribute('href', '/business-areas');
   });
 
@@ -185,7 +185,7 @@ describe('ContractTemplateForm', () => {
 
   it('does not show either hint when business areas and managers already exist', () => {
     render(<ContractTemplateForm onClose={onClose} />, { wrapper: createWrapper() });
-    expect(screen.queryByText(/nessuna area di business creata ancora/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/nessun reparto creato ancora/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/nessun responsabile creato ancora/i)).not.toBeInTheDocument();
   });
 

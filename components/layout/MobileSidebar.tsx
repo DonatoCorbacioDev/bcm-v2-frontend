@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { FeedbackLink } from "@/components/layout/FeedbackLink";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -92,6 +93,7 @@ export default function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
       {/* Footer */}
       <div className="border-t border-[var(--sidebar-border)] px-2 py-3 shrink-0">
+        <FeedbackLink onClick={onClose} />
         <div className="flex items-center gap-2 px-2.5 pb-2 text-[10.5px] text-[var(--muted-foreground)]">
           <Link href="/privacy" onClick={onClose} className="hover:text-foreground hover:underline">
             Privacy

@@ -63,11 +63,11 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
     mutationFn: (id: string) => financialTypesService.delete(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: referenceQueryKeys.financialTypes });
-      toast.success("Tipo finanziario eliminato");
+      toast.success("Categoria eliminata");
       setDeleteDialog({ open: false, financialType: null });
     },
     onError: () => {
-      toast.error("Eliminazione del tipo finanziario non riuscita");
+      toast.error("Eliminazione della categoria non riuscita");
     },
   });
 
@@ -76,7 +76,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
   if (isError) {
     return (
       <div className="text-center py-8 text-destructive">
-        Impossibile caricare i tipi finanziari. Riprova.
+        Impossibile caricare le categorie. Riprova.
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
   if (financialTypes.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nessun tipo finanziario trovato
+        Nessuna categoria trovata
       </div>
     );
   }
@@ -94,7 +94,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
       <div className="mb-4 flex gap-2 md:gap-4 items-center flex-wrap">
         <div className="flex-1 min-w-[200px]">
           <Input
-            placeholder="Cerca tipi finanziari..."
+            placeholder="Cerca categorie..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-md"
@@ -112,7 +112,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
 
       {filtered.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          Nessun tipo finanziario corrisponde alla ricerca
+          Nessuna categoria corrisponde alla ricerca
         </div>
       )}
 
@@ -153,7 +153,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Elimina tipo finanziario</DialogTitle>
+            <DialogTitle>Elimina categoria</DialogTitle>
             <DialogDescription>
               Sei sicuro di voler eliminare{" "}
               <span className="font-semibold">{deleteDialog.financialType?.name}</span>? L&apos;operazione non può essere annullata.

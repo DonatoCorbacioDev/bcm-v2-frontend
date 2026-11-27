@@ -178,7 +178,7 @@ describe('InstantiateTemplateDialog', () => {
       { wrapper: createWrapper() }
     );
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText(/area di business/i)).toBeInTheDocument();
+    expect(screen.getByText(/reparto/i)).toBeInTheDocument();
   });
 
   it('shows the default duration hint and pre-fills overrides for a fully populated template', () => {
@@ -294,7 +294,7 @@ describe('InstantiateTemplateDialog', () => {
         { wrapper: createWrapper() }
       );
       expect(screen.getByRole('alert')).toHaveTextContent(/serve prima crearne una/i);
-      expect(screen.getByRole('link', { name: /crea un'area di business/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /crea un reparto/i })).toBeInTheDocument();
     } finally {
       useAuthStore.setState({ user: null });
     }

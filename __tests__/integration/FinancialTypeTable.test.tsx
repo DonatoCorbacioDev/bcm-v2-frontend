@@ -84,7 +84,7 @@ describe('FinancialTypeTable', () => {
       isError: true,
     });
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/impossibile caricare i tipi finanziari/i)).toBeInTheDocument();
+    expect(screen.getByText(/impossibile caricare le categorie/i)).toBeInTheDocument();
   });
 
   it('shows empty state when no financial types exist', () => {
@@ -94,7 +94,7 @@ describe('FinancialTypeTable', () => {
       isError: false,
     });
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/nessun tipo finanziario trovato/i)).toBeInTheDocument();
+    expect(screen.getByText(/nessuna categoria trovata/i)).toBeInTheDocument();
   });
 
   // ── Data rendering ────────────────────────────────────────────────────────
@@ -120,27 +120,27 @@ describe('FinancialTypeTable', () => {
 
   it('filters types by name on search', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue');
+    await userEvent.type(screen.getByPlaceholderText(/cerca categorie/i), 'Revenue');
     expect(screen.getByText('Revenue')).toBeInTheDocument();
     expect(screen.queryByText('Expense')).not.toBeInTheDocument();
   });
 
   it('filters types by description on search', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue type');
+    await userEvent.type(screen.getByPlaceholderText(/cerca categorie/i), 'Revenue type');
     expect(screen.getByText('Revenue')).toBeInTheDocument();
     expect(screen.queryByText('Expense')).not.toBeInTheDocument();
   });
 
   it('shows no match message when search has no results', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'xyz-no-match');
-    expect(screen.getByText(/nessun tipo finanziario corrisponde alla ricerca/i)).toBeInTheDocument();
+    await userEvent.type(screen.getByPlaceholderText(/cerca categorie/i), 'xyz-no-match');
+    expect(screen.getByText(/nessuna categoria corrisponde alla ricerca/i)).toBeInTheDocument();
   });
 
   it('shows Clear button when search is active', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue');
+    await userEvent.type(screen.getByPlaceholderText(/cerca categorie/i), 'Revenue');
     expect(screen.getByRole('button', { name: /pulisci/i })).toBeInTheDocument();
   });
 
@@ -186,7 +186,7 @@ describe('FinancialTypeTable', () => {
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Tipo finanziario eliminato');
+      expect(toast.success).toHaveBeenCalledWith('Categoria eliminata');
     });
   });
 
@@ -199,14 +199,14 @@ describe('FinancialTypeTable', () => {
     const dialog = screen.getByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: /^elimina$/i }));
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Eliminazione del tipo finanziario non riuscita");
+      expect(toast.error).toHaveBeenCalledWith("Eliminazione della categoria non riuscita");
     });
   });
 
   it('clears the search field when Clear is clicked', async () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    await userEvent.type(screen.getByPlaceholderText(/cerca tipi finanziari/i), 'Revenue');
+    await userEvent.type(screen.getByPlaceholderText(/cerca categorie/i), 'Revenue');
     await userEvent.click(screen.getByRole('button', { name: /pulisci/i }));
-    expect(screen.getByPlaceholderText(/cerca tipi finanziari/i)).toHaveValue('');
+    expect(screen.getByPlaceholderText(/cerca categorie/i)).toHaveValue('');
   });
 });

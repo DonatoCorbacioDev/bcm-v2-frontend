@@ -79,7 +79,7 @@ export default function ContractForm(props: ContractFormProps) {
   if (isReferenceError) {
     return (
       <div className="py-8 text-center text-sm text-destructive">
-        Impossibile caricare aree di business/responsabili/controparti.
+        Impossibile caricare reparti/responsabili/controparti.
       </div>
     );
   }
@@ -98,8 +98,8 @@ export default function ContractForm(props: ContractFormProps) {
 interface ContractFormFieldsProps extends ContractFormProps {
   readonly businessAreas: { id: string; name: string }[];
   readonly managers: { id: string; firstName: string; lastName: string }[];
-  readonly counterparties: { id: string; name: string }[];
-  readonly financialTypes: { id: string; name: string }[];
+  readonly counterparties: { id: string; name: string; type?: string }[];
+  readonly financialTypes: { id: string; name: string; category?: string }[];
 }
 
 function ContractFormFields({
@@ -119,6 +119,8 @@ function ContractFormFields({
     handleSubmit,
     formState: { errors },
     control,
+    getValues,
+    setValue,
   } = useForm<ContractFormData>({
     resolver: zodResolver(contractSchema),
     defaultValues: contract
@@ -150,6 +152,17 @@ function ContractFormFields({
             : managers.length === 1 ? managers[0].id : undefined,
         },
   });
+
+  // A supplier's contract is a cost, a customer's a revenue: the category
+  // follows the counterparty, unless one is chosen already (or the
+  // counterparty is both, when there is nothing to infer).
+  const preselectCategory = (counterpartyId: string) => {
+    if (getValues("financialTypeId")) return;
+    const type = counterparties.find((cp) => String(cp.id) === counterpartyId)?.type;
+    const category = type === "SUPPLIER" ? "COST" : type === "CUSTOMER" ? "REVENUE" : null;
+    const match = category ? financialTypes.find((ft) => ft.category === category) : undefined;
+    if (match) setValue("financialTypeId", String(match.id), { shouldDirty: true });
+  };
 
   const autoRenew = useWatch({ control, name: "autoRenew" });
   const watchedEndDate = useWatch({ control, name: "endDate" });
@@ -212,7 +225,10 @@ function ContractFormFields({
             id="counterpartyId"
             label={<>Controparte <span className="text-destructive">*</span></>}
             value={field.value ? String(field.value) : ""}
-            onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
+            onValueChange={/* istanbul ignore next */ (value) => {
+              field.onChange(value);
+              preselectCategory(value);
+            }}
             placeholder="Seleziona la controparte"
             options={counterparties.map((cp) => ({ value: String(cp.id), label: cp.name }))}
             error={errors.counterpartyId?.message}
@@ -297,10 +313,10 @@ function ContractFormFields({
         render={({ field }) => (
           <SelectField
             id="areaId"
-            label={<>Area di business <span className="text-destructive">*</span></>}
+            label={<>Reparto <span className="text-destructive">*</span></>}
             value={field.value ? String(field.value) : ""}
             onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
-            placeholder="Seleziona l'area di business"
+            placeholder="Seleziona il reparto"
             options={businessAreas.map((area) => ({ value: String(area.id), label: area.name }))}
             error={errors.areaId?.message}
           />
@@ -428,10 +444,10 @@ function ContractFormFields({
           render={({ field }) => (
             <SelectField
               id="financialTypeId"
-              label="Tipo finanziario (categoria di costo o ricavo)"
+              label="Categoria (costo o ricavo)"
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (value) => field.onChange(value)}
-              placeholder="Seleziona il tipo finanziario"
+              placeholder="Seleziona la categoria"
               options={financialTypes.map((ft) => ({ value: String(ft.id), label: ft.name }))}
               // The schema's all-or-nothing refine always attaches its error to
               // annualValue (see contract.schema.ts) — financialTypeId has no

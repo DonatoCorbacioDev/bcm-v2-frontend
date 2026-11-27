@@ -351,7 +351,7 @@ export default function ContractDetailPage() {
             <tr>
               <th className={th}>Mese</th>
               <th className={th}>Tipo</th>
-              <th className={`${th} hidden md:table-cell`}>Area di business</th>
+              <th className={`${th} hidden md:table-cell`}>Reparto</th>
               <th className={`${th} text-right`}>Importo</th>
               <th className={th}>Fattura</th>
               <th className={`${th} hidden md:table-cell`}>Fonte</th>
@@ -733,7 +733,7 @@ export default function ContractDetailPage() {
           )}
           {/* Bookkeeping data, rarely what one looks for: kept, but quieter. */}
           <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-3 border-t border-border pt-3">
-            Area: {contract.area?.name || "non assegnata"}
+            Reparto: {contract.area?.name || "non assegnato"}
             {contract.wbsCode && <> · Codice WBS: {contract.wbsCode}</>}
           </p>
         </CardContent>

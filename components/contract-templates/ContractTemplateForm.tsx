@@ -117,7 +117,7 @@ export default function ContractTemplateForm({
   }
 
   if (isReferenceError) {
-    return <div className="py-8 text-center text-sm text-destructive">Impossibile caricare aree di business/responsabili.</div>;
+    return <div className="py-8 text-center text-sm text-destructive">Impossibile caricare reparti/responsabili.</div>;
   }
 
   return (
@@ -189,7 +189,7 @@ export default function ContractTemplateForm({
         name="businessAreaId"
         render={({ field }) => (
           <div className="space-y-2">
-            <Label htmlFor="businessAreaId">Area di business predefinita</Label>
+            <Label htmlFor="businessAreaId">Reparto predefinito</Label>
             <Select
               value={field.value ? String(field.value) : ""}
               onValueChange={/* istanbul ignore next */ (v) => field.onChange(v || null)}
@@ -207,7 +207,7 @@ export default function ContractTemplateForm({
             </Select>
             {businessAreas.length === 0 && (
               <p className="text-xs text-muted-foreground">
-                Nessuna area di business creata ancora.{" "}
+                Nessun reparto creato ancora.{" "}
                 <Link href="/business-areas" className="underline">
                   Creane una
                 </Link>

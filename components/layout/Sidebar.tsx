@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { FeedbackLink } from "@/components/layout/FeedbackLink";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -103,6 +104,7 @@ export default function Sidebar({ collapsed }: SidebarProps) {
 
       {/* Footer */}
       <div className="border-t border-[var(--sidebar-border)] shrink-0 py-3 px-2">
+        <FeedbackLink collapsed={collapsed} />
         {!collapsed && (
           <div className="flex items-center gap-2 px-2.5 pb-2 text-[10.5px] text-[var(--muted-foreground)]">
             <Link href="/privacy" className="hover:text-foreground hover:underline">

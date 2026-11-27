@@ -6,6 +6,7 @@
  */
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { toast } from "sonner";
 import { useManagers } from "@/hooks/useManagers";
 import { useRoles } from "@/hooks/useRoles";
@@ -103,6 +104,13 @@ export default function InviteUserForm({ onClose }: InviteUserFormProps) {
             </option>
           ))}
         </select>
+        <p className="text-xs text-muted-foreground">
+          Non è nell&apos;elenco?{" "}
+          <Link href="/managers" className="font-medium text-primary underline-offset-4 hover:underline">
+            Aggiungilo prima tra i responsabili
+          </Link>
+          .
+        </p>
       </div>
 
       <div className="flex justify-end gap-2 pt-2">

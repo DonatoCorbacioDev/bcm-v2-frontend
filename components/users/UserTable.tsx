@@ -215,9 +215,9 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                 <TableHead>Nome utente</TableHead>
                 <TableHead className="hidden md:table-cell">Responsabile</TableHead>
                 <TableHead className="hidden md:table-cell">Ruolo</TableHead>
-                <TableHead>Verificato</TableHead>
-                <TableHead className="hidden md:table-cell">Approva contratti</TableHead>
-                <TableHead className="hidden md:table-cell">2FA</TableHead>
+                <TableHead>Email confermata</TableHead>
+                <TableHead className="hidden md:table-cell">Può approvare</TableHead>
+                <TableHead className="hidden md:table-cell">Verifica in 2 passaggi</TableHead>
                 <TableHead className="hidden lg:table-cell">Data creazione</TableHead>
                 <TableHead>Azioni</TableHead>
               </TableRow>

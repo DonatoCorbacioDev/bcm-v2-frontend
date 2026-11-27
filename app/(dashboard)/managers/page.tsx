@@ -7,6 +7,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ManagerTable from "@/components/managers/ManagerTable";
 import ManagerForm from "@/components/managers/ManagerForm";
@@ -54,7 +55,11 @@ export default function ManagersPage() {
           <h1 className="text-3xl font-bold text-foreground">
             Responsabili
           </h1>
-          <p className="text-muted-foreground mt-2">Gestisci i responsabili del team</p>
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            Le persone che seguono i contratti: ricevono per email gli avvisi delle loro scadenze. Non serve che entrino in
+            BCM; per farle entrare,{" "}
+            <Link href="/users?invite=1" className="font-medium text-primary underline-offset-4 hover:underline">invitale come utenti</Link>.
+          </p>
         </div>
         <Button onClick={handleCreateClick}>+ Nuovo responsabile</Button>
       </div>

@@ -6,6 +6,7 @@
  */
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/button";
 import UserTable from "@/components/users/UserTable";
@@ -42,10 +43,6 @@ function UsersPageContent() {
 
   if (!isAdmin) return null;
 
-  const handleCreateClick = () => {
-    setFormDialog({ open: true, user: null });
-  };
-
   const handleEditClick = (user: User) => {
     setFormDialog({ open: true, user });
   };
@@ -64,14 +61,15 @@ function UsersPageContent() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Utenti</h1>
-          <p className="text-muted-foreground mt-2">Gestisci gli utenti del sistema</p>
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            Le persone che entrano in BCM con email e password. Ognuna è collegata a un{" "}
+            <Link href="/managers" className="font-medium text-primary underline-offset-4 hover:underline">responsabile</Link>, la
+            scheda con nome e contatti.
+          </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setInviteOpen(true)}>
-            Invita utente
-          </Button>
-          <Button onClick={handleCreateClick}>+ Nuovo utente</Button>
-        </div>
+        {/* One way in: the invitation, where the person chooses their own
+            password. An existing user is still edited from the table. */}
+        <Button onClick={() => setInviteOpen(true)}>+ Invita utente</Button>
       </div>
 
       <UserTable onEditClick={handleEditClick} />

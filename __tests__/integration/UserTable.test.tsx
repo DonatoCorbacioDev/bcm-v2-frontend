@@ -332,6 +332,6 @@ describe('UserTable — columns', () => {
     render(<UserTable onEditClick={jest.fn()} />, { wrapper: createWrapper() });
 
     expect(screen.queryByRole('columnheader', { name: 'ID' })).not.toBeInTheDocument();
-    expect(screen.getByRole('columnheader', { name: 'Approva contratti' })).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: 'Può approvare' })).toBeInTheDocument();
   });
 });

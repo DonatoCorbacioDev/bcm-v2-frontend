@@ -12,12 +12,16 @@
 export const VAT_NUMBER_INVALID =
   "Partita IVA non valida: una partita IVA italiana ha 11 cifre (es. IT01234567897), una estera inizia con la sigla del paese";
 
-export function isValidVatNumber(raw: string): boolean {
+export const VAT_NUMBER_WRONG_CHECK_DIGIT =
+  "Questa partita IVA non esiste: controlla di averla copiata giusta (l'ultima cifra non corrisponde alle altre)";
+
+/** Why a VAT number is refused, or null when it is well formed (blank is refused). */
+export function vatNumberViolation(raw: string): string | null {
   const vat = raw.replace(/\s+/g, "").toUpperCase();
-  if (vat === "") return false;
+  if (vat === "") return VAT_NUMBER_INVALID;
   if (/^(IT)?\d+$/.test(vat)) {
     const digits = vat.startsWith("IT") ? vat.slice(2) : vat;
-    if (digits.length !== 11 || /^0+$/.test(digits)) return false;
+    if (digits.length !== 11 || /^0+$/.test(digits)) return VAT_NUMBER_INVALID;
     let sum = 0;
     for (let i = 0; i < 10; i++) {
       let d = Number(digits[i]);
@@ -27,7 +31,21 @@ export function isValidVatNumber(raw: string): boolean {
       }
       sum += d;
     }
-    return (10 - (sum % 10)) % 10 === Number(digits[10]);
+    return (10 - (sum % 10)) % 10 === Number(digits[10]) ? null : VAT_NUMBER_WRONG_CHECK_DIGIT;
   }
-  return /^[A-Z]{2}[A-Z0-9]{2,13}$/.test(vat);
+  return /^[A-Z]{2}[A-Z0-9]{2,13}$/.test(vat) ? null : VAT_NUMBER_INVALID;
+}
+
+export function isValidVatNumber(raw: string): boolean {
+  return vatNumberViolation(raw) === null;
+}
+
+/** An Italian CAP (country empty or IT) has five digits; abroad, any format. */
+export const POSTAL_CODE_INVALID = "Il CAP italiano ha 5 cifre (es. 70043)";
+
+export function isValidPostalCode(postalCode: string, country: string | undefined): boolean {
+  const cap = postalCode.trim();
+  if (cap === "") return true;
+  const c = (country ?? "").trim().toUpperCase();
+  return (c !== "" && c !== "IT") || /^\d{5}$/.test(cap);
 }

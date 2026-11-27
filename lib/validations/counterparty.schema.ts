@@ -4,7 +4,7 @@
  */
 
 import { z } from "zod";
-import { isValidVatNumber, VAT_NUMBER_INVALID } from "@/lib/vatNumber";
+import { isValidPostalCode, POSTAL_CODE_INVALID, vatNumberViolation } from "@/lib/vatNumber";
 
 export const counterpartySchema = z.object({
   name: z
@@ -21,7 +21,10 @@ export const counterpartySchema = z.object({
     .string()
     .max(50, "La partita IVA non può superare i 50 caratteri")
     .trim()
-    .refine((v) => v === "" || isValidVatNumber(v), VAT_NUMBER_INVALID)
+    .superRefine((v, ctx) => {
+      const violation = v === "" ? null : vatNumberViolation(v);
+      if (violation) ctx.addIssue({ code: "custom", message: violation });
+    })
     .optional()
     .or(z.literal("")),
   taxCode: z.string().max(50, "Il codice fiscale non può superare i 50 caratteri").trim().optional().or(z.literal("")),
@@ -34,6 +37,11 @@ export const counterpartySchema = z.object({
   contactEmail: z.email("Email non valida").trim().optional().or(z.literal("")),
   contactPhone: z.string().max(50, "Il telefono non può superare i 50 caratteri").trim().optional().or(z.literal("")),
   notes: z.string().max(2000, "Le note non possono superare i 2000 caratteri").trim().optional().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  // Same rule as the backend: an Italian address has a five-digit CAP.
+  if (data.postalCode && !isValidPostalCode(data.postalCode, data.country)) {
+    ctx.addIssue({ code: "custom", path: ["postalCode"], message: POSTAL_CODE_INVALID });
+  }
 });
 
 export type CounterpartyFormData = z.infer<typeof counterpartySchema>;

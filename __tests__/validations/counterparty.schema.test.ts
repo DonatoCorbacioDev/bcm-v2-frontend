@@ -24,6 +24,18 @@ describe("counterpartySchema", () => {
     expect(result.success).toBe(true);
   });
 
+  describe("postalCode", () => {
+    it.each([
+      ["70043", "IT", true],
+      ["70043", "", true],
+      ["7004", "IT", false],
+      ["7004", "", false],
+      ["SW1A 1AA", "GB", true],
+    ])("CAP %s, country '%s' -> %s", (postalCode, country, ok) => {
+      expect(counterpartySchema.safeParse({ ...validData, postalCode, country }).success).toBe(ok);
+    });
+  });
+
   describe("vatNumber", () => {
     it.each(["IT01234567897", "01234567897", "it 0123 4567 897", "DE123456789"])("accepts %s", (vatNumber) => {
       expect(counterpartySchema.safeParse({ ...validData, vatNumber }).success).toBe(true);
@@ -32,6 +44,12 @@ describe("counterpartySchema", () => {
     // IT00000000 is the one found in the interface review: 8 digits instead of 11.
     it.each(["IT00000000", "IT01234567890", "IT00000000000", "1234"])("rejects %s", (vatNumber) => {
       expect(counterpartySchema.safeParse({ ...validData, vatNumber }).success).toBe(false);
+    });
+
+    it("says when the last digit does not match", () => {
+      const result = counterpartySchema.safeParse({ ...validData, vatNumber: "IT04932843789" });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toMatch(/non esiste/);
     });
 
     it("stays optional", () => {

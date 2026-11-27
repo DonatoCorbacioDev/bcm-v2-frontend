@@ -191,7 +191,7 @@ describe('FinancialValueTable', () => {
 
   it('shows the value count', () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/2 \/ 2 valori/i)).toBeInTheDocument();
+    expect(screen.getByText(/^2 importi$/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────
@@ -199,13 +199,13 @@ describe('FinancialValueTable', () => {
   it('filters values by year', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await userEvent.type(screen.getByRole('textbox', { name: 'Cerca movimenti' }), '2024');
-    expect(screen.getByText(/2 \/ 2 valori/i)).toBeInTheDocument();
+    expect(screen.getByText(/^2 importi$/i)).toBeInTheDocument();
   });
 
   it('searches by counterparty and shows the matching months expanded', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await userEvent.type(screen.getByRole('textbox', { name: 'Cerca movimenti' }), 'beta');
-    expect(screen.getByText(/1 \/ 2 valori/i)).toBeInTheDocument();
+    expect(screen.getByText(/^1 di 2 importi$/i)).toBeInTheDocument();
     expect(screen.getByText('Giu/2024')).toBeInTheDocument();
     expect(screen.queryByText('Gen/2024')).not.toBeInTheDocument();
   });
@@ -213,7 +213,7 @@ describe('FinancialValueTable', () => {
   it('searches by contract number', async () => {
     render(<FinancialValueTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
     await userEvent.type(screen.getByRole('textbox', { name: 'Cerca movimenti' }), 'cnt-001');
-    expect(screen.getByText(/1 \/ 2 valori/i)).toBeInTheDocument();
+    expect(screen.getByText(/^1 di 2 importi$/i)).toBeInTheDocument();
     expect(screen.getByText('Gen/2024')).toBeInTheDocument();
   });
 
@@ -275,7 +275,7 @@ describe('FinancialValueTable', () => {
   it('restricts rows and the count to the given year', () => {
     render(<FinancialValueTable onEditClick={onEditClick} year={2023} />, { wrapper: createWrapper() });
     expect(screen.getByText(/nessun valore finanziario corrisponde ai filtri/i)).toBeInTheDocument();
-    expect(screen.getByText(/0 \/ 0 valori/i)).toBeInTheDocument();
+    expect(screen.getByText(/^0 importi$/i)).toBeInTheDocument();
   });
 
   // ── Area prop ─────────────────────────────────────────────────────────────
@@ -284,7 +284,7 @@ describe('FinancialValueTable', () => {
     render(<FinancialValueTable onEditClick={onEditClick} areaId={uid(1)} />, { wrapper: createWrapper() });
     expect(screen.getByText('Acme Corp')).toBeInTheDocument();
     expect(screen.queryByText('Beta Inc')).not.toBeInTheDocument();
-    expect(screen.getByText(/1 \/ 1 valori/i)).toBeInTheDocument();
+    expect(screen.getByText(/^1 importo$/i)).toBeInTheDocument();
   });
 
   it('shows every area when areaId is null', () => {
@@ -374,6 +374,6 @@ describe('FinancialValueTable — missing data', () => {
 
     expect(screen.getAllByText('N/D').length).toBeGreaterThanOrEqual(2);
     await userEvent.type(screen.getByRole('textbox', { name: 'Cerca movimenti' }), 'beta');
-    expect(screen.getByText(/1 \/ 2 valori/i)).toBeInTheDocument();
+    expect(screen.getByText(/^1 di 2 importi$/i)).toBeInTheDocument();
   });
 });

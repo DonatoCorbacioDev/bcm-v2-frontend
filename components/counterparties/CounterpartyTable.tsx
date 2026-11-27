@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { countLabel } from "@/lib/countLabel";
 import { RowActions } from "@/components/shared/RowActions";
 import { useState, useMemo } from "react";
 import Link from "next/link";
@@ -152,7 +153,7 @@ export default function CounterpartyTable({ onEditClick }: CounterpartyTableProp
         )}
 
         <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
-          {filteredCounterparties.length} / {counterparties.length} controparti
+          {countLabel(filteredCounterparties.length, counterparties.length, "controparte", "controparti")}
         </div>
       </div>
 

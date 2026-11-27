@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -41,15 +42,18 @@ export default function FinancialTypesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Categorie di costo e ricavo</h1>
-          <p className="text-muted-foreground mt-2">Gestisci le categorie dei valori finanziari</p>
-        </div>
-        <Button onClick={() => setFormDialog({ open: true, financialType: null })}>
+      <PageHeader
+        title="Categorie di costo e ricavo"
+        description="Per dividere le spese per tipo, per esempio Licenze software, Manutenzione o Consulenze. Si scelgono nel contratto."
+        back={{ href: "/settings", label: "Impostazioni" }}
+        actions={
+          <>
+            <Button onClick={() => setFormDialog({ open: true, financialType: null })}>
           + Nuova categoria
         </Button>
-      </div>
+          </>
+        }
+      />
 
       <FinancialTypeTable
         onEditClick={(ft) => setFormDialog({ open: true, financialType: ft })}

@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,16 +25,14 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Impostazioni</h1>
-        <p className="text-muted-foreground mt-2">
-          Organizzazione, utenti, dati di base e strumenti avanzati
-        </p>
-      </div>
+      <PageHeader
+        title="Impostazioni"
+        description="L'azienda, le persone e i dati di base: si impostano una volta, poi si toccano di rado."
+      />
 
       {SETTINGS_SECTIONS.map((section) => (
         <section key={section.id} aria-labelledby={`settings-${section.id}`} className="space-y-3">
-          <h2 id={`settings-${section.id}`} className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          <h2 id={`settings-${section.id}`} className="text-base font-semibold text-foreground">
             {section.title}
           </h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

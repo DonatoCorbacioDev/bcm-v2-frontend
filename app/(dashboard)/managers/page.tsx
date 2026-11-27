@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -50,19 +51,18 @@ export default function ManagersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Responsabili
-          </h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Le persone che seguono i contratti: ricevono per email gli avvisi delle loro scadenze. Non serve che entrino in
+      <PageHeader
+        title="Responsabili"
+        description={<>Le persone che seguono i contratti: ricevono per email gli avvisi delle loro scadenze. Non serve che entrino in
             BCM; per farle entrare,{" "}
-            <Link href="/users?invite=1" className="font-medium text-primary underline-offset-4 hover:underline">invitale come utenti</Link>.
-          </p>
-        </div>
-        <Button onClick={handleCreateClick}>+ Nuovo responsabile</Button>
-      </div>
+            <Link href="/users?invite=1" className="font-medium text-primary underline-offset-4 hover:underline">invitale come utenti</Link>.</>}
+        back={{ href: "/settings", label: "Impostazioni" }}
+        actions={
+          <>
+            <Button onClick={handleCreateClick}>+ Nuovo responsabile</Button>
+          </>
+        }
+      />
 
       <ManagerTable onEditClick={handleEditClick} />
 

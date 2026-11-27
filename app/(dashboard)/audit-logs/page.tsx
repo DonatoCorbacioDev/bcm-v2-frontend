@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -271,18 +272,11 @@ function AuditLogsContent({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-muted">
-          <Shield className="h-6 w-6 text-muted-foreground" />
-        </div>
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Registro attività</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Chi ha fatto cosa, e quando: serve a ricostruire una modifica o un accesso sospetto.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Registro attività"
+        description="Chi ha fatto cosa, e quando: serve a ricostruire una modifica o un accesso sospetto."
+        back={{ href: "/settings", label: "Impostazioni" }}
+      />
 
       {/* Table card */}
       <div className="bg-card rounded-lg border border-border">

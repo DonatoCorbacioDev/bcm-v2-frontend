@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -157,12 +158,11 @@ export default function OrganizationPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Organizzazione</h1>
-        <p className="text-muted-foreground mt-2">
-          Impostazioni dell&apos;organizzazione e conto di addebito per i pagamenti SEPA
-        </p>
-      </div>
+      <PageHeader
+        title="Organizzazione"
+        description="I dati della tua azienda, il piano, il conto da cui paghi i fornitori e i tuoi dati."
+        back={{ href: "/settings", label: "Impostazioni" }}
+      />
 
       <Card>
         <CardHeader>

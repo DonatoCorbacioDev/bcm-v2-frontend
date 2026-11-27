@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -37,20 +38,20 @@ function ContractTemplatesPageContent() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Modelli di contratto</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Crea e gestisci template riutilizzabili per generare nuovi contratti rapidamente.
-          </p>
-        </div>
-        {isAdmin && (
+      <PageHeader
+        title="Modelli di contratto"
+        description={<>Crea e gestisci template riutilizzabili per generare nuovi contratti rapidamente.</>}
+        back={{ href: "/settings", label: "Impostazioni" }}
+        actions={
+          <>
+            {isAdmin && (
           <Button onClick={handleCreateClick}>
             Nuovo template
           </Button>
         )}
-      </div>
+          </>
+        }
+      />
 
       {/* Table */}
       <ContractTemplateTable onEditClick={handleEditClick} />

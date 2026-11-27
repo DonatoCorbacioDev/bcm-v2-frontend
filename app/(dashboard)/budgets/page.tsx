@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -46,18 +47,21 @@ export default function BudgetsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Budget</h1>
-          <p className="text-muted-foreground mt-2">Obiettivi di ricavo e costo per reparto</p>
-        </div>
-        <Button
+      <PageHeader
+        title="Budget"
+        description="Quanto prevedi di spendere o incassare in un anno, reparto per reparto."
+        back={{ href: "/costs", label: "Costi e budget" }}
+        actions={
+          <>
+            <Button
           onClick={() => setFormDialog({ open: true, budget: null })}
           disabled={hasNoBusinessAreas}
         >
           + Nuovo budget
         </Button>
-      </div>
+          </>
+        }
+      />
 
       {hasNoBusinessAreas && (
         <MissingPrerequisiteBanner

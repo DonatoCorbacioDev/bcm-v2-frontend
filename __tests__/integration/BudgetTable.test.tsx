@@ -105,7 +105,7 @@ describe('BudgetTable', () => {
 
   it('shows the budget count', () => {
     render(<BudgetTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/2 \/ 2 budget/i)).toBeInTheDocument();
+    expect(screen.getByText(/^2 budget$/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────

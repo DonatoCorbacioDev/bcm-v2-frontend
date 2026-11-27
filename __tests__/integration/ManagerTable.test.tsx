@@ -133,7 +133,7 @@ describe('ManagerTable', () => {
   it('shows the manager count', () => {
     render(<ManagerTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/2 \/ 2 responsabili/i)).toBeInTheDocument();
+    expect(screen.getByText(/^2 responsabili$/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────

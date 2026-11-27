@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { countLabel } from "@/lib/countLabel";
 import { RowActions } from "@/components/shared/RowActions";
 import { Fragment, useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -367,10 +368,12 @@ export default function FinancialValueTable({ onEditClick, year = null, areaId =
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="month-filter" className="text-sm text-muted-foreground hidden sm:inline">Mese:</label>
           <Select value={monthFilter} onValueChange={setMonthFilter}>
-            <SelectTrigger id="month-filter" aria-label="Filtra per mese" className="w-32">
-              <SelectValue />
+            <SelectTrigger id="month-filter" aria-label="Filtra per mese" className="w-44">
+              <span className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Mese:</span>
+                <SelectValue />
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Tutti</SelectItem>
@@ -405,7 +408,7 @@ export default function FinancialValueTable({ onEditClick, year = null, areaId =
         </div>
 
         <div className="text-xs md:text-sm text-muted-foreground">
-          {filteredFinancialValues.length} / {yearScopedCount} valori
+          {countLabel(filteredFinancialValues.length, yearScopedCount, "importo", "importi")}
         </div>
       </div>
 

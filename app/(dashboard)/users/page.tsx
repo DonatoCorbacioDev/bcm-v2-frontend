@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -58,19 +59,20 @@ function UsersPageContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Utenti</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Le persone che entrano in BCM con email e password. Ognuna è collegata a un{" "}
+      <PageHeader
+        title="Utenti"
+        description={<>Le persone che entrano in BCM con email e password. Ognuna è collegata a un{" "}
             <Link href="/managers" className="font-medium text-primary underline-offset-4 hover:underline">responsabile</Link>, la
-            scheda con nome e contatti.
-          </p>
-        </div>
-        {/* One way in: the invitation, where the person chooses their own
+            scheda con nome e contatti.</>}
+        back={{ href: "/settings", label: "Impostazioni" }}
+        actions={
+          <>
+            {/* One way in: the invitation, where the person chooses their own
             password. An existing user is still edited from the table. */}
         <Button onClick={() => setInviteOpen(true)}>+ Invita utente</Button>
-      </div>
+          </>
+        }
+      />
 
       <UserTable onEditClick={handleEditClick} />
 

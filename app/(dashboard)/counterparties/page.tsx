@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -48,12 +49,15 @@ function CounterpartiesPageContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Controparti</h1>
-        </div>
-        {isAdmin && <Button onClick={handleCreateClick}>+ Nuova controparte</Button>}
-      </div>
+      <PageHeader
+        title="Controparti"
+        description="I fornitori e i clienti con cui hai un contratto, con Partita IVA, indirizzo e IBAN verificato."
+        actions={
+          <>
+            {isAdmin && <Button onClick={handleCreateClick}>+ Nuova controparte</Button>}
+          </>
+        }
+      />
 
       <CounterpartyTable onEditClick={handleEditClick} />
 

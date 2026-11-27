@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -104,18 +105,19 @@ function FinancialValuesPageContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Valori finanziari
-          </h1>
-          <p className="text-muted-foreground mt-2">Ricavi e costi per contratto, con l&apos;andamento rispetto al budget</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <label htmlFor="year-filter" className="text-sm text-muted-foreground">Anno:</label>
+      <PageHeader
+        title="Valori finanziari"
+        description={<>Ricavi e costi per contratto, con l&apos;andamento rispetto al budget</>}
+        back={{ href: "/costs", label: "Costi e budget" }}
+        actions={
+          <>
+            <div className="flex items-center gap-2">
           <Select value={yearFilter} onValueChange={setYearFilter}>
-            <SelectTrigger id="year-filter" aria-label="Filtra per anno" className="w-32">
-              <SelectValue />
+            <SelectTrigger id="year-filter" aria-label="Filtra per anno" className="w-44">
+              <span className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Anno:</span>
+                <SelectValue />
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL_YEARS}>Tutti gli anni</SelectItem>
@@ -128,7 +130,9 @@ function FinancialValuesPageContent() {
             + Nuovo valore finanziario
           </Button>
         </div>
-      </div>
+          </>
+        }
+      />
 
       {hasMissingPrerequisite && (
         <MissingPrerequisiteBanner message={prerequisiteMessage} actions={prerequisiteActions} />

@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { countLabel } from "@/lib/countLabel";
 import { RowActions } from "@/components/shared/RowActions";
 import { useState, useMemo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -106,7 +107,7 @@ export default function FinancialTypeTable({ onEditClick }: FinancialTypeTablePr
           </Button>
         )}
         <div className="text-xs md:text-sm text-muted-foreground">
-          {filtered.length} / {financialTypes.length} tipi
+          {countLabel(filtered.length, financialTypes.length, "categoria", "categorie")}
         </div>
       </div>
 

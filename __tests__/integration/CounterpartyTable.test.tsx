@@ -182,7 +182,7 @@ describe('CounterpartyTable', () => {
   it('shows the counterparty count', () => {
     render(<CounterpartyTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/2 \/ 2 controparti/i)).toBeInTheDocument();
+    expect(screen.getByText(/^2 controparti$/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────

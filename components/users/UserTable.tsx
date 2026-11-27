@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { countLabel } from "@/lib/countLabel";
 import { SHOW_APPROVAL_WORKFLOW } from "@/lib/featureFlags";
 import { RowActions } from "@/components/shared/RowActions";
 import { useState, useMemo } from "react";
@@ -169,15 +170,17 @@ export default function UserTable({ onEditClick }: UserTableProps) {
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="verified-filter" className="text-sm text-muted-foreground hidden sm:inline">Stato:</label>
           <Select value={verifiedFilter} onValueChange={setVerifiedFilter}>
-            <SelectTrigger id="verified-filter" aria-label="Filtra per stato di verifica" className="w-40">
-              <SelectValue />
+            <SelectTrigger id="verified-filter" aria-label="Filtra per email confermata" className="w-56">
+              <span className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Email:</span>
+                <SelectValue />
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Tutti</SelectItem>
-              <SelectItem value="VERIFIED">Verificato</SelectItem>
-              <SelectItem value="UNVERIFIED">Non verificato</SelectItem>
+              <SelectItem value="VERIFIED">Confermata</SelectItem>
+              <SelectItem value="UNVERIFIED">Da confermare</SelectItem>
             </SelectContent>
           </Select>
 
@@ -197,7 +200,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
         </div>
 
         <div aria-live="polite" aria-atomic="true" className="text-xs md:text-sm text-muted-foreground">
-          {filteredUsers.length} / {users.length} utenti
+          {countLabel(filteredUsers.length, users.length, "utente", "utenti")}
         </div>
       </div>
 
@@ -248,7 +251,7 @@ export default function UserTable({ onEditClick }: UserTableProps) {
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell text-sm">
-                    {new Date(user.createdAt).toLocaleDateString("it-IT")}
+                    {user.createdAt && !Number.isNaN(Date.parse(user.createdAt)) ? new Date(user.createdAt).toLocaleDateString("it-IT") : "—"}
                   </TableCell>
                   <TableCell>
                     <RowActions name={user.username} onEdit={() => onEditClick(user)} onDelete={() => handleDeleteClick(user)} />

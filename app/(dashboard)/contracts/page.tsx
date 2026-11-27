@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -165,13 +166,12 @@ function ContractsPageContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            Contratti
-          </h1>
-        </div>
-        <div className="flex gap-2">
+      <PageHeader
+        title="Contratti"
+        description="Tutti i contratti con fornitori e clienti: cerca, filtra, apri o aggiungine uno nuovo."
+        actions={
+          <>
+            <div className="flex gap-2">
           {/* One "Esporta" menu instead of two buttons: exporting is occasional,
               it shouldn't compete with creating a contract. */}
           <DropdownMenu>
@@ -213,7 +213,9 @@ function ContractsPageContent() {
             + Nuovo contratto
           </Button>
         </div>
-      </div>
+          </>
+        }
+      />
 
       {!isAdmin && (
         <p id="contracts-admin-only" className="-mt-2 text-sm text-muted-foreground sm:text-right">

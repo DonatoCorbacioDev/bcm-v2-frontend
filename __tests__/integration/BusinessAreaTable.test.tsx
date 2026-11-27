@@ -124,7 +124,7 @@ describe('BusinessAreaTable', () => {
   it('shows the area count', () => {
     render(<BusinessAreaTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
 
-    expect(screen.getByText(/2 \/ 2 aree/i)).toBeInTheDocument();
+    expect(screen.getByText(/^2 reparti$/i)).toBeInTheDocument();
   });
 
   // ── Search ────────────────────────────────────────────────────────────────

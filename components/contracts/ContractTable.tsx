@@ -454,10 +454,12 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
         </div>
 
         <div className="flex gap-2 items-center">
-          <label htmlFor="status-filter" className="text-sm text-muted-foreground hidden sm:inline">Stato:</label>
           <Select value={statusFilter} onValueChange={handleStatusChange}>
-            <SelectTrigger id="status-filter" aria-label="Filtra per stato" className="w-36">
-              <SelectValue />
+            <SelectTrigger id="status-filter" aria-label="Filtra per stato" className="w-48">
+              <span className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Stato:</span>
+                <SelectValue />
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Tutti</SelectItem>
@@ -633,7 +635,7 @@ export default function ContractTable({ onEditClick, initialSearchQuery = "" }: 
                 <TableCell className="font-medium text-sm">
                   <Link
                     href={`/contracts/${c.id}`}
-                    className="rounded-sm hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="rounded-sm text-primary hover:underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-[var(--accent-foreground)]"
                   >
                     {c.contractNumber}
                   </Link>

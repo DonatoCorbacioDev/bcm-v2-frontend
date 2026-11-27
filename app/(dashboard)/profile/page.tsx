@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useState } from "react";
 import { isAxiosError } from "axios";
 import { useQuery } from "@tanstack/react-query";
@@ -100,10 +101,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Il mio profilo</h1>
-        <p className="text-muted-foreground mt-2">Le informazioni del tuo account</p>
-      </div>
+      <PageHeader title="Il mio profilo" description="Il tuo account, la password, la verifica in 2 passaggi e i tuoi dati." />
 
       {/* Account Info */}
       <Card>

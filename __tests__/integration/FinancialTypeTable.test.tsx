@@ -107,7 +107,7 @@ describe('FinancialTypeTable', () => {
 
   it('shows the type count', () => {
     render(<FinancialTypeTable onEditClick={onEditClick} />, { wrapper: createWrapper() });
-    expect(screen.getByText(/2 \/ 2 tipi/i)).toBeInTheDocument();
+    expect(screen.getByText(/^2 categorie$/i)).toBeInTheDocument();
   });
 
   it('shows the category badge for each type', () => {

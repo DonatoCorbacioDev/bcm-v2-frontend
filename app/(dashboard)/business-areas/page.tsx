@@ -4,6 +4,7 @@
  * Copyright (c) 2025 Donato Corbacio. All rights reserved.
  * Licensed under the terms of the LICENSE file at the repository root.
  */
+import { PageHeader } from "@/components/layout/PageHeader";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
@@ -49,13 +50,16 @@ export default function BusinessAreasPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Reparti</h1>
-          <p className="text-muted-foreground mt-2">I reparti in cui dividi i contratti, per esempio IT, Acquisti o Produzione</p>
-        </div>
-        <Button onClick={handleCreateClick}>+ Nuovo reparto</Button>
-      </div>
+      <PageHeader
+        title="Reparti"
+        description={<>I reparti in cui dividi i contratti, per esempio IT, Acquisti o Produzione</>}
+        back={{ href: "/settings", label: "Impostazioni" }}
+        actions={
+          <>
+            <Button onClick={handleCreateClick}>+ Nuovo reparto</Button>
+          </>
+        }
+      />
 
       <BusinessAreaTable onEditClick={handleEditClick} />
 

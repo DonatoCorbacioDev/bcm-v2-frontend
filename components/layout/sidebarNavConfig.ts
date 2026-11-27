@@ -8,6 +8,7 @@ import {
   FileText,
   CalendarDays,
   Handshake,
+  Wallet,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -37,8 +38,6 @@ export const SETTINGS_ROUTES = [
   "/business-areas",
   "/financial-types",
   "/contract-templates",
-  "/financial-values",
-  "/budgets",
   "/audit-logs",
 ] as const;
 
@@ -56,6 +55,8 @@ export const navGroups: { title: string; items: NavItem[] }[] = [
       { label: "Contratti",   href: "/contracts",      icon: FileText },
       { label: "Calendario",  href: "/calendar",       icon: CalendarDays },
       { label: "Controparti", href: "/counterparties", icon: Handshake },
+      // Budgets and the full list of amounts are reached from this page.
+      { label: "Costi e budget", href: "/costs", icon: Wallet, adminOnly: true, activeFor: ["/budgets", "/financial-values"] },
     ],
   },
   {

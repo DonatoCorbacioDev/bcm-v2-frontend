@@ -9,8 +9,6 @@ import {
   Building2,
   Tag,
   LayoutTemplate,
-  TrendingUp,
-  Wallet,
   Shield,
   type LucideIcon,
 } from "lucide-react";
@@ -60,10 +58,6 @@ const ALL_SECTIONS: { id: string; title: string; links: SettingsLink[] }[] = [
     links: [
       { href: "/contract-templates", label: "Modelli di contratto", icon: LayoutTemplate,
         description: "Bozze riutilizzabili per i contratti che si ripetono" },
-      { href: "/financial-values", label: "Valori finanziari", icon: TrendingUp,
-        description: "Tutti gli importi previsti, di tutti i contratti" },
-      { href: "/budgets", label: "Budget", icon: Wallet,
-        description: "Obiettivi annuali di ricavi e costi per area" },
     ],
   },
   {

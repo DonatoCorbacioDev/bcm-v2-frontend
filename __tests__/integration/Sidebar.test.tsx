@@ -62,9 +62,9 @@ describe('Sidebar', () => {
   const navLinks = () =>
     screen.getAllByRole('link').filter((link) => link.closest('nav')).map((link) => link.textContent);
 
-  it('shows ADMIN the five main entries, Impostazioni included', () => {
+  it('shows ADMIN the six main entries, Costi e budget and Impostazioni included', () => {
     render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
-    expect(navLinks()).toEqual(['Home', 'Contratti', 'Calendario', 'Controparti', 'Impostazioni']);
+    expect(navLinks()).toEqual(['Home', 'Contratti', 'Calendario', 'Controparti', 'Costi e budget', 'Impostazioni']);
     expect(screen.getByRole('link', { name: 'Impostazioni' })).toHaveAttribute('href', '/settings');
   });
 
@@ -89,7 +89,7 @@ describe('Sidebar', () => {
     expect(screen.getByRole('link', { name: 'Contratti' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it.each(['/users', '/organization', '/financial-values', '/audit-logs'])(
+  it.each(['/users', '/organization', '/audit-logs'])(
     'keeps Impostazioni highlighted on %s, reached from it',
     (pathname) => {
       (usePathname as jest.Mock).mockReturnValue(pathname);
@@ -98,6 +98,13 @@ describe('Sidebar', () => {
       expect(screen.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current');
     }
   );
+
+  it.each(['/costs', '/budgets', '/financial-values'])('keeps Costi e budget highlighted on %s', (pathname) => {
+    (usePathname as jest.Mock).mockReturnValue(pathname);
+    render(<Sidebar collapsed={false} />, { wrapper: createWrapper() });
+    expect(screen.getByRole('link', { name: 'Costi e budget' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Impostazioni' })).not.toHaveAttribute('aria-current');
+  });
 
   it('marks the active route with aria-current="page"', () => {
     (usePathname as jest.Mock).mockReturnValue('/dashboard');

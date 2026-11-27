@@ -25,6 +25,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings":           "Impostazioni",
   "/contract-templates": "Modelli di contratto",
   "/financial-values":   "Valori finanziari",
+  "/costs":              "Costi e budget",
   "/financial-types":    "Categorie di costo e ricavo",
   "/budgets":            "Budget",
   "/business-areas":     "Reparti",

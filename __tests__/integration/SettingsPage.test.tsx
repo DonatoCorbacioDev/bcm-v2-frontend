@@ -55,7 +55,8 @@ describe('SettingsPage', () => {
 
 describe('the short menu leaves no page unreachable', () => {
   const listed = SETTINGS_SECTIONS.flatMap((section) => section.links.map((link) => link.href));
-  const inMenu = navGroups.flatMap((group) => group.items.map((item) => item.href));
+  // A menu entry reaches its own page and the pages it stands for (Costi e budget: budgets, all amounts).
+  const inMenu = navGroups.flatMap((group) => group.items.flatMap((item) => [item.href, ...(item.activeFor ?? [])]));
 
   it('lists on the settings page exactly the routes that keep Impostazioni highlighted', () => {
     expect([...listed].sort()).toEqual(SETTINGS_ROUTES.filter((r) => !HIDDEN_ROUTES.includes(r)).sort());
